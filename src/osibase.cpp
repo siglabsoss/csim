@@ -11,24 +11,24 @@ OsiBase::OsiBase(int dat)
 }//OsiBase constructor
 
   
-void OsiBase::txdown(int* data, bool meta)
+void OsiBase::txdown(int* data, unsigned size, bool meta)
 {
    // return down->rxup(data, meta);
 }//Transmit to lower layer
 
-void OsiBase::txup(int* data, bool meta)
+void OsiBase::txup(int* data, unsigned size, bool meta)
 {
 //    return up->rxdown(data,meta);
 }//transmit to upper layer
 
- void OsiBase::rxdown(int* data, bool meta)
+ void OsiBase::rxdown(int* data, unsigned size, bool meta)
 {
         cout << "Warning." << name << " does not implement rxdown().";
    //     return this->txup(data,meta);
 }//Receive from the lower layer  VIRTUAL
 
 
- void OsiBase::rxup(int* data, bool meta)
+ void OsiBase::rxup(int* data, unsigned size, bool meta)
 {
     cout << "Warning. " << name << " does not implement rxup().";
  //   return this->txdown(data,meta);

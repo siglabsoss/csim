@@ -10,10 +10,10 @@ private:
 
 public:
 	OsiDerived(int dat);
-    void txdown(int* data, bool meta);
-    void txup(int* data, bool meta);
-    virtual void rxdown(int* data, bool meta);
-    virtual void rxup(int* data, bool meta);
+    void txdown(int* data, unsigned size, bool meta);
+    void txup(int* data, unsigned size, bool meta);
+    virtual void rxdown(int* data, unsigned size, bool meta);
+    virtual void rxup(int* data, unsigned size, bool meta);
     void tick();
     virtual ~OsiDerived();
 

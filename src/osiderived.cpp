@@ -8,24 +8,24 @@ OsiDerived::OsiDerived(int dat) : OsiBase(dat)
 }//OsiDerived constructor
 
 
-void OsiDerived::txdown(int* data, bool meta)
+void OsiDerived::txdown(int* data, unsigned size, bool meta)
 {
    // return down->rxup(data, meta);
 }//Transmit to lower layer
 
-void OsiDerived::txup(int* data, bool meta)
+void OsiDerived::txup(int* data, unsigned size, bool meta)
 {
 //    return up->rxdown(data,meta);
 }//transmit to upper layer
 
- void OsiDerived::rxdown(int* data, bool meta)
+ void OsiDerived::rxdown(int* data, unsigned size, bool meta)
 {
         cout << "Warning." << name << " does not implement rxdown().";
    //     return this->txup(data,meta);
 }//Receive from the lower layer  VIRTUAL
 
 
- void OsiDerived::rxup(int* data, bool meta)
+ void OsiDerived::rxup(int* data, unsigned size, bool meta)
 {
     cout << "Warning. " << name << " does not implement rxup().";
  //   return this->txdown(data,meta);
