@@ -7,8 +7,11 @@ using namespace std;
 class OsiDerived : public OsiBase
 {
 private:
+	unsigned factor;
 
 public:
+
+
 	OsiDerived(int dat);
     void txdown(int* data, unsigned size, bool meta);
     void txup(int* data, unsigned size, bool meta);
@@ -16,5 +19,6 @@ public:
     virtual void rxup(int* data, unsigned size, bool meta);
     void tick();
     virtual ~OsiDerived();
+
 
 };

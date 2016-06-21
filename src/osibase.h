@@ -21,6 +21,7 @@ public:
     virtual void rxdown(int* data, unsigned size,bool meta);
     virtual void rxup(int* data, unsigned size,bool meta);
     void tick();
+    void setParent(OsiBase* parent);
     virtual ~OsiBase();
 
 };
