@@ -1,52 +1,47 @@
+#include "osiderived.h"
 
-#include "osibase.h"
 using namespace std;
 
-OsiBase::OsiBase(int dat)
+OsiDerived::OsiDerived(int dat) : OsiBase(dat)
 {
-        this->up = 0;
-        this->down = 0;
-        this->name = "noname";
-        this->data = dat;
-}//OsiBase constructor
 
-  
-void OsiBase::txdown(int* data, bool meta)
+}//OsiDerived constructor
+
+
+void OsiDerived::txdown(int* data, bool meta)
 {
    // return down->rxup(data, meta);
 }//Transmit to lower layer
 
-void OsiBase::txup(int* data, bool meta)
+void OsiDerived::txup(int* data, bool meta)
 {
 //    return up->rxdown(data,meta);
 }//transmit to upper layer
 
- void OsiBase::rxdown(int* data, bool meta)
+ void OsiDerived::rxdown(int* data, bool meta)
 {
         cout << "Warning." << name << " does not implement rxdown().";
    //     return this->txup(data,meta);
 }//Receive from the lower layer  VIRTUAL
 
 
- void OsiBase::rxup(int* data, bool meta)
+ void OsiDerived::rxup(int* data, bool meta)
 {
     cout << "Warning. " << name << " does not implement rxup().";
  //   return this->txdown(data,meta);
 }//Recieve from the up layer  VIRTUAL
 
-void OsiBase::tick()
-{
+void OsiDerived::tick()
+{}//Pass
 
-}//Pass
-
-    // void set_parent(OsiBase* parent)
+    // void set_parent(OsiDerived* parent)
     // {
     //     this->up = parent;
     //     *parent->down = this;
     // }; //Sets the parent
 
 
-OsiBase::~OsiBase()
+OsiDerived::~OsiDerived()
 {
 
 }
