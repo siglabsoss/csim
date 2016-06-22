@@ -1,5 +1,9 @@
 #include <iostream>
 #include "osiderived.h"
+#include "systemc.h"
+
+
+
 using namespace std;
 
 int main()
