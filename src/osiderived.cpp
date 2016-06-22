@@ -4,7 +4,8 @@ using namespace std;
 
 OsiDerived::OsiDerived(int dat) : OsiBase(dat)
 {
-	this->factor = 2;
+	sc_uint<4> fact = 2;
+	this->factor = fact;
 }//OsiDerived constructor
 
 
@@ -18,21 +19,19 @@ void OsiDerived::txup(int* data, unsigned size, bool meta)
 
 }//transmit to upper layer
 
-void OsiDerived::rxdown(int* data, unsigned size, bool meta)
+void OsiDerived::rxdown(vector<foobar> data, unsigned size, bool meta)
 {
-	 int dout[size];
-	 for(unsigned i = 0; i < size; i++)
-	 {
-		 dout[i] = data[i] * this->factor;
-	 }
+	 vector<foobar> dout;
+	 for (int i = 0; i < 5; i++)
+		 dout.push_back(data[i] * factor);
 	 this->up->rxdown(dout,size,meta);
 
 }
 
 
- void OsiDerived::rxup(int* data, unsigned size, bool meta)
+ void OsiDerived::rxup(vector<foobar> data, unsigned size, bool meta)
 {
-    cout << "Warning. " << name << " does not implement rxup().";
+    cout << "Warning.  " << name << " does not implement rxup(). " << endl;
 
 }//Recieve from the up layer  VIRTUAL
 

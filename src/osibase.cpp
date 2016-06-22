@@ -21,16 +21,17 @@ void OsiBase::txup(int* data, unsigned size, bool meta)
 
 }//transmit to upper layer
 
- void OsiBase::rxdown(int* data, unsigned size, bool meta)
+ void OsiBase::rxdown( vector<foobar> data, unsigned size, bool meta)
 {
-        cout << "Warning." << name << " does not implement rxdown().";
-
+        cout << "Warning. " << name << " does not implement rxdown()" << endl;
+    	for (int i = 0; i < 5; i++)
+    		cout << data[i] << endl; // prints data
 }//Receive from the lower layer  VIRTUAL
 
 
- void OsiBase::rxup(int* data, unsigned size, bool meta)
+ void OsiBase::rxup( vector<foobar> data, unsigned size, bool meta)
 {
-    cout << "Warning. " << name << " does not implement rxup().";
+    cout << "Warning.  " << name << " does not implement rxup()." << endl;
 
 }//Recieve from the up layer  VIRTUAL
 
