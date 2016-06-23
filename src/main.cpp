@@ -4,12 +4,14 @@
 #include <vector>
 
 
+
 typedef sc_uint<4> foobar;
 
 using namespace std;
 
 int main()
 {
+
 	vector<foobar> myvector;
 	sc_uint<4> test[5] = {1,1,2,3,4};
 
