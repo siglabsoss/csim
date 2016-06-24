@@ -7,6 +7,7 @@
 
 #include "plotter.h"
 #include <string>
+#include <unistd.h>
 
 using namespace std;
 plotter::plotter() {
@@ -31,11 +32,13 @@ void plotter::nplot(vector<int> obj, string title)
     cout << message << endl; //Prints json to be send
 
     zmq::context_t context (1);
-    zmq::socket_t socket (context, ZMQ_REQ);
+    zmq::socket_t socket (context, ZMQ_PUB);
     socket.connect ("tcp://localhost:5555"); //Port number
+    usleep(1000000.0/4.0);
     zmq::message_t request (message.size()); //Size of message
     memcpy (request.data (), (message.c_str()), (message.size())); //Copies data into request
     socket.send (request); //Sends off data
+//    socket.send(message.c_str());
 
 }
 

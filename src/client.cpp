@@ -14,9 +14,9 @@ int main ()
 			complex<double> c(i, i*3);
 			cvector.push_back(c);
 	}
-
-	 for (vector<complex<double> >::iterator it = cvector.begin() ; it != cvector.end(); ++it)
-	    std::cout << ' ' << *it;
+//
+//	 for (vector<complex<double> >::iterator it = cvector.begin() ; it != cvector.end(); ++it)
+//	    std::cout << ' ' << *it;
 
 	 plot->nplotqam(cvector, "title");
 
