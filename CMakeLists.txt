@@ -55,6 +55,7 @@ set(CMAKE_BUILD_TYPE debug)
 
 include_directories(
 	${Boost_INCLUDE_DIRS}
+	${CMAKE_SOURCE_DIR}/inc/json
 )
 
 link_directories(

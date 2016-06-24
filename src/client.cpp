@@ -2,8 +2,12 @@
 //  Connects REQ socket to tcp://localhost:5555
 
 
-#include "plotter.cpp"
+#include "plotter.h"
+//#include "mycomplex.cpp"
+
+//#include "mycomplex.cpp"
 #include <iostream>
+
 using namespace std;
 int main ()
 {

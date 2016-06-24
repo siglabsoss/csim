@@ -7,7 +7,7 @@
 #include <zmq.hpp>
 #include <string>
 #include<vector>
-#include <../inc/jsoncpp.cpp>
+#include "json.h"
 #include <complex>
 #include <iostream>
 

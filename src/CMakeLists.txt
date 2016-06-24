@@ -1,8 +1,9 @@
 set(ALL_SOURCES
-	sigmath.cpp
 	osibase.cpp
 	osiderived.cpp
 	plotter.cpp
+	mycomplex.cpp
+	../inc/jsoncpp.cpp
 )
 
 
@@ -16,7 +17,7 @@ add_custom_target(rundavey COMMAND davey DEPENDS davey WORKING_DIRECTORY ${CMAKE
 ########################### TEST ###########################
 add_executable(test ${ALL_SOURCES} test.cpp)
 target_link_libraries(test ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
-set_target_properties(test PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
+#set_target_properties(test PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
 add_custom_target(runtest COMMAND test DEPENDS test WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 
@@ -28,6 +29,6 @@ add_custom_target(runsysc COMMAND sysc DEPENDS sysc WORKING_DIRECTORY ${CMAKE_SO
 
 
 ########################### CLIENT ###########################
-add_executable(client client.cpp)
-target_link_libraries(client ${ZEROMQ_LIBRARY})
+add_executable(client ${ALL_SOURCES} client.cpp)
+target_link_libraries(client ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 add_custom_target(runclient COMMAND client DEPENDS client WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
