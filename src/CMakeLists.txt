@@ -2,7 +2,7 @@ set(ALL_SOURCES
 	osibase.cpp
 	osiderived.cpp
 	plotter.cpp
-	mycomplex.cpp
+	fixedcomplex.cpp
 	../inc/jsoncpp.cpp
 )
 
