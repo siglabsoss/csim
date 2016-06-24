@@ -2,7 +2,7 @@ set(ALL_SOURCES
 	sigmath.cpp
 	osibase.cpp
 	osiderived.cpp
-	jsoncpp.cpp
+	plotter.cpp
 )
 
 
@@ -30,3 +30,4 @@ add_custom_target(runsysc COMMAND sysc DEPENDS sysc WORKING_DIRECTORY ${CMAKE_SO
 ########################### CLIENT ###########################
 add_executable(client client.cpp)
 target_link_libraries(client ${ZEROMQ_LIBRARY})
+add_custom_target(runclient COMMAND client DEPENDS client WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
