@@ -2,6 +2,7 @@ set(ALL_SOURCES
 	sigmath.cpp
 	osibase.cpp
 	osiderived.cpp
+	jsoncpp.cpp
 )
 
 
