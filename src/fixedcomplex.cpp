@@ -6,28 +6,29 @@
  */
 
 #include <fixedcomplex.h>
-
-FixedComplex::FixedComplex()
+template <int B>
+FixedComplex<B>::FixedComplex()
 {
 	this->real = 0;
 	this->imag = 0;
 }//Default constructor
 
-
-FixedComplex::FixedComplex(sc_int<16> rea)
+template <int B>
+FixedComplex<B>::FixedComplex(sc_int<B> rea)
 {
 	this->real = rea;
 	this->imag = 0;
 }//Constructor with only real arg
 
-
-FixedComplex::FixedComplex(sc_int<16> rea, sc_int<16> ima) {
+template <int B>
+FixedComplex<B>::FixedComplex(sc_int<B> rea, sc_int<B> ima) {
 
 	this->real = rea;
 	this->imag = ima;
 }//Constructor with real and imaginary args
 
-FixedComplex FixedComplex::operator+(const FixedComplex& rhs)
+template <int B>
+FixedComplex<B> FixedComplex<B>::operator+(const FixedComplex& rhs)
 {
 	FixedComplex c;
 	c.real = this->real + rhs.real;
@@ -35,8 +36,8 @@ FixedComplex FixedComplex::operator+(const FixedComplex& rhs)
 	return c;
 }//Addition
 
-
-FixedComplex FixedComplex::operator-(const FixedComplex& rhs)
+template <int B>
+FixedComplex<B> FixedComplex<B>::operator-(const FixedComplex& rhs)
 {
 	FixedComplex c;
 	c.real = this->real - rhs.real;
@@ -44,7 +45,8 @@ FixedComplex FixedComplex::operator-(const FixedComplex& rhs)
 	return c;
 }//Subtraction
 
-FixedComplex FixedComplex::operator*(const FixedComplex& rhs)
+template <int B>
+FixedComplex<B> FixedComplex<B>::operator*(const FixedComplex& rhs)
 {
 	FixedComplex c;
 	c.real = (this->real * rhs.real) - (this->imag * rhs.imag);//Adds real parts
@@ -52,8 +54,8 @@ FixedComplex FixedComplex::operator*(const FixedComplex& rhs)
 	return c;
 }//Multiplication
 
-
-FixedComplex FixedComplex::operator/(const FixedComplex& rhs)
+template <int B>
+FixedComplex<B> FixedComplex<B>::operator/(const FixedComplex& rhs)
 {
 	FixedComplex num;
 	FixedComplex denom;
@@ -70,8 +72,8 @@ FixedComplex FixedComplex::operator/(const FixedComplex& rhs)
 	return num;
 }//Division. Multiplies by conjugate and simplifies
 
-
-FixedComplex FixedComplex::operator<<(int shift)
+template <int B>
+FixedComplex<B> FixedComplex<B>::operator<<(int shift)
 {
 	FixedComplex c;
 	c.real = this->real<<shift;
@@ -79,8 +81,8 @@ FixedComplex FixedComplex::operator<<(int shift)
 	return c;
 }//Left Shift
 
-
-FixedComplex FixedComplex::operator>>(int shift)
+template <int B>
+FixedComplex<B> FixedComplex<B>::operator>>(int shift)
 {
 	FixedComplex c;
 	c.real = this->real>>shift;
@@ -88,8 +90,8 @@ FixedComplex FixedComplex::operator>>(int shift)
 	return c;
 }//Right Shift
 
-
-bool FixedComplex::operator==(const FixedComplex& rhs)
+template <int B>
+bool FixedComplex<B>::operator==(const FixedComplex& rhs)
 {
 
 	if((this->real == rhs.real) && (this->imag == rhs.imag))
@@ -99,7 +101,8 @@ bool FixedComplex::operator==(const FixedComplex& rhs)
 
 }// == operator
 
-bool FixedComplex::operator!=(const FixedComplex& rhs)
+template <int B>
+bool FixedComplex<B>::operator!=(const FixedComplex& rhs)
 {
 	if((this->real == rhs.real) && (this->imag == rhs.imag))
 		return false;
@@ -107,8 +110,41 @@ bool FixedComplex::operator!=(const FixedComplex& rhs)
 		return true;
 }// != operator
 
-
-FixedComplex::~FixedComplex() {
+template <int B>
+FixedComplex<B>::~FixedComplex() {
 
 }
+
+template class FixedComplex<2>;
+template class FixedComplex<3>;
+template class FixedComplex<4>;
+template class FixedComplex<5>;
+template class FixedComplex<6>;
+template class FixedComplex<7>;
+template class FixedComplex<8>;
+template class FixedComplex<9>;
+template class FixedComplex<10>;
+template class FixedComplex<11>;
+template class FixedComplex<12>;
+template class FixedComplex<13>;
+template class FixedComplex<14>;
+template class FixedComplex<15>;
+template class FixedComplex<16>;
+template class FixedComplex<17>;
+template class FixedComplex<18>;
+template class FixedComplex<19>;
+template class FixedComplex<20>;
+template class FixedComplex<21>;
+template class FixedComplex<22>;
+template class FixedComplex<23>;
+template class FixedComplex<24>;
+template class FixedComplex<25>;
+template class FixedComplex<26>;
+template class FixedComplex<27>;
+template class FixedComplex<28>;
+template class FixedComplex<29>;
+template class FixedComplex<30>;
+template class FixedComplex<31>;
+template class FixedComplex<32>;
+
 

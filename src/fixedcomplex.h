@@ -12,20 +12,21 @@
 
 #include "systemc.h"
 
+template <int B>
 class FixedComplex {
 
 private:
 
 public:
 
-	sc_int<16> real;
-	sc_int<16> imag;
+	sc_int<B> real;
+	sc_int<B> imag;
 
 	FixedComplex();
 	bool operator==(const FixedComplex& rhs);
 	bool operator!=(const FixedComplex& rhs);
-	FixedComplex(sc_int<16> rea);
-	FixedComplex(sc_int<16> rea, sc_int<16> ima);
+	FixedComplex(sc_int<B> rea);
+	FixedComplex(sc_int<B> rea, sc_int<B> ima);
 	FixedComplex operator+(const FixedComplex& rhs);
 	FixedComplex operator-(const FixedComplex& rhs);
 	FixedComplex operator*(const FixedComplex& rhs);

@@ -12,8 +12,8 @@ BOOST_AUTO_TEST_CASE(Equal_and_notequal)
 	sc_int<16> a = (4);
 	sc_int<16> b = (12);
 
-	FixedComplex c1(a,b);
-	FixedComplex c2(b,a);
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(b,a);
 
 	BOOST_CHECK( c1 == c1 );//Check == when true
 	BOOST_CHECK( !(c1 != c1) );//Check != when true
@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE(CONSTRUCTORS)
 	sc_int<16> a = (65536);
 	sc_int<16> b = (12);
 
-	FixedComplex c1(a,b);
-	FixedComplex c2(b,a);
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(b,a);
 	sc_int<16> z = 0;
 	BOOST_CHECK( c1.real == z );//Tests rollover and constructor
 	BOOST_CHECK( c1.real == a );//Tests constructor
@@ -39,11 +39,11 @@ BOOST_AUTO_TEST_CASE(CONSTRUCTORS)
 	BOOST_CHECK(c1.real == c2.imag); //Tests constructor
 	BOOST_CHECK(c1.imag==c2.real); //Tests constructor
 
-	FixedComplex c3;
+	FixedComplex<16> c3;
 	BOOST_CHECK( c3.real.to_int() == 0 );//Tests default
 	BOOST_CHECK(c3.imag.to_int() == 0); //Tests default
 
-	FixedComplex c4(1);
+	FixedComplex<16> c4(1);
 	BOOST_CHECK( c4.real.to_int() == 1 );//Tests constructor with 1 arg
 	BOOST_CHECK(c4.imag.to_int() == 0); //Tests constructor with 1 arg
 
@@ -56,10 +56,10 @@ BOOST_AUTO_TEST_CASE(ADDING)
 	sc_int<16> a = (2);
 	sc_int<16> b = (1);
 
-	FixedComplex c1(a,b);
-	FixedComplex c2(b,a);
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(b,a);
 
-	FixedComplex c3;
+	FixedComplex<16> c3;
 	c3 = c1 + c2;
 	BOOST_CHECK(c3.real.to_int() == (3) ); //Tests basic add
 	BOOST_CHECK(c3.imag.to_int() == (3) ); //Tests basic add
@@ -96,10 +96,10 @@ BOOST_AUTO_TEST_CASE(SUBTRACTING)
 	sc_int<16> c = (1);
 	sc_int<16> d = (2);
 
-	FixedComplex c1(a,b);
-	FixedComplex c2(c,d);
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(c,d);
 
-	FixedComplex c3;
+	FixedComplex<16> c3;
 	c3 = c1 - c2;
 	BOOST_CHECK(c3.real.to_int() == 1 );//Tests basic subtraction
 	BOOST_CHECK(c3.imag.to_int() == 2 );//Tests basic subtraction
@@ -132,10 +132,10 @@ BOOST_AUTO_TEST_CASE(MULTIPLYING)
 	sc_int<16> a = (2);
 	sc_int<16> b = (1);
 
-	FixedComplex c1(a,b);
-	FixedComplex c2(b,a);
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(b,a);
 
-	FixedComplex c3;
+	FixedComplex<16> c3;
 
 	c3 = c1 * c2;
 	BOOST_CHECK(c3.real.to_int() == 0);//Normal multiply
@@ -144,10 +144,10 @@ BOOST_AUTO_TEST_CASE(MULTIPLYING)
 	sc_int<16> c = (4);
 	sc_int<16> d = (6);
 
-	FixedComplex c4(a,b);
-	FixedComplex c5(c,d);
+	FixedComplex<16> c4(a,b);
+	FixedComplex<16> c5(c,d);
 
-	FixedComplex c6;
+	FixedComplex<16> c6;
 
 	c6 = c4 * c5;
 
@@ -165,10 +165,10 @@ BOOST_AUTO_TEST_CASE(DIVIDING)
 	sc_int<16> c = (0);
 	sc_int<16> d = (1);
 
-	FixedComplex c1(a,b);
-	FixedComplex c2(c,d);
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(c,d);
 
-	FixedComplex c3;
+	FixedComplex<16> c3;
 
 	c3 = c1/c2;
 	BOOST_CHECK(c3.real.to_int() == 2);//Tests normal division
@@ -213,7 +213,7 @@ BOOST_AUTO_TEST_CASE(SHIFTING)
 
 	sc_int<16> a = (2);
 	sc_int<16> b = (1);
-	FixedComplex c1(a,b);
+	FixedComplex<16> c1(a,b);
 
 	c1 = c1<<3;
 	BOOST_CHECK(c1.real.to_int() == 16);//Normal left shift
