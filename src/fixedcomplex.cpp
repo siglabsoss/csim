@@ -115,6 +115,25 @@ FixedComplex<B>::~FixedComplex() {
 
 }
 
+template <int B>
+operator FixedComplex<16>()
+{
+	FixedComplex<16> c;
+	c.real = this->real;
+	c.imag = this->imag;
+	return c;
+}
+
+template <int B>
+operator FixedComplex<32>()
+{
+	FixedComplex<32> c;
+	c.real = this->real;
+	c.imag = this->imag;
+	return c;
+}
+
+
 template class FixedComplex<2>;
 template class FixedComplex<3>;
 template class FixedComplex<4>;
