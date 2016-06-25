@@ -17,19 +17,21 @@ class FixedComplex {
 private:
 
 public:
+
+	sc_int<16> real;
+	sc_int<16> imag;
+
 	FixedComplex();
 	bool operator==(const FixedComplex& rhs);
 	bool operator!=(const FixedComplex& rhs);
-	FixedComplex(sc_uint<16> rea);
-	FixedComplex(sc_uint<16> rea, sc_uint<16> ima);
+	FixedComplex(sc_int<16> rea);
+	FixedComplex(sc_int<16> rea, sc_int<16> ima);
 	FixedComplex operator+(const FixedComplex& rhs);
 	FixedComplex operator-(const FixedComplex& rhs);
 	FixedComplex operator*(const FixedComplex& rhs);
 	FixedComplex operator/(const FixedComplex& rhs);
 	FixedComplex operator<<(int shift);
-	sc_uint<16> real;
-	sc_uint<16> imag;
-
+	FixedComplex operator>>(int shift);
 	virtual ~FixedComplex();
 };
 
