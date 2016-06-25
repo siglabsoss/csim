@@ -33,6 +33,8 @@ public:
 	FixedComplex operator/(const FixedComplex& rhs);
 	FixedComplex operator<<(int shift);
 	FixedComplex operator>>(int shift);
+	operator FixedComplex<16>();
+	operator FixedComplex<32>();
 	virtual ~FixedComplex();
 };
 
