@@ -116,7 +116,7 @@ FixedComplex<B>::~FixedComplex() {
 }
 
 template <int B>
-operator FixedComplex<16>()
+FixedComplex<16> FixedComplex<B>::to_16()
 {
 	FixedComplex<16> c;
 	c.real = this->real;
@@ -125,7 +125,7 @@ operator FixedComplex<16>()
 }
 
 template <int B>
-operator FixedComplex<32>()
+FixedComplex<32> FixedComplex<B>::to_32()
 {
 	FixedComplex<32> c;
 	c.real = this->real;

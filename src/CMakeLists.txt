@@ -4,7 +4,7 @@ set(ALL_SOURCES
 	plotter.cpp
 	fixedcomplex.cpp
 	../inc/jsoncpp.cpp
-	fixedfir.cpp
+
 )
 
 
@@ -33,9 +33,4 @@ add_custom_target(runsysc COMMAND sysc DEPENDS sysc WORKING_DIRECTORY ${CMAKE_SO
 add_executable(client ${ALL_SOURCES} client.cpp)
 target_link_libraries(client ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 add_custom_target(runclient COMMAND client DEPENDS client WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
-
-########################### FILTER ###########################
-add_executable(filter ${ALL_SOURCES} filter.cpp)
-target_link_libraries(filter ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
-add_custom_target(runfilter COMMAND filter DEPENDS filter WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
