@@ -242,30 +242,3 @@ BOOST_AUTO_TEST_CASE(SHIFTING)
 
 }
 
-
-
-BOOST_AUTO_TEST_CASE(CASTING)
-{
-	sc_int<16> a = (2);
-	sc_int<16> b = (1);
-	FixedComplex<16> c1(a,b);
-	FixedComplex<32> c2;
-	c2 = c1.to_32();
-	BOOST_CHECK(c2.real.to_int() == 2);//Testing conversion up with no change
-	BOOST_CHECK(c2.imag.to_int() == 1);//Testing conversion up with no change
-	
-	c2.real = 4;
-	c2.imag = 3;
-	c1 = c2.to_16();
-	BOOST_CHECK(c1.real.to_int() == 4);//Testing conversion down with no change
-	BOOST_CHECK(c1.imag.to_int() == 3);//Testing conversion down with no change
-	
-	c2.real = 536936449; //2e29 + 1
-	c2.imag = 65538; //2e16 + 2
-	c1 = c2.to_16();
-	BOOST_CHECK(c1.real.to_int() == 1);//Testing conversion down with truncation
-	BOOST_CHECK(c1.imag.to_int() == 2);//Testing conversion down with truncation
-	
-	
-	
-}

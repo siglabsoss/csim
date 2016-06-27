@@ -21,6 +21,9 @@ public:
 	void fir(FixedComplex<16> *coeffs, int filterLength );
 	void firFixedInit();
 	virtual ~fixedfir();
+	
+	
+	
 };
 
 #endif /* FIXEDFIR_H_ */
