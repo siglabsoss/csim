@@ -1,3 +1,4 @@
+PROJECT(SIGLABS_C_CIM)
 cmake_minimum_required(VERSION 2.8)
 SET(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})  # this allows custom "cmake find" files to be located in the current directory
