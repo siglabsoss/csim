@@ -156,6 +156,22 @@ BOOST_AUTO_TEST_CASE(MULTIPLYING)
 
 }
 
+BOOST_AUTO_TEST_CASE(MULTIPLYING_TO_REAL)
+{
+	sc_int<16> a = (0);
+	sc_int<16> b = (1);
+
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(a,b);
+
+	FixedComplex<16> c3;
+
+	// 1j*1j = -1
+	c3 = c1 * c2;
+	BOOST_CHECK(c3.real.to_int() == -1);
+	BOOST_CHECK(c3.imag.to_int() == 0);
+}
+
 
 BOOST_AUTO_TEST_CASE(DIVIDING)
 {
