@@ -92,7 +92,7 @@ int main()
 //FixedComplex<16> tap2[4];
 //for (int i = 0; i < 4; i ++)
 //	tap2[i].real = 2;
-//
+
 //    fixedfir fir2(4, tap2);
 //
 //    fir2.fir(6, input2, output2);
@@ -101,9 +101,9 @@ int main()
 
 
 
-    for (int k = 0; k < 10; k++)
+    for (int k = 0; k < 6; k++)
     {
-    	cout << k+1 << setprecision(5) << " Real: " << output[k].real/32768.000 <<endl;
+    	cout << k+1 << setprecision(5) << " Real: " << output[k].real/32768.00 << " Imaginary: " << output[k].imag/32768.00 <<endl;
     }
 
     fclose( out_fid );
