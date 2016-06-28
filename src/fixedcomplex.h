@@ -11,7 +11,7 @@
 #define FixedComplex_H_
 
 #include "systemc.h"
-
+#include <iostream>
 template <int B>
 class FixedComplex {
 
@@ -27,6 +27,7 @@ public:
 	bool operator!=(const FixedComplex& rhs);
 	FixedComplex(sc_int<B> rea);
 	FixedComplex(sc_int<B> rea, sc_int<B> ima);
+	void print();
 	FixedComplex operator+(const FixedComplex& rhs);
 	FixedComplex operator-(const FixedComplex& rhs);
 	FixedComplex operator*(const FixedComplex& rhs);

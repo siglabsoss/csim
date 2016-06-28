@@ -26,56 +26,43 @@ fixedfir::fixedfir(int N, FixedComplex<16>* tap) {
 		this->taps[i] = tap[i];
 
 
+
 }
 
-void fixedfir::firFixedInit()
+void fixedfir::init()
 {
-    
+    memset( this->insamp, 0, sizeof( insamp ) );
 }
 
-void fixedfir::fir(FixedComplex<16>* output)
+
+void fixedfir::fir(int length, FixedComplex<16>* input, FixedComplex<16>* output)
 {
+	FixedComplex<16> bench[this->n];
+	FixedComplex<32> sum;
 
-    FixedComplex<32> acc;     // accumulator for MACs
-    FixedComplex<16> *coeffp; // pointer to coefficients
-    FixedComplex<16> *inputp; // pointer to input samples
 
-    int k;
-    FixedComplex<16> insamp[BUFFER_LEN];
-    // put the new samples at the high end of the buffer
-    memcpy( &insamp[FILTER_LEN - 1], this->taps,
-            this->n * sizeof(FixedComplex<16>));
+	for (int i = 0; i < length; i++)
+	{
+		bench[0] = input[i];
 
-    // apply the filter to each input sample
-    for (int n = 0; n < this->n; n++ ) {
-        // calculate output n
-        coeffp = this->taps;
-        inputp = &insamp[FILTER_LEN - 1 + n];
-        // load rounding constant
-        acc.real = 1 << 14;
-        
-        // perform the multiply-accumulate
-        for ( k = 0; k < FILTER_LEN; k++ ) {
-            acc = acc + ( (*coeffp++).to_32() * (*inputp--).to_32());
-        }
-        // saturate the result
-        if ( acc.real > 0x3fffffff ) 
-            acc.real= 0x3fffffff; //Only real
-        else if ( acc.real < -0x40000000 ) 
-            acc.real = -0x40000000; //Only real
-        
-        // convert from Q30 to Q15
-        output[n] = (acc >> 15).to_16();//Only Real?
-    }
+		sum.real = 0;
+		for ( int j = 0; (j < this->n ); j++)
+		{
+			sum = sum + (bench[j].to_32() * taps[j].to_32());
+		}
 
-    // shift input samples back in time for next time
-    memmove( &insamp[0], &insamp[this->n],
-            (FILTER_LEN - 1) * sizeof( FixedComplex<16>) );
+		for (int j = this->n - 1 ; j > 0; j--)
+		{
+			bench[j] = bench[j-1];
+		}
 
+		output[i] = sum.to_16();
+		output[i].print();
+	}
 
 }
 
 fixedfir::~fixedfir() {
-	// TODO Auto-generated destructor stub
+
 }
 

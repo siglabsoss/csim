@@ -5,7 +5,15 @@
  *      Author: ubuntu
  */
 
-#include <fixedcomplex.h>
+#include "fixedcomplex.h"
+
+template <int B>
+void FixedComplex<B>::print()
+{
+	cout << "Real: " <<this->real << " " << "Imaginary: " << this->imag <<endl;
+}//Default constructor
+
+
 template <int B>
 FixedComplex<B>::FixedComplex()
 {
