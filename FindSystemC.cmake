@@ -58,6 +58,7 @@ SET(_SYSTEMC_PATHS
   /usr/local/systemc/latest/include
   /usr/local/systemc/latest/lib-linux64
   /usr/local/systemc-2.3.1/include
+  /usr/local/systemc-2.3.1/lib-linux64
   )
 FIND_FILE(_SYSTEMC_VERSION_FILE
   NAMES sc_ver.h
