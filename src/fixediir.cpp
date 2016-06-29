@@ -48,15 +48,21 @@ FixedComplex<16> fixediir::calculate(FixedComplex<16> current)
 	 FixedComplex<32> currenty, CenterTap;//32 bits due to multiplication of 2 16 bits
 
 	 CenterTap = (current.to_32() * b[0].to_32()); // x[0] * b[0]
+
 	 for (int i = 1; i < numRegisters; i++)
 		 CenterTap = CenterTap + ( x[i].to_32() * b[i].to_32());//Accumulate for each x register
 
 	 CenterTap = CenterTap >> 15;//Reset to 16 bits
-	 currenty = (CenterTap); // Coefficient of a[0] = 1
+
+	 currenty = (CenterTap << 15 ); // Coefficient of a[0] = 1
 	 for (int i = 1; i < numRegisters; i++)
-		 currenty = (currenty << 15)- (a[i].to_32() * y[i].to_32());//Accumulate
+	 {
+		 currenty = (currenty )- (a[i].to_32() * y[i].to_32());//Accumulate
+
+	 }
 
 	 currenty = currenty >> 15;//Reset to 16 bits
+
 	 for (int i = numRegisters - 1; i > 1; i--)
 	 {
 		 x[i] = x[i-1];
