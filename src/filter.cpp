@@ -1,16 +1,5 @@
 #include "fixedfir.h"
-#include <stdio.h>
-#include <iostream>
-#include <string>
-#include <iostream>     // cout, endl
-#include <fstream>      // fstream
-#include <vector>
-#include <string>
-#include <stdlib.h>
-#include <algorithm>    // copy
-#include <iterator>     // ostream_operator
-#include <boost/tokenizer.hpp>
-#include <iomanip>
+
 
 using namespace boost;
 using namespace std;
@@ -19,21 +8,10 @@ using namespace std;
 
 int main()
 {
-	
-    int size;
-    FixedComplex<16> input[SAMPLES];
-    FixedComplex<16> output[SAMPLES];
-    FILE   *out_fid;
+    FixedComplex<16> input[SAMPLES];//Array to hold inputs
+    FixedComplex<16> output[SAMPLES];//Array to hold outputs
 
-
-    // open the output waveform file
-    out_fid = fopen( "outputFixed.pcm", "w" );
-    if ( out_fid == 0 ) {
-        printf("couldn't open outputFixed.pcm");
-        exit(EXIT_FAILURE);
-    }
-
-    string data("../data/firdata/basic1_in.csv");
+    string data("../data/firdata/basic1_in.csv");//Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open())
@@ -53,62 +31,42 @@ int main()
         input[i].imag = atof(vec[1].c_str()) * 32768;
      //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
         i++;
-    }
+    }//Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
     string taps("../data/firdata/basic1_taps.csv");
     FixedComplex<16> tap[41];
 
 
-       ifstream in2(taps.c_str());
-       if (!in2.is_open())
+    ifstream in2(taps.c_str());
+    if (!in2.is_open())
        	return 1;
 
 
-       typedef tokenizer< escaped_list_separator<char> > Tokenizer;
+   typedef tokenizer< escaped_list_separator<char> > Tokenizer;
 
-       vector< string > vec2;
-       string line2;
-       int j = 0;
+    vector< string > vec2;
+    string line2;
+    int j = 0;
 
-       while (getline(in2,line2))
-       {
-
-           Tokenizer tok(line2);
-           vec2.assign(tok.begin(),tok.end());
-           tap[j].real = atof(vec2[0].c_str()) * 32768;
-
-          // cout<< setprecision(30)<< j+1 << ": Tap: " << tap[j].real.to_int() << " " << atof(vec2[0].c_str()) << " Is actually " << vec2[0].c_str() <<endl;
-           j++;
-
-       }
-
-    fixedfir fir(j, tap);
-
-//    FixedComplex<16> input2[6];
-//    FixedComplex<16> output2[6];
-//    for (int i = 0;  i < 6; i++)
-//    	input2[i].real = i+1;
-//
-//FixedComplex<16> tap2[4];
-//for (int i = 0; i < 4; i ++)
-//	tap2[i].real = 2;
-
-//    fixedfir fir2(4, tap2);
-//
-//    fir2.fir(6, input2, output2);
-
-    fir.fir(i, input,output);
-
-
-
-    for (int k = 0; k < 6; k++)
+    while (getline(in2,line2))
     {
-    	cout << k+1 << setprecision(5) << " Real: " << output[k].real/32768.00 << " Imaginary: " << output[k].imag/32768.00 <<endl;
-    }
 
-    fclose( out_fid );
+        Tokenizer tok(line2);
+        vec2.assign(tok.begin(),tok.end());
+        tap[j].real = atof(vec2[0].c_str()) * 32768;
 
-    
+        // cout<< setprecision(30)<< j+1 << ": Tap: " << tap[j].real.to_int() << " " << atof(vec2[0].c_str()) << " Is actually " << vec2[0].c_str() <<endl;
+        j++;
+    }//Reads in taps
+
+
+    fixedfir fir(j, tap);//Creates instance of fixed FIR filter given j taps.
+    fir.fir(i, input,output);//Filters data
+
+    for (int k = 0; k < i; k++)
+    	cout << k+1 << setprecision(5) << " Real: " << output[k].real/32768.00 << " Imaginary: " << output[k].imag/32768.00 << endl;//Prints out filtered data
+
+
     return 0;
 }
 

@@ -36,6 +36,11 @@ add_custom_target(runclient COMMAND client DEPENDS client WORKING_DIRECTORY ${CM
 
 ########################### FILTER ###########################
 add_executable(filter ${ALL_SOURCES} filter.cpp)
-target_link_libraries(filter ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+target_link_libraries(filter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 add_custom_target(runfilter COMMAND filter DEPENDS filter WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+########################### FILTER2 ###########################
+add_executable(filter2 ${ALL_SOURCES} filter2.cpp)
+target_link_libraries(filter2 ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+
 

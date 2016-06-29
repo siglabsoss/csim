@@ -25,8 +25,6 @@ fixedfir::fixedfir(int N, FixedComplex<16>* tap) {
 	for (int i = 0; i < N; i++)
 		this->taps[i] = tap[i];
 
-
-
 }
 
 
