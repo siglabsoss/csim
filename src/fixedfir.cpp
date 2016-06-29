@@ -52,16 +52,15 @@ void fixedfir::fir(int length, FixedComplex<16>* input, FixedComplex<16>* output
 			bench[j] = bench[j-1];
 		}//Moves all data down by 1 space
 
-        if ( sum.real > 0x3fffffff ) {
+        if ( sum.real > 0x3fffffff )
             sum.real = 0x3fffffff;
-        } else if ( sum.real < -0x40000000 ) {
+        else if ( sum.real < -0x40000000 )
             sum.real = -0x40000000;
-        }
-        if ( sum.imag > 0x3fffffff ) {
-                    sum.imag = 0x3fffffff;
-                } else if ( sum.imag < -0x40000000 ) {
-                    sum.imag = -0x40000000;
-                }
+
+        if ( sum.imag > 0x3fffffff )
+        	sum.imag = 0x3fffffff;
+        else if ( sum.imag < -0x40000000 )
+        	sum.imag = -0x40000000;
 
 		sum = sum >> 15;
 		output[i] = sum.to_16();

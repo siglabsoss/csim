@@ -36,11 +36,9 @@ int main()
     string taps("../data/firdata/basic1_taps.csv");
     FixedComplex<16> tap[41];
 
-
     ifstream in2(taps.c_str());
     if (!in2.is_open())
        	return 1;
-
 
    typedef tokenizer< escaped_list_separator<char> > Tokenizer;
 
