@@ -3,8 +3,8 @@
 using namespace std;
 
 
-double a[3] = {1, -1.33012033759563986, 0.644119155523180109}; // a coefficients
-double b[3] = {0.087936161148626110,  0.138126495630287949, 0.087936161148626110};//b coefficients
+double a[4] = {1, -1.33012033759563986, 0.644119155523180109,.5}; // a coefficients
+double b[4] = {0.087936161148626110,  0.138126495630287949, 0.087936161148626110,.5};//b coefficients
 
 int main()
 {
@@ -16,7 +16,7 @@ int main()
 		input[i-1] = (double)i/10.00;
 	}
 
-	fixediir iir(3, a, b);
+	fixediir iir(4, a, b);
 	iir.iir(input,output,6);
 
 

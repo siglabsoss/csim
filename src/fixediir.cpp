@@ -13,6 +13,8 @@ fixediir::fixediir(int registerSize, double* aCoeffs, double* bCoeffs)
 	this->numRegisters = registerSize; //number of coefficients of each side
 	this->a = new double[this->numRegisters];
 	this->b = new double[this->numRegisters];
+	this->x = new double[this->numRegisters];
+	this->y = new double[this->numRegisters];
 
 	for (int i = 0; i < this->numRegisters; i++)
 	{

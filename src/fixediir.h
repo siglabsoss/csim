@@ -13,8 +13,8 @@ public:
 	int numRegisters;
 	double* a;
 	double* b;
-	double x[3]; //x registers
-	double y[3]; //y registers
+	double* x; //x registers
+	double* y; //y registers
 
 	fixediir(int registerSize, double* aCoeffs, double* bCoeffs);
 	void iir(double *input, double *output, int inputs);
