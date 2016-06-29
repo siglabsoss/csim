@@ -4,11 +4,12 @@
  *  Created on: Jun 24, 2016
  *      Author: ubuntu
  */
-
-#define FILTER_LEN  63
+#include <stdio.h>
 
 #ifndef FIXEDFIR_H_
 #define FIXEDFIR_H_
+#include <iostream>
+#include<cstring>
 #include "fixedcomplex.h"
 
 class fixedfir {
@@ -17,13 +18,11 @@ public:
 
 	int n; // Number of taps
 	FixedComplex<16>* taps;
-	FixedComplex<16> coeffs[ FILTER_LEN ];//Filter coeffs
-	
-	fixedfir(int N, FixedComplex<16>* val);
 
-	void fir(FixedComplex<16>* output);
-	void firFixedInit();
-	
+
+	fixedfir(int N, FixedComplex<16>* val);
+	void fir(int length, FixedComplex<16>* input, FixedComplex<16>* output);
+
 	virtual ~fixedfir();
 	
 	
