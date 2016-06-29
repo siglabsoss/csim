@@ -3,7 +3,7 @@ set(ALL_SOURCES
 	osiderived.cpp
 	plotter.cpp
 	fixedcomplex.cpp
-	../inc/jsoncpp.cpp
+	../3rd/jsoncpp.cpp
 	fixedfir.cpp
 )
 
