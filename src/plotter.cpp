@@ -21,6 +21,25 @@ plotter::~plotter() {
 
 }
 
+template<typename T>
+void plotter::some(T){
+	cout << "other version" << endl;
+}
+
+
+template<>
+void plotter::some(char){
+	cout << "char version" << endl;
+}
+
+template void plotter::some(int);
+template void plotter::some(float);
+template void plotter::some(char);
+
+
+
+
+
 void plotter::conv_real_int(vector<int> obj, Json::Value& t1)
 {
 	for (int i = 0; i < obj.size(); i ++)
@@ -31,18 +50,18 @@ void plotter::conv_real_int(vector<int> obj, Json::Value& t1)
 
 void plotter::nplot(vector<int> obj, string title)
 {
-	Json::Value jsn;
-	jsn["method"] = "nplot";
-
-	conv_real_int(obj, jsn);
-
-	jsn["arg1"] = title; //title of graph
-    std::string message = writer.write(jsn);
-//    cout << message << endl; //Prints json to be send
-
-    zmq::message_t request (message.size()); //Size of message
-    memcpy (request.data (), (message.c_str()), (message.size())); //Copies data into request
-    socket->send (request); //Sends off data
+//	Json::Value jsn;
+//	jsn["method"] = "nplot";
+//
+//	conv_real_int(obj, jsn);
+//
+//	jsn["arg1"] = title; //title of graph
+//    std::string message = writer.write(jsn);
+////    cout << message << endl; //Prints json to be send
+//
+//    zmq::message_t request (message.size()); //Size of message
+//    memcpy (request.data (), (message.c_str()), (message.size())); //Copies data into request
+//    socket->send (request); //Sends off data
 
 }
 

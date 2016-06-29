@@ -26,6 +26,12 @@ public:
     Json::Value top;  // top level object
     Json::Value arg0;
 
+//    void some(int);
+//    void some(float);
+    template<typename T>
+    void some(T);
+
+//    template<typename T>
 	void nplot(vector<int> obj, string title);
 	void nplotfft(int obj, string title);
 	void nplotqam(vector<complex<double> >, string title);

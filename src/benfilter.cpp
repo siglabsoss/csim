@@ -34,6 +34,9 @@ int main()
     }//Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
     plotter plot = plotter();
+    plot.some(1);
+    plot.some(1.f);
+    plot.some('c');
 //    plot.nplot(input, "");
 
     vector<int > cvector;
@@ -43,7 +46,7 @@ int main()
     			cvector.push_back(i);
     	}
 
-    	 plot.nplot(cvector, "title");
+//    	 plot.nplot(cvector, "title");
 
     	 cout << "here" << endl;
 
