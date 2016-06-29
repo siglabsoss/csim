@@ -34,8 +34,7 @@ void fixedfir::fir(int length, FixedComplex<16>* input, FixedComplex<16>* output
 	FixedComplex<32> sum;
 	FixedComplex<16> zero(0,0);
 
-	sum.real = 1<<14;
-	sum.imag = 1<<14;
+
 
 	for (int j = this->n - 1 ; j >= 0; j--)
 			{
