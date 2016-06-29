@@ -4,6 +4,9 @@ SET(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})  # this allows custom "cmake find" files to be located in the current directory
 
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+
+
 set(BOOST_INCLUDEDIR /usr/include)
 find_package(Boost)
 
