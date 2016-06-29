@@ -5,6 +5,7 @@ set(ALL_SOURCES
 	fixedcomplex.cpp
 	../3rd/jsoncpp.cpp
 	fixedfir.cpp
+	fixediir.cpp
 )
 
 
@@ -34,9 +35,11 @@ add_executable(client ${ALL_SOURCES} client.cpp)
 target_link_libraries(client ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 add_custom_target(runclient COMMAND client DEPENDS client WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
-########################### FILTER ###########################
-add_executable(filter ${ALL_SOURCES} filter.cpp)
-target_link_libraries(filter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
-add_custom_target(runfilter COMMAND filter DEPENDS filter WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+########################### FIR FILTER ###########################
+add_executable(firfilter ${ALL_SOURCES} firfilter.cpp)
+target_link_libraries(firfilter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 
+########################### IIR FILTER ###########################
+add_executable(iirfilter ${ALL_SOURCES} iirfilter.cpp)
+target_link_libraries(iirfilter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 
