@@ -142,6 +142,7 @@ FixedComplex<32> FixedComplex<B>::to_32()
 }
 
 
+
 template class FixedComplex<2>;
 template class FixedComplex<3>;
 template class FixedComplex<4>;

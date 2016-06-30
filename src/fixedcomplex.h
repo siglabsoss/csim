@@ -9,10 +9,10 @@
 
 #ifndef FixedComplex_H_
 #define FixedComplex_H_
-
+using namespace std;
 #include "systemc.h"
 #include <iostream>
-template <int B>
+template <int B> //How many bits the number will have
 class FixedComplex {
 
 private:
@@ -36,6 +36,11 @@ public:
 	FixedComplex operator>>(int shift);
 	FixedComplex<16> to_16();
 	FixedComplex<32> to_32();
+	friend ostream& operator<<(ostream& os, const FixedComplex& c)
+	{
+		os << "Real: " << c.real.to_int() << " Imaginary: " << c.imag.to_int() << endl;
+		return os;
+	};
 	virtual ~FixedComplex();
 };
 

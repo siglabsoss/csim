@@ -4,6 +4,7 @@
 
 /*
  * Based on this design of an IIR filter: https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/IIR-filter.png/220px-IIR-filter.png
+ *
  */
 #define NUM_X_REGISTERS 2
 
