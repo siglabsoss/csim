@@ -14,13 +14,14 @@
 
 class fixediir {
 public:
-	int numRegisters;
+	int numXRegisters;
+	int numYRegisters;
 	FixedComplex<16>* a;//a coefficients
 	FixedComplex<16>* b;//b coefficients
 	FixedComplex<16>* x; //x registers
 	FixedComplex<16>* y; //y registers
 
-	fixediir(int registerSize, FixedComplex<16>* aCoeffs, FixedComplex<16>* bCoeffs);//Constructor
+	fixediir(int registerXSize,int registerYSize, FixedComplex<16>* aCoeffs, FixedComplex<16>* bCoeffs);//Constructor
 	void iir(FixedComplex<16> *input, FixedComplex<16> *output, int inputs);//Filtering input data
 	FixedComplex<16> calculate(FixedComplex<16> current); // Calculate output based on input
 	virtual ~fixediir();
