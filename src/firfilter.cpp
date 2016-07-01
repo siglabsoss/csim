@@ -11,7 +11,7 @@ int main()
     FixedComplex<16> input[SAMPLES];//Array to hold inputs
     FixedComplex<16> output[SAMPLES];//Array to hold outputs
 
-    string data("../data/firdata/basic1_in.csv");//Input data file
+    string data("./data/firdata/basic1_in.csv");//Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open())
@@ -33,7 +33,7 @@ int main()
         i++;
     }//Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    string taps("../data/firdata/basic1_taps.csv");
+    string taps("./data/firdata/basic1_taps.csv");
     FixedComplex<16> tap[41];
 
     ifstream in2(taps.c_str());

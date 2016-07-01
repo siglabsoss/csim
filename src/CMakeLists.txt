@@ -43,3 +43,13 @@ target_link_libraries(firfilter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIB
 add_executable(iirfilter ${ALL_SOURCES} iirfilter.cpp)
 target_link_libraries(iirfilter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 
+########################### MULTIPLY ###########################
+add_executable(multiply ${ALL_SOURCES} multiply.cpp)
+target_link_libraries(multiply ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+
+########################### TEST FIR###########################
+add_executable(testfir ${ALL_SOURCES} testfir.cpp)
+target_link_libraries(testfir ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
+#set_target_properties(testfir PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
+add_custom_target(runtestfir COMMAND testfir DEPENDS testfir WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
