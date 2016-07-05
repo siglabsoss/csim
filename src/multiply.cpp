@@ -19,7 +19,7 @@ int main()
     if (!in.is_open())
     	return 1;
     else
-    	cout << "Found file..." << endl;;
+    	cout << "Found file..." << endl;
     typedef tokenizer< escaped_list_separator<char> > Tokenizer;
 
     string outFile = "data/output/out1.csv";
@@ -35,11 +35,10 @@ int main()
         vec.assign(tok.begin(),tok.end());
         a = atoi(vec[0].c_str());
         b = atoi(vec[1].c_str());
-        out << a*b << endl;
+        out << setw(10) << setfill(' ') << a*b << endl;
      //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
         i++;
     }//Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-    cout << "Output file is at " << outFile << endl;
     in.close();
     out.close();
 
