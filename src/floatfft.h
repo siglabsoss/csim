@@ -1,3 +1,5 @@
+#include <complex>
+
 #ifndef __FLOATFFT_H__
 #define __FLOATFFT_H__
 
@@ -22,6 +24,8 @@ public:
 	void dump(void);
 	void inputandtick(float x);
 	void compute(void);
+	void butterfly(float array[2], float x, float y);
+	complex<float> twiddler(int k);
 
 };
 
