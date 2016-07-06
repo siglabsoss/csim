@@ -53,7 +53,7 @@ complex<float> floatfftstage::twiddler(int k)
 
 void floatfftstage::inputandtick(float x){
 
-	cout << "starting in state" << state << endl;
+//	cout << "starting in state " << state << endl;
 
 	switch(state)
 	{
@@ -78,13 +78,26 @@ void floatfftstage::inputandtick(float x){
 	case FFT_STATE_READ:
 
 		float butterflyresult[2];
-		butterfly(butterflyresult, memory[write_pointer], x);
+		butterfly(butterflyresult, memory[read_pointer], x);
 		memory[write_pointer] = butterflyresult[1];
 		cout << "butterfly output " << butterflyresult[0] << endl;
-		write_pointer++;
+		if (read_pointer == ((N/2)-1))
+		{
+			state = FFT_STATE_OUTPUT;
+			write_pointer = 0;
+			read_pointer = 0;
+		}
+		else
+		{
+			read_pointer++;
+			write_pointer++;
+		}
 
 		break;
 	case FFT_STATE_OUTPUT:
+		cout << "butterfly output " << memory[read_pointer] * twiddler(read_pointer) << endl;
+		read_pointer++;
+
 		break;
 	}
 

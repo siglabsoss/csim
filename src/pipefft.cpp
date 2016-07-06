@@ -21,6 +21,11 @@ int main(void)
 	stageone.inputandtick(10);
 	stageone.inputandtick(9);
 
+	stageone.inputandtick(0);
+	stageone.inputandtick(0);
+	stageone.inputandtick(0);
+	stageone.inputandtick(0);
+
 
 
 	cout << "program end" << endl;
