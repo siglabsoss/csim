@@ -6,6 +6,7 @@ set(ALL_SOURCES
 	../3rd/jsoncpp.cpp
 	fixedfir.cpp
 	fixediir.cpp
+	floatfft.cpp
 )
 
 
