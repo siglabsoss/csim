@@ -10,11 +10,14 @@ enum FFT_STATE {
 	FFT_STATE_OUTPUT
 };
 
+//class floatfftbase {
+//	virtual inputandtick(float x);
+//};
 
 class floatfftstage {
 public:
 	int N;
-	float *memory;
+	complex<float> *memory;
 	FFT_STATE state;
 
 	int read_pointer;
@@ -22,12 +25,16 @@ public:
 
 	floatfftstage(int Ninput);
 	void dump(void);
-	void inputandtick(float x);
+	void inputandtick(complex<float> x);
 	void compute(void);
-	void butterfly(float array[2], float x, float y);
+	void butterfly(complex<float> array[2], complex<float> x, complex<float> y);
 	complex<float> twiddler(int k);
 
 };
+
+//class floatfftmux {
+//	void inputandtick(complex<float> x);
+//};
 
 
 #endif
