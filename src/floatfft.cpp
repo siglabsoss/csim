@@ -39,12 +39,14 @@ void floatfft::inputandtick(float x){
 	default:
 	case FFT_STATE_INITIAL:
 
-		write_pointer++;
+		memory[write_pointer] = x;
+
 
 		if (write_pointer == ((N/2)-1))
 		{
 			state = FFT_STATE_READ;
 		}
+		write_pointer++;
 		break;
 	case FFT_STATE_READ:
 		break;
