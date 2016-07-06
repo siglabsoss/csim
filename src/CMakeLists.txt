@@ -53,3 +53,8 @@ target_link_libraries(testfir ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_
 #set_target_properties(testfir PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
 add_custom_target(runtestfir COMMAND testfir DEPENDS testfir WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+
+########################### Anurag: FFT  ###########################
+add_executable(pipefft ${ALL_SOURCES} pipefft.cpp)
+target_link_libraries(pipefft ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+add_custom_target(runpipefft COMMAND pipefft DEPENDS pipefft WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
