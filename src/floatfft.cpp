@@ -6,7 +6,7 @@ using namespace std;
 #include "floatfft.h"
 
 
-floatfft::floatfft(int Ninput)
+floatfftstage::floatfftstage(int Ninput)
 {
 	this->N = Ninput;
 
@@ -20,7 +20,7 @@ floatfft::floatfft(int Ninput)
 	cout << "FFT bufferfly " << this->N << " was created" << endl;
 }
 
-void floatfft::dump(void)
+void floatfftstage::dump(void)
 {
 	int i;
 	for(i=0;i<N;i++)
@@ -30,7 +30,7 @@ void floatfft::dump(void)
 }
 
 
-void floatfft::inputandtick(float x){
+void floatfftstage::inputandtick(float x){
 
 	cout << "starting in state" << state << endl;
 
@@ -61,6 +61,6 @@ void floatfft::inputandtick(float x){
 
 
 }
-void floatfft::compute(void){
+void floatfftstage::compute(void){
 
 }

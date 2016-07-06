@@ -9,7 +9,7 @@ enum FFT_STATE {
 };
 
 
-class floatfft {
+class floatfftstage {
 public:
 	int N;
 	float *memory;
@@ -18,7 +18,7 @@ public:
 	int read_pointer;
 	int write_pointer;
 
-	floatfft(int Ninput);
+	floatfftstage(int Ninput);
 	void dump(void);
 	void inputandtick(float x);
 	void compute(void);

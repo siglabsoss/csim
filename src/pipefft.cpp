@@ -10,7 +10,7 @@ int main(void)
 	cout << "program start" << endl;
 
 
-	floatfft stageone(8);
+	floatfftstage stageone(8);
 
 	stageone.inputandtick(5);
 	stageone.inputandtick(6);
