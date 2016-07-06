@@ -31,8 +31,8 @@ public:
     template<typename T>
     void some(T);
 
-//    template<typename T>
-	void nplot(vector<int> obj, string title);
+    template<typename T>
+	void nplot(vector<T> obj, string title);
 	void nplotfft(int obj, string title);
 	void nplotqam(vector<complex<double> >, string title);
 	void conv_real_int(vector<int> obj, Json::Value& t1);

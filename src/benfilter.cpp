@@ -46,7 +46,7 @@ int main()
     			cvector.push_back(i);
     	}
 
-//    	 plot.nplot(cvector, "title");
+    	 plot.nplot(cvector, "title");
 
     	 cout << "here" << endl;
 

@@ -48,20 +48,21 @@ void plotter::conv_real_int(vector<int> obj, Json::Value& t1)
 	}//Adds each element in vector to dictionary arg0
 }
 
-void plotter::nplot(vector<int> obj, string title)
+template<typename T>
+void plotter::nplot(vector<T> obj, string title)
 {
-//	Json::Value jsn;
-//	jsn["method"] = "nplot";
-//
-//	conv_real_int(obj, jsn);
-//
-//	jsn["arg1"] = title; //title of graph
-//    std::string message = writer.write(jsn);
-////    cout << message << endl; //Prints json to be send
-//
-//    zmq::message_t request (message.size()); //Size of message
-//    memcpy (request.data (), (message.c_str()), (message.size())); //Copies data into request
-//    socket->send (request); //Sends off data
+	Json::Value jsn;
+	jsn["method"] = "nplot";
+
+	conv_real_int(obj, jsn);
+
+	jsn["arg1"] = title; //title of graph
+    std::string message = writer.write(jsn);
+//    cout << message << endl; //Prints json to be send
+
+    zmq::message_t request (message.size()); //Size of message
+    memcpy (request.data (), (message.c_str()), (message.size())); //Copies data into request
+    socket->send (request); //Sends off data
 
 }
 
