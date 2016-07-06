@@ -12,9 +12,15 @@ int main(void)
 
 	floatfft stageone(8);
 
-	stageone.memory[3] = 2343;
+	stageone.inputandtick(5);
+	stageone.inputandtick(6);
+	stageone.inputandtick(8);
+	stageone.inputandtick(-5);
+	stageone.inputandtick(6);
+	stageone.inputandtick(12);
+	stageone.inputandtick(10);
+	stageone.inputandtick(9);
 
-	stageone.dump();
 
 
 	cout << "program end" << endl;
