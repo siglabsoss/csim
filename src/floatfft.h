@@ -23,6 +23,7 @@ public:
 
 	int read_pointer;
 	int write_pointer;
+	int clock;
 
 	floatfftbase *next;
 

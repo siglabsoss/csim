@@ -8,16 +8,18 @@ const float pi = 3.14159265359;
 
 floatfftstage::floatfftstage(int Ninput)
 {
-	this->N = Ninput;
+	N = Ninput;
 
-	this->memory = new complex<float>[this->N/2];
+	memory = new complex<float>[N/2];
 
-	this->state = FFT_STATE_INITIAL;
+	state = FFT_STATE_INITIAL;
 
-	this->read_pointer = 0;
-	this->write_pointer = 0;
+	read_pointer = 0;
+	write_pointer = 0;
 
-	cout << "FFT bufferfly " << this->N << " was created" << endl;
+	clock = 0;
+
+	cout << "FFT bufferfly " << N << " was created" << endl;
 }
 
 void floatfftstage::dump(void)
@@ -121,6 +123,7 @@ void floatfftstage::inputandtick(complex<float> x){
 		break;
 	}
 
+	clock++;
 
 }
 
