@@ -29,6 +29,8 @@ public:
 	floatfftbase *next;
 
 	floatfftstage(int Ninput);
+	floatfftstage();
+	void init(int Ninput);
 	void dump(void);
 	void inputandtick(complex<float> x);
 	void output(complex<float> x);
@@ -43,6 +45,21 @@ public:
 	floatfftprint(int Ninput);
 	void inputandtick(complex<float> x);
 };
+
+class floatfft : public floatfftbase
+{
+public:
+	int N;
+	int stagecount;
+	floatfftstage *stages;
+	floatfftprint printer;
+	floatfft(int Ninput);
+	void inputandtick(complex<float> x);
+};
+
+
+
+
 
 
 #endif

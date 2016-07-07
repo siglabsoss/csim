@@ -9,6 +9,11 @@ set(ALL_SOURCES
 	floatfft.cpp
 )
 
+# add all tests files that are not test.cpp
+set(TEST_SOURCES
+	test_floatfft.cpp
+)	
+
 
 
 ########################### For target Davey ###########################

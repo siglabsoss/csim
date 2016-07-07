@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 
 using namespace std;
 
@@ -6,7 +7,7 @@ using namespace std;
 #include "floatfft.h"
 const float pi = 3.14159265359;
 
-floatfftstage::floatfftstage(int Ninput)
+void floatfftstage::init(int Ninput)
 {
 	N = Ninput;
 
@@ -22,6 +23,16 @@ floatfftstage::floatfftstage(int Ninput)
 	clock = 0;
 
 	cout << "FFT bufferfly " << N << " was created" << endl;
+}
+
+floatfftstage::floatfftstage(int Ninput)
+{
+	init(Ninput);
+}
+
+floatfftstage::floatfftstage()
+{
+
 }
 
 void floatfftstage::dump(void)
@@ -65,7 +76,7 @@ void floatfftstage::output(complex<float> x)
 
 void floatfftstage::inputandtick(complex<float> x){
 
-//	cout << "FFT(" << N << ") starting in state " << state << " with x " << x << endl;
+	//	cout << "FFT(" << N << ") starting in state " << state << " with x " << x << endl;
 
 	if( state != FFT_STATE_OUTPUT && x == complex<float>(0,0))
 	{
@@ -160,4 +171,39 @@ void floatfftprint::inputandtick(complex<float> x)
 	cout << "output[" << count << "]: " << x << endl;
 	count++;
 }
+
+
+
+
+
+floatfft::floatfft(int Ninput):printer(Ninput){
+	N = Ninput;
+	stagecount = log2(N);
+	int stagesize = 0;
+
+	stages = new floatfftstage[3];
+
+	int i;
+	for(i = 0; i < stagecount; i++)
+	{
+		stagesize = pow(2,(stagecount-i));
+		stages[i].init(stagesize);
+
+		if(i>0)
+		{
+			stages[i-1].next = &stages[i];
+		}
+	}
+
+	stages[stagecount-1].next = &printer;
+}
+void floatfft::inputandtick(complex<float> x)
+{
+	stages[0].inputandtick(x);
+}
+
+
+
+
+
 
