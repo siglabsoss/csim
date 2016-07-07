@@ -51,14 +51,13 @@ BOOST_AUTO_TEST_CASE(FIR_TEST)
 	expected.push_back(complex<float>(4.65685424949238, -16.142135623731));
 
 
-	const float tolerance = 1;  // measured in percentage
+	const float tolerance = 0.0001;  // measured in percentage
 
-//	int k;
 	float r1,r2,i1,i2;
 
-	for(k = 0; k < 8; k++)
+	for(k = 0; k < fft_size*2; k++)
 	{
-		index = reverseBits(fft_size, k);
+		index = reverseBits(fft_size, k%fft_size);
 
 		r1 = expected[index].real();
 		i1 = expected[index].imag();
