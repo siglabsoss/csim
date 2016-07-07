@@ -56,12 +56,11 @@ complex<float> floatfftstage::twiddler(int k)
 
 void floatfftstage::output(complex<float> x)
 {
-//	cout << "FFT(" << N << ") passing along " << x << endl;
-	next->inputandtick(x);
 	while(!next->ready)
 	{
 		next->inputandtick(0);
 	}
+	next->inputandtick(x);
 }
 
 void floatfftstage::inputandtick(complex<float> x){
@@ -139,9 +138,6 @@ void floatfftstage::inputandtick(complex<float> x){
 			read_pointer++;
 		}
 
-		break;
-
-	case FFT_STATE_IDLE:
 		break;
 	}
 
