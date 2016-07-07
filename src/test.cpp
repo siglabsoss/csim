@@ -156,6 +156,21 @@ BOOST_AUTO_TEST_CASE(MULTIPLYING)
 
 }
 
+BOOST_AUTO_TEST_CASE(ROLLOVER)
+{
+	sc_int<3> a = (4);
+	sc_int<3> b = (4);
+
+	FixedComplex<3> c1(a);
+	FixedComplex<3> c2(b);
+
+	FixedComplex<3> c3= c1*c2;
+	BOOST_CHECK(c3.real.to_int() == 0);
+
+
+}
+
+
 BOOST_AUTO_TEST_CASE(MULTIPLYING_TO_REAL)
 {
 	sc_int<16> a = (0);
