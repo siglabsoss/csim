@@ -7,7 +7,8 @@
 enum FFT_STATE {
 	FFT_STATE_INITIAL,
 	FFT_STATE_READ,
-	FFT_STATE_OUTPUT
+	FFT_STATE_OUTPUT,
+	FFT_STATE_IDLE
 };
 
 class floatfftbase {
@@ -30,6 +31,7 @@ public:
 	floatfftstage(int Ninput);
 	void dump(void);
 	void inputandtick(complex<float> x);
+	void output(complex<float> x);
 	void butterfly(complex<float> array[2], complex<float> x, complex<float> y);
 	complex<float> twiddler(int k);
 };

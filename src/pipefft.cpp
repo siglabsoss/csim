@@ -20,8 +20,8 @@ int main(void)
 	stagetwo.next = &stagethree;
 	stagethree.next = &printer;
 
-//	stageone.next = &stagetwo;
-//	stagetwo.next = &printer;
+	//	stageone.next = &stagetwo;
+	//	stagetwo.next = &printer;
 
 
 	stageone.inputandtick(5);
@@ -43,23 +43,12 @@ int main(void)
 	stageone.inputandtick(0);
 
 	stageone.inputandtick(0);
-		stageone.inputandtick(0);
-		stageone.inputandtick(0);
-		stageone.inputandtick(0);
-		stageone.inputandtick(0);
-		stageone.inputandtick(0);
-		stageone.inputandtick(0);
-		stageone.inputandtick(0);
+	stageone.inputandtick(0);
+	stageone.inputandtick(0);
+	stageone.inputandtick(0);
 
-
-		stageone.inputandtick(0);
-			stageone.inputandtick(0);
-			stageone.inputandtick(0);
-			stageone.inputandtick(0);
-			stageone.inputandtick(0);
-			stageone.inputandtick(0);
-			stageone.inputandtick(0);
-			stageone.inputandtick(0);
+	stageone.inputandtick(0);
+	stageone.inputandtick(0);
 
 
 

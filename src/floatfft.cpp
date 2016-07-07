@@ -52,13 +52,25 @@ complex<float> floatfftstage::twiddler(int k)
 
 }
 
+void floatfftstage::output(complex<float> x)
+{
+//	cout << "FFT(" << N << ") passing along " << x << endl;
+	next->inputandtick(x);
+}
 
 void floatfftstage::inputandtick(complex<float> x){
 
-	//	cout << "starting in state " << state << endl;
+//	cout << "FFT(" << N << ") starting in state " << state << " with x " << x << endl;
+
+	if( state != FFT_STATE_OUTPUT && x == complex<float>(0,0))
+	{
+		cout << "PROBLEMS " << endl;
+	}
 
 	complex<float> butterflyresult[2];
-	complex<float> output;
+	complex<float> outputtemp;
+
+	int i;
 
 	switch(state)
 	{
@@ -87,12 +99,16 @@ void floatfftstage::inputandtick(complex<float> x){
 		memory[write_pointer] = butterflyresult[1];
 
 		//		cout << "butterfly output " << butterflyresult[0] << endl;
-		next->inputandtick(butterflyresult[0]);
+		output(butterflyresult[0]);
 
 
 
 		if (read_pointer == ((N/2)-1))
 		{
+			for(i=0;i<N/4;i++)
+			{
+				output(0); // clock next stage (aka we are waiting)
+			}
 			state = FFT_STATE_OUTPUT;
 			write_pointer = 0;
 			read_pointer = 0;
@@ -105,12 +121,13 @@ void floatfftstage::inputandtick(complex<float> x){
 
 		break;
 	case FFT_STATE_OUTPUT:
-		//		cout << "butterfly output " << memory[read_pointer] * twiddler(read_pointer) << endl;
-		output = memory[read_pointer] * twiddler(read_pointer);
-		next->inputandtick(output);
+
+		outputtemp = memory[read_pointer] * twiddler(read_pointer);
+		output(outputtemp);
 
 		if (read_pointer == ((N/2)-1))
 		{
+
 			state = FFT_STATE_INITIAL;
 			write_pointer = 0;
 			read_pointer = 0;
@@ -120,6 +137,9 @@ void floatfftstage::inputandtick(complex<float> x){
 			read_pointer++;
 		}
 
+		break;
+
+	case FFT_STATE_IDLE:
 		break;
 	}
 
