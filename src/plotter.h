@@ -64,7 +64,7 @@ public:
     template<typename T> void conv_real_int(vector<T> obj, Json::Value& t1)
 	{
 		for (int i = 0; i < obj.size(); i ++)
-			t1["arg0"][i] = obj[i]//Adds each element in vector to dictionary arg0
+			t1["arg0"][i] = obj[i];//Adds each element in vector to dictionary arg0
 	};
 
     template<int B> void conv_real_int(vector<sc_int<B> > obj, Json::Value& t1)
