@@ -10,6 +10,8 @@
 #include <iterator>     // ostream_operator
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
+#include <stdlib.h>
+
 #include "fixedfir.h"
 
 
@@ -93,8 +95,8 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER)
 
 	    for (int k = 0; k < i; k++)
 	    {
-		    BOOST_CHECK_MESSAGE(output[k].real/32768.00 -  answers[k].real/32768.00 < .001 , output[k].real/32768.00 << " is not the same as " << answers[k].real/32768.00 );
-	    }
+		    BOOST_CHECK_MESSAGE(abs(output[k].real/32768.00 -  answers[k].real/32768.00) < .001 , output[k].real/32768.00 << " is not the same as " << answers[k].real/32768.00 );
+	    }//Compares all outputs with solution to ensure they are .001 within each other.
 
 
 }
@@ -174,11 +176,12 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
     fixedfir fir(j, tap);//Creates instance of fixed FIR filter given j taps.
     fir.fir(i, input,output);//Filters data
 
-    for (int k = 0; k < 100; k++)
+    for (int k = 0; k < i; k++)
     {
-	    BOOST_CHECK_MESSAGE(output[k].real/32768.00 -  realAnswers[k] < .001 , output[k].real/32768.00 << " is not the same as " << realAnswers[k]);
-	    BOOST_CHECK_MESSAGE(output[k].imag/32768.00 -  imagAnswers[k] < .001 , output[k].imag/32768.00 << " is not the same as " << imagAnswers[k]);
-    }
+	    BOOST_CHECK_MESSAGE(abs(output[k].real/32768.00 -  realAnswers[k]) < .001 , output[k].real/32768.00 << " is not the same as " << realAnswers[k]);
+	    BOOST_CHECK_MESSAGE(abs(output[k].imag/32768.00 -  imagAnswers[k]) < .001 , output[k].imag/32768.00 << " is not the same as " << imagAnswers[k]);
+	    cout << output[k].real/32768.00 << " is the same as " << realAnswers[k] << endl;
+    }//Compares all outputs with solution to ensure they are .001 within each other.
 
 
 }
