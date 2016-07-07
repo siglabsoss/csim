@@ -37,7 +37,7 @@ int main()
 
 
 	fixediir iir(NUM_X_REGISTERS, NUM_Y_REGISTERS, a, b);
-	iir.iir(input,output,6);
+	iir.iir(input,output,4);
 
 
 	for (int k = 0; k < 4; k++)

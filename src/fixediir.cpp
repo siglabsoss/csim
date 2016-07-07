@@ -4,7 +4,11 @@
  *  Created on: Jun 28, 2016
  *      Author: ubuntu
  */
-
+/*
+ *
+ * NOTE: First a coefficient must be 1
+ *
+ */
 #include <fixediir.h>
 
 fixediir::fixediir(int registerXSize, int registerYSize, FixedComplex<16>* aCoeffs, FixedComplex<16>* bCoeffs)
@@ -23,7 +27,7 @@ fixediir::fixediir(int registerXSize, int registerYSize, FixedComplex<16>* aCoef
 	for (int i = 0; i < this->numXRegisters; i++)
 		this->b[i] = bCoeffs[i];//Gets coefficient data for left side
 
-}
+}//Contructs filter based on number of registers on each side and the values of those registers
 
 void fixediir::iir(FixedComplex<16> *input, FixedComplex<16> *output, int inputs)
 {
@@ -44,7 +48,7 @@ void fixediir::iir(FixedComplex<16> *input, FixedComplex<16> *output, int inputs
 	for(int j=0; j < inputs; j++)
 		output[j] = calculate(input[j]); //Calculate filtered data
 
-}//Filters input data and places filtered data in output.
+}//Filters input data and places filtered data in output. Takes in input values, output array, and number of inputs.
 
 
 

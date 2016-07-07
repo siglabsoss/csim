@@ -53,3 +53,9 @@ target_link_libraries(testfir ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_
 #set_target_properties(testfir PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
 add_custom_target(runtestfir COMMAND testfir DEPENDS testfir WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
+########################### TEST IIR###########################
+add_executable(testiir ${ALL_SOURCES} testiir.cpp)
+target_link_libraries(testiir ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
+#set_target_properties(testiir PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
+add_custom_target(runtestiir COMMAND testiir DEPENDS testiir WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
