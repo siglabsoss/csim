@@ -197,8 +197,13 @@ floatfft::floatfft(int Ninput):printer(Ninput){
 
 	stages[stagecount-1].next = &printer;
 }
+
 void floatfft::inputandtick(complex<float> x)
 {
+	while(!stages[0].ready)
+	{
+		stages[0].inputandtick(0);
+	}
 	stages[0].inputandtick(x);
 }
 
