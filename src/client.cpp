@@ -10,6 +10,7 @@
 using namespace std;
 int main ()
 {
+	/*
 	plotter* plot = new plotter();
 	vector<complex<double> > cvector;
 	for (int i = 0; i < 100; i++)
@@ -28,6 +29,6 @@ int main ()
 
 
 	plot->nplot(myVector,"heyo");
-
+*/
     return 0;
 }
