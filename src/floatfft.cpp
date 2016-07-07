@@ -17,6 +17,8 @@ floatfftstage::floatfftstage(int Ninput)
 	read_pointer = 0;
 	write_pointer = 0;
 
+	ready = 1;
+
 	clock = 0;
 
 	cout << "FFT bufferfly " << N << " was created" << endl;
@@ -56,6 +58,10 @@ void floatfftstage::output(complex<float> x)
 {
 //	cout << "FFT(" << N << ") passing along " << x << endl;
 	next->inputandtick(x);
+	while(!next->ready)
+	{
+		next->inputandtick(0);
+	}
 }
 
 void floatfftstage::inputandtick(complex<float> x){
@@ -105,10 +111,6 @@ void floatfftstage::inputandtick(complex<float> x){
 
 		if (read_pointer == ((N/2)-1))
 		{
-			for(i=0;i<N/4;i++)
-			{
-				output(0); // clock next stage (aka we are waiting)
-			}
 			state = FFT_STATE_OUTPUT;
 			write_pointer = 0;
 			read_pointer = 0;
@@ -144,6 +146,7 @@ void floatfftstage::inputandtick(complex<float> x){
 	}
 
 	clock++;
+	ready = (state != FFT_STATE_OUTPUT);
 
 }
 

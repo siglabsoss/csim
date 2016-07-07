@@ -14,6 +14,7 @@ enum FFT_STATE {
 class floatfftbase {
 public:
 	virtual void inputandtick(complex<float> x) = 0;
+	int ready;
 };
 
 class floatfftstage : public floatfftbase {
