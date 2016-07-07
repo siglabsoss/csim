@@ -29,7 +29,6 @@ public:
 	floatfftstage(int Ninput);
 	void dump(void);
 	void inputandtick(complex<float> x);
-	void compute(void);
 	void butterfly(complex<float> array[2], complex<float> x, complex<float> y);
 	complex<float> twiddler(int k);
 };

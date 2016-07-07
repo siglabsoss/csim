@@ -43,7 +43,7 @@ complex<float> floatfftstage::twiddler(int k)
 	float theta;
 	theta = (2 * pi/N) * k;
 	W_cos = cos(theta);
-	W_sin = sin(theta);
+	W_sin = -sin(theta);
 
 	complex<float> W(W_cos, W_sin);
 	return W;
@@ -121,9 +121,6 @@ void floatfftstage::inputandtick(complex<float> x){
 		break;
 	}
 
-
-}
-void floatfftstage::compute(void){
 
 }
 

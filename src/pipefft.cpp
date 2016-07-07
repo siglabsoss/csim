@@ -12,12 +12,17 @@ int main(void)
 
 	floatfftstage stageone(8);
 	floatfftstage stagetwo(4);
-
+	floatfftstage stagethree(2);
 	floatfftprint printer(8);
 
 
+//	stageone.next = &stagetwo;
+//	stagetwo.next = &stagethree;
+//	stagethree.next = &printer;
+
 	stageone.next = &stagetwo;
 	stagetwo.next = &printer;
+
 
 	stageone.inputandtick(5);
 	stageone.inputandtick(6);
@@ -32,6 +37,7 @@ int main(void)
 	stageone.inputandtick(0);
 	stageone.inputandtick(0);
 	stageone.inputandtick(0);
+
 
 
 
