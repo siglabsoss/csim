@@ -7,6 +7,7 @@ set(ALL_SOURCES
 	fixedfir.cpp
 	fixediir.cpp
 	floatfft.cpp
+	utils.cpp
 )
 
 # add all tests files that are not test.cpp

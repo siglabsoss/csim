@@ -164,11 +164,25 @@ floatfftprint::floatfftprint(int Ninput)
 {
 	N = Ninput;
 	count = 0;
+	ready = 1;
 }
 
 void floatfftprint::inputandtick(complex<float> x)
 {
 	cout << "output[" << count << "]: " << x << endl;
+	count++;
+}
+
+floatfftbuffer::floatfftbuffer(int Ninput)
+{
+	N = Ninput;
+	count = 0;
+	ready = 1;
+}
+
+void floatfftbuffer::inputandtick(complex<float> x)
+{
+	buf.push_back(x);
 	count++;
 }
 

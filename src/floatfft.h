@@ -1,4 +1,5 @@
 #include <complex>
+#include <vector>
 
 #ifndef __FLOATFFT_H__
 #define __FLOATFFT_H__
@@ -43,6 +44,16 @@ public:
 	int N;
 	int count;
 	floatfftprint(int Ninput);
+	void inputandtick(complex<float> x);
+};
+
+// saves all output forever
+class floatfftbuffer : public floatfftbase {
+public:
+	int N;
+	int count;
+	std::vector<complex<float> > buf;
+	floatfftbuffer(int Ninput);
 	void inputandtick(complex<float> x);
 };
 
