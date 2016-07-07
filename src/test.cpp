@@ -1,10 +1,12 @@
-#define BOOST_TEST_DYN_LINK
 #define BOOST_AUTO_TEST_MAIN
 #define BOOST_TEST_MODULE Complex
+
+// In this file only use the /included/ version
 #include <boost/test/included/unit_test.hpp>
 #include "fixedcomplex.h"
 #include <iostream>
 
+//BOOST_AUTO_TEST_SUITE(Name)
 
 BOOST_AUTO_TEST_CASE(Equal_and_notequal)
 {
@@ -282,6 +284,9 @@ BOOST_AUTO_TEST_CASE(CASTING)
 	BOOST_CHECK(c1.real.to_int() == 1);//Testing conversion down with truncation
 	BOOST_CHECK(c1.imag.to_int() == 2);//Testing conversion down with truncation
 	
-	
-	
 }
+
+//BOOST_AUTO_TEST_SUITE_END()
+
+
+
