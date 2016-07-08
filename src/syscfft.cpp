@@ -7,7 +7,7 @@ SC_MODULE (hello_world) {
   }
   void say_hello() {
     //Print "Hello World" to the console.
-    cout << "Hello World.\n";
+    cout << "Hello World FFT.\n";
   }
 };
 
