@@ -66,3 +66,9 @@ add_custom_target(runtestfir COMMAND testfir DEPENDS testfir WORKING_DIRECTORY $
 add_executable(pipefft ${ALL_SOURCES} pipefft.cpp)
 target_link_libraries(pipefft ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 add_custom_target(runpipefft COMMAND pipefft DEPENDS pipefft WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+
+########################### Anurag SYSTEMC: fft  ###########################
+add_executable(syscfft ${ALL_SOURCES} sysc.cpp)
+target_link_libraries(syscfft ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
+add_custom_target(runsyscfft COMMAND syscfft DEPENDS syscfft WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
