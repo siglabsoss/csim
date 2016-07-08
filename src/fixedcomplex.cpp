@@ -10,8 +10,17 @@
 template <int B>
 void FixedComplex<B>::print()
 {
-	cout << "Real: " <<this->real << " " << "Imaginary: " << this->imag <<endl;
-}//Default constructor
+	cout << to_string() <<endl;
+}
+
+
+template <int B>
+std::string FixedComplex<B>::to_string()
+{
+	std::ostringstream oss;
+	oss << "Real: " <<this->real << " " << "Imaginary: " << this->imag;
+	return oss.str();
+}
 
 
 template <int B>

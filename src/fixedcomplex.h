@@ -36,6 +36,7 @@ public:
 	FixedComplex operator>>(int shift);
 	FixedComplex<16> to_16();
 	FixedComplex<32> to_32();
+	string to_string();
 	friend ostream& operator<<(ostream& os, const FixedComplex& c)
 	{
 		os << "Real: " << c.real.to_int() << " Imaginary: " << c.imag.to_int() << endl;
