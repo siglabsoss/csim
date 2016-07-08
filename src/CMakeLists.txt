@@ -7,6 +7,7 @@ set(ALL_SOURCES
 	fixedfir.cpp
 	fixediir.cpp
 	floatfft.cpp
+	fixedfft.cpp
 	utils.cpp
 )
 

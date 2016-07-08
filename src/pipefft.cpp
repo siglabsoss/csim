@@ -2,15 +2,25 @@
 
 using namespace std;
 
+#include "fixedfft.h"
 #include "floatfft.h"
 
 int main(void)
 {
-	int i;
+
+
+
+
+
 	cout << "program start" << endl;
 
+
+
+	int i;
+
+	{
 	floatfft fft(8);
-	for(i = 0; i < 10; i++)
+	for(i = 0; i < 3; i++)
 	{
 		fft.inputandtick(5);
 		fft.inputandtick(6);
@@ -20,6 +30,31 @@ int main(void)
 		fft.inputandtick(12);
 		fft.inputandtick(10);
 		fft.inputandtick(9);
+	}
+	}
+
+
+
+	cout << "---------------------------------------------------" << endl;
+	cout << "---------------------------------------------------" << endl;
+
+
+	int a = pow(2,15);
+	int scale = a/1000.0;
+
+
+	fixedfft fft(8);
+	for(i = 0; i < 3; i++)
+	{
+
+		fft.inputandtick(FixedComplex<16>(5 * scale,0));
+		fft.inputandtick(FixedComplex<16>(6 * scale,0));
+		fft.inputandtick(FixedComplex<16>(8 * scale,0));
+		fft.inputandtick(FixedComplex<16>(-5 * scale,0));
+		fft.inputandtick(FixedComplex<16>(6 * scale,0));
+		fft.inputandtick(FixedComplex<16>(12 * scale,0));
+		fft.inputandtick(FixedComplex<16>(10 * scale,0));
+		fft.inputandtick(FixedComplex<16>(9 * scale,0));
 	}
 
 

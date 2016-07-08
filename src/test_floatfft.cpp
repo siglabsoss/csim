@@ -9,10 +9,11 @@ using namespace std;
 
 #include "floatfft.h"
 #include "utils.h"
+#include "systemc.h"
 
 BOOST_AUTO_TEST_SUITE(FloatFFT)
 
-BOOST_AUTO_TEST_CASE(FIR_TEST)
+BOOST_AUTO_TEST_CASE(FLOAT_FFT_TEST)
 {
 
 	const int fft_size = 8;
@@ -68,6 +69,44 @@ BOOST_AUTO_TEST_CASE(FIR_TEST)
 		BOOST_CHECK_CLOSE(r1, r2, tolerance);
 		BOOST_CHECK_CLOSE(i1, i2, tolerance);
 	}
+
+}
+
+BOOST_AUTO_TEST_CASE(BLAH)
+{
+
+	cout << "hello world" << endl;
+
+//	FixedComplex<8> c1 ( rca)
+
+
+
+
+	float result = 0.2 * 0.2;
+
+	cout << "float " << result << endl;
+
+
+	const float scalar = 64;
+
+
+	sc_int<6>  f1 = 0.2 * scalar;
+	sc_int<6>  f2 = 0.2 * scalar;
+
+	cout << "scaled " << f1 << endl;
+
+	sc_int<12> result2 = (sc_int<6>)f1*(sc_int<6>)f2;
+
+//	sc_int<32> result3 = result2 / scalar;
+
+	cout << "fixed<> " << result2 << endl;
+	cout << "fixed<> " << (float)result2/(scalar*scalar) << endl;
+
+
+
+
+
+
 
 
 }

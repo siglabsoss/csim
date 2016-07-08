@@ -226,6 +226,60 @@ BOOST_AUTO_TEST_CASE(DIVIDING)
 
 
 
+BOOST_AUTO_TEST_CASE(DIVIDING2)
+{
+
+	sc_int<16> a = (-4224);
+	sc_int<16> b = (4224);
+	sc_int<16> c = (32);
+	sc_int<16> d = (0);
+
+	FixedComplex<16> c1(a,b);
+	FixedComplex<16> c2(c,d);
+
+	FixedComplex<16> c3;
+
+	c3 = c1/c2;
+
+	cout << "c3 was" << c3 << endl;
+
+//	BOOST_CHECK(c3.real.to_int() == 2);//Tests normal division
+//	BOOST_CHECK(c3.imag.to_int() == -2);//Tests normal division
+//
+//
+//	c1.real = 4;
+//	c1.imag = 5;
+//	c2.real = 2;
+//	c2.imag = 6;
+//
+//	c3 = c1/c2;
+//	BOOST_CHECK(c3.real.to_int() == 0);//tests truncating
+//	BOOST_CHECK(c3.imag.to_int() == 0);//Tests truncating
+//
+//
+//	c1.real = 110;
+//	c1.imag = 50;
+//	c2.real = 4;
+//	c2.imag = 6;
+//
+//	c3 = c1/c2;
+//
+//	BOOST_CHECK(c3.real.to_int() == 14);//tests truncating
+//	BOOST_CHECK(c3.imag.to_int() == -8);//Tests truncating
+//
+//	c1.real = 20;
+//	c1.imag = -100;
+//	c2.real = 4;
+//	c2.imag = 6;
+//
+//	c3 = c1/c2;
+//	BOOST_CHECK(c3.real.to_int() == -10);//Tests negative nums
+//	BOOST_CHECK(c3.imag.to_int() == -10);//Tests negative nums
+}
+
+
+
+
 BOOST_AUTO_TEST_CASE(SHIFTING)
 {
 

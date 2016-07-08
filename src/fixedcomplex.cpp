@@ -87,6 +87,16 @@ FixedComplex<B> FixedComplex<B>::operator/(const FixedComplex& rhs)
 	num.real = num.real/denom.real;
 	num.imag = (num.imag/denom.real);
 	return num;
+
+
+
+//	FixedComplex d = rhs;
+//	c = *this;
+//	//num = c * conj;
+//	denom = d * conj;
+//	num.real = (c.real*conj.real/denom.real) - (c.imag*conj.imag/denom.real);
+//	num.imag = (c.imag*conj.real/denom.real) + (conj.imag*c.real/denom.real);
+
 }//Division. Multiplies by conjugate and simplifies
 
 template <int B>

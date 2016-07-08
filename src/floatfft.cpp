@@ -22,7 +22,7 @@ void floatfftstage::init(int Ninput)
 
 	clock = 0;
 
-	cout << "FFT bufferfly " << N << " was created" << endl;
+//	cout << "FFT bufferfly " << N << " was created" << endl;
 }
 
 floatfftstage::floatfftstage(int Ninput)
@@ -69,6 +69,7 @@ void floatfftstage::output(complex<float> x)
 {
 	while(!next->ready)
 	{
+		cout << N << "X" << endl;
 		next->inputandtick(0);
 	}
 	next->inputandtick(x);
@@ -92,6 +93,7 @@ void floatfftstage::inputandtick(complex<float> x){
 	{
 	default:
 	case FFT_STATE_INITIAL:
+		cout << N << "a" << endl;
 
 		memory[write_pointer] = x;
 
@@ -109,6 +111,7 @@ void floatfftstage::inputandtick(complex<float> x){
 
 		break;
 	case FFT_STATE_READ:
+		cout << N << "b" << endl;
 
 
 		butterfly(butterflyresult, memory[read_pointer], x);
@@ -133,6 +136,7 @@ void floatfftstage::inputandtick(complex<float> x){
 
 		break;
 	case FFT_STATE_OUTPUT:
+		cout << N << "c" << endl;
 
 		outputtemp = memory[read_pointer] * twiddler(read_pointer);
 		output(outputtemp);
@@ -169,7 +173,7 @@ floatfftprint::floatfftprint(int Ninput)
 
 void floatfftprint::inputandtick(complex<float> x)
 {
-	cout << "output[" << count << "]: " << x << endl;
+//	cout << "output[" << count << "]: " << x << endl;
 	count++;
 }
 
@@ -195,7 +199,7 @@ floatfft::floatfft(int Ninput):printer(Ninput){
 	stagecount = log2(N);
 	int stagesize = 0;
 
-	stages = new floatfftstage[3];
+	stages = new floatfftstage[stagecount];
 
 	int i;
 	for(i = 0; i < stagecount; i++)
