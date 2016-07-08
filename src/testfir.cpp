@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
     double imagAnswers[1024];
     FixedComplex<16> tap[100];
 
-    string data("./data/firdata/data3_in.csv");//Input data file
+    string data("./data/firdata/data1_in.csv");//Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open())
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
         j++;
     }//Reads in taps
 
-    string data3("./data/firdata/data3_out.csv");//Answers data file
+    string data3("./data/firdata/data1_out.csv");//Answers data file
 
    	    ifstream in3(data3.c_str());
    	    if (!in3.is_open())
