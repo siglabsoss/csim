@@ -7,6 +7,7 @@ set(ALL_SOURCES
 	fixedfir.cpp
 	fixediir.cpp
 	cic.cpp
+	
 )
 
 
@@ -54,3 +55,7 @@ add_custom_target(runtestiir COMMAND testiir DEPENDS testiir WORKING_DIRECTORY $
 ########################### TEST CIC ###########################
 add_executable(testcic ${ALL_SOURCES} testcic.cpp)
 target_link_libraries(testcic ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+
+########################### MULTIPLY ###########################
+add_executable(aluverifier ${ALL_SOURCES} aluverifier.cpp)
+target_link_libraries(aluverifier ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
