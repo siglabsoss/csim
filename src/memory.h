@@ -10,13 +10,16 @@
 
 const int WORD_SIZE = 32;
 const int ADDR_SIZE = 32;
-//const int MEM_SIZE = 100;
+const int MEM_SIZE = 100;
 
 SC_MODULE(memory) {
-	sc_in <sc_uint<32> > MEM_SIZE;
+public:
+
+	//sc_uint<32> MEM_SIZE;
 	sc_in <bool> en, read, write, clk;
-	sc_in <sc_uint<ADDR_SIZE> > addr;
-	sc_inout <FixedComplex<WORD_SIZE> > data;
+	sc_in <sc_uint<ADDR_SIZE> > addr_read, addr_write;
+	sc_in <FixedComplex<WORD_SIZE> > data_in;
+	sc_out <FixedComplex<WORD_SIZE> > data_out;
 
 	void prc_memory();
 	FixedComplex<WORD_SIZE> ram[MEM_SIZE];

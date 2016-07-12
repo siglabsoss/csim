@@ -2,6 +2,6 @@
 
 void butterfly_two_pt::butterfly_fft()
 {
-	result[0] = x + y;
-	result[1] = x - y;
+	result_0 = x + y;
+	result_1 = x - y;
 }

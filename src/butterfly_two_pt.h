@@ -15,14 +15,14 @@
 SC_MODULE (butterfly_two_pt)
 {
 	sc_in <FixedComplex<32> > x,y;
-	sc_out <FixedComplex<32> > result[2];
+	sc_out <FixedComplex<32> > result_0,result_1;
 
 	void butterfly_fft ();
 
 	SC_CTOR (butterfly_two_pt)
 	{
 		SC_METHOD (butterfly_fft);
-		sensitive(x,y);
+		sensitive<<x<<y;
 	}
 };
 
