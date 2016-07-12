@@ -7,6 +7,7 @@ set(ALL_SOURCES
 	fixedfir.cpp
 	fixediir.cpp
 	cic.cpp
+	cordic.cpp
 	
 )
 
@@ -59,3 +60,7 @@ target_link_libraries(testcic ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRA
 ########################### MULTIPLY ###########################
 add_executable(aluverifier ${ALL_SOURCES} aluverifier.cpp)
 target_link_libraries(aluverifier ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+
+########################### CordicTester ###########################
+add_executable(cordictester ${ALL_SOURCES} cordictester.cpp)
+target_link_libraries(cordictester ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
