@@ -15,7 +15,6 @@ int main()
 	FixedComplex<16> b(0,0);
 	FixedComplex<32> sin;
 	FixedComplex<32> cos;
-
 	for (float i = 0; i < 12.57; i = i + .07)
 	{
 		sc_int<20> j = i * 32768;

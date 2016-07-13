@@ -9,32 +9,32 @@
 using namespace std;
 
 cordic::cordic() {
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 16; i++)
 	{
 
 		if (i == 0)
-			vals[i] = .785398  * (2 << 14);
+			vals[i] = .785398  * (1 << 15);
 		else if (i == 1)
-			vals[i] = .463648 * (2 << 14);
+			vals[i] = .463648 * (1 << 15);
 		else if (i == 2)
-			vals[i] = .244979 *(2 << 14);
+			vals[i] = .244979 * (1 << 15);
 		else if (i == 3)
-			vals[i] = .124355 * (2 << 14);
+			vals[i] = .124355 * (1 << 15);
 		else if (i == 4 )
-			vals[i] = .062419 * (2 << 14);
+			vals[i] = .062419 * (1 << 15);
 		else
-			vals[i] = ((float)1/(2 << (i-1))) * (2 << 14);
+			vals[i] = 1 << (15 - i);//((float)1/(1 << (i))) * (1 << 15);
 
 	}//Calculates and sets values to rotate by
 
 	k = .607252935;//constant k
 
 }
+
 void cordic::rotate(sc_int<20> theta)
 {
 	while (theta >=  205888)//input greater than 2pi
 		theta = theta - 205888;
-
 
 	if (theta >= 154415)//4th quadrant
 	{
@@ -54,10 +54,8 @@ void cordic::rotate(sc_int<20> theta)
 	else//1st quadrant
 		quad = 1;
 
-
 	sc_int<20> x = 0; //starting point for rotations
-	//theta = theta * (1 << 15);//scale up theta
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 16; i++)
 	{
 		if (x < theta)
 		{
@@ -80,27 +78,26 @@ void cordic::calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, 
 	y[0][0] = (a.to_32()<<15); //scale up input
 	y[1][0] = (b.to_32()<<15); //scale up input
 
-	for (int i = 0; i < 30; i++)
+	for (int i = 0; i < 16; i++)
 	{
 		z[0][0].real = 1 << 15; //32768. Upper left
 
-		if (i == 0)
-			z[0][1].real = -(1 << 15); // First values of z[0][1] must be -1. Upper right
-		else
-			z[0][1].real = (((double)-1/(2 << (i-1))) * (1 << 15)); // 1/2^(i-1). Upper right
-
+		z[0][1].real = -(1<< (15 - i));
 		z[1][0].real = -z[0][1].real; // Lower left
 		z[1][1].real = 1 << 15; // 1. Lower right
 		temp = y[0][0]; //temporary storage for later calculation
 
-		c1 = (((z[0][0] * y[0][0]) >> 15));
-		c2 = (((z[0][1]) * (y[1][0].real))  >> 15);
-		c2.real = c2.real * sign[i];//multiply by rotation direction
-		y[0][0] =c1   + c2;//Upper value
+		c1 = (((y[0][0])));//(((z[0][0] * y[0][0]) >> 15)); z[0][0].real = 1 << 15
+		c2 = (y[1][0] >> i) ; //(((z[0][1]) * (y[1][0].real))  >> 15); z[0][1].real = -(1<< (15 - i));
+		c2.real = -c2.real;//-(1<< (15 - i));
+		if (sign[i] == -1)
+			c2.real = -c2.real;//multiply by rotation direction
+		y[0][0] = c1 + c2;//Upper value
 
-		c1 = ((z[1][1] * y[1][0]) >> 15);
-		c2 = ((z[1][0] * temp) >> 15);
-		c2.real = c2.real * sign[i]; //multiply by rotation direction
+		c1 = ((y[1][0]));//((z[1][1] * y[1][0]) >> 15) z[1][1] = 1 << 15
+		c2 = (temp) >> i;//	c2 = ((z[1][0] * temp) >> 15);
+		if (sign[i] == -1)
+			c2.real = -c2.real;//multiply by rotation direction
 		y[1][0] = c2 + c1;//Lower value
 
 	}
@@ -111,7 +108,18 @@ void cordic::calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, 
 	y[0][0] = y[0][0] >> 15;
 	y[1][0] = y[1][0] >> 15;
 
+	signs();
 
+//	cout << "Cosine: " << y[0][0].real/32768.0 << endl;
+//	cout << "Sine: " << y[1][0].real/32768.0 << endl;
+	*sin = y[1][0];
+	*cos = y[0][0];
+	return;
+
+}
+
+void cordic::signs()
+{
 	if (quad == 4)
 	{
 		temp = y[0][0];
@@ -129,13 +137,8 @@ void cordic::calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, 
 		y[0][0].real = -y[1][0].real;
 		y[1][0] = temp;
 	}//swap sin and cosine. cosine is negative
-//	cout << "Cosine: " << y[0][0].real/32768.0 << endl;
-//	cout << "Sine: " << y[1][0].real/32768.0 << endl;
-	*sin = y[1][0];
-	*cos = y[0][0];
-	return;
+}//swaps cosine and sign or changes sign if necessary.
 
-}
 
 cordic::~cordic() {
 
