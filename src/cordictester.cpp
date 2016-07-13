@@ -10,7 +10,9 @@ int main()
 	cordic c;
 	long double i;
 	cin >> i;
-	c.calculate(i,1,0);
+	FixedComplex<16> a(1,0);
+	FixedComplex<16> b(0,0);
+	c.calculate(i,a,b);
 
 
 }

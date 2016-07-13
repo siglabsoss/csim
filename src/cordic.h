@@ -9,13 +9,14 @@
 #define CORDIC_H_
 
 #include <iostream>
+#include "fixedcomplex.h"
 class cordic {
 public:
-	long double vals[30];
-	int sign[30];
+	int vals[16];
+	int sign[16];
 	long double k;
-
-	long double calculate(long double theta, int a, int b);
+	void rotations(long double theta);
+	long double calculate(long double theta, FixedComplex<16> a, FixedComplex<16> b);
 	cordic();
 	virtual ~cordic();
 };
