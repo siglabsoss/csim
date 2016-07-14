@@ -9,73 +9,128 @@
 
 using namespace std;
 
-Stitcher::Stitcher() {
-	totalTime = 100;
+Stitcher::Stitcher(int* waveNums, int* percents, int nums)
+{
+	val = new int[nums];
+	for (int i = 0; i < nums; i++)
+	{
+		val[i] = waveNums[i];
+	}
+	percent = new int[nums];
+	for (int i = 0; i < nums; i++)
+	{
+		percent[i] = percents[i];
+	}
+	num = nums;
+
+
+
+
 
 	// TODO Auto-generated constructor stub
 
 }
-void Stitcher::stitch()
+void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 {
-	 string outFile = "data/output/stitching.csv";
-	 ofstream out(outFile.c_str());
-
-	for (int time = 0; time < totalTime; time++)
+	float totalTime = numSamples/sampleRate;
+	string outFile = "data/output/stitching.csv";
+	ofstream out(outFile.c_str());
+	cordic c;
+	FixedComplex<16> a1(1,0);
+	FixedComplex<16> b1(0,1);
+	sc_int<32> cosdown;
+	sc_int<32> cosup;
+	sc_int<32> sinup;
+	sc_int<32> sindown;
+	int count = 0;
+	float currentAngle = 0;
+	for (int i = 0; i < num; i++)
 	{
+		count = 0;
 
-		cordic c;
-		FixedComplex<16> a(1,0);
-		FixedComplex<16> b(0,0);
-		FixedComplex<32> sin;
-		FixedComplex<32> cos;
-		if (timer[time] == 0)
+		float a = totalTime * percent[i] / 100.0; //total time of wave
+		float b = a;
+		float t = 1.0/frequency; //Period of wave
+
+		while (b > t)
 		{
-			sc_int<20> j = time/100.00 * 32768;
-			c.calculate(j,a,b,&sin,&cos);
-			//cout << "Cosine: " << cos.real/32768.0 << endl;
-			//cout << "Sine: " << sin.real/32768.0 << endl;
-			//out << cos.real/32768.0<<",";
-			out << sin.real/32768.0 << "," << endl;
+			b = b - t;
+			count++;
+		}//While b is greater than 1 wave time
+
+		float theta = 2 * 3.14159 * b * frequency; // theta must be between 0 and 2pi Equivalent to 2pi * b / t
+		float delta = 2 * 3.14159 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second
+
+		if (val[i] == 0)
+		{
+			while (count > 0)
+			{
+				for (float l = 0; l < 2 * 3.14159; l = l + delta)
+				{
+					int randomNum = rand() % 19 + (-9);
+					out << randomNum/10.0 << endl;
+				}//print out 1 entire wave
+				count--;
+			}//print out count entire waves
+
+			for (float m = 0; m < theta; m = m + delta)
+			{
+				int randomNum = rand() % 19 + (-9);
+				out << setprecision(5) << randomNum/10.0 << endl;
+			}//prints out remainder of wave
+
 		}
 
-		if (timer[time] == 1)
+		if (val[i] == 1)
 		{
-			int randomNum = rand() % 19 + (-9);
-			out << randomNum/10.0 << "," << endl;
+			while (count > 0)
+			{
+				for (float l = 0; l < 2 * 3.14159; l = l + delta)
+				{
+					sc_int<20> k = l * 32768;
+
+					c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
+					out << sinup/32768.0 << endl;
+
+				}//print out 1 entire wave
+				count--;
+			}//print out count entire waves
+
+			for (float m = 0; m < theta; m = m + delta)
+			{
+				sc_int<20> k = m * 32768;
+				c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
+				out << setprecision(5) << sinup/32768.0 << endl;
+			}//prints out remainder of wave
+
+
 		}
 
-		if (timer[time] == 2)
+		if (val[i] == 2)
 		{
-			sc_int<20> j = time/100.00 * 32768;
-			c.calculate(j,a,b,&sin,&cos);
-			//cout << "Cosine: " << cos.real/32768.0 << endl;
-			//cout << "Sine: " << sin.real/32768.0 << endl;
-			//out << cos.real/32768.0<<",";
-			out << -sin.real/32768.0 << "," <<endl;
+			while (count > 0)
+			{
+				for (float l = 0; l < 2 * 3.14159; l = l + delta)
+				{
+					sc_int<20> k = l * 32768;
+					c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
+					out << setprecision(5) << sindown/32768.0 << endl;
+				}//print out 1 entire wave
+				count--;
+			}//print out count entire waves
+
+			for (float m = 0; m < theta; m = m + delta)
+			{
+				sc_int<20> k = m * 32768;
+				c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
+				out << sinup/32768.0 << endl;
+			}//prints out remainder of wave
 		}
-		cout << time << endl;
 	}
 
-	return;
 }
 
-void Stitcher::format(int* wave, int* percent)
-{
-	int j = 0;
-	int temp;
-	int currentTime = 0;
-	for ( int i = 0; i < 3; i++)
-	{
-		 temp = percent[i] * totalTime /100;
-		for (j = 0; j < (temp); j++)
-		{
-			timer[currentTime] = wave[i];
-			currentTime++;
-		}
 
-	}
-
-}
 Stitcher::~Stitcher() {
 	// TODO Auto-generated destructor stub
 }

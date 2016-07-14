@@ -12,15 +12,22 @@
 #include <fstream>
 #include <iostream>
 #include <stdlib.h> //rand()
-
+#include <iomanip>
+#include <vector>
 class Stitcher {
 public:
-	Stitcher();
-	void stitch();
-	void format(int* wave, int* percent);
+	Stitcher(int* waveNums, int* percents, int nums);
+	void stitch(int numSamples, int sampleRate, int frequency);
+
 	virtual ~Stitcher();
-	int totalTime;
-	int timer[100];
+
+	int* val;
+	int num;
+	int* percent;
+	vector<float> data;
+
+
+
 
 };
 

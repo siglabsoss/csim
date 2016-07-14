@@ -2,10 +2,12 @@
 
 int main()
 {
-	Stitcher stitch;
-	int waves[3] = {0,1,2};
-	int percent[3] = {20,30,50};
+	int waves[5] = {1,2,1,0,1};
+	int percent[5] = {10,10,20,60};
+	int num = 5;
 
-	stitch.format(waves, percent);
-	stitch.stitch();
+	Stitcher stitch(waves, percent, num);
+
+	stitch.stitch(100, 10,2);//(int numsamples, int sampleRate, int frequency);
+	cout << "DONE"<< endl;
 }
