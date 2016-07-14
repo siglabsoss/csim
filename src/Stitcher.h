@@ -16,8 +16,8 @@
 #include <vector>
 class Stitcher {
 public:
-	Stitcher(int* waveNums, int* percents, int nums);
-	void stitch(int numSamples, int sampleRate, int frequency);
+	Stitcher(int* waveNums, int* percents, int nums, vector<float> datas);
+	vector<float> stitch(int numSamples, int sampleRate, int frequency);
 
 	virtual ~Stitcher();
 
@@ -25,7 +25,7 @@ public:
 	int num;
 	int* percent;
 	vector<float> data;
-
+	vector<float> output;
 
 
 

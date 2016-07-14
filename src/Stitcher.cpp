@@ -9,32 +9,26 @@
 
 using namespace std;
 
-Stitcher::Stitcher(int* waveNums, int* percents, int nums)
+Stitcher::Stitcher(int* waveNums, int* percents, int nums, vector<float> datas)
 {
 	val = new int[nums];
+
 	for (int i = 0; i < nums; i++)
-	{
 		val[i] = waveNums[i];
-	}
+
 	percent = new int[nums];
 	for (int i = 0; i < nums; i++)
-	{
 		percent[i] = percents[i];
-	}
+
 	num = nums;
-
-
-
-
-
-	// TODO Auto-generated constructor stub
+	data = datas;
 
 }
-void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
+
+vector<float> Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 {
 	float totalTime = numSamples/sampleRate;
-	string outFile = "data/output/stitching.csv";
-	ofstream out(outFile.c_str());
+
 	cordic c;
 	FixedComplex<16> a1(1,0);
 	FixedComplex<16> b1(0,1);
@@ -67,8 +61,8 @@ void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 			{
 				for (float l = 0; l < 2 * 3.14159; l = l + delta)
 				{
-					int randomNum = rand() % 19 + (-9);
-					out << randomNum/10.0 << endl;
+					int randomNum = data[rand() % 10];
+					output.push_back(randomNum/10.0);
 				}//print out 1 entire wave
 				count--;
 			}//print out count entire waves
@@ -76,7 +70,7 @@ void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 			for (float m = 0; m < theta; m = m + delta)
 			{
 				int randomNum = rand() % 19 + (-9);
-				out << setprecision(5) << randomNum/10.0 << endl;
+				output.push_back(randomNum/10.0);
 			}//prints out remainder of wave
 
 		}
@@ -90,7 +84,7 @@ void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 					sc_int<20> k = l * 32768;
 
 					c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
-					out << sinup/32768.0 << endl;
+					output.push_back(sinup/32768.0);
 
 				}//print out 1 entire wave
 				count--;
@@ -100,7 +94,7 @@ void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 			{
 				sc_int<20> k = m * 32768;
 				c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
-				out << setprecision(5) << sinup/32768.0 << endl;
+				output.push_back(sinup/32768.0);
 			}//prints out remainder of wave
 
 
@@ -114,7 +108,7 @@ void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 				{
 					sc_int<20> k = l * 32768;
 					c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
-					out << setprecision(5) << sindown/32768.0 << endl;
+					output.push_back(sindown/32768.0);
 				}//print out 1 entire wave
 				count--;
 			}//print out count entire waves
@@ -123,10 +117,12 @@ void Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 			{
 				sc_int<20> k = m * 32768;
 				c.calculate(k,a1,b1,&sinup,&sindown, &cosup, &cosdown);
-				out << sinup/32768.0 << endl;
+				output.push_back(sindown/32768.0);
 			}//prints out remainder of wave
 		}
 	}
+
+	return output;
 
 }
 
