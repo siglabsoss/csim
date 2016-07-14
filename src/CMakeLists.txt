@@ -8,6 +8,7 @@ set(ALL_SOURCES
 	fixediir.cpp
 	cic.cpp
 	cordic.cpp
+	Stitcher.cpp
 	
 )
 
@@ -64,3 +65,4 @@ target_link_libraries(aluverifier ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_L
 ########################### CordicTester ###########################
 add_executable(cordictester ${ALL_SOURCES} cordictester.cpp)
 target_link_libraries(cordictester ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+
