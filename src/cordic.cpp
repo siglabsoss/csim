@@ -57,7 +57,8 @@ void cordic::rotate(sc_int<20> theta)
 	sc_int<20> x = 0; //starting point for rotations
 	for (int i = 0; i < 16; i++)
 	{
-		if (x < theta)
+
+		if (x <= theta)
 		{
 			sign[i] =  1;
 			x = x + vals[i];
@@ -71,7 +72,7 @@ void cordic::rotate(sc_int<20> theta)
 }
 
 
-void cordic::calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, FixedComplex<32>* sin, FixedComplex<32>* cos)
+void cordic::calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup, sc_int<32>* cosdown)
 {
 	rotate(theta);
 
@@ -81,39 +82,62 @@ void cordic::calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, 
 	for (int i = 0; i < 16; i++)
 	{
 		z[0][0].real = 1 << 15; //32768. Upper left
-
+		z[0][0].imag = 0;
 		z[0][1].real = -(1<< (15 - i));
+		z[0][1].imag = 0;
 		z[1][0].real = -z[0][1].real; // Lower left
+		z[1][0].imag = 0;
 		z[1][1].real = 1 << 15; // 1. Lower right
+		z[1][1].imag  = 0;
+
 		temp = y[0][0]; //temporary storage for later calculation
-
-		c1 = (((y[0][0])));//(((z[0][0] * y[0][0]) >> 15)); z[0][0].real = 1 << 15
-		c2 = (y[1][0] >> i) ; //(((z[0][1]) * (y[1][0].real))  >> 15); z[0][1].real = -(1<< (15 - i));
+		c1 = y[0][0];//(((z[0][0] * y[0][0]) >> 15)); z[0][0].real = 1 << 15
+		c2 = y[1][0] >> i ; //(((z[0][1]) * (y[1][0].real))  >> 15); z[0][1].real = -(1<< (15 - i));
 		c2.real = -c2.real;//-(1<< (15 - i));
-		if (sign[i] == -1)
-			c2.real = -c2.real;//multiply by rotation direction
-		y[0][0] = c1 + c2;//Upper value
+		c2.imag = -c2.imag;// * -1
 
-		c1 = ((y[1][0]));//((z[1][1] * y[1][0]) >> 15) z[1][1] = 1 << 15
-		c2 = (temp) >> i;//	c2 = ((z[1][0] * temp) >> 15);
 		if (sign[i] == -1)
+		{
+			c2.imag = -c2.imag;
 			c2.real = -c2.real;//multiply by rotation direction
-		y[1][0] = c2 + c1;//Lower value
+		}
+
+			y[0][0] = c1 + c2;//Upper value
+		c1 = y[1][0];//((z[1][1] * y[1][0]) >> 15) z[1][1] = 1 << 15
+		c2 = temp >> i;//	c2 = ((z[1][0] * temp) >> 15);
+		if (sign[i] == -1)
+		{
+			c2.imag = -c2.imag;
+			c2.real = -c2.real;//multiply by rotation direction
+		}
+			y[1][0] = c2 + c1;//Lower value
+
+
+
 
 	}
 
+
+
 	y[0][0].real = (y[0][0].real * ( k * (1 << 15)));//multiply by k
 	y[1][0].real= (y[1][0].real * ( k * (1 << 15)));//multiply by k
+	y[0][0].imag = (y[0][0].imag * ( k * (1 << 15)));//multiply by k
+	y[1][0].imag= (y[1][0].imag* ( k * (1 << 15)));//multiply by k
 
 	y[0][0] = y[0][0] >> 15;
 	y[1][0] = y[1][0] >> 15;
+
 
 	signs();
 
 //	cout << "Cosine: " << y[0][0].real/32768.0 << endl;
 //	cout << "Sine: " << y[1][0].real/32768.0 << endl;
-	*sin = y[1][0];
-	*cos = y[0][0];
+
+	*cosdown = y[0][0].real;
+	*cosup = y[1][0].imag;
+	*sindown = y[0][0].imag;
+	*sinup = y[1][0].real;
+
 	return;
 
 }
@@ -125,16 +149,20 @@ void cordic::signs()
 		temp = y[0][0];
 		y[0][0] = y[1][0];
 		y[1][0].real = -temp.real;
+		y[1][0].imag = -temp.imag;
 	}//swap sin and cosine. sin is negative
 	else if (quad == 3)
 	{
 		y[0][0].real = -y[0][0].real;
 		y[1][0].real = -y[1][0].real;
+		y[0][0].imag = -y[0][0].imag;
+		y[1][0].imag = -y[1][0].imag;
 	}//both are negative
 	else if (quad == 2)
 	{
 		temp = y[0][0];
 		y[0][0].real = -y[1][0].real;
+		y[0][0].imag = -y[1][0].imag;
 		y[1][0] = temp;
 	}//swap sin and cosine. cosine is negative
 }//swaps cosine and sign or changes sign if necessary.
