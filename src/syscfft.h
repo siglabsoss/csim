@@ -23,6 +23,8 @@ SC_MODULE(syscfft)
 	sc_in <sc_int<32> > x_in_r, x_in_im;
 	sc_out <sc_int<32> > z_r,z_im;
 
+	sc_int<32> count;
+
 	////////// Memory Signals //////////
 	sc_signal <sc_uint<32> > MEM_SIZE;
 	sc_signal <bool> en, read, write;
@@ -81,9 +83,10 @@ SC_MODULE(syscfft)
 		butterfly_stage_ptr -> result_1_im (result_1_im);
 
 		SC_METHOD (prc_state);
-		sensitive<<melay_state<<next_state<<rst.pos(); //sensitive at pos edge of clk and reset
+		sensitive<<melay_state<<next_state<<rst.pos();
+		sensitive<<en<<read<<write<<clk<<addr_read<<addr_write;
 		SC_METHOD(prc_output);
-		sensitive<<clk.pos()<<rst.pos();
+		sensitive<<clk.pos()<<rst.pos();//sensitive at pos edge of clk and reset
 
 		sc_trace_file *wf = sc_create_vcd_trace_file("counter");
 		// Dump the desired signals

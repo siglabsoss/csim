@@ -6,11 +6,14 @@
  *      Author: ubuntu
  */
 #include "complex_alu.h"
+#include <iostream>
+#include <cmath>
 
 #ifndef TWIDDLER_H_
 #define TWIDDLER_H_
 
-//const float pi = 3.14159265359;
+const float pi = 3.14159265359;
+const int a = pow(2,15);
 
 
 SC_MODULE (twiddler)
