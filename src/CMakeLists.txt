@@ -8,6 +8,13 @@ set(ALL_SOURCES
 	fixediir.cpp
 	floatfft.cpp
 	fixedfft.cpp
+	butterfly_two_pt.cpp
+	complex_alu.cpp
+	driver.cpp
+	memory.cpp
+	monitor.cpp
+	syscfft.cpp
+	twiddler.cpp
 	utils.cpp
 )
 
@@ -69,6 +76,6 @@ add_custom_target(runpipefft COMMAND pipefft DEPENDS pipefft WORKING_DIRECTORY $
 
 
 ########################### Anurag SYSTEMC: fft  ###########################
-add_executable(syscfft ${ALL_SOURCES} syscfft.cpp)
-target_link_libraries(syscfft ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
-add_custom_target(runsyscfft COMMAND syscfft DEPENDS syscfft WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+add_executable(fixedfft_main ${ALL_SOURCES} fixedfft_main.cpp)
+target_link_libraries(fixedfft_main ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
+add_custom_target(runfixedfft_main COMMAND fixedfft_main DEPENDS fixedfft_main WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

@@ -18,7 +18,7 @@ const int a = pow(2,15);
 SC_MODULE (twiddler)
 {
 	sc_in <sc_int<32> > N, k;
-	sc_out <FixedComplex<32> > W;
+	sc_out <sc_int<32> > W_r,W_im;
 	float W_cos, W_sin, theta;
 	int scale;
 	void twiddler_comp ();

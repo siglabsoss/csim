@@ -20,8 +20,8 @@ void twiddler::twiddler_comp()
 	W_cos = W_cos * scale;
 	W_sin = W_sin * scale;
 
-	W.real.write() = W_cos;
-	W.imag.write() = W_sin;
+	W_r = W_cos;
+	W_im = W_sin;
 }
 
 

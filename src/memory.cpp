@@ -19,11 +19,11 @@ void memory::prc_memory()
 		{ //read
 			if ( addr_read.read() < MEM_SIZE)
 			{
-				data_out.write() = ram[addr_read.read()];
+				data_out= ram[addr_read.read()];
 			}
 			else
 			{
-				data_out.write() = allxs;
+				data_out = allxs;
 			} // end of else
 		} // end of read
 		if(write)
@@ -36,7 +36,7 @@ void memory::prc_memory()
 	}
 	else // en is not active
 	{
-		data_out.write() = allzs;
+		data_out = allzs;
 	}
 
 
