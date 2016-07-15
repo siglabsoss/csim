@@ -2,16 +2,17 @@
 
 int main()
 {
-	int waves[4] = {1,0,2,1};
+	int waves[4] = {0,0,0,0};
 	int percent[4] = {25,25,25,25};
 	int num = 4;
 	vector<FixedComplex<32> > datas;
-	for (float i = 0; i < 32768; i++)
-	{
-		FixedComplex<32> j(i,i);
-		cout << j;
-		datas.push_back(j);
-	}
+	for (int k = 0; k < 7 ; k++)
+		for ( int i = 0; i < 32768; i++)
+		{
+			FixedComplex<32> j(i,i);
+		//	cout << j;
+			datas.push_back(j);
+		}
 
 	Stitcher stitch(waves, percent, num,datas);
 
@@ -24,7 +25,7 @@ int main()
 	for (int i = 0; i < size; i++)
 	{
 		out << datas[i].real/32768.0 <<"," << datas[i].imag/32768.0 << endl;
-		cout << datas[i];
+	//	cout << datas[i];
 	}
 	cout << "DONE"<< endl;
 }

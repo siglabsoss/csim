@@ -26,7 +26,7 @@ Stitcher::Stitcher(int* waveNums, int* percents, int nums, vector<FixedComplex<3
 
 vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate, int frequency)
 {
-	float totalTime = numSamples/sampleRate;
+	sc_int<32> totalTime = numSamples/sampleRate;
 
 	cordic c;
 	FixedComplex<16> a1(1,0);
@@ -37,66 +37,63 @@ vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate, int f
 	sc_int<32> sindown;
 	sc_int<32> theta;
 	sc_int<32> currentTheta = 0;//Keeps track of current position
-	sc_int<32> a;
-	sc_int<32> delta;
+	sc_int<32> a;//total time that wave is used
+	sc_int<32> delta;//Total angle that wave is used in radians
 
 	for (int i = 0; i < num; i++)
 	{
 
-		a = totalTime * percent[i] / 100.0 * 32768; //total time of wave
-		theta = 2 * 3.14159 * a * frequency; // theta must be between 0 and 2pi Equivalent to 2pi * b / t
-		delta = 2 * 3.14159 * frequency / sampleRate * 32768; //increment of angles between samples. 2pi * number of waves per second / number of samples per second
+		a = totalTime * percent[i] / 100.0; //total time of wave
+		theta = 2 * 102943 * a * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
+		delta = 2 * 102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
 
 		if (val[i] == 0)
 			for (sc_int<32> m = currentTheta; m < currentTheta + theta; m = m + delta)
 			{
-
-				if (m > 205887)//2pi * 32768
+				while (m > 205887)//2pi * 32768
 				{
-					currentTheta-=205887;
-					m-=205887;
+					currentTheta -= 205887;
+					m -= 205887;
 				}//Shift theta down by 2pi if above it
 
-				output.push_back(data[rand() % 32768]);
+				output.push_back(data[m]);
 			}//prints out wave
 
 		if (val[i] == 1)
 			for (sc_int<32> m = currentTheta; m < theta + currentTheta; m = m + delta)
 			{
-				if (m > 205887)//2pi * 32768
+				while (m > 205887)//2pi * 32768
 				{
-					currentTheta-=205887;
-					m-=205887;
+					currentTheta -= 205887;
+					m -= 205887;
 				}//Shift theta down by 2pi if above it
 
-				c.calculate(m,a1,b1,&sinup,&sindown, &cosup, &cosdown);
-				FixedComplex<32> clockup(cosup, sinup);
-				output.push_back(clockup);
+				c.calculate(m,a1,b1,&sinup,&sindown, &cosup, &cosdown);//Use cordic to calculate clock up
+				FixedComplex<32> clockup(cosup, sinup);//Creates FixedComplex value to add to vector
+				output.push_back(clockup);//Adds result to vector
 			}//prints out remainder of wave
-
 
 		if (val[i] == 2)
 			for (sc_int<32> m = currentTheta; m < theta + currentTheta; m = m + delta)
 			{
-				if (m > 205887)//2pi * 32768
+				while (m > 205887)//2pi * 32768
 				{
-					currentTheta-=205887;
-					m-=205887;
+					currentTheta -= 205887;
+					m -= 205887;
 				}//Shift theta down by 2pi if above it
 
-
-				c.calculate(m,a1,b1,&sinup,&sindown, &cosup, &cosdown);
-				FixedComplex<32> clockdown(cosdown, sindown);
-				output.push_back(clockdown);
+				c.calculate(m,a1,b1,&sinup,&sindown, &cosup, &cosdown);//Use cordic to calculate clockdown
+				FixedComplex<32> clockdown(cosdown, sindown);//Creates FixedComplex value to add to vector
+				output.push_back(clockdown);//Adds result to vector
 			}//prints out remainder of wave
 
-		currentTheta += theta;
+		currentTheta += theta;//Sets starting point for next wave
 	}
-
 
 	return output;
 
 }
+
 
 
 
