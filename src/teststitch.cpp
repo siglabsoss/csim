@@ -2,7 +2,7 @@
 
 int main()
 {
-	int waves[4] = {1,1,1,1};
+	int waves[4] = {1,0,2,1};
 	int percent[4] = {25,25,25,25};
 	int num = 4;
 	vector<FixedComplex<32> > datas;

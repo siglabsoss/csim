@@ -31,7 +31,7 @@ cordic::cordic() {
 
 }
 
-void cordic::rotate(sc_int<20> theta)
+void cordic::rotate(sc_int<32> theta)
 {
 	while (theta >=  205888)//input greater than 2pi
 		theta = theta - 205888;
@@ -72,7 +72,7 @@ void cordic::rotate(sc_int<20> theta)
 }
 
 
-void cordic::calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup, sc_int<32>* cosdown)
+void cordic::calculate(sc_int<32>theta, FixedComplex<16> a, FixedComplex<16> b, sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup, sc_int<32>* cosdown)
 {
 	rotate(theta);
 

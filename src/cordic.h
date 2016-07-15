@@ -14,8 +14,8 @@ class cordic {
 public:
 
 	cordic();
-	void rotate(sc_int<20> theta);//Calculates which direction to rotate
-	void calculate(sc_int<20>theta, FixedComplex<16> a, FixedComplex<16> b, sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup, sc_int<32>* cosdown);//Calculates sine and cosine
+	void rotate(sc_int<32> theta);//Calculates which direction to rotate
+	void calculate(sc_int<32>theta, FixedComplex<16> a, FixedComplex<16> b, sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup, sc_int<32>* cosdown);//Calculates sine and cosine
 	void signs(); //swaps cosine and sign or changes sign if necessary
 	virtual ~cordic();
 
