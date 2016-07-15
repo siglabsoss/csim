@@ -8,9 +8,11 @@
 #include "fixedcomplex.h"
 
 template <int B>
-void FixedComplex<B>::print()
+string FixedComplex<B>::to_string() const
 {
-	cout << "Real: " <<this->real << " " << "Imaginary: " << this->imag <<endl;
+	std::ostringstream oss;
+	oss << "Real: " <<this->real << " " << "Imaginary: " << this->imag;
+	return oss.str();
 }//Default constructor
 
 

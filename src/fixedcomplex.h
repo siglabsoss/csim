@@ -27,7 +27,6 @@ public:
 	bool operator!=(const FixedComplex& rhs);
 	FixedComplex(sc_int<B> rea);
 	FixedComplex(sc_int<B> rea, sc_int<B> ima);
-	void print();
 	FixedComplex operator+(const FixedComplex& rhs);
 	FixedComplex operator-(const FixedComplex& rhs);
 	FixedComplex operator*(const FixedComplex& rhs);
@@ -36,9 +35,10 @@ public:
 	FixedComplex operator>>(int shift);
 	FixedComplex<16> to_16();
 	FixedComplex<32> to_32();
+	string to_string() const;
 	friend ostream& operator<<(ostream& os, const FixedComplex& c)
 	{
-		os << "Real: " << c.real.to_int() << " Imaginary: " << c.imag.to_int() << endl;
+		os << c.to_string() << endl;
 		return os;
 	};
 	virtual ~FixedComplex();
