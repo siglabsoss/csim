@@ -41,14 +41,13 @@ SC_MODULE(syscfft)
 	memory *memory_stage_ptr;
 	twiddler *twiddler_stage_ptr;
 	butterfly_two_pt *butterfly_stage_ptr;
-	enum FFT_STATE
-	{
-		FFT_STATE_INITIAL = 0,
-		FFT_STATE_READ,
-		FFT_STATE_OUTPUT,
-		//FFT_STATE_IDLE
-	};
-	sc_signal<FFT_STATE> melay_state, next_state;
+
+#define FFT_STATE_INITIAL (0)
+#define FFT_STATE_READ    (1)
+#define FFT_STATE_OUTPUT  (2)
+
+
+	sc_signal<uint8_t> melay_state, next_state;
 	void prc_state();
 	void prc_output();
 
