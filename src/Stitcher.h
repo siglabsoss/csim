@@ -16,16 +16,16 @@
 #include <vector>
 class Stitcher {
 public:
-	Stitcher(int* waveNums, int* percents, int nums, vector<float> datas);
-	vector<float> stitch(int numSamples, int sampleRate, int frequency);
-
+	Stitcher(int* waveNums, int* percents, int nums, vector<FixedComplex<32> > datas);
+	vector<FixedComplex<32> > stitch(int numSamples, int sampleRate, int frequency);
 	virtual ~Stitcher();
+
 
 	int* val;
 	int num;
 	int* percent;
-	vector<float> data;
-	vector<float> output;
+	vector<FixedComplex<32> > data;
+	vector<FixedComplex<32> > output;
 
 
 
