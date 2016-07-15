@@ -7,6 +7,7 @@ void syscfft :: prc_state()
 	if(rst)
 	{
 		melay_state = FFT_STATE_INITIAL;
+		//next_state = melay_state;
 		//		z = sc_uint<32>(0);
 
 
@@ -23,11 +24,12 @@ void syscfft::prc_output()
 	if(rst)
 	{
 		addr_write = -1;
-		addr_read = -1;
+		addr_read = 0;
 		en = 0;
 		read = 0;
 		write = 0;
 		N = N_STAGES;
+		next_state = melay_state;
 	}
 	else
 	{
@@ -43,10 +45,11 @@ void syscfft::prc_output()
 			temp1 = temp1 | sc_int<2*WORD_SIZE>(x_in_im);
 			data_in.write(temp1);
 			//		data_in = data_in | sc_int<2*WORD_SIZE>(x_in_im);
-			if(addr_write.read()==N_STAGES.read()/2)
+			if(addr_write.read()==((N_STAGES.read()/2)-1))
 			{
 				next_state = FFT_STATE_READ;
 				addr_write = 0;
+				read = 1;
 
 			}
 			else
@@ -58,7 +61,7 @@ void syscfft::prc_output()
 			break;
 		case FFT_STATE_READ:
 			en = 1;
-			read = 1;
+
 			//write = 1;
 			temp1 = sc_int<2*WORD_SIZE>(result_1_r)<<32;
 			//		data_in = result_1_r;
@@ -75,7 +78,7 @@ void syscfft::prc_output()
 			y_im = x_in_im;
 			z_r = result_0_r;
 			z_im = result_0_im;
-			if(addr_read.read()==N_STAGES.read()/2)
+			if(addr_read.read()==((N_STAGES.read()/2)-1))
 			{
 				next_state = FFT_STATE_OUTPUT;
 				addr_read = 0;
@@ -96,10 +99,11 @@ void syscfft::prc_output()
 			temp1 = data_out;
 			z_r = (temp1 >> 32) & ~(~0 << (63-32+1));
 			z_im = (temp1 >> 0) & ~(~0 << (31-0+1));
-			if(addr_read.read()==N_STAGES.read()/2)
+			if(addr_read.read()==((N_STAGES.read()/2)-1))
 			{
 				next_state = FFT_STATE_INITIAL;
 				addr_read = 0;
+				write = 1;
 
 			}
 			else

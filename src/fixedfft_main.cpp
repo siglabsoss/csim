@@ -45,7 +45,7 @@ int sc_main(int argc, char* argv[])
 //	sc_trace(wf, counter_out, "count");
 
 
-	sc_start(1500, SC_NS);
+	sc_start(99000, SC_NS);
 
 	return(0);
 

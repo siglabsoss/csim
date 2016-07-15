@@ -81,9 +81,9 @@ SC_MODULE(syscfft)
 		butterfly_stage_ptr -> result_1_im (result_1_im);
 
 		SC_METHOD (prc_state);
-		sensitive<<clk.pos()<<rst.pos(); //sensitive at pos edge of clk and reset
+		sensitive<<melay_state<<next_state<<rst.pos(); //sensitive at pos edge of clk and reset
 		SC_METHOD(prc_output);
-		sensitive<<melay_state<<next_state;
+		sensitive<<clk.pos()<<rst.pos();
 
 		sc_trace_file *wf = sc_create_vcd_trace_file("counter");
 		// Dump the desired signals
@@ -104,6 +104,8 @@ SC_MODULE(syscfft)
 		sc_trace(wf, data_out, "data_out");
 		sc_trace(wf, N, "N");
 		sc_trace(wf, k, "k");
+		//float W_cos, W_sin, theta;
+
 		sc_trace(wf, W_r, "W_r");
 		sc_trace(wf, W_im, "W_im");
 		sc_trace(wf, x_r, "x_r");
@@ -115,6 +117,7 @@ SC_MODULE(syscfft)
 		sc_trace(wf, result_1_r, "result_1_r");
 		sc_trace(wf, result_1_im, "result_1_im");
 		sc_trace(wf, N_STAGES, "N_STAGES");
+
 
 	}
 

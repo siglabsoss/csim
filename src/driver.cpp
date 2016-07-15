@@ -15,14 +15,25 @@ void driver :: prc_driver()
 //	std::copy(init.begin(), init.end(), data_in);
 
 	int i = 0;
-	rst.write(1);
-	wait(10.5,SC_NS);
-	//wait();
 	rst.write(0);
+	wait(10,SC_NS);
+	rst.write(1);
 	clk.write(0);
-	while(i<8)
-	{
+	wait(10,SC_NS);
+	clk.write(1);
+	wait(10,SC_NS);
+	clk.write(0);
+	wait(10,SC_NS);
+	clk.write(1);
+	wait(10,SC_NS);
+	clk.write(0);
+	rst.write(0);
+	wait(10,SC_NS);
+	//wait();
 
+
+	while(i<100)
+	{
 		clk.write(1);
 
 		x_in_im.write(0);
