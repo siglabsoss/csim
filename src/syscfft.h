@@ -32,9 +32,12 @@ SC_MODULE(syscfft)
 	sc_signal <sc_int<2*WORD_SIZE> > data_in;
 	sc_signal <sc_int<2*WORD_SIZE> > data_out;
 
+	////////// Complex_ALU //////////
+	sc_signal<sc_int<32> > ctrl_4,temp_r,temp_im;
+
 	////////// Twiddler Signals //////////
 	sc_signal <sc_int<32> > N, k;
-	sc_signal <sc_int<32> > W_r,W_im;
+	sc_signal <sc_int<32> > W_r,W_im,comp_r,comp_im;
 
 	////////// Butterfly Signals //////////
 	sc_signal <sc_int<32> > x_r,x_im,y_r,y_im;
@@ -43,6 +46,7 @@ SC_MODULE(syscfft)
 	memory *memory_stage_ptr;
 	twiddler *twiddler_stage_ptr;
 	butterfly_two_pt *butterfly_stage_ptr;
+	complex_alu *complex_1;
 
 #define FFT_STATE_INITIAL (0)
 #define FFT_STATE_READ    (1)
@@ -55,6 +59,15 @@ SC_MODULE(syscfft)
 
 	SC_CTOR (syscfft)
 	{
+		complex_1 = new complex_alu ("comp1");
+		complex_1 -> ctrl(ctrl_4);
+		complex_1 -> x_r (temp_r);
+		complex_1 -> x_im(temp_im);
+		complex_1 -> y_r(W_r);
+		complex_1 -> y_im(W_im);
+		complex_1 -> z_im(comp_im);
+		complex_1 -> z_r(comp_r);
+
 		memory_stage_ptr = new memory("memory_stage");
 		//memory_stage_ptr -> MEM_SIZE (999);
 		memory_stage_ptr -> en (en);
@@ -84,7 +97,7 @@ SC_MODULE(syscfft)
 
 		SC_METHOD (prc_state);
 		sensitive<<melay_state<<next_state<<rst.pos();
-		sensitive<<en<<read<<write<<clk<<addr_read<<addr_write;
+		sensitive<<en<<read<<clk<<addr_read<<addr_write;
 		SC_METHOD(prc_output);
 		sensitive<<clk.pos()<<rst.pos();//sensitive at pos edge of clk and reset
 

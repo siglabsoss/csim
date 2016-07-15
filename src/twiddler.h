@@ -12,8 +12,8 @@
 #ifndef TWIDDLER_H_
 #define TWIDDLER_H_
 
-const float pi = 3.14159265359;
-const int a = pow(2,15);
+//const float pi = 3.14159265359;
+//const int a = pow(2,15);
 
 
 SC_MODULE (twiddler)
@@ -23,7 +23,7 @@ SC_MODULE (twiddler)
 	//sc_signal<sc_int<32> > theta;
 	sc_in <sc_int<32> > N, k;
 	sc_out <sc_int<32> > W_r,W_im;
-	int W_cos, W_sin;
+	sc_int<32> W_cos, W_sin;
 	//int scale;
 	void twiddler_comp ();
 //	sc_signal<sc_int<32> > ctrl_1,ctrl_2,zero,result_0_im,result_0_r,result_1_im;
