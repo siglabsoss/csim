@@ -71,6 +71,19 @@ void cordic::rotate(sc_int<32> theta)
 	}
 }
 
+sc_int<32> cordic::sin(sc_int<32>theta)
+{
+	FixedComplex<16> a(1);
+	FixedComplex<16> b(0);
+	sc_int<32> cosdown;
+	sc_int<32> cosup;
+	sc_int<32> sinup;
+	sc_int<32> sindown;
+
+	calculate(theta,a,b,&sinup,&sindown, &cosup, &cosdown);
+	return sinup;
+
+}
 
 void cordic::calculate(sc_int<32>theta, FixedComplex<16> a, FixedComplex<16> b, sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup, sc_int<32>* cosdown)
 {
@@ -111,13 +124,7 @@ void cordic::calculate(sc_int<32>theta, FixedComplex<16> a, FixedComplex<16> b, 
 			c2.real = -c2.real;//multiply by rotation direction
 		}
 			y[1][0] = c2 + c1;//Lower value
-
-
-
-
 	}
-
-
 
 	y[0][0].real = (y[0][0].real * ( k * (1 << 15)));//multiply by k
 	y[1][0].real= (y[1][0].real * ( k * (1 << 15)));//multiply by k

@@ -17,12 +17,12 @@ public:
 	void rotate(sc_int<32> theta);//Calculates which direction to rotate
 	void calculate(sc_int<32>theta, FixedComplex<16> a, FixedComplex<16> b, sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup, sc_int<32>* cosdown);//Calculates sine and cosine
 	void signs(); //swaps cosine and sign or changes sign if necessary
+	sc_int<32> sin(sc_int<32>theta);
 	virtual ~cordic();
 
 	int vals[16];//Holds rotation values
 	int sign[16];//Holds which direction to rotate
-	FixedComplex<32>* sin;
-	FixedComplex<32>* cos;
+
 	int quad;
 	double k;//Constant
 	FixedComplex<32> y[2][1];//right aray to multiply (2x1)

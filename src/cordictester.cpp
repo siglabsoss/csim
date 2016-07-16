@@ -36,6 +36,8 @@ int main()
 		out2 << sinup/32768.0 << endl;
 		out3 << cosdown/32768.0 << ",";
 		out3 << sindown/32768.0 << endl;
+		sinup = c.sin(j);
+		out << sinup/32768.0 << endl;
 	}
 
 	out.close();
