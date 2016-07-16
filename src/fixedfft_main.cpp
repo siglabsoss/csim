@@ -18,9 +18,9 @@ int sc_main(int argc, char* argv[])
 	sc_signal <sc_int<32> > x_in_r, x_in_im;
 	sc_signal <sc_int<32> > z_r,z_im;
 
-	syscfft m1 ("FFT_first_stage");
+	syscfft m1 ("FFT_first_stage", 8);
 	//m1<<N_STAGES<<clk<<rst<<x_in_r<<x_in_im<<z_r<<z_im;
-	m1.N_STAGES(N_STAGES);
+	//m1.N_STAGES(N_STAGES);
 	m1.clk(clk);
 	m1.rst(rst);
 	m1.x_in_r(x_in_r);
@@ -29,7 +29,7 @@ int sc_main(int argc, char* argv[])
 	m1.z_im(z_im);
 
 	driver d1("GetWaveForms");
-	d1.N_STAGES(N_STAGES);
+	//d1.N_STAGES(N_STAGES);
 	d1.clk(clk);
 	d1.rst(rst);
 	d1.x_in_r(x_in_r);

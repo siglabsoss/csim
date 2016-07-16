@@ -18,7 +18,7 @@
 
 SC_MODULE(syscfft)
 {
-	sc_in<sc_int<32> > N_STAGES;
+int  N_STAGES;
 	sc_in <bool> clk,rst;
 	sc_in <sc_int<32> > x_in_r, x_in_im;
 	sc_out <sc_int<32> > z_r,z_im;
@@ -57,8 +57,16 @@ SC_MODULE(syscfft)
 	void prc_state();
 	void prc_output();
 
-	SC_CTOR (syscfft)
+	SC_HAS_PROCESS(syscfft);
+
+	syscfft(sc_module_name nm, int Nin) : sc_module(nm)
 	{
+		N.write(Nin);
+		N_STAGES = Nin;
+//		while(rst.read() == 1)
+//		{
+//			wait(10,SC_NS);
+//		}
 		complex_1 = new complex_alu ("comp1");
 		complex_1 -> ctrl(ctrl_4);
 		complex_1 -> x_r (temp_r);

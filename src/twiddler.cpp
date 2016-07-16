@@ -13,11 +13,13 @@ void twiddler::twiddler_comp()
 
 //int 		scale = a/1000.0;
 
-		sc_int<32> theta;
-		sc_int<32> N_r,k_r;
-									N_r = 8;
-									k_r = 0;
-									theta = (360/N_r) * k_r;
+//		sc_int<32> theta;
+//		sc_int<32> N_r,k_r;
+//									N_r = 8;
+//									k_r = 0;
+//									theta = (360/N_r) * k_r;
+	N_s.write(N.read());
+	k_s.write(k.read());
 //		W_cos = cos(theta);
 //		W_sin = -sin(theta);
 //
@@ -32,8 +34,8 @@ void twiddler::twiddler_comp()
 //	//	int scale = a/1000.0;
 ////	zero.write(0);
 ////	pi_in.write(360);
-////ctrl_1.write(3);
-////ctrl_2.write(2);
+ctrl_1.write(2);
+ctrl_2.write(3);
 //	//	theta = (2*pi/N)*k;
 //	int theta= ((360/N.read()) * k.read());
 //	//	sc_int<32> as_cos, as_sin;
@@ -41,15 +43,15 @@ void twiddler::twiddler_comp()
 //	//	W_cos = W_cos * scale;
 //	//	W_sin = -sin(theta);
 //	//	W_sin = W_sin * scale;
-//
-	W_sin = -a[theta];
-	if(theta>90)
+pi_in.write(360);
+	W_sin = -a[theta.read()];
+	if(theta.read()>90)
 	{
-		W_cos = -a[-90+theta];
+		W_cos = -a[-90+theta.read()];
 	}
 	else
 	{
-		W_cos = a[90-theta];
+		W_cos = a[90-theta.read()];
 	}
 
 	W_r.write(W_cos);

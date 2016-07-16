@@ -10,7 +10,7 @@
 
 SC_MODULE(driver)
 {
-	sc_out<sc_int<32> > N_STAGES;
+	//sc_out<sc_int<32> > N_STAGES;
 	sc_out <bool> clk,rst;
 	sc_out <sc_int<32> > x_in_r, x_in_im;
 
