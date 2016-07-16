@@ -37,10 +37,10 @@ void syscfft :: prc_state()
 			data_in.write(temp1);
 
 			temp1 = data_out;
-						temp_r = (temp1 >> 32) & ~(~0 << (63-32+1));
-						temp_im = (temp1 >> 0) & ~(~0 << (31-0+1));
-						z_r = comp_r;
-						z_im = comp_im;
+			temp_r = (temp1 >> 32) & ~(~0 << (63-32+1));
+			temp_im = (temp1 >> 0) & ~(~0 << (31-0+1));
+			z_r = comp_r;
+			z_im = comp_im;
 
 			if(addr_write.read()==((N_STAGES/2)-1))
 			{
@@ -84,6 +84,8 @@ void syscfft :: prc_state()
 			temp_im = (temp1 >> 0) & ~(~0 << (31-0+1));
 			z_r = comp_r;
 			z_im = comp_im;
+			break;
+
 
 		}
 	}
@@ -195,10 +197,18 @@ void syscfft::prc_output()
 			//			z_im = (temp1 >> 0) & ~(~0 << (31-0+1));
 			if(addr_read.read()==((N_STAGES/2)-1))
 			{
-				next_state = FFT_STATE_INITIAL;
-				addr_read = 0;
-				write = 1;
-				k = ((N_STAGES/2)-1);
+				if(N_STAGES == 2)
+				{
+					next_state = FFT_STATE_INITIAL;
+					addr_read = 0;
+					write = 1;
+					k = ((N_STAGES/2)-1);
+				}
+				else
+				{
+					next_state = FFT_STATE_IDLE;
+					write = 0;
+				}
 				//
 			}
 			else
@@ -209,16 +219,16 @@ void syscfft::prc_output()
 			}
 			//
 			break;
-			//			//	case FFT_STATE_IDLE:
-			//			//		read = 1;
-			//			//		en = 1;
-			//			//		z = data_out;
-			//			//		if(addr_read==N_STAGES/2)
-			//			//		{
-			//			//			next_state = FFT_STATE_INITIAL;
-			//			//			addr_read = 0;
-			//			//
-			//			//		}
+		case FFT_STATE_IDLE:
+			if(ready_in.read() == 1)
+			{
+				next_state = FFT_STATE_INITIAL;
+				addr_read = 0;
+				write = 1;
+				k = ((N_STAGES/2)-1);
+				ready_out.write(1);
+			}
+			break;
 		}
 	}
 	//sc_trace_file *wf = sc_create_vcd_trace_file("counter");
