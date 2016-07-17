@@ -16,6 +16,7 @@ void driver :: prc_driver()
 
 	int i = 0;
 	rst.write(0);
+	valid_Data_IN.write(0);
 	wait(10,SC_NS);
 	rst.write(1);
 	clk.write(0);
@@ -35,7 +36,7 @@ void driver :: prc_driver()
 	while(i<100)
 	{
 		clk.write(1);
-
+		valid_Data_IN.write(1);
 		x_in_im.write(0);
 		x_in_r.write(data_in[i]);
 		wait(10,SC_NS);
