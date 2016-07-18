@@ -64,11 +64,12 @@ vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate, int f
 	{
 
 		t = (totalTime * samples[i]) / sample_total; //total time of wave
+
+		theta = 2 *  102943 * t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
 		if (scaled)
 		{
-			t = t/32768;
+			theta = theta/32768;
 		}
-		theta = 2 *  102943 * t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
 		delta = 2 *  102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
 		endTheta = startingTheta + theta;
 		if (val[i] == 0)
