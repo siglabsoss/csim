@@ -145,7 +145,8 @@ void syscfft :: prc_state()
 
 			break;
 		case FFT_STATE_OUTPUT:
-
+			if (N_STAGES == 2)
+				valid_Data_OUT = 0;
 			en = 1;
 			read = 1;
 			temp1 = data_out;
