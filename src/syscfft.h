@@ -41,12 +41,12 @@ SC_MODULE(syscfft)
 
 	////////// Butterfly Signals //////////
 	sc_signal <sc_int<32> > x_r,x_im,y_r,y_im;
-	sc_signal <sc_int<32> > result_0_r,result_0_im, result_1_r,result_1_im;
+	sc_signal <sc_int<32> > result_0_r,result_0_im, result_1_r,result_1_im,comp_r_1, comp_im_1, scale_r, scale_im,ctrl_5;
 
 	memory *memory_stage_ptr;
 	twiddler *twiddler_stage_ptr;
 	butterfly_two_pt *butterfly_stage_ptr;
-	complex_alu *complex_1;
+	complex_alu *complex_1, *complex_2;
 
 #define FFT_STATE_INITIAL (0)
 #define FFT_STATE_READ    (1)
@@ -78,8 +78,17 @@ SC_MODULE(syscfft)
 		complex_1 -> x_im(temp_im);
 		complex_1 -> y_r(W_r);
 		complex_1 -> y_im(W_im);
-		complex_1 -> z_im(comp_im);
-		complex_1 -> z_r(comp_r);
+		complex_1 -> z_im(comp_im_1);
+		complex_1 -> z_r(comp_r_1);
+
+		complex_2 = new complex_alu ("divide");
+		complex_2 -> ctrl(ctrl_5);
+		complex_2 -> x_r (comp_r_1);
+		complex_2 -> x_im(comp_im_1);
+		complex_2 -> y_r(scale_r);
+		complex_2 -> y_im(scale_im);
+		complex_2 -> z_im(comp_im);
+		complex_2 -> z_r(comp_r);
 
 		memory_stage_ptr = new memory("memory_stage");
 		//memory_stage_ptr -> MEM_SIZE (999);
@@ -110,7 +119,7 @@ SC_MODULE(syscfft)
 
 		SC_METHOD (prc_state);
 		sensitive<<melay_state<<next_state<<rst.pos();
-		sensitive<<en<<read<<clk<<addr_read<<addr_write<<result_0_r<<result_0_im<<result_1_r<<result_1_im<<W_r<<W_im<<comp_im<<comp_r<<valid_Data_IN<<valid_Data_OUT;
+		sensitive<<en<<read<<clk<<addr_read<<addr_write<<result_0_r<<result_0_im<<result_1_r<<result_1_im<<W_r<<W_im<<comp_im<<comp_r<<valid_Data_IN<<valid_Data_OUT<<x_in_r<<x_in_im<<write;
 		SC_METHOD(prc_output);
 		sensitive<<clk.pos()<<rst.pos();//sensitive at pos edge of clk and reset
 
@@ -153,10 +162,16 @@ SC_MODULE(syscfft)
 			sc_trace(wf, N_STAGES, "N_STAGES");
 
 			sc_trace(wf, ctrl_4, "ctrl_4");
+			sc_trace(wf, ctrl_5, "ctrl_5");
 			sc_trace(wf, temp_r, "temp_r");
 			sc_trace(wf, temp_im, "temp_im");
+			sc_trace(wf, comp_im_1, "comp_im_1");
+			sc_trace(wf, comp_r_1, "comp_r_1");
 			sc_trace(wf, comp_im, "comp_im");
 			sc_trace(wf, comp_r, "comp_r");
+			sc_trace(wf, scale_r, "scale_r");
+			sc_trace(wf, ready_in, "ready_in");
+			sc_trace(wf, ready_out, "ready_out");
 
 
 		}
@@ -195,6 +210,54 @@ SC_MODULE(syscfft)
 			sc_trace(wf, result_1_r, "result_1_r_1");
 			sc_trace(wf, result_1_im, "result_1_im_1");
 			sc_trace(wf, N_STAGES, "N_STAGES_1");
+			sc_trace(wf, ready_in, "ready_in");
+			sc_trace(wf, ready_out, "ready_out");
+		}
+		if(Nin == 2)
+		{
+			sc_trace_file *wf = sc_create_vcd_trace_file("counter_2");
+			sc_trace(wf, clk, "clk");
+			sc_trace(wf, rst, "rst");
+			sc_trace(wf, x_in_r, "x_in_r");
+			sc_trace(wf, x_in_im, "x_in_im");
+			sc_trace(wf, z_r, "z_r");
+			sc_trace(wf, z_im, "z_im");
+			sc_trace(wf, melay_state, "melay_state");
+			sc_trace(wf, next_state, "next_state");
+			sc_trace(wf, en, "en");
+			sc_trace(wf, read, "read");
+			sc_trace(wf, write, "write");
+			sc_trace(wf, valid_Data_IN, "valid_Data_IN");
+			sc_trace(wf, valid_Data_OUT, "valid_Data_OUT");
+			sc_trace(wf, addr_read, "addr_read");
+			sc_trace(wf, addr_write, "addr_write");
+			sc_trace(wf, data_in, "data_in");
+			sc_trace(wf, data_out, "data_out");
+			sc_trace(wf, N, "N");
+			sc_trace(wf, k, "k");
+			//float W_cos, W_sin, theta;
+
+			sc_trace(wf, W_r, "W_r");
+			sc_trace(wf, W_im, "W_im");
+			sc_trace(wf, x_r, "x_r");
+			sc_trace(wf, x_im, "x_im");
+			sc_trace(wf, y_r, "y_r");
+			sc_trace(wf, y_im, "y_im");
+			sc_trace(wf, result_0_r, "result_0_r");
+			sc_trace(wf, result_0_im, "result_0_im");
+			sc_trace(wf, result_1_r, "result_1_r");
+			sc_trace(wf, result_1_im, "result_1_im");
+			sc_trace(wf, N_STAGES, "N_STAGES");
+
+			sc_trace(wf, ctrl_4, "ctrl_4");
+			sc_trace(wf, temp_r, "temp_r");
+			sc_trace(wf, temp_im, "temp_im");
+			sc_trace(wf, comp_im, "comp_im");
+			sc_trace(wf, comp_r, "comp_r");
+			sc_trace(wf, ready_in, "ready_in");
+			sc_trace(wf, ready_out, "ready_out");
+
+
 		}
 
 

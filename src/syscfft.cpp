@@ -4,6 +4,7 @@
 #include "monitor.h"
 void syscfft :: prc_state()
 {
+
 	if(rst)
 	{
 
@@ -24,6 +25,7 @@ void syscfft :: prc_state()
 	else if(valid_Data_IN.read())
 	{
 		ctrl_4.write(2);
+		ctrl_5.write(3);
 		melay_state = next_state;
 		sc_int<2*WORD_SIZE> temp1;
 		switch(melay_state)
@@ -31,6 +33,7 @@ void syscfft :: prc_state()
 		case FFT_STATE_INITIAL:
 			en = 1;
 			read = 0;
+			//write = 1;
 			temp1 = sc_int<2*WORD_SIZE>(x_in_r)<<32;
 
 			temp1 = temp1 | sc_int<2*WORD_SIZE>(x_in_im);
@@ -41,9 +44,28 @@ void syscfft :: prc_state()
 			temp_im = (temp1 >> 0) & ~(~0 << (31-0+1));
 			z_r = comp_r;
 			z_im = comp_im;
-
-			if(addr_write.read()==((N_STAGES/2)-1))
+			if (N_STAGES == 2)
 			{
+				next_trigger(20,SC_NS);
+				if(addr_write.read()==((N_STAGES/2)-1))
+				{
+
+					read = 1;
+					temp1 = data_out;
+					x_r = (temp1 >> 32) & ~(~0 << (32));
+					x_im = (temp1 >> 0) & ~(~0 << (32));
+					y_r = x_in_r;
+					y_im = x_in_im;
+					z_r = result_0_r;
+					z_im = result_0_im;
+					valid_Data_OUT = 1;
+				}
+
+			}
+
+			else if(addr_write.read()==((N_STAGES/2)-1))
+			{
+
 				read = 1;
 				temp1 = data_out;
 				x_r = (temp1 >> 32) & ~(~0 << (32));
@@ -52,7 +74,7 @@ void syscfft :: prc_state()
 				y_im = x_in_im;
 				z_r = result_0_r;
 				z_im = result_0_im;
-
+				valid_Data_OUT = 1;
 			}
 
 			break;
@@ -86,6 +108,10 @@ void syscfft :: prc_state()
 			temp_im = (temp1 >> 0) & ~(~0 << (31-0+1));
 			z_r = comp_r;
 			z_im = comp_im;
+			if(addr_read.read()==((N_STAGES/2)-1))
+			{
+				ready_out = 1;
+			}
 			break;
 
 		case FFT_STATE_IDLE:
@@ -101,6 +127,8 @@ void syscfft :: prc_state()
 
 void syscfft::prc_output()
 {
+	scale_r.write(32);
+	scale_im.write(0);
 	if(rst)
 	{
 		addr_write = -1;
@@ -114,7 +142,7 @@ void syscfft::prc_output()
 	}
 	else if(valid_Data_IN.read())
 	{
-		write = 1;
+
 		sc_int<2*WORD_SIZE> temp1;
 		switch(melay_state)
 		{
@@ -130,28 +158,59 @@ void syscfft::prc_output()
 			//			//		data_in = data_in | sc_int<2*WORD_SIZE>(x_in_im);
 			//			if(addr_write.read()==((N_STAGES.read()/2)-2))
 			//				read = 1;
-			if(addr_write.read()==((N_STAGES/2)-1))
+			if (N_STAGES == 2)
 			{
-				next_state = FFT_STATE_READ;
-				addr_write = 0;
-				addr_read.write(addr_read.read() + sc_uint<32>(1));
+				next_trigger(20,SC_NS);
+				if(addr_write.read()==((N_STAGES/2)-1))
+				{
+					next_state = FFT_STATE_READ;
+					addr_write = 0;
+					addr_read.write(addr_read.read() + sc_uint<32>(1));
 
-				//								temp1 = sc_int<2*WORD_SIZE>(result_1_r)<<32;
-				//								temp1 = temp1 | sc_int<2*WORD_SIZE>(result_1_im);
-				//								data_in.write(temp1);
-				//
-				//				temp1 = data_out;
-				//				x_r = (temp1 >> 32) & ~(~0 << (32));
-				//				x_im = (temp1 >> 0) & ~(~0 << (32));
-				//				y_r = x_in_r;
-				//				y_im = x_in_im;
-				//				z_r = result_0_r;
-				//				z_im = result_0_im;
-				//
+					//								temp1 = sc_int<2*WORD_SIZE>(result_1_r)<<32;
+					//								temp1 = temp1 | sc_int<2*WORD_SIZE>(result_1_im);
+					//								data_in.write(temp1);
+					//
+					//				temp1 = data_out;
+					//				x_r = (temp1 >> 32) & ~(~0 << (32));
+					//				x_im = (temp1 >> 0) & ~(~0 << (32));
+					//				y_r = x_in_r;
+					//				y_im = x_in_im;
+					//				z_r = result_0_r;
+					//				z_im = result_0_im;
+					//
+				}
+				else
+				{
+					addr_write.write(addr_write.read() + sc_uint<32>(1));
+				}
+
 			}
 			else
 			{
-				addr_write.write(addr_write.read() + sc_uint<32>(1));
+				if(addr_write.read()==((N_STAGES/2)-1))
+				{
+					next_state = FFT_STATE_READ;
+					addr_write = 0;
+					addr_read.write(addr_read.read() + sc_uint<32>(1));
+
+					//								temp1 = sc_int<2*WORD_SIZE>(result_1_r)<<32;
+					//								temp1 = temp1 | sc_int<2*WORD_SIZE>(result_1_im);
+					//								data_in.write(temp1);
+					//
+					//				temp1 = data_out;
+					//				x_r = (temp1 >> 32) & ~(~0 << (32));
+					//				x_im = (temp1 >> 0) & ~(~0 << (32));
+					//				y_r = x_in_r;
+					//				y_im = x_in_im;
+					//				z_r = result_0_r;
+					//				z_im = result_0_im;
+					//
+				}
+				else
+				{
+					addr_write.write(addr_write.read() + sc_uint<32>(1));
+				}
 			}
 			//
 			//
@@ -175,13 +234,18 @@ void syscfft::prc_output()
 			//			y_im = x_in_im;
 			//			z_r = result_0_r;
 			//			z_im = result_0_im;
-			if(addr_write.read()==((N_STAGES/2)-1))
+			if((addr_write.read()==((N_STAGES/2)-1)) && ready_in.read())
 			{
 				next_state = FFT_STATE_OUTPUT;
-				addr_read = 1;
+				addr_read = 0;
 				addr_write = 0;
 				write = 0;
 				k.write(1);
+			}
+			else if ((addr_write.read()==((N_STAGES/2)-1)) && (ready_in.read() == 0))
+			{
+				next_state = FFT_STATE_IDLE;
+
 			}
 			else
 			{
@@ -208,19 +272,20 @@ void syscfft::prc_output()
 			{
 				//								k = ((N_STAGES/2)-1);
 				k.write(k.read() + 1);
-				if(N_STAGES == 2)
-				{
-					next_state = FFT_STATE_INITIAL;
-					addr_read = 0;
-					write = 1;
+				//				if(N_STAGES == 2)
+				//				{
+				next_state = FFT_STATE_INITIAL;
+				addr_read = 0;
+				write = 1;
+				//				ready_out = 1;
 
-				}
-				else
-				{
-					next_state = FFT_STATE_IDLE;
-					write = 0;
-					//					k.write(k.read() + 1);
-				}
+				//				}
+				//				else
+				//				{
+				//					next_state = FFT_STATE_IDLE;
+				//					write = 0;
+				//					//					k.write(k.read() + 1);
+				//				}
 				//
 			}
 			else
@@ -234,11 +299,15 @@ void syscfft::prc_output()
 		case FFT_STATE_IDLE:
 			if(ready_in.read() == 1)
 			{
-				next_state = FFT_STATE_INITIAL;
-				addr_read = 0;
-				write = 1;
-				k = ((N_STAGES/2)-1);
-				ready_out.write(1);
+				next_state = FFT_STATE_OUTPUT;
+				addr_read = 1;
+				addr_write = 0;
+				write = 0;
+				k.write(1);
+				//				addr_read = 0;
+				//				write = 1;
+				//				k = ((N_STAGES/2)-1);
+				////				ready_out.write(1);
 			}
 			break;
 		}

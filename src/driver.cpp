@@ -10,7 +10,8 @@ void driver :: prc_driver()
 {
 	//sc_clock clk ("clk",10,0.5,1,false);
 	//N_STAGES.write(8);
-	int data_in[8] = {5,6,8,-5,6,12,10,9};
+//	int data_in[8] = {5,6,8,-5,6,12,10,9};
+	int data_in[8] = {160,192,256,-160,192,384,320,288};
 //	auto init = std::initializer_list<int>({5,6,8,-5,6,12,10,9});
 //	std::copy(init.begin(), init.end(), data_in);
 
