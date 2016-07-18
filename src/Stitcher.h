@@ -16,7 +16,7 @@
 #include <vector>
 class Stitcher {
 public:
-	Stitcher(int* waveNums, int* samples, int numSections);//Takes in array of corresponding wave number, percent array,number of values in each of those arrays, and wave data
+	Stitcher(int* waveNums, int* samples, int numSections);//Takes in array of corresponding wave number,number of samples for each wave number, and number of sections
 	vector<FixedComplex<32> > stitch(int numSamples, int sampleRate, int frequency, vector<FixedComplex<32> > data);//stitches data based on inputs given. Returns as a vector of fixedcomplex
 
 	int* val; //which waves to use at which section
