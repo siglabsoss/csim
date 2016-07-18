@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE(PYTHON_COMPARISON)
 	outdatas = stitch.stitch(400, 1000, 100, datas);//(int numsamples, int sampleRate, int frequency) stitches data with clockup and clockdown waves
 
 	int size = outdatas.size();
-	string outFile = "data/output/stitching2.csv";//Output data file
+	string outFile = "data/stitcher/output/stitching2.csv";//Output data file
 	ofstream out(outFile.c_str());
 
 	for (int i = 0; i < size; i++)
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(PYTHON_COMPARISON)
 	vector<string> vec;
 	vector<double> answers;//Vector to hold answer data read from file
 	string line;
-	string data2("data/output/stitcher_answers.csv");//Answers data file
+	string data2("data/stitcher/answers/stitcher_answers.csv");//Answers data file
 	ifstream in2(data2.c_str());
 	if (!in2.is_open())
 	{

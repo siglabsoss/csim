@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
     FixedComplex<16> atap[100];
     FixedComplex<16> btap[100];
 
-    string data("./data/iirdata/data2_in.csv");//Input data file
+    string data("./data/iirdata/input/data1_in.csv");//Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open())
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
         i++;
     }//Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    string taps("./data/iirdata/ataps.csv");
+    string taps("./data/iirdata/input/ataps.csv");
 
     ifstream in2(taps.c_str());
     if (!in2.is_open())
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
 
 
 
-    string taps2("./data/iirdata/btaps.csv");
+    string taps2("./data/iirdata/input/btaps.csv");
 
     ifstream in4(taps2.c_str());
     if (!in4.is_open())
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
         m++;
     }//Reads in taps
 
-    string data3("./data/iirdata/data2_out.csv");//Answers data file
+    string data3("./data/iirdata/answers/answers1.csv");//Answers data file
 
     ifstream in3(data3.c_str());
     if (!in3.is_open())
