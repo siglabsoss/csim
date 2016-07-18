@@ -22,19 +22,19 @@ SC_MODULE(syscfft)
 	sc_in <bool> clk,rst;
 	sc_in <sc_int<32> > x_in_r, x_in_im,ready_in,valid_Data_IN;
 	sc_out <sc_int<32> > z_r,z_im,ready_out,valid_Data_OUT;
-
+	sc_int<2*WORD_SIZE> temp1,temp2,temp3,temp4;
 	//sc_int<32> count;
 
 	////////// Memory Signals //////////
 	sc_signal <sc_uint<32> > MEM_SIZE;
 	sc_signal <bool> en, read, write;
-	sc_signal <sc_int<ADDR_SIZE> > addr_read, addr_write;
+	sc_signal <sc_int<ADDR_SIZE> > addr_read, addr_write,register_r,register_im;
 	sc_signal <sc_int<2*WORD_SIZE> > data_in;
 	sc_signal <sc_int<2*WORD_SIZE> > data_out;
 
 	////////// Complex_ALU //////////
 	sc_signal<sc_int<32> > ctrl_4,temp_r,temp_im;
-
+	//sc_int<2*WORD_SIZE> temp1,temp2;
 	////////// Twiddler Signals //////////
 	sc_signal <sc_int<32> > N, k;
 	sc_signal <sc_int<32> > W_r,W_im,comp_r,comp_im;
@@ -212,6 +212,11 @@ SC_MODULE(syscfft)
 			sc_trace(wf, N_STAGES, "N_STAGES_1");
 			sc_trace(wf, ready_in, "ready_in");
 			sc_trace(wf, ready_out, "ready_out");
+			sc_trace(wf, temp1, "temp1");
+			sc_trace(wf, temp3, "temp3");
+			sc_trace(wf, temp2, "temp2");
+			sc_trace(wf, temp4, "temp4");
+
 		}
 		if(Nin == 2)
 		{
@@ -256,6 +261,8 @@ SC_MODULE(syscfft)
 			sc_trace(wf, comp_r, "comp_r");
 			sc_trace(wf, ready_in, "ready_in");
 			sc_trace(wf, ready_out, "ready_out");
+			sc_trace(wf, register_r, "register_r");
+			sc_trace(wf, register_im, "register_im");
 
 
 		}
