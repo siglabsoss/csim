@@ -35,9 +35,18 @@ Stitcher::Stitcher(int* waveNums, int* sampless, int numsSections)
 
 vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate, int frequency, vector<FixedComplex<32> > data)
 {
-	sc_int<32> totalTime = 400; //numSamples/sampleRate; // time in milliseconds?
-
-	cordic c;
+	sc_int<32> totalTime = 0; //numSamples/sampleRate; // time in milliseconds?
+	bool scaled = false;
+	if (numSamples > sampleRate)
+	{
+		totalTime = numSamples/sampleRate;
+	}
+	else
+	{
+		totalTime = numSamples * 32768/(sampleRate);
+		scaled = true;
+	}
+		cordic c;
 	FixedComplex<16> a1(1,0);//coefficient for cordic
 	FixedComplex<16> b1(0,1);//coefficient for cordic
 	sc_int<32> cosdown;
@@ -55,6 +64,10 @@ vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate, int f
 	{
 
 		t = (totalTime * samples[i]) / sample_total; //total time of wave
+		if (scaled)
+		{
+			t = t/32768;
+		}
 		theta = 2 *  102943 * t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
 		delta = 2 *  102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
 		endTheta = startingTheta + theta;
