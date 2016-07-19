@@ -48,7 +48,7 @@ int main()
         cout << i << endl;
         out << (input1[0] + input2[0]).real << " " << (input1[0] + input2[0]).imag << " ";
         out << (input1[0] - input2[0]).real << " " << (input1[0] - input2[0]).imag << " ";
-        out << (input1[0] * input2[0]).real << " " << (input1[0] * input2[0]).imag << endl;
+        out << (input1[0] * input2[0]).real << " " << (input1[0] * input2[0]).imag << " " << endl;
       //  out << (input1[i] + input2[i]).real << "," << (input1[i] + input2[i]).imag;
         i++;
     }//Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
