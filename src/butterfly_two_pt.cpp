@@ -8,8 +8,7 @@ void butterfly_two_pt::butterfly_fft()
 //	result_1_r = z_r_2;
 //	result_1_im = z_im_2;
 //
-	ctrl_1.write(0);
-	ctrl_2.write(1);
-
+    ctrl_1.write(0);
+    ctrl_2.write(1);
 
 }

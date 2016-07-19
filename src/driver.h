@@ -10,20 +10,18 @@
 
 SC_MODULE(driver)
 {
-	//sc_out<sc_int<32> > N_STAGES;
-	sc_out <bool> clk,rst;
-	sc_out <sc_int<32> > x_in_r, x_in_im,valid_Data_IN;
+    //sc_out<sc_int<32> > N_STAGES;
+    sc_out<bool> clk, rst;
+    sc_out<sc_int<32> > x_in_r, x_in_im, valid_Data_IN;
 
-	void prc_driver();
+    void prc_driver();
 
-	SC_CTOR (driver)
-	{
-		SC_THREAD(prc_driver);
-		//sensitive<<clk.pos()<<rst.pos();
-	}
+    SC_CTOR (driver)
+    {
+        SC_THREAD(prc_driver);
+        //sensitive<<clk.pos()<<rst.pos();
+    }
 
 };
-
-
 
 #endif /* DRIVER_H_ */
