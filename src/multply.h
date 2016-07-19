@@ -1,4 +1,3 @@
-
 #ifndef test
 #define test
 #include<cstring>

@@ -14,67 +14,50 @@
 
 // array to hold input samples
 
-
-
-
-fixedfir::fixedfir(int N, FixedComplex<16>* tap) {
-
-	this->n = N;
-	this->taps = new FixedComplex<16>[N];
-
-	for (int i = 0; i < N; i++)
-		this->taps[i] = tap[i];
-
-}
-
-
-void fixedfir::fir(int length, FixedComplex<16>* input, FixedComplex<16>* output)
+fixedfir::fixedfir(int N, FixedComplex<16>* tap)
 {
-	FixedComplex<16> bench[this->n];
-	FixedComplex<32> sum;
-	FixedComplex<16> zero(0,0);
 
+    this->n = N;
+    this->taps = new FixedComplex<16> [N];
 
-
-	for (int j = this->n - 1 ; j >= 0; j--)
-			{
-				bench[j] = zero;
-			}//Initialize to 0
-
-	for (int i = 0; i < length; i++)
-	{
-		bench[0] = input[i];//New data on bench
-
-		sum.real = 1 << 14;
-		sum.imag = 1 << 14;
-		for ( int j = 0; (j < this->n ); j++)
-		{
-			sum = sum + (bench[j].to_32() * taps[j].to_32());
-		}//Accumulate
-
-		for (int j = this->n - 1 ; j > 0; j--)
-		{
-			bench[j] = bench[j-1];
-		}//Moves all data down by 1 space
-
-        if ( sum.real > 0x3fffffff )
-            sum.real = 0x3fffffff;
-        else if ( sum.real < -0x40000000 )
-            sum.real = -0x40000000;
-
-        if ( sum.imag > 0x3fffffff )
-        	sum.imag = 0x3fffffff;
-        else if ( sum.imag < -0x40000000 )
-        	sum.imag = -0x40000000;
-
-		sum = sum >> 15;
-		output[i] = sum.to_16();
-
-	}
+    for (int i = 0; i < N; i++)
+        this->taps[i] = tap[i];
 
 }
 
-fixedfir::~fixedfir() {
+void fixedfir::fir(int length, FixedComplex<16>* input,
+        FixedComplex<16>* output)
+{
+    FixedComplex<16> bench[this->n];
+    FixedComplex<32> sum;
+    FixedComplex<16> zero(0, 0);
+
+    for (int j = this->n - 1; j >= 0; j--) {
+        bench[j] = zero;
+    } //Initialize to 0
+
+    for (int i = 0; i < length; i++) {
+        bench[0] = input[i]; //New data on bench
+
+        sum.real = 1 << 14;
+        sum.imag = 1 << 14;
+        for (int j = 0; (j < this->n); j++) {
+            sum = sum + (bench[j].to_32() * taps[j].to_32());
+        } //Accumulate
+
+        for (int j = this->n - 1; j > 0; j--) {
+            bench[j] = bench[j - 1];
+        } //Moves all data down by 1 space
+
+        sum = sum >> 15;
+        output[i] = sum.to_16();
+
+    }
+
+}
+
+fixedfir::~fixedfir()
+{
 
 }
 
