@@ -17,19 +17,24 @@ int main()
     FixedComplex<16> input2[1024];//Array to hold inputs
 
 
-	string data("./data/jenkins/alu/in1.csv");//Input data file
+	string data("data/alu/input/in1.csv");//Input data file
 
 	ifstream in(data.c_str());
     if (!in.is_open())
+    {
     	cout << "error reading" << endl;
+    	return 1;
+    }
     char ** ptr;
 
     typedef tokenizer< escaped_list_separator<char> > Tokenizer;
 
     vector< string > vec;
     string line;
-    string outFile("./data/jenkins/alu/out1.csv");
+    string outFile("data/alu/output/out1.csv");
     ofstream out(outFile.c_str());
+
+
     int i = 0;
     while (getline(in,line))
     {

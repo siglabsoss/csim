@@ -8,7 +8,8 @@
 #include "cordic.h"
 using namespace std;
 
-cordic::cordic() {
+cordic::cordic()
+{
 	for (int i = 0; i < 16; i++)
 	{
 
