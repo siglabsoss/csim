@@ -8,8 +8,14 @@
 #include "fixedcomplex.h"
 
 template <int B>
-void FixedComplex<B>::print()
+string FixedComplex<B>::to_string() const
 {
+<<<<<<< HEAD
+	std::ostringstream oss;
+	oss << "Real: " <<this->real << " " << "Imaginary: " << this->imag;
+	return oss.str();
+}//Default constructor
+=======
 	cout << to_string() <<endl;
 }
 
@@ -21,6 +27,7 @@ std::string FixedComplex<B>::to_string()
 	oss << "Real: " <<this->real << " " << "Imaginary: " << this->imag;
 	return oss.str();
 }
+>>>>>>> anurag
 
 
 template <int B>

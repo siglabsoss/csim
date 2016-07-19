@@ -10,7 +10,22 @@ set(ALL_SOURCES
 	cordic.cpp
 	Stitcher.cpp
 	
+	floatfft.cpp
+	fixedfft.cpp
+	butterfly_two_pt.cpp
+	complex_alu.cpp
+	driver.cpp
+	memory.cpp
+	monitor.cpp
+	syscfft.cpp
+	twiddler.cpp
+	utils.cpp
 )
+
+# add all tests files that are not test.cpp
+set(TEST_SOURCES
+	test_floatfft.cpp
+)	
 
 
 
@@ -21,7 +36,7 @@ add_custom_target(rundavey COMMAND davey DEPENDS davey WORKING_DIRECTORY ${CMAKE
 
 
 ########################### TEST ###########################
-add_executable(test ${ALL_SOURCES} test.cpp)
+add_executable(test ${ALL_SOURCES} ${TEST_SOURCES} test.cpp)
 target_link_libraries(test ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
 #set_target_properties(test PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
 add_custom_target(runtest COMMAND test DEPENDS test WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
@@ -69,3 +84,13 @@ target_link_libraries(cordictester ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_
 ########################### Test Stitcher ###########################
 add_executable(teststitch ${ALL_SOURCES} teststitch.cpp)
 target_link_libraries(teststitch ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+########################### Anurag: FFT  ###########################
+add_executable(pipefft ${ALL_SOURCES} pipefft.cpp)
+target_link_libraries(pipefft ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+add_custom_target(runpipefft COMMAND pipefft DEPENDS pipefft WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+
+########################### Anurag SYSTEMC: fft  ###########################
+add_executable(fixedfft_main ${ALL_SOURCES} fixedfft_main.cpp)
+target_link_libraries(fixedfft_main ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
+add_custom_target(runfixedfft_main COMMAND fixedfft_main DEPENDS fixedfft_main WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
