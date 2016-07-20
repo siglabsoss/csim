@@ -10,6 +10,8 @@ using namespace std;
 int main(void)
 {
 
+    string infile = "../csim/data/fft/input/input2.txt";
+    string outfile = "../csim/data/fft/output/out2.csv"
     cout << "program start" << endl;
     int i;
 //
@@ -27,15 +29,15 @@ int main(void)
 //		fft.inputandtick(9);
 //	}
 //	}
-//
-//	cout << "---------------------------------------------------" << endl;
-//	cout << "---------------------------------------------------" << endl;
 
     int realInput[8] = {5,6,8,-5,6,12,10,9}; // default values
     int imagInput[8] = {0};
-    ifstream in("input1.txt");
-    if (!in.is_open())
+    ifstream in(infile);
+
+    if (!in.is_open()){
             cout << "error reading" << endl;
+            return 1;
+    }//If cannot read from file, return 1;
 
     std::string token;
     for (i = 0; i < 8; i++) {
@@ -53,9 +55,9 @@ int main(void)
         strValue2 << token;
         strValue2 >> intValue;
         imagInput[i] = intValue;
-    }
+    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 
-    int scale = 32;
+    int scale = 1;
     fixedfft fft(8);
     for (i = 0; i < 3; i++) {
 
@@ -69,7 +71,7 @@ int main(void)
         fft.inputandtick(FixedComplex<32>(realInput[7] * scale, imagInput[7] * scale));
     }
 
-    ifstream in2("out1.csv");
+    ifstream in2(outfile);
     if (!in2.is_open())
          cout << "error reading" << endl;
 
@@ -78,20 +80,24 @@ int main(void)
      string ans;
      for (i = 0; i < 8; i++) {
          in2 >> str[i];
-     }
+     }//Reads in output file
 
-
+     in2.close();
 
      cout << "Hopefully correct:" << endl;
      string temp[10];
      for (i = 0; i < 8; i++) {
          temp[reverseBits(8, i)] = str[i];
-         //cout << reverseBits(8, i) << endl;
-     }
+     }//Reformats data in correct order
+
+
+     ofstream out2(outfile);
 
      for (i = 0; i < 8; i++) {
+         out2 << temp[i] << endl;
          cout << temp[i] << endl;
-     }
+     }//Prints data out in correct order
+
 
 
     //	floatfftstage stageone(8);

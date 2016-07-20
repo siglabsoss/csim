@@ -7,7 +7,12 @@ using namespace std;
 const float pi = 3.14159265359;
 
 
-ofstream out2("out1.csv");
+ofstream out2("../csim/data/fft/output/out2.csv");
+
+fixedfftbase::~fixedfftbase()
+{
+    out2.close();
+}
 
 void fixedfftstage::init(int Ninput)
 {
@@ -54,28 +59,22 @@ void fixedfftstage::butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
 
 FixedComplex<32> fixedfftstage::twiddler(int k)
 {
-
-    int W_cos;
-    int W_sin;
     int theta;
-
+    int thet;
     theta = (360 / N) * k;
 
-
-    int thet = theta * 572; //2pi * 32768 / 360= 572
+    thet = theta * 572; //2pi * 32768 / 360= 572
     cordic c;
     sc_int<32> sin;
     sc_int<32> cos;
     sin = c.sin(thet);
-    int tempsin = sin * -32 / 32768;
+    int tempsin = sin * -1024 / 32768;
     int phaseShift = 51471;
     cos = c.sin(thet + phaseShift);
-    int tempcos = cos * 32 / 32768;
+    int tempcos = cos * 1024 / 32768;
 
     FixedComplex<32> V(tempcos,tempsin);
-
     return V;
-
 }
 
 void fixedfftstage::output(FixedComplex<32> x)
@@ -103,7 +102,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
     int as;
     int a = pow(2, 15);
     int scale = a / 1000.0;
-    scale = 32;
+    scale = 1024;
     switch (state) {
         default:
         case FFFT_STATE_INITIAL:
@@ -178,8 +177,8 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
 {
 //	sc_int<32> a = pow(2,15);
 //	x = x * a;
-    cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
-            << x.imag.to_int() / 32.0 << " " << x << endl;
+//    cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
+//            << x.imag.to_int() / 32.0 << " " << x << endl;
 
 
     out2 << x.real.to_int() << "," << x.imag.to_int() << endl;
