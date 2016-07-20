@@ -7,7 +7,7 @@ using namespace std;
 const float pi = 3.14159265359;
 
 
-ofstream out2("../csim/data/fft/output/out2.csv");
+ofstream out2("data/fft/output/out3.csv");
 
 fixedfftbase::~fixedfftbase()
 {

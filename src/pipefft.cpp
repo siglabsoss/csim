@@ -1,5 +1,8 @@
 #include <iostream>
 #include <stdlib.h>
+#include <cstring>
+#include <stdlib.h>
+#include <string>
 #include "utils.h"
 #include "fixedfft.h"
 #include "floatfft.h"
@@ -10,8 +13,8 @@ using namespace std;
 int main(void)
 {
 
-    string infile = "../csim/data/fft/input/input2.txt";
-    string outfile = "../csim/data/fft/output/out2.csv"
+    string infile("data/fft/input/input3.txt");
+    string outfile("data/fft/output/out3.csv");
     cout << "program start" << endl;
     int i;
 //
@@ -32,7 +35,7 @@ int main(void)
 
     int realInput[8] = {5,6,8,-5,6,12,10,9}; // default values
     int imagInput[8] = {0};
-    ifstream in(infile);
+    ifstream in(infile.c_str());
 
     if (!in.is_open()){
             cout << "error reading" << endl;
@@ -71,7 +74,7 @@ int main(void)
         fft.inputandtick(FixedComplex<32>(realInput[7] * scale, imagInput[7] * scale));
     }
 
-    ifstream in2(outfile);
+    ifstream in2(outfile.c_str());
     if (!in2.is_open())
          cout << "error reading" << endl;
 
@@ -91,7 +94,7 @@ int main(void)
      }//Reformats data in correct order
 
 
-     ofstream out2(outfile);
+     ofstream out2(outfile.c_str());
 
      for (i = 0; i < 8; i++) {
          out2 << temp[i] << endl;
