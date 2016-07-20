@@ -1,12 +1,13 @@
 
 #include "radio_s.hpp"
 #include "dummy_filter_element.hpp"
+#include "fixedfir.h"
 
 int main(int argc, char *argv[])
 {
     //Construct a radio with some dummy filter chains
     FilterChain *mod = new FilterChain(new DummyByte(new DummyByte(new DummyByte(new DummyByteToComplex(new DummyComplex(nullptr))))));
-    FilterChain *demod = new FilterChain(new DummyComplex(new DummyComplex(new DummyComplex(new DummyComplex(new DummyComplexToByte(new DummyByte(new DummyByte(nullptr))))))));
+    FilterChain *demod = new FilterChain(new fixedfir(new DummyComplex(new DummyComplex(new DummyComplex(new DummyComplexToByte(new DummyByte(new DummyByte(nullptr))))))));
     RadioS radio(Vector2d(0,0), *mod, *demod);
 
     uint8_t byte;

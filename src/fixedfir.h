@@ -15,6 +15,7 @@
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
 #include "fixedcomplex.h"
+#include "filter_chain_element.hpp"
 
 class fixedfir : public FilterChainElement
 {
@@ -35,7 +36,7 @@ public:
 
     FixedComplex<16>                  m_output;
 
-    fixedfir(int N, FixedComplex<16>* val, FilterChainElement *next);
+    fixedfir(int N, FixedComplex<16>* tap, FilterChainElement *next);
     void fir(FixedComplex<16> &input);
     virtual ~fixedfir();
 };

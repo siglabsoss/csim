@@ -31,7 +31,8 @@ bool fixedfir::input(const block_io_t &data)
 
     //XXX convert data -> sample
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
-    fir(data.fc);
+    FixedComplex<16> sample = data.fc;
+    fir(sample);
     return true;
 }
 /**
