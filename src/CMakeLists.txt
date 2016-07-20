@@ -99,3 +99,7 @@ add_custom_target(runfixedfft_main COMMAND fixedfft_main DEPENDS fixedfft_main W
 add_executable(benfilter ${ALL_SOURCES} benfilter.cpp)
 target_link_libraries(benfilter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
 add_custom_target(runbenfilter COMMAND benfilter DEPENDS benfilter WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
+########################### RADIOSIM ###########################
+add_executable(radiosim radio_s.cpp testradio.cpp)
+

@@ -43,3 +43,7 @@ CTestTestfile.cmake
 *.app
 
 /bin
+
+# Vimdiff conflict resolution original backups
+*.orig
+
