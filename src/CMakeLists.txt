@@ -101,5 +101,6 @@ target_link_libraries(benfilter ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIB
 add_custom_target(runbenfilter COMMAND benfilter DEPENDS benfilter WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 ########################### RADIOSIM ###########################
-add_executable(testradio radio_s.cpp filter_chain_element.cpp filter_chain.cpp fixedfir.cpp testradio.cpp)
+add_executable(testradio radio_s.cpp filter_chain_element.cpp filter_chain.cpp fixedfir.cpp fixedcomplex.cpp testradio.cpp)
+target_link_libraries(testradio ${SystemC_LIBRARIES} pthread)
 
