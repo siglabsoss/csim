@@ -8,24 +8,36 @@
 #ifndef FIXEDIIR_H_
 #define FIXEDIIR_H_
 #include "fixedcomplex.h"
-
+#include "filter_chain_element.hpp"
 //Note that a[0] must be 1
 
-class fixediir
+class fixediir : public FilterChainElement
 {
 public:
-    int numXRegisters;
-    int numYRegisters;
-    FixedComplex<16>* a; //a coefficients
-    FixedComplex<16>* b; //b coefficients
-    FixedComplex<16>* x; //x registers
-    FixedComplex<16>* y; //y registers
+
+    bool input(const block_io_t &data) override;
+       /**
+        * output - provide an output sample to the caller.
+        * @return false if no output sample is available.
+        */
+    bool output(block_io_t &data) override;
+
+    void tick() override;
 
     fixediir(int registerXSize, int registerYSize, FixedComplex<16>* aCoeffs,
-            FixedComplex<16>* bCoeffs); //Constructor
-    void iir(FixedComplex<16> *input, FixedComplex<16> *output, int inputs); //Filtering input data
+               FixedComplex<16>* bCoeffs); //Constructor
+    void iir(FixedComplex<16> &input); //Filtering input data
+    void reset(); //resets registers
     FixedComplex<16> calculate(FixedComplex<16> current); // Calculate output based on input
-    virtual ~fixediir();
+
+    int                         m_numXRegisters;
+    int                         m_numYRegisters;
+    vector<FixedComplex<16> >   m_a; //a coefficients
+    vector<FixedComplex<16> >   m_b; //b coefficients
+    vector<FixedComplex<16> >   m_x; //x registers
+    vector<FixedComplex<16> >   m_y; //y registers
+    FixedComplex<16>            m_output;
+
 };
 
 #endif /* FIXEDIIR_H_ */

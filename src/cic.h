@@ -14,25 +14,35 @@
 #include <iterator>     // ostream_operator
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
+#include "filter_chain_element.hpp"
 #include "fixedcomplex.h"
 
-class fixedcic
+class fixedcic : public FilterChainElement
 {
 public:
 
-    int numBRegisters; //number of b registers
-    int numARegisters; //number of a registers
-    FixedComplex<32>* a; //a registers
-    FixedComplex<32>* b; //b registers
+    bool input(const block_io_t &data) override;
+    /**
+     * output - provide an output sample to the caller.
+     * @return false if no output sample is available.
+     */
+    bool output(block_io_t &data) override;
 
-    int r; //Decimation factor
-    int samples; //How many samples have been processed.
-    fixedcic(int R, int aregs, int bregs); //Contructor takes in decimation factor and number of regs on each side.
-    int cic(int length, FixedComplex<16>* input, FixedComplex<16>* output); //actual filtering of data. Returns number of outputs
+    void tick() override;
+
+    fixedcic(int R, int aregs, int bregs); //Constructor takes in decimation factor and number of regs on each side.
+    void cic(FixedComplex<16> &input); //actual filtering of data. Returns number of outputs
     FixedComplex<32> integrate(FixedComplex<16> current); //integrate side of filter
     FixedComplex<32> comb(FixedComplex<32> current); //comb side of filter
     bool downsample(); //returns false when the sample should be passed
-    virtual ~fixedcic();
+    void reset();
+    int                 m_numBRegisters; //number of b registers
+    int                 m_numARegisters; //number of a registers
+    vector<FixedComplex<32> >  m_a; //a registers
+    vector<FixedComplex<32> >   m_b; //b registers
+    int                 m_r; //Decimation factor
+    int                 m_samples; //How many samples have been processed
+    FixedComplex<16>    m_output;
 };
 
 #endif /* CIC_H_ */
