@@ -1,5 +1,6 @@
 #include <complex>
 #include <vector>
+#include "cordic.h"
 #include "fixedcomplex.h"
 
 #ifndef __FIXEDFFT_H__

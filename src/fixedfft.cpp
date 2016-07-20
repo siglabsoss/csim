@@ -6,6 +6,9 @@ using namespace std;
 #include "fixedfft.h"
 const float pi = 3.14159265359;
 
+
+ofstream out2("out1.csv");
+
 void fixedfftstage::init(int Ninput)
 {
     N = Ninput;
@@ -105,8 +108,30 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
     int W_cos;
     int W_sin;
     int theta;
-//	theta = (2*pi/N)*k;
+
     theta = (360 / N) * k;
+
+//
+//    cordic c;
+//    FixedComplex<16> a(1, 0);
+//    FixedComplex<16> b(0, 1);
+//
+//    sc_int<32> sin;
+//    sc_int<32> cos;
+// //   int newTheta = theta * 32768 /360 * 2 * 3.14159;
+//    sin = c.sin(theta);
+//    int tempsin = sin * 32 / 32768;
+//    int phaseShift = 51471;
+//    cos = c.sin(theta + phaseShift);
+//    int tempcos = cos * 32 / 32768;
+//
+//
+//
+//          FixedComplex<32> W(tempcos,tempsin);
+//          return W;
+
+
+
 //	sc_int<32> as_cos, as_sin;
 //	W_cos = cos(theta);
 //	W_cos = W_cos * scale;
@@ -149,7 +174,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
     int as;
     int a = pow(2, 15);
     int scale = a / 1000.0;
-
+    scale = 32;
     switch (state) {
         default:
         case FFFT_STATE_INITIAL:
@@ -226,6 +251,10 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
 //	x = x * a;
     cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
             << x.imag.to_int() / 32.0 << " " << x << endl;
+
+
+    out2 << x.real.to_int() << "," << x.imag.to_int() << endl;
+   // out.close();
     count++;
 }
 

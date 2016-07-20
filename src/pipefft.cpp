@@ -1,17 +1,18 @@
 #include <iostream>
+#include <stdlib.h>
+#include "utils.h"
+#include "fixedfft.h"
+#include "floatfft.h"
 
 using namespace std;
 
-#include "fixedfft.h"
-#include "floatfft.h"
 
 int main(void)
 {
 
     cout << "program start" << endl;
-
     int i;
-
+//
 //	{
 //	floatfft fft(8);
 //	for(i = 0; i < 3; i++)
@@ -26,27 +27,73 @@ int main(void)
 //		fft.inputandtick(9);
 //	}
 //	}
-
+//
 //	cout << "---------------------------------------------------" << endl;
 //	cout << "---------------------------------------------------" << endl;
 
-    int a = pow(2, 15);
-    int scale = a / 1000.0;
+    int realInput[8] = {5,6,8,-5,6,12,10,9}; // default values
+    int imagInput[8] = {0};
+    ifstream in("input1.txt");
+    if (!in.is_open())
+            cout << "error reading" << endl;
 
+    std::string token;
+    for (i = 0; i < 8; i++) {
+        string line;
+        getline(in,line);
+        istringstream ss(line);
+        getline(ss, token, ',');
+        stringstream strValue;
+        strValue << token;
+        int intValue;
+        strValue >> intValue;
+        realInput[i] = intValue;
+        getline(ss, token, ',');
+        stringstream strValue2;
+        strValue2 << token;
+        strValue2 >> intValue;
+        imagInput[i] = intValue;
+    }
+
+    int scale = 32;
     fixedfft fft(8);
     for (i = 0; i < 3; i++) {
 
-        fft.inputandtick(FixedComplex<32>(5 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(8 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(-5 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(12 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(10 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(9 * scale, 0));
+        fft.inputandtick(FixedComplex<32>(realInput[0] * scale, imagInput[0] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[1] * scale, imagInput[1] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[2] * scale, imagInput[2] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[3] * scale, imagInput[3] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[4] * scale, imagInput[4] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[5] * scale, imagInput[5] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[6] * scale, imagInput[6] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[7] * scale, imagInput[7] * scale));
     }
 
-    //
+    ifstream in2("out1.csv");
+    if (!in2.is_open())
+         cout << "error reading" << endl;
+
+
+     string str[8];
+     string ans;
+     for (i = 0; i < 8; i++) {
+         in2 >> str[i];
+     }
+
+
+
+     cout << "Hopefully correct:" << endl;
+     string temp[10];
+     for (i = 0; i < 8; i++) {
+         temp[reverseBits(8, i)] = str[i];
+         //cout << reverseBits(8, i) << endl;
+     }
+
+     for (i = 0; i < 8; i++) {
+         cout << temp[i] << endl;
+     }
+
+
     //	floatfftstage stageone(8);
     //	floatfftstage stagetwo(4);
     //	floatfftstage stagethree(2);
