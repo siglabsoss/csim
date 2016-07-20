@@ -1,23 +1,20 @@
 
 #include "radio_s.hpp"
-#include "dummy_block_element.hpp"
+#include "dummy_filter_element.hpp"
+#include <cassert>
 
-RadioS::RadioS(Vector2d position) :
+RadioS::RadioS(Vector2d position, FilterChain &modChain, FilterChain &demodChain) :
     m_position(position),
-    m_mod(new DummyBlockElement(
-          new DummyBlockElement(
-          new DummyBlockElement(
-          nullptr)))),
-    m_demod(new DummyBlockElement(nullptr))
-{
-
-}
+    m_mod(modChain),
+    m_demod(demodChain)
+{}
 
 bool RadioS::rxByte(uint8_t &byte)
 {
     block_io_t data;
     bool didRx = m_demod.output(data);
     if (didRx) {
+        assert(data.type == IO_TYPE_BYTE); //sanity check on the demodulation filter chain output
         byte = data.byte;
     }
     return didRx;
@@ -44,6 +41,7 @@ bool RadioS::txWave(std::complex<double> &sample_out)
     block_io_t data;
     bool didRx = m_mod.output(data);
     if (didRx) {
+        assert(data.type == IO_TYPE_COMPLEX_DOUBLE); //sanity check on the modulation filter chain output
         sample_out = data.rf;
     }
     return didRx;
@@ -54,6 +52,7 @@ Vector2d  RadioS::getPosition() const
     return m_position;
 }
 
-void RadioS::tick() {
+void RadioS::tick()
+{
 
 }

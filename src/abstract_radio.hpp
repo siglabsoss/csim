@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Eigen/Dense>
-#include <stdint.h>
+#include <cstdint>
 
 using Eigen::Vector2d;
 
@@ -14,10 +14,12 @@ class AbstractRadio
 public:
     virtual ~AbstractRadio() {}
 
-    virtual bool         rxByte(uint8_t &byte) = 0;
-    virtual bool         txByte(const uint8_t &byte) = 0;
-
+    //Demodulation
     virtual bool         rxWave(const std::complex<double> &sample_in) = 0;
+    virtual bool         rxByte(uint8_t &byte) = 0;
+
+    //Modulation
+    virtual bool         txByte(const uint8_t &byte) = 0;
     virtual bool         txWave(std::complex<double> &sample_out) = 0;
 
     virtual Vector2d     getPosition() const = 0;

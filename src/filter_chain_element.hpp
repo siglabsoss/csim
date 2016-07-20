@@ -1,8 +1,8 @@
 #pragma once
 
 #include "abstract_siso.hpp"
-#include <vector>
-
+#include <cstdint>
+#include <complex>
 
 enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,
@@ -11,18 +11,23 @@ enum io_type_t : uint8_t {
 };
 struct block_io_t
 {
-    block_io_t() :
-        type(IO_TYPE_NULL)
-    {}
-    ~block_io_t() {}
+    //Data members
     io_type_t type;
     union {
         std::complex<double> rf;
         uint8_t byte;
     };
+
+
+    block_io_t() :
+        type(IO_TYPE_NULL)
+    {}
+    ~block_io_t() {}
+
     block_io_t & operator=(const block_io_t &rhs)
     {
         if (this != &rhs) {
+            this->type = rhs.type;
             switch (rhs.type) {
                 case IO_TYPE_COMPLEX_DOUBLE:
                     this->rf = rhs.rf;
@@ -37,19 +42,20 @@ struct block_io_t
         return *this;
     }
 };
+extern std::ostream& operator<<(std::ostream& os, const block_io_t& obj);
 
-class BlockChainElement : public AbstractSISO< block_io_t, block_io_t >
+class FilterChainElement : public AbstractSISO< block_io_t, block_io_t >
 {
 public:
-    virtual ~BlockChainElement() {}
+    virtual ~FilterChainElement() {}
 
-    BlockChainElement(BlockChainElement *next) :
+    FilterChainElement(FilterChainElement *next) :
         m_next(next)
     {
     }
-    BlockChainElement() :
+    FilterChainElement() :
         m_next(nullptr)
     {
     }
-    BlockChainElement *m_next;
+    FilterChainElement *m_next;
 };

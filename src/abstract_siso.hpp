@@ -18,4 +18,6 @@ public:
      * @return false if no output sample is available.
      */
     virtual bool output(OUTPUT_T &data) = 0;
+
+    virtual void tick() = 0;
 };
