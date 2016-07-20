@@ -14,46 +14,61 @@
 
 // array to hold input samples
 
-fixedfir::fixedfir(int N, FixedComplex<16>* tap)
+fixedfir::fixedfir(int N, FixedComplex<16>* tap, FilterChainElement *next) :
+    FilterChainElement(next),
+    m_n(N),
+    m_taps(N),
+    m_bench(N),
+    m_output()
+{
+    for (int i = 0; i < N; i++) {
+        m_taps[i] = tap[i];
+    }
+}
+
+bool fixedfir::input(const block_io_t &data)
 {
 
-    this->n = N;
-    this->taps = new FixedComplex<16> [N];
+    //XXX convert data -> sample
+    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
+    fir(data.fc);
+    return true;
+}
+/**
+ * output - provide an output sample to the caller.
+ * @return false if no output sample is available.
+ */
+bool fixedfir::output(block_io_t &data)
+{
+    data.type = IO_TYPE_FIXED_COMPLEX_16;
+    data.fc = m_output;
+    return true;
+}
 
-    for (int i = 0; i < N; i++)
-        this->taps[i] = tap[i];
+void fixedfir::tick()
+{
 
 }
 
-void fixedfir::fir(int length, FixedComplex<16>* input,
-        FixedComplex<16>* output)
+void fixedfir::fir(FixedComplex<16> &input)
 {
-    FixedComplex<16> bench[this->n];
+    FixedComplex<16> bench[m_n];
     FixedComplex<32> sum;
-    FixedComplex<16> zero(0, 0);
 
-    for (int j = this->n - 1; j >= 0; j--) {
-        bench[j] = zero;
-    } //Initialize to 0
+    bench[0] = input; //New data on bench
 
-    for (int i = 0; i < length; i++) {
-        bench[0] = input[i]; //New data on bench
+    sum.real = 1 << 14;
+    sum.imag = 1 << 14;
+    for (int j = 0; (j < m_n); j++) {
+        sum = sum + (bench[j].to_32() * m_taps[j].to_32());
+    } //Accumulate
 
-        sum.real = 1 << 14;
-        sum.imag = 1 << 14;
-        for (int j = 0; (j < this->n); j++) {
-            sum = sum + (bench[j].to_32() * taps[j].to_32());
-        } //Accumulate
+    for (int j = m_n - 1; j > 0; j--) {
+        bench[j] = bench[j - 1];
+    } //Moves all data down by 1 space
 
-        for (int j = this->n - 1; j > 0; j--) {
-            bench[j] = bench[j - 1];
-        } //Moves all data down by 1 space
-
-        sum = sum >> 15;
-        output[i] = sum.to_16();
-
-    }
-
+    sum = sum >> 15;
+    m_output = sum.to_16();
 }
 
 fixedfir::~fixedfir()

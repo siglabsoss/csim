@@ -16,15 +16,27 @@
 #include <iomanip> //For setprecision
 #include "fixedcomplex.h"
 
-class fixedfir
+class fixedfir : public FilterChainElement
 {
 public:
 
-    int n; // Number of taps
-    FixedComplex<16>* taps;
+    bool input(const block_io_t &data) override;
+    /**
+     * output - provide an output sample to the caller.
+     * @return false if no output sample is available.
+     */
+    bool output(block_io_t &data) override;
 
-    fixedfir(int N, FixedComplex<16>* val);
-    void fir(int length, FixedComplex<16>* input, FixedComplex<16>* output);
+    void tick() override;
+
+    int                               m_n; // Number of taps
+    std::vector< FixedComplex<16> >   m_taps;
+    std::vector< FixedComplex<16> >   m_bench;
+
+    FixedComplex<16>                  m_output;
+
+    fixedfir(int N, FixedComplex<16>* val, FilterChainElement *next);
+    void fir(FixedComplex<16> &input);
     virtual ~fixedfir();
 };
 

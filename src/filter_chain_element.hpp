@@ -7,6 +7,7 @@
 enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,
     IO_TYPE_COMPLEX_DOUBLE,
+    IO_TYPE_FIXED_COMPLEX_16,
     IO_TYPE_BYTE
 };
 struct block_io_t
@@ -15,9 +16,9 @@ struct block_io_t
     io_type_t type;
     union {
         std::complex<double> rf;
+        FixedComplex<16> fc;
         uint8_t byte;
     };
-
 
     block_io_t() :
         type(IO_TYPE_NULL)
@@ -31,6 +32,9 @@ struct block_io_t
             switch (rhs.type) {
                 case IO_TYPE_COMPLEX_DOUBLE:
                     this->rf = rhs.rf;
+                    break;
+                case IO_TYPE_FIXED_COMPLEX_16:
+                    this->fc = rhs.fc;
                     break;
                 case IO_TYPE_BYTE:
                     this->byte = rhs.byte;
