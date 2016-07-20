@@ -59,22 +59,22 @@ void fixedfftstage::butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
 
 FixedComplex<32> fixedfftstage::twiddler(int k)
 {
-    int theta;
-    int thet;
-    theta = (360 / N) * k;
 
-    thet = theta * 572; //2pi * 32768 / 360= 572
+    int thet;
+ //   theta = (360 / N) * k;
+    thet = (360 / N) * k * 572; //2pi * 32768 / 360 = 572
     cordic c;
     sc_int<32> sin;
     sc_int<32> cos;
-    sin = c.sin(thet);
-    int tempsin = sin * -1024 / 32768;
-    int phaseShift = 51471;
-    cos = c.sin(thet + phaseShift);
-    int tempcos = cos * 1024 / 32768;
+    sin = c.sin(thet);//Calculates sin
+    int tempsin = sin * -1024 / 32768;//Scales to 1024
+    int phaseShift = 51471;//pi/2 * 32768
+    cos = c.sin(thet + phaseShift);//Calculates cos
+    int tempcos = cos * 1024 / 32768;//Scales to 1024
 
     FixedComplex<32> V(tempcos,tempsin);
     return V;
+
 }
 
 void fixedfftstage::output(FixedComplex<32> x)
@@ -102,7 +102,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
     int as;
     int a = pow(2, 15);
     int scale = a / 1000.0;
-    scale = 1024;
+    scale = 1024;//Cannot scale higher that this yet
     switch (state) {
         default:
         case FFFT_STATE_INITIAL:
@@ -177,8 +177,8 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
 {
 //	sc_int<32> a = pow(2,15);
 //	x = x * a;
-//    cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
-//            << x.imag.to_int() / 32.0 << " " << x << endl;
+    cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
+            << x.imag.to_int() / 32.0 << " " << x << endl;
 
 
     out2 << x.real.to_int() << "," << x.imag.to_int() << endl;
