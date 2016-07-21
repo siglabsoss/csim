@@ -48,22 +48,6 @@ if(SystemC_FOUND)
 else()
     message( FATAL_ERROR "SystemC library not found." )
 endif()
-
-include_directories(
-	${Boost_INCLUDE_DIRS}
-	${CMAKE_SOURCE_DIR}/3rd/json
-	${CMAKE_SOURCE_DIR}/3rd
-	${C_SIM_SOURCE_ROOT}
-	${C_SIM_SOURCE_ROOT}/filters
-	${C_SIM_SOURCE_ROOT}/core
-	${C_SIM_SOURCE_ROOT}/interfaces
-)
-
-link_directories(
-	${Boost_LIBRARY_DIRS}
-)
-
-
 add_definitions(-DSC_DISABLE_API_VERSION_CHECK)
 add_definitions(-DSC_INCLUDE_DYNAMIC_PROCESSES)
 

@@ -1,11 +1,11 @@
 /*
- * Stitcher.cpp
+ * stitcher.cpp
  *
  *  Created on: Jul 13, 2016
  *      Author: ubuntu
  */
 
-#include "Stitcher.h"
+#include "stitcher.h"
 
 using namespace std;
 

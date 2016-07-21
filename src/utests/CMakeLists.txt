@@ -1,9 +1,7 @@
 
 
-PREPEND(SYSTEM_UNDER_TEST_SOURCES ../ ${ALL_SOURCES})
-
-add_executable(test ${SYSTEM_UNDER_TEST_SOURCES} ${TEST_SOURCES} test.cpp)
-target_link_libraries(test ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread)
+add_executable(test test.cpp)
+target_link_libraries(test ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${SystemC_LIBRARIES} pthread sigtypes)
 #set_target_properties(test PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DUNIT_TEST")
 add_custom_target(runtest COMMAND test DEPENDS test WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
@@ -25,9 +23,12 @@ add_custom_target(runtest COMMAND test DEPENDS test WORKING_DIRECTORY ${CMAKE_SO
 
 ########################### Test Stitcher ###########################
 add_executable(teststitch ${SYSTEM_UNDER_TEST_SOURCES} teststitch.cpp)
-target_link_libraries(teststitch ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+target_link_libraries(teststitch ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath)
 
 ########################### Test Radio ###########################
-add_executable(testradio ../fixedcomplex.cpp testradio.cpp)
-target_link_libraries(testradio ${SystemC_LIBRARIES} ${Boost_LIBRARIES} pthread sigcore sigfilters)
+add_executable(testradio testradio.cpp)
+target_link_libraries(testradio ${SystemC_LIBRARIES} ${Boost_LIBRARIES} pthread sigcore sigfilters sigtypes)
 
+########################### CordicTester ###########################
+add_executable(cordictester cordictester.cpp)
+target_link_libraries(cordictester ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread  sigfilters sigtypes sigmath)
