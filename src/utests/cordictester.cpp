@@ -5,13 +5,13 @@ using namespace std;
 
 int main()
 {
-    string outFile = "data/cordic/output/sinwave.csv";
+    string outFile = "data/cordic/output/sinwave.txt";
     ofstream out(outFile.c_str());
 
-    string outFile2 = "data/cordic/output/clockup.csv";
+    string outFile2 = "data/cordic/output/clockup.txt";
     ofstream out2(outFile2.c_str());
 
-    string outFile3 = "data/cordic/output/clockdown.csv";
+    string outFile3 = "data/cordic/output/clockdown.txt";
     ofstream out3(outFile3.c_str());
 
     cordic c;
