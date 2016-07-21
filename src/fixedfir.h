@@ -36,7 +36,7 @@ public:
 
     FixedComplex<16>                  m_output;
     void reset();
-    fixedfir(int N, FixedComplex<16>* tap, FilterChainElement *next);
+    fixedfir(int N, FixedComplex<16>* tap);
     void fir(FixedComplex<16> &input);
     virtual ~fixedfir();
 };

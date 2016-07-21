@@ -14,8 +14,7 @@
 
 // array to hold input samples
 
-fixedfir::fixedfir(int N, FixedComplex<16>* tap, FilterChainElement *next) :
-    FilterChainElement(next),
+fixedfir::fixedfir(int N, FixedComplex<16>* tap) :
     m_n(N),
     m_taps(N),
     m_bench(N),
@@ -43,6 +42,7 @@ bool fixedfir::output(block_io_t &data)
 {
     data.type = IO_TYPE_FIXED_COMPLEX_16;
     data.fc = m_output;
+    std::cout << m_output << std::endl;
     return true;
 }
 
