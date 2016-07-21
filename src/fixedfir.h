@@ -35,7 +35,7 @@ public:
     std::vector< FixedComplex<16> >   m_bench;
 
     FixedComplex<16>                  m_output;
-
+    void reset();
     fixedfir(int N, FixedComplex<16>* tap, FilterChainElement *next);
     void fir(FixedComplex<16> &input);
     virtual ~fixedfir();

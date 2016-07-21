@@ -82,9 +82,18 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER)
         l++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
-    fir.fir(i, input, output); //Filters data
 
+
+    FilterChainElement* fil;
+    fixedfir fir(j, tap, fil); //Creates instance of fixed FIR filter given j taps.
+    for (int k = 0; k < i; k++)
+    {
+        block_io_t data;
+        data.type =  IO_TYPE_FIXED_COMPLEX_16;
+        data.fc = input[k];
+        fir.input(data); //Filters data
+        output[k] = fir.m_output;
+    }
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
                 abs(output[k].real / 32768.00 - answers[k].real / 32768.00)
@@ -160,19 +169,25 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
         l++;
 
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
-    fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
-    fir.fir(i, input, output); //Filters data
+    FilterChainElement* fil;
+    fixedfir fir(j, tap, fil); //Creates instance of fixed FIR filter given j taps.
+    for (int k = 0; k < i; k++) {
+        block_io_t data;
+        data.type =  IO_TYPE_FIXED_COMPLEX_16;
+        data.fc = input[k];
+        fir.input(data); //Filters data
+        output[k] = fir.m_output;
+     }
 
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
                 abs(output[k].real / 32768.00 - realAnswers[k]) < .001,
-                output[k].real/32768.00 << " is not the same as " << realAnswers[k]);
+                input[k].real/32768.00 << " is not the same as " << realAnswers[k]);
         BOOST_CHECK_MESSAGE(
                 abs(output[k].imag / 32768.00 - imagAnswers[k]) < .001,
                 output[k].imag/32768.00 << " is not the same as " << imagAnswers[k]);
-        cout << output[k].real / 32768.00 << " is the same as "
-                << realAnswers[k] << endl;
+     //   cout << input[k].real / 32768.00 << " is the same as "
+      //          << realAnswers[k] << endl;
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
 }
