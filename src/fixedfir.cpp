@@ -53,23 +53,24 @@ void fixedfir::tick()
 
 void fixedfir::fir(FixedComplex<16> &input)
 {
-    FixedComplex<16> bench[m_n];
+
     FixedComplex<32> sum;
 
-    bench[0] = input; //New data on bench
+    m_bench[0] = input; //New data on bench
 
     sum.real = 1 << 14;
     sum.imag = 1 << 14;
     for (int j = 0; (j < m_n); j++) {
-        sum = sum + (bench[j].to_32() * m_taps[j].to_32());
+        sum = sum + (m_bench[j].to_32() * m_taps[j].to_32());
     } //Accumulate
 
     for (int j = m_n - 1; j > 0; j--) {
-        bench[j] = bench[j - 1];
+        m_bench[j] = m_bench[j - 1];
     } //Moves all data down by 1 space
 
     sum = sum >> 15;
     m_output = sum.to_16();
+    return m_output;
 }
 
 fixedfir::~fixedfir()
