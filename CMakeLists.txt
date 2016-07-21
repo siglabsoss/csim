@@ -1,10 +1,13 @@
 project(SIGLABS_C_SIM)
 cmake_minimum_required(VERSION 2.8)
-set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})  # this allows custom "cmake find" files to be located in the current directory
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})  # this allows custom "cmake find" files to be located in the current directory
+
+set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
+set(C_SIM_SOURCE_ROOT ${CMAKE_SOURCE_DIR}/src)
 
 find_package(Boost)
 
@@ -50,6 +53,10 @@ include_directories(
 	${Boost_INCLUDE_DIRS}
 	${CMAKE_SOURCE_DIR}/3rd/json
 	${CMAKE_SOURCE_DIR}/3rd
+	${C_SIM_SOURCE_ROOT}
+	${C_SIM_SOURCE_ROOT}/filters
+	${C_SIM_SOURCE_ROOT}/core
+	${C_SIM_SOURCE_ROOT}/interfaces
 )
 
 link_directories(
