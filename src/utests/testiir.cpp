@@ -28,26 +28,40 @@ using namespace std;
 BOOST_AUTO_TEST_CASE(REAL_FILTER)
 {
 
-    for (int i = 0; i < NUM_Y_REGISTERS; i++)
+    for (int i = 0; i < NUM_Y_REGISTERS; i++) {
         a[i].real = (temp1[i] * 32768); //Scales coefficients a
+    }
 
-    for (int i = 0; i < NUM_X_REGISTERS; i++)
+    for (int i = 0; i < NUM_X_REGISTERS; i++) {
         b[i].real = (temp2[i] * 32768); //Scales coefficients b
+    }
 
     FixedComplex<16> output[1024];
     FixedComplex<16> input[1024];
+
     for (int i = 1; i < 5; i++) {
         input[i - 1].real = ((double) i / 10.00) * 32768; //Scales input data
     }
 
     fixediir iir(NUM_X_REGISTERS, NUM_Y_REGISTERS, a, b);
-    iir.iir(input, output, 4);
 
+    block_io_t data;
+    data.type =  IO_TYPE_FIXED_COMPLEX_16;
+    for (int i = 0; i < 4; i ++) {
+
+
+      data.fc = input[i];
+      iir.input(data); //Filters data
+      output[i] = iir.m_output;
+    }
     BOOST_CHECK(abs(output[0].real / 32768.00 - .05) < .001);
     BOOST_CHECK(abs(output[1].real / 32768.00 - .125) < .001);
     BOOST_CHECK(abs(output[2].real / 32768.00 - .1625) < .001);
     BOOST_CHECK(abs(output[3].real / 32768.00 - .176250) < .001);
 }
+
+
+
 
 BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
 {
@@ -138,20 +152,26 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
         imagAnswers[l] = atof(vec[1].c_str());
         //  cout << setprecision(30) << l+1 << ": Real: " << answers[i].real.to_int() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
         l++;
-    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+    } //Gets each line of answers. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+    fixediir iir(NUM_X_REGISTERS, NUM_Y_REGISTERS, a, b);
 
-    fixediir iir(j, j, atap, btap);
-    iir.iir(input, output, i);
+    block_io_t data2;
+    data2.type =  IO_TYPE_FIXED_COMPLEX_16;
+    for (int j = 0; j < i; j ++) {
+        data2.fc = input[j];
+        iir.input(data2); //Filters data
+        output[j] = iir.m_output;
+    }
 
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
-                abs(output[k].real / 32768.00 - realAnswers[k] < .001),
+                abs(output[k].real / 32768.00 - realAnswers[k]) < .001,
                 output[k].real/32768.00 << " is not the same as " << realAnswers[k]);
         BOOST_CHECK_MESSAGE(
-                abs(output[k].imag / 32768.00 - imagAnswers[k] < .001),
+                abs(output[k].imag / 32768.00 - imagAnswers[k]) < .001,
                 output[k].imag/32768.00 << " is not the same as " << imagAnswers[k]);
-        cout << output[k].real / 32768.00 << " is the same as "
-                << realAnswers[k] << endl;
+//        cout << output[k].real / 32768.00 << " is the same as "
+//                << realAnswers[k] << endl;
     }
 
 }

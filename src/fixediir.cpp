@@ -55,7 +55,9 @@ fixediir::fixediir(int registerXSize, int registerYSize,
                 m_numXRegisters(registerXSize),
                 m_numYRegisters(registerYSize),
                 m_a(m_numYRegisters),
-                m_b(m_numXRegisters)
+                m_b(m_numXRegisters),
+                m_x(m_numXRegisters),
+                m_y(m_numYRegisters)
 {
 
     for (int i = 0; i < m_numYRegisters; i++)
@@ -69,15 +71,15 @@ fixediir::fixediir(int registerXSize, int registerYSize,
 void fixediir::iir(FixedComplex<16> &input)
 {
 
-    FixedComplex<32> currenty, CenterTap; //32 bits due to multiplication of 2 16 bits
-    CenterTap = (input.to_32() * m_b[0].to_32()); // x[0] * b[0]
+    FixedComplex<32> currenty, centerTap; //32 bits due to multiplication of 2 16 bits
+    centerTap = (input.to_32() * m_b[0].to_32()); // x[0] * b[0]
 
     for (int i = 1; i < m_numXRegisters; i++)
-        CenterTap = CenterTap + (m_x[i].to_32() * m_b[i].to_32()); //Accumulate for each x register
+        centerTap = centerTap + (m_x[i].to_32() * m_b[i].to_32()); //Accumulate for each x register
 
-    CenterTap = CenterTap >> 15; //Reset to 16 bits
+    centerTap = centerTap >> 15; //Reset to 16 bits
 
-    currenty = (CenterTap << 15); // Coefficient of a[0] = 1
+    currenty = (centerTap << 15); // Coefficient of a[0] = 1
     for (int i = 1; i < m_numYRegisters; i++) {
         currenty = (currenty) - (m_a[i].to_32() * m_y[i].to_32()); //Accumulate
 
