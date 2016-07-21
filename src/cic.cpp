@@ -7,9 +7,36 @@ fixedcic::fixedcic(int R, int aregs, int bregs) :
         m_numBRegisters(bregs),
         m_numARegisters(aregs),
         m_a(aregs),
-        m_b(bregs),
-        m_samples(0)
-{}
+        m_b(bregs)
+{
+    m_samples = 0;
+}
+
+
+bool fixedcic::input(const block_io_t &data)
+{
+
+    //XXX convert data -> sample
+    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
+    FixedComplex<16> sample = data.fc;
+    cic(sample);
+    return true;
+}
+/**
+ * output - provide an output sample to the caller.
+ * @return false if no output sample is available.
+ */
+bool fixedcic::output(block_io_t &data)
+{
+    data.type = IO_TYPE_FIXED_COMPLEX_16;
+    data.fc = m_output;
+    return true;
+}
+
+void fixedcic::tick()
+{
+
+}
 
 void fixedcic::cic(FixedComplex<16> &input)
 {
