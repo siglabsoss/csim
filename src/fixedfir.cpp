@@ -70,7 +70,7 @@ void fixedfir::fir(FixedComplex<16> &input)
 
     sum = sum >> 15;
     m_output = sum.to_16();
-    return m_output;
+
 }
 
 fixedfir::~fixedfir()
