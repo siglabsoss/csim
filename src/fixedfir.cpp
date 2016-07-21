@@ -51,6 +51,15 @@ void fixedfir::tick()
 
 }
 
+
+void fixedfir::reset()
+{
+    for (int i = 0; i < m_n; i++) {
+        m_bench[i].real = 0;
+        m_bench[i].imag = 0;
+    }
+}
+
 void fixedfir::fir(FixedComplex<16> &input)
 {
 
