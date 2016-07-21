@@ -84,8 +84,7 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER)
 
 
 
-    FilterChainElement* fil;
-    fixedfir fir(j, tap, fil); //Creates instance of fixed FIR filter given j taps.
+    fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++)
     {
         block_io_t data;
@@ -169,8 +168,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
         l++;
 
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-    FilterChainElement* fil;
-    fixedfir fir(j, tap, fil); //Creates instance of fixed FIR filter given j taps.
+    fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++) {
         block_io_t data;
         data.type =  IO_TYPE_FIXED_COMPLEX_16;
