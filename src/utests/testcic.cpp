@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads
     FixedComplex<16> input[2048]; //Array to hold inputs
     FixedComplex<16> output[2048]; //Array to hold outputs
     FixedComplex<16> answers[2048];
-    string data("./data/cicdata/cic_data_in.csv"); //Input data file
+    string data("./data/cicdata/input/cic_data_in.txt"); //Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open())
@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    string data3("./data/cicdata/cic_data_out.csv"); //Answers data file
+    string data3("./data/cicdata/answers/answers1.txt"); //Answers data file
 
     ifstream in3(data3.c_str());
     if (!in3.is_open())
@@ -62,12 +62,23 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
     fixedcic cic(2, 2, 2);
-    cic.cic(i, input, output);
+    int m = 0;
+    for (int k = 0; k < i; k++)
+      {
+          block_io_t data;
+          data.type =  IO_TYPE_FIXED_COMPLEX_16;
+          data.fc = input[k];
+          cic.input(data); //Filters data
+          bool test = cic.output(data);
+          if (test) {
+              output[m++] = data.fc;
+          }
+}
 
-    for (int k = 0; k < i; k++) {
+    for (int k = 0; k < l; k++) {
         // cout << k << endl;
         BOOST_CHECK_MESSAGE(abs(output[k].real - answers[k].real) < 1,
-                output[k].real << " is not the same as " << answers[k].real << " " << k);
+                output[k].real << " is not the same as " << answers[k].real << " ");
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
 }

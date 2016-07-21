@@ -78,11 +78,8 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER)
         vec.assign(tok.begin(), tok.end());
         answers[l].real = atof(vec[0].c_str()) * 32768;
         answers[l].imag = atof(vec[1].c_str()) * 32768;
-        //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
         l++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
-
 
     FilterChainElement* fil;
     fixedfir fir(j, tap, fil); //Creates instance of fixed FIR filter given j taps.
