@@ -26,8 +26,10 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads
     string data("./data/cicdata/input/cic_data_in.txt"); //Input data file
 
     ifstream in(data.c_str());
-    if (!in.is_open())
+    if (!in.is_open()) {
         cout << "error reading" << endl;
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/cicdata/input/cic_data_in.txt");
+    }
     char ** ptr;
 
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
@@ -45,10 +47,11 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
     string data3("./data/cicdata/answers/answers1.txt"); //Answers data file
-
     ifstream in3(data3.c_str());
-    if (!in3.is_open())
+    if (!in3.is_open()) {
         cout << "error reading" << endl;
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/cicdata/answers/answers1.txt");
+    }
 
     int l = 0;
     while (getline(in3, line)) {
