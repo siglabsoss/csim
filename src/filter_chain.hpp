@@ -6,13 +6,15 @@ class FilterChain : public AbstractSISO < block_io_t, block_io_t >
 {
 
 public:
-    FilterChain(FilterChainElement *head);
+    FilterChain();
 
     virtual ~FilterChain() {}
 
     bool input(const block_io_t &data) override;
     bool output(block_io_t &data) override;
     void tick() override;
+
+    FilterChain & operator=(const FilterChainElement &rhs);
 
 private:
     FilterChainElement *    m_head;

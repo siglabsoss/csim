@@ -1,7 +1,7 @@
 #include "filter_chain.hpp"
 
-FilterChain::FilterChain(FilterChainElement *head) :
-    m_head(head),
+FilterChain::FilterChain() :
+    m_head(nullptr),
     m_output(),
     m_outputReady(false)
 {
@@ -12,10 +12,10 @@ bool FilterChain::input(const block_io_t &data)
     if (m_head == nullptr) {
         return false;
     }
-    //XXX should we care about this return value?
-    (void)m_head->input(data);
+
+    bool didInput = m_head->input(data);
     tick();
-    return true;
+    return didInput;
 }
 
 bool FilterChain::output(block_io_t &data)
@@ -44,4 +44,10 @@ void FilterChain::tick()
             }
         }
     }
+}
+
+FilterChain & FilterChain::operator=(const FilterChainElement &rhs)
+{
+    this->m_head = (FilterChainElement *)&rhs;
+    return *this;
 }

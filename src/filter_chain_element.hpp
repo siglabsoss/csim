@@ -62,5 +62,15 @@ public:
         m_next(nullptr)
     {
     }
+
+    virtual void tick() {}
+
+    friend FilterChainElement& operator+(const FilterChainElement &lhs, FilterChainElement &rhs)
+    {
+        rhs.m_next = (FilterChainElement *)&lhs;
+        return rhs;
+    }
+
+
     FilterChainElement *m_next;
 };

@@ -7,8 +7,7 @@ class DummyComplex : public FilterChainElement
 {
 public:
     virtual ~DummyComplex() {}
-    DummyComplex(FilterChainElement *next) :
-        FilterChainElement(next)
+    DummyComplex()
     {}
     bool input(const block_io_t &data) override
     {
@@ -36,8 +35,7 @@ class DummyByte : public FilterChainElement
 {
 public:
     virtual ~DummyByte() {}
-    DummyByte(FilterChainElement *next) :
-        FilterChainElement(next)
+    DummyByte()
     {}
     bool input(const block_io_t &data) override
     {
@@ -65,8 +63,7 @@ class DummyComplexToByte : public FilterChainElement
 {
 public:
     virtual ~DummyComplexToByte() {}
-    DummyComplexToByte(FilterChainElement *next) :
-        FilterChainElement(next)
+    DummyComplexToByte()
     {}
     bool input(const block_io_t &data) override
     {
@@ -95,8 +92,7 @@ class DummyByteToComplex : public FilterChainElement
 {
 public:
     virtual ~DummyByteToComplex() {}
-    DummyByteToComplex(FilterChainElement *next) :
-        FilterChainElement(next)
+    DummyByteToComplex()
     {}
     bool input(const block_io_t &data) override
     {
