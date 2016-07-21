@@ -1,17 +1,23 @@
 #include <iostream>
+#include <stdlib.h>
+#include <cstring>
+#include <stdlib.h>
+#include <string>
+#include "utils.h"
+#include "fixedfft.h"
+#include "floatfft.h"
 
 using namespace std;
 
-#include "fixedfft.h"
-#include "floatfft.h"
 
 int main(void)
 {
 
+    string infile("data/fft/input/input3.txt");
+    string outfile("data/fft/output/out3.csv");
     cout << "program start" << endl;
-
     int i;
-
+//
 //	{
 //	floatfft fft(8);
 //	for(i = 0; i < 3; i++)
@@ -27,26 +33,76 @@ int main(void)
 //	}
 //	}
 
-//	cout << "---------------------------------------------------" << endl;
-//	cout << "---------------------------------------------------" << endl;
+    int realInput[8] = {5,6,8,-5,6,12,10,9}; // default values
+    int imagInput[8] = {0};
+    ifstream in(infile.c_str());
 
-    int a = pow(2, 15);
-    int scale = a / 1000.0;
+    if (!in.is_open()){
+            cout << "error reading" << endl;
+            return 1;
+    }//If cannot read from file, return 1;
 
+    std::string token;
+    for (i = 0; i < 8; i++) {
+        string line;
+        getline(in,line);
+        istringstream ss(line);
+        getline(ss, token, ',');
+        stringstream strValue;
+        strValue << token;
+        int intValue;
+        strValue >> intValue;
+        realInput[i] = intValue;
+        getline(ss, token, ',');
+        stringstream strValue2;
+        strValue2 << token;
+        strValue2 >> intValue;
+        imagInput[i] = intValue;
+    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+
+    int scale = 1;
     fixedfft fft(8);
     for (i = 0; i < 3; i++) {
 
-        fft.inputandtick(FixedComplex<32>(5 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(8 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(-5 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(12 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(10 * scale, 0));
-        fft.inputandtick(FixedComplex<32>(9 * scale, 0));
+        fft.inputandtick(FixedComplex<32>(realInput[0] * scale, imagInput[0] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[1] * scale, imagInput[1] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[2] * scale, imagInput[2] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[3] * scale, imagInput[3] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[4] * scale, imagInput[4] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[5] * scale, imagInput[5] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[6] * scale, imagInput[6] * scale));
+        fft.inputandtick(FixedComplex<32>(realInput[7] * scale, imagInput[7] * scale));
     }
 
-    //
+    ifstream in2(outfile.c_str());
+    if (!in2.is_open())
+         cout << "error reading" << endl;
+
+
+     string str[8];
+     string ans;
+     for (i = 0; i < 8; i++) {
+         in2 >> str[i];
+     }//Reads in output file
+
+     in2.close();
+
+     cout << "Hopefully correct:" << endl;
+     string temp[10];
+     for (i = 0; i < 8; i++) {
+         temp[reverseBits(8, i)] = str[i];
+     }//Reformats data in correct order
+
+
+     ofstream out2(outfile.c_str());
+
+     for (i = 0; i < 8; i++) {
+         out2 << temp[i] << endl;
+         cout << temp[i] << endl;
+     }//Prints data out in correct order
+
+
+
     //	floatfftstage stageone(8);
     //	floatfftstage stagetwo(4);
     //	floatfftstage stagethree(2);

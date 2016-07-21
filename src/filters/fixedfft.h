@@ -1,5 +1,6 @@
 #include <complex>
 #include <vector>
+#include "cordic.h"
 #include "fixedcomplex.h"
 
 #ifndef __FIXEDFFT_H__
@@ -14,6 +15,7 @@ class fixedfftbase
 {
 public:
     virtual void inputandtick(FixedComplex<32> x) = 0;
+    virtual ~fixedfftbase();
     int ready;
 };
 
@@ -40,7 +42,6 @@ public:
             FixedComplex<32> y);
     FixedComplex<32> twiddler(int k);
 };
-
 class fixedfftprint: public fixedfftbase
 {
 public:
