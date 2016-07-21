@@ -18,8 +18,8 @@ target_link_libraries(testiir ${Boost_LIBRARIES} ${ZEROMQ_LIBRARY} ${Boost_UNIT_
 add_custom_target(runtestiir COMMAND testiir DEPENDS testiir WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 ########################### TEST CIC ###########################
-#add_executable(testcic ${SYSTEM_UNDER_TEST_SOURCES} testcic.cpp)
-#target_link_libraries(testcic ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread)
+add_executable(testcic ${SYSTEM_UNDER_TEST_SOURCES} testcic.cpp)
+target_link_libraries(testcic ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} sigtypes ${SystemC_LIBRARIES} pthread sigfilters)
 
 ########################### Test Stitcher ###########################
 add_executable(teststitch ${SYSTEM_UNDER_TEST_SOURCES} teststitch.cpp)
