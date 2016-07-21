@@ -33,6 +33,8 @@ public:
     FixedComplex<32> comb(FixedComplex<32> current); //comb side of filter
     bool downsample(); //returns false when the sample should be passed
     void reset();
+
+    bool goodOutput;
     int                         m_numBRegisters; //number of b registers
     int                         m_numARegisters; //number of a registers
     int                         m_r; //Decimation factor

@@ -21,8 +21,6 @@ BOOST_AUTO_TEST_CASE(PYTHON_COMPARISON)
 {
     int waves[2] = { 1, 0 };
     int samples[2] = { 200, 200 };
-//	int waves[2] = {1,1};
-//	int samples[2] = {50,50};
     int num_sections = sizeof(samples) / sizeof(samples[0]);
     vector<FixedComplex<32> > datas;
     for (int k = 0; k < 7; k++)
@@ -36,8 +34,12 @@ BOOST_AUTO_TEST_CASE(PYTHON_COMPARISON)
     outdatas = stitch.stitch(400, 1000, 100, datas); //(int numsamples, int sampleRate, int frequency) stitches data with clockup and clockdown waves
 
     int size = outdatas.size();
-    string outFile = "data/stitcher/output/stitching2.csv"; //Output data file
+    string outFile = "data/stitcher/output/stitching2.txt"; //Output data file
     ofstream out(outFile.c_str());
+    if (!out.is_open()) {
+           cout << "error reading" << endl;
+           BOOST_REQUIRE_MESSAGE(0 == 1, "Could not write to data/stitcher/output/stitching2.txt");
+    }
 
     for (int i = 0; i < size; i++) {
         out << outdatas[i].real / 32768.0 << "," << outdatas[i].imag / 32768.0
@@ -52,11 +54,11 @@ BOOST_AUTO_TEST_CASE(PYTHON_COMPARISON)
     vector<string> vec;
     vector<double> answers; //Vector to hold answer data read from file
     string line;
-    string data2("data/stitcher/answers/stitcher_answers.csv"); //Answers data file
+    string data2("data/stitcher/answers/stitcher_answers.txt"); //Answers data file
     ifstream in2(data2.c_str());
     if (!in2.is_open()) {
         cout << "error reading" << endl;
-        return;
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from data/stitcher/answers/stitcher_answers.txt");
     }
 
     int l = 0;
