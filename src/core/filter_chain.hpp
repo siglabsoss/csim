@@ -1,13 +1,14 @@
 #pragma once
 
-#include "filter_chain_element.hpp"
+#include <core/filter_chain_element.hpp>
+
 
 class FilterChain : public AbstractSISO < block_io_t, block_io_t >
 {
 
 public:
     FilterChain();
-
+    FilterChain(const FilterChain &other);
     virtual ~FilterChain() {}
 
     bool input(const block_io_t &data) override;

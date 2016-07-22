@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#include "floatfft.h"
-#include "utils.h"
+#include <filters/floatfft.hpp>
+#include <utils/utils.hpp>
 #include "systemc.h"
 
 BOOST_AUTO_TEST_SUITE(FloatFFT)

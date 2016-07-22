@@ -3,7 +3,8 @@
 
 using namespace std;
 
-#include "floatfft.h"
+#include <filters/floatfft.hpp>
+
 const float pi = 3.14159265359;
 
 void floatfftstage::init(int Ninput)

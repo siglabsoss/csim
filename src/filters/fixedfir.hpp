@@ -14,8 +14,10 @@
 #include <iterator>     // ostream_operator
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
-#include "fixedcomplex.h"
-#include "filter_chain_element.hpp"
+
+
+#include <types/fixedcomplex.hpp>
+#include <core/filter_chain_element.hpp>
 
 class fixedfir : public FilterChainElement
 {

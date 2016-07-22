@@ -1,4 +1,4 @@
-#include "cic.h"
+#include <filters/cic.hpp>
 
 using namespace std;
 

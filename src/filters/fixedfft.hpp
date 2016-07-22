@@ -1,6 +1,7 @@
 #include <complex>
 #include <vector>
-#include "fixedcomplex.h"
+
+#include <types/fixedcomplex.hpp>
 
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__

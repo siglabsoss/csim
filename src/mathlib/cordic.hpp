@@ -9,7 +9,7 @@
 #define CORDIC_H_
 
 #include <iostream>
-#include "fixedcomplex.h"
+#include <types/fixedcomplex.hpp>
 class cordic
 {
 public:

@@ -1,7 +1,8 @@
 #pragma once
 #include <iostream>
 #include <cassert>
-#include "filter_chain_element.hpp"
+
+#include <core/filter_chain_element.hpp>
 
 class DummyComplex : public FilterChainElement
 {

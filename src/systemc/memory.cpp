@@ -4,7 +4,7 @@
  *  Created on: Jul 8, 2016
  *      Author: ubuntu
  */
-#include "memory.h"
+#include <systemc/memory.hpp>
 
 void memory::prc_memory()
 {

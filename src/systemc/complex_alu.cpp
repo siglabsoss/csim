@@ -6,7 +6,7 @@
  *      Author: ubuntu
  */
 
-#include "complex_alu.h"
+#include <systemc/complex_alu.hpp>
 
 void complex_alu::prc_complex_alu()
 {

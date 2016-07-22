@@ -1,9 +1,9 @@
 #include <iostream>
 #include <cmath>
-#include "fixedcomplex.h"
 using namespace std;
 
-#include "fixedfft.h"
+#include <filters/fixedfft.hpp>
+
 const float pi = 3.14159265359;
 
 void fixedfftstage::init(int Ninput)

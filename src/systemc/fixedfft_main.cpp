@@ -5,9 +5,9 @@
  *      Author: ubuntu
  */
 
-#include "driver.h"
-#include "monitor.h"
-#include "syscfft.h"
+#include <systemc/driver.hpp>
+#include <systemc/monitor.hpp>
+#include <systemc/syscfft.hpp>
 
 int sc_main(int argc, char* argv[])
 {

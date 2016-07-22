@@ -4,9 +4,9 @@
  *  Created on: Jul 8, 2016
  *      Author: ubuntu
  */
-#include "butterfly_two_pt.h"
-#include "twiddler.h"
-#include "memory.h"
+#include <systemc/butterfly_two_pt.hpp>
+#include <systemc/twiddler.hpp>
+#include <systemc/memory.hpp>
 
 #ifndef SYSCFFT_H_
 #define SYSCFFT_H_

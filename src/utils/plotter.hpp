@@ -10,8 +10,8 @@
 #include <complex>
 #include <iostream>
 
-#include "json.h"
-#include "fixedcomplex.h"
+#include <json/json.h>
+#include <types/fixedcomplex.hpp>
 
 #ifndef PLOTTER_H_
 #define PLOTTER_H_

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "abstract_siso.hpp"
-#include "fixedcomplex.h"
+#include <interfaces/abstract_siso.hpp>
+#include <types/fixedcomplex.hpp>
+
 #include <cstdint>
 #include <complex>
 

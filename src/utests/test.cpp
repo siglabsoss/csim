@@ -3,7 +3,7 @@
 
 // In this file only use the /included/ version
 #include <boost/test/included/unit_test.hpp>
-#include "fixedcomplex.h"
+#include <types/fixedcomplex.hpp>
 #include <iostream>
 
 //BOOST_AUTO_TEST_SUITE(Name)

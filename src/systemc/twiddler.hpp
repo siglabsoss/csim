@@ -5,7 +5,8 @@
  *  Created on: Jul 8, 2016
  *      Author: ubuntu
  */
-#include "complex_alu.h"
+#include <systemc/complex_alu.hpp>
+
 #include <iostream>
 #include <cmath>
 

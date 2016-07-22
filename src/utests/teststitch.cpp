@@ -12,7 +12,7 @@
 #include <iomanip> //For setprecision
 #include <stdlib.h>
 
-#include "stitcher.h"
+#include <filters/stitcher.hpp>
 
 using namespace std;
 using namespace boost;
