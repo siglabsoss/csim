@@ -7,7 +7,59 @@ using namespace std;
 const float pi = 3.14159265359;
 
 
-ofstream out2("data/fft/output/out3.csv");
+ofstream out2("data/fft/output/out3.txt");
+
+
+
+bool fixedfftbase::input(const block_io_t &data)
+{
+
+}
+
+bool fixedfftbase::output(block_io_t &data)
+{
+
+
+}
+
+
+void fixedfftbase::tick()
+{
+
+}
+
+bool fixedfft::input(const block_io_t &data)
+{
+    m_count++;
+    //XXX convert data -> sample
+    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
+    FixedComplex<16> sample = data.fc;
+    inputandtick(sample.to_32());
+    return true;
+}
+/**
+ * output - provide an output sample to the caller.
+ * @return false if no output sample is available.
+ */
+bool fixedfft::output(block_io_t &data)
+{
+    if (m_count > 15)
+        m_count = m_count - 16;
+
+    if (m_count > 7) {
+        data.type = IO_TYPE_FIXED_COMPLEX_16;
+     //   data.fc = next->m_output;
+        return true;
+    }
+    else {
+        return false;
+    }
+}
+
+void fixedfft::tick()
+{
+
+}
 
 fixedfftbase::~fixedfftbase()
 {
@@ -61,7 +113,6 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
 {
 
     int thet;
- //   theta = (360 / N) * k;
     thet = (360 / N) * k * 572; //2pi * 32768 / 360 = 572
     cordic c;
     sc_int<32> sin;
@@ -182,6 +233,7 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
 
 
     out2 << x.real.to_int() << "," << x.imag.to_int() << endl;
+    m_output = x.to_16();
    // out.close();
     count++;
 }
@@ -202,6 +254,7 @@ void fixedfftbuffer::inputandtick(FixedComplex<32> x)
 fixedfft::fixedfft(int Ninput) :
         printer(Ninput)
 {
+    m_count = 0;
     N = Ninput;
     stagecount = log2(N);
     int stagesize = 0;

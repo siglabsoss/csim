@@ -2,7 +2,7 @@
 #include <vector>
 #include "cordic.h"
 #include "fixedcomplex.h"
-
+#include "filter_chain_element.hpp"
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
 
@@ -11,26 +11,34 @@ enum FFFT_STATE
     FFFT_STATE_INITIAL, FFFT_STATE_READ, FFFT_STATE_OUTPUT
 };
 
-class fixedfftbase
+class fixedfftbase : public FilterChainElement
 {
 public:
+    int m_count;
+    bool input(const block_io_t &data) override;
+        /**
+         * output - provide an output sample to the caller.
+         * @return false if no output sample is available.
+         */
+    bool output(block_io_t &data) override;
+
+    void tick() override;
     virtual void inputandtick(FixedComplex<32> x) = 0;
     virtual ~fixedfftbase();
     int ready;
+    FixedComplex<16>    m_output;
 };
 
 class fixedfftstage: public fixedfftbase
 {
 public:
-    int N;
-    FixedComplex<32> *memory;
-    FFFT_STATE state;
-
-    int read_pointer;
-    int write_pointer;
-    int clock;
-
-    fixedfftbase *next;
+    int                  N;
+    FixedComplex<32>    *memory;
+    FFFT_STATE          state;
+    int                 read_pointer;
+    int                 write_pointer;
+    int                 clock;
+    fixedfftbase        *next;
 
     fixedfftstage(int Ninput);
     fixedfftstage();
@@ -41,6 +49,7 @@ public:
     void butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
             FixedComplex<32> y);
     FixedComplex<32> twiddler(int k);
+
 };
 class fixedfftprint: public fixedfftbase
 {
@@ -65,6 +74,14 @@ public:
 class fixedfft: public fixedfftbase
 {
 public:
+    bool input(const block_io_t &data) override;
+        /**
+         * output - provide an output sample to the caller.
+         * @return false if no output sample is available.
+         */
+    bool output(block_io_t &data) override;
+
+    void tick() override;
     int N;
     int stagecount;
     fixedfftstage *stages;
