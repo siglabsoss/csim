@@ -1,8 +1,9 @@
 #include <complex>
 #include <vector>
-
-#include "filter_chain_element.hpp"
+#include <mathlib/cordic.hpp>
+#include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
+#include <queue>
 
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
@@ -27,7 +28,8 @@ public:
     virtual void inputandtick(FixedComplex<32> x) = 0;
     virtual ~fixedfftbase();
     int ready;
-    FixedComplex<16>    m_output;
+    queue<FixedComplex<16> >   m_output;
+
 };
 
 class fixedfftstage: public fixedfftbase

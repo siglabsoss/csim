@@ -7,10 +7,6 @@ using namespace std;
 const float pi = 3.14159265359;
 
 
-ofstream out2("data/fft/output/out3.txt");
-
-
-
 bool fixedfftbase::input(const block_io_t &data)
 {
 
@@ -43,17 +39,21 @@ bool fixedfft::input(const block_io_t &data)
  */
 bool fixedfft::output(block_io_t &data)
 {
-    if (m_count > 15)
-        m_count = m_count - 16;
-
-    if (m_count > 7) {
-        data.type = IO_TYPE_FIXED_COMPLEX_16;
-     //   data.fc = next->m_output;
-        return true;
+    if (m_count > 15) {
+        m_count = m_count - 16; //Full cycle of outputs complete
     }
+
+    if (m_count >= 8) {
+        data.type = IO_TYPE_FIXED_COMPLEX_16;
+
+        data.fc = printer.m_output.front();
+        printer.m_output.pop();
+
+        return true;
+    }//Time to start outputs
     else {
         return false;
-    }
+    }//Not ready
 }
 
 void fixedfft::tick()
@@ -63,7 +63,7 @@ void fixedfft::tick()
 
 fixedfftbase::~fixedfftbase()
 {
-    out2.close();
+
 }
 
 void fixedfftstage::init(int Ninput)
@@ -231,9 +231,7 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
     cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
             << x.imag.to_int() / 32.0 << " " << x << endl;
 
-
-    out2 << x.real.to_int() << "," << x.imag.to_int() << endl;
-    m_output = x.to_16();
+    m_output.push(x.to_16());
    // out.close();
     count++;
 }
@@ -254,6 +252,7 @@ void fixedfftbuffer::inputandtick(FixedComplex<32> x)
 fixedfft::fixedfft(int Ninput) :
         printer(Ninput)
 {
+
     m_count = 0;
     N = Ninput;
     stagecount = log2(N);
