@@ -78,7 +78,8 @@ int main()
      ofstream out2(outfile.c_str());
 
      for (i = 0; i < 8; i++) {
-         out2 << answers[i].real.to_int() <<"," << answers[i].imag.to_int() << endl;
+         out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
+         out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
          cout << answers[i];
      }//Prints data out in correct order
 
