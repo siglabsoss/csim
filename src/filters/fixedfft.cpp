@@ -26,8 +26,7 @@ void fixedfftbase::tick()
 
 bool fixedfft::input(const block_io_t &data)
 {
-    m_count++;
-    //XXX convert data -> sample
+    m_count++;//One more input has been received
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
     FixedComplex<16> sample = data.fc;
     inputandtick(sample.to_32());
@@ -231,8 +230,7 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
     cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
             << x.imag.to_int() / 32.0 << " " << x << endl;
 
-    m_output.push(x.to_16());
-   // out.close();
+    m_output.push(x.to_16());//adds this output to the queue of outputs
     count++;
 }
 
