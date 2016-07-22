@@ -39,12 +39,15 @@ bool RadioS::rxWave(const std::complex<double> &sample_in)
 bool RadioS::txWave(std::complex<double> &sample_out)
 {
     block_io_t data;
-    bool didRx = m_mod.output(data);
-    if (didRx) {
+    //A properly formed modulation filter chain will always
+    //have an output, but we check anyway
+    bool didTx = m_mod.output(data);
+    //XXX just add an assertion here
+    if (didTx) {
         assert(data.type == IO_TYPE_COMPLEX_DOUBLE); //sanity check on the modulation filter chain output
         sample_out = data.rf;
     }
-    return didRx;
+    return didTx;
 }
 
 Vector2d  RadioS::getPosition() const

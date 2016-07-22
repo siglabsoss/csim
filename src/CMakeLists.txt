@@ -8,6 +8,7 @@ link_directories(
 	${Boost_LIBRARY_DIRS}
 )
 
+add_subdirectory(apps)
 add_subdirectory(core)
 add_subdirectory(filters)
 add_subdirectory(mathlib)
