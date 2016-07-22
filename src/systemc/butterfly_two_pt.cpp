@@ -1,4 +1,4 @@
-#include "butterfly_two_pt.h"
+#include <systemc/butterfly_two_pt.hpp>
 
 void butterfly_two_pt::butterfly_fft()
 {

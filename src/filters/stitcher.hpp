@@ -8,7 +8,8 @@
 #ifndef STITCHER_H_
 #define STITCHER_H_
 
-#include "cordic.h"
+#include <mathlib/cordic.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <stdlib.h> //rand()

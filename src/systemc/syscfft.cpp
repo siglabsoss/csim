@@ -1,7 +1,8 @@
 // All systemc modules should include systemc.h header file
-#include "syscfft.h"
-#include "driver.h"
-#include "monitor.h"
+#include <systemc/syscfft.hpp>
+#include <systemc/driver.hpp>
+#include <systemc/monitor.hpp>
+
 void syscfft::prc_state()
 {
 

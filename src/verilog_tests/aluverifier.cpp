@@ -6,7 +6,7 @@
 #include <iterator>     // ostream_operator
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
-#include "fixedcomplex.h"
+#include <types/fixedcomplex.hpp>
 
 using namespace boost;
 using namespace std;

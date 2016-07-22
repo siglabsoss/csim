@@ -11,8 +11,9 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
-#include "filter_chain_element.hpp"
-#include "fixedcomplex.h"
+
+#include <core/filter_chain_element.hpp>
+#include <types/fixedcomplex.hpp>
 
 class fixedcic : public FilterChainElement
 {

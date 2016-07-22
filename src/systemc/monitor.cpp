@@ -4,7 +4,8 @@
  *  Created on: Jul 13, 2016
  *      Author: ubuntu
  */
-#include "monitor.h"
+#include <systemc/monitor.hpp>
+
 void monitor::prc_monitor()
 {
     cout << "At time " << sc_time_stamp() << "::";

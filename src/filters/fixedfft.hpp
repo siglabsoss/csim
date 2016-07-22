@@ -1,8 +1,9 @@
 #include <complex>
 #include <vector>
-#include "cordic.h"
-#include "fixedcomplex.h"
+
 #include "filter_chain_element.hpp"
+#include <types/fixedcomplex.hpp>
+
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
 

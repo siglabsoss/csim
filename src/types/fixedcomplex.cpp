@@ -5,7 +5,7 @@
  *      Author: ubuntu
  */
 
-#include "fixedcomplex.h"
+#include <types/fixedcomplex.hpp>
 
 template<int B>
 void FixedComplex<B>::print()

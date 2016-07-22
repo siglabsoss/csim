@@ -8,7 +8,7 @@
 #ifndef FixedComplex_H_
 #define FixedComplex_H_
 using namespace std;
-#include "systemc.h"
+#include <systemc.h>
 #include <iostream>
 template<int B> //How many bits the number will have
 class FixedComplex

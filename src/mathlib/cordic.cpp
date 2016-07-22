@@ -5,7 +5,8 @@
  *      Author: ubuntu
  */
 
-#include "cordic.h"
+#include <mathlib/cordic.hpp>
+
 using namespace std;
 
 cordic::cordic()

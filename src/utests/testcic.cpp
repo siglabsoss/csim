@@ -12,7 +12,7 @@
 #include <iomanip> //For setprecision
 #include <stdlib.h>
 
-#include "cic.h"
+#include <filters/cic.hpp>
 
 using namespace boost;
 using namespace std;

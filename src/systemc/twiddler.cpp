@@ -5,7 +5,7 @@
  *      Author: ubuntu
  */
 
-#include "twiddler.h"
+#include <systemc/twiddler.hpp>
 
 void twiddler::twiddler_comp()
 {

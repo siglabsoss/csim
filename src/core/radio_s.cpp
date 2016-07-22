@@ -1,10 +1,10 @@
 
-#include "radio_s.hpp"
-#include "dummy_filter_element.hpp"
+#include <core/radio_s.hpp>
+
 #include <cassert>
 
-RadioS::RadioS(Vector2d position, FilterChain &modChain, FilterChain &demodChain) :
-    m_position(position),
+RadioS::RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain) :
+    m_position(config.position),
     m_mod(modChain),
     m_demod(demodChain)
 {}

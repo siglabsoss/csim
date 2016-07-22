@@ -5,7 +5,7 @@
  *      Author: ubuntu
  */
 
-#include "stitcher.h"
+#include <filters/stitcher.hpp>
 
 using namespace std;
 

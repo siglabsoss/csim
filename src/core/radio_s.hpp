@@ -3,13 +3,19 @@
  */
 #pragma once
 
-#include "abstract_radio.hpp"
-#include "filter_chain.hpp"
+#include <interfaces/abstract_radio.hpp>
+
+#include <core/filter_chain.hpp>
+
+struct radio_config_t
+{
+    Vector2d position;
+    //XXX additional radio configurations go here
+};
 
 class RadioS : public AbstractRadio
 {
 public:
-    RadioS(const Vector2d position, FilterChain &modChain, FilterChain &demodChain);
 
     //Demodulation
     bool         rxWave(const std::complex<double> &sample_in) override;
@@ -19,11 +25,18 @@ public:
     bool         txByte(const uint8_t &byte) override;
     bool         txWave(std::complex<double> &sample_out) override;
 
+    //Other
     Vector2d     getPosition() const override;
-
     void         tick() override;
-private:
+
+    //Factory
+    static RadioS * create(radio_config_t &config);
+
+private: //methods
+    RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain);
+
+private: //members
     Vector2d                m_position;
-    FilterChain &           m_mod;
-    FilterChain &           m_demod;
+    FilterChain             m_mod;
+    FilterChain             m_demod;
 };

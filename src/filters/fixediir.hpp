@@ -7,8 +7,10 @@
 
 #ifndef FIXEDIIR_H_
 #define FIXEDIIR_H_
-#include "fixedcomplex.h"
-#include "filter_chain_element.hpp"
+
+#include <types/fixedcomplex.hpp>
+#include <core/filter_chain_element.hpp>
+
 //Note that a[0] must be 1
 
 class fixediir : public FilterChainElement

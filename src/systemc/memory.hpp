@@ -4,7 +4,7 @@
  *  Created on: Jul 8, 2016
  *      Author: ubuntu
  */
-#include "systemc.h"
+#include <systemc.h>
 #ifndef MEMORY_H_
 #define MEMORY_H_
 

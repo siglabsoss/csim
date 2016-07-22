@@ -1,4 +1,4 @@
-#include "cordic.h"
+#include <mathlib/cordic.hpp>
 #include <iostream>
 
 using namespace std;

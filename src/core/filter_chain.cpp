@@ -1,10 +1,18 @@
-#include "filter_chain.hpp"
+#include <core/filter_chain.hpp>
 
 FilterChain::FilterChain() :
     m_head(nullptr),
     m_output(),
     m_outputReady(false)
 {
+}
+
+FilterChain::FilterChain(const FilterChain &other)
+{
+    //XXX could use std::move / std::unique_ptr here
+    this->m_head = other.m_head;
+    this->m_output = other.m_output;
+    this->m_outputReady = other.m_outputReady;
 }
 
 bool FilterChain::input(const block_io_t &data)

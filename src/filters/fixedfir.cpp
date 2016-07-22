@@ -5,7 +5,7 @@
  *      Author: ubuntu
  */
 
-#include <fixedfir.h>
+#include <filters/fixedfir.hpp>
 
 #define FILTER_LEN  63
 #define MAX_INPUT_LEN   80// maximum length of filter than can be handled

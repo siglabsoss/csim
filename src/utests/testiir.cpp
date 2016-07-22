@@ -11,7 +11,7 @@
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
 #include <stdlib.h>
-#include "fixediir.h"
+#include <filters/fixediir.hpp>
 
 
 #define NUM_X_REGISTERS 2

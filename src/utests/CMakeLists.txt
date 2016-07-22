@@ -27,7 +27,7 @@ target_link_libraries(teststitch ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LI
 
 ########################### Test Radio ###########################
 add_executable(testradio testradio.cpp)
-target_link_libraries(testradio ${SystemC_LIBRARIES} ${Boost_LIBRARIES} pthread sigcore sigfilters sigtypes)
+target_link_libraries(testradio ${Boost_LIBRARIES} pthread sigcore sigfilters sigtypes ${SystemC_LIBRARIES} )
 
 ########################### CordicTester ###########################
 add_executable(cordictester cordictester.cpp)

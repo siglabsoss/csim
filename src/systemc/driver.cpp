@@ -4,7 +4,7 @@
  *  Created on: Jul 13, 2016
  *      Author: ubuntu
  */
-#include "driver.h"
+#include <systemc/driver.hpp>
 
 void driver::prc_driver()
 {
