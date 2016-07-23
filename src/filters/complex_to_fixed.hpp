@@ -18,7 +18,7 @@ public:
     bool output(block_io_t &data) override
     {
         data = m_output;
-        std::cout << data << std::endl;
+        //std::cout << data << std::endl;
         return true;
     }
 

@@ -22,7 +22,6 @@ bool FilterChain::input(const block_io_t &data)
     }
 
     bool didInput = m_head->input(data);
-    tick();
     return didInput;
 }
 
@@ -42,7 +41,7 @@ void FilterChain::tick()
         //Tick the current element
         current->tick();
         //Check if there's output waiting, move on to tick the next element if no output,
-        //otherwise forward the output to the next element
+        //otherwise forward the output to the next element first
         bool didOutput = current->output(m_output);
         if (didOutput) {
             if (current->m_next == nullptr) {

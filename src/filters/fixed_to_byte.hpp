@@ -22,7 +22,7 @@ public:
         if (m_outputReady) {
             m_outputReady = false;
             data = m_output;
-            std::cout << data << std::endl;
+            //std::cout << data << std::endl;
             return true;
         }
         return false;

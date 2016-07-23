@@ -21,19 +21,19 @@ void SigWorld::tick()
     {
         RadioS *current = *it;
 
-        /* Step 1 - Get the current radio's RF sample */
-        std::complex<double> sample;
-        current->txWave(sample);
+        /* Step 1 - Feed the radio a waveform sample from the environment */
+        std::complex<double> rxSample;
+        m_radioSet.getSampleForRadio(it, rxSample);
+        current->rxWave(rxSample);
 
-        /* Step 2 - Queue the sample in a buffer */
-        m_radioSet.bufferSampleForRadio(it, sample);
-    }
+        /* Step 2 - trigger the radio's internal processing */
+        current->tick();
 
-    for (RadioSet::iterator it = m_radioSet.begin(); it != m_radioSet.end(); it++)
-    {
-        RadioS *current = *it;
+        /* Step 3 - Get the current radio's RF output */
+        std::complex<double> txSample;
+        current->txWave(txSample);
 
-        std::complex<double> sample;
-        m_radioSet.getSampleForRadio(it, sample);
+        /* Step 4 - Queue the sample in a buffer */
+        m_radioSet.bufferSampleForRadio(it, txSample);
     }
 }

@@ -42,7 +42,7 @@ bool fixedfir::output(block_io_t &data)
 {
     data.type = IO_TYPE_FIXED_COMPLEX_16;
     data.fc = m_output;
-    std::cout << m_output << std::endl;
+    //std::cout << m_output << std::endl;
     return true;
 }
 

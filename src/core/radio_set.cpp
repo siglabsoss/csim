@@ -81,7 +81,7 @@ void RadioSet::getSampleForRadio(const RadioSet::iterator &it, std::complex<doub
         double distance = m_distances(i, radioOfInterest);
         int delay = sampleDelayForDistance(distance);
         assert (delay <= m_txBuffers[radio].capacity());
-        sample += m_txBuffers[radio].at(delay); //TODO power loss
+        sample += m_txBuffers[radio].at(delay-1); //TODO power loss
     }
 }
 

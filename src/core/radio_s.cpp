@@ -57,5 +57,6 @@ Vector2d  RadioS::getPosition() const
 
 void RadioS::tick()
 {
-
+    m_mod.tick();
+    m_demod.tick();
 }
