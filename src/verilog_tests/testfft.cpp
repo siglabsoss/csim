@@ -17,7 +17,7 @@ using namespace std;
 
 int main()
 {
-    string infile("data/fft/input/input1.txt");
+    string infile("data/fft/input/data_file_complex.csv");
     string outfile("data/fft/output/out1.txt");
     cout << "program start" << endl;
     int i;

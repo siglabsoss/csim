@@ -16,7 +16,7 @@ int main()
     FixedComplex<16> input1[1024]; //Array to hold inputs
     FixedComplex<16> input2[1024]; //Array to hold inputs
 
-    string data("data/alu/input/in1.csv"); //Input data file
+    string data("data/alu/input/data_file_complex.csv"); //Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open()) {
