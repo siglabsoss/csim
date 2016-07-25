@@ -10,14 +10,14 @@ public:
         m_counter(0),
         m_outputReady(false)
     {}
-    bool input(const block_io_t &data) override
+    bool input(const filter_io_t &data) override
     {
         assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
         m_input = data.fc;
         return true;
     }
 
-    bool output(block_io_t &data) override
+    bool output(filter_io_t &data) override
     {
         if (m_outputReady) {
             m_outputReady = false;
@@ -38,7 +38,7 @@ public:
         }
     }
 private:
-    block_io_t m_output;
+    filter_io_t m_output;
     FixedComplex<16> m_input;
     unsigned int m_counter;
     bool m_outputReady;

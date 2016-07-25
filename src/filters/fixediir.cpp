@@ -25,7 +25,7 @@ void fixediir::reset()
     } //Initialize registers
 
 }
-bool fixediir::input(const block_io_t &data)
+bool fixediir::input(const filter_io_t &data)
 {
 
     //XXX convert data -> sample
@@ -38,7 +38,7 @@ bool fixediir::input(const block_io_t &data)
  * output - provide an output sample to the caller.
  * @return false if no output sample is available.
  */
-bool fixediir::output(block_io_t &data)
+bool fixediir::output(filter_io_t &data)
 {
     data.type = IO_TYPE_FIXED_COMPLEX_16;
     data.fc = m_output;

@@ -19,12 +19,12 @@ class fixedcic : public FilterChainElement
 {
 public:
 
-    bool input(const block_io_t &data) override;
+    bool input(const filter_io_t &data) override;
     /**
      * output - provide an output sample to the caller.
      * @return false if no output sample is available.
      */
-    bool output(block_io_t &data) override;
+    bool output(filter_io_t &data) override;
 
     void tick() override;
     fixedcic();

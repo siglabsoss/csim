@@ -15,13 +15,13 @@ public:
     {
         m_output.type = IO_TYPE_COMPLEX_DOUBLE;
     }
-    bool input(const block_io_t &data) override
+    bool input(const filter_io_t &data) override
     {
         //don't care about input
         return true;
     }
 
-    bool output(block_io_t &data) override
+    bool output(filter_io_t &data) override
     {
         data = m_output;
         return true;
@@ -38,7 +38,7 @@ public:
     }
 private:
     double m_ticksPerPeriod;
-    block_io_t m_output;
+    filter_io_t m_output;
     size_t m_count;
 
 };

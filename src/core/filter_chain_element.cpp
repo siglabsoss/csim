@@ -1,7 +1,7 @@
 #include <core/filter_chain_element.hpp>
 
 #include <iomanip>
-std::ostream& operator<<(std::ostream& os, const block_io_t& obj)
+std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
 {
     switch(obj.type) {
         case IO_TYPE_COMPLEX_DOUBLE:

@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads
     int m = 0;
     for (int k = 0; k < i; k++)
       {
-          block_io_t data;
+          filter_io_t data;
           data.type =  IO_TYPE_FIXED_COMPLEX_16;
           data.fc = input[k];
           cic.input(data); //Filters data

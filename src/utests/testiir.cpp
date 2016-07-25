@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER)
 
     fixediir iir(NUM_X_REGISTERS, NUM_Y_REGISTERS, a, b);
 
-    block_io_t data;
+    filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_16;
     for (int i = 0; i < 4; i ++) {
 
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
 
     assert(l == i);//Length of inputs is length of answers/outputs.
     fixediir iir(j, j, atap, btap);
-    block_io_t data2;
+    filter_io_t data2;
     data2.type =  IO_TYPE_FIXED_COMPLEX_16;
     for (int j = 0; j < i; j ++) {
         data2.fc = input[j];

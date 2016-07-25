@@ -12,7 +12,7 @@ enum io_type_t : uint8_t {
     IO_TYPE_FIXED_COMPLEX_16,
     IO_TYPE_BYTE
 };
-struct block_io_t
+struct filter_io_t
 {
     //Data members
     io_type_t type;
@@ -22,12 +22,12 @@ struct block_io_t
         uint8_t byte;
     };
 
-    block_io_t() :
+    filter_io_t() :
         type(IO_TYPE_NULL)
     {}
-    ~block_io_t() {}
+    ~filter_io_t() {}
 
-    block_io_t & operator=(const block_io_t &rhs)
+    filter_io_t & operator=(const filter_io_t &rhs)
     {
         if (this != &rhs) {
             this->type = rhs.type;
@@ -48,9 +48,9 @@ struct block_io_t
         return *this;
     }
 };
-extern std::ostream& operator<<(std::ostream& os, const block_io_t& obj);
+extern std::ostream& operator<<(std::ostream& os, const filter_io_t& obj);
 
-class FilterChainElement : public AbstractSISO< block_io_t, block_io_t >
+class FilterChainElement : public AbstractSISO< filter_io_t, filter_io_t >
 {
 public:
     virtual ~FilterChainElement() {}

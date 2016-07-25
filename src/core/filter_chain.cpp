@@ -15,7 +15,7 @@ FilterChain::FilterChain(const FilterChain &other)
     this->m_outputReady = other.m_outputReady;
 }
 
-bool FilterChain::input(const block_io_t &data)
+bool FilterChain::input(const filter_io_t &data)
 {
     if (m_head == nullptr) {
         return false;
@@ -25,7 +25,7 @@ bool FilterChain::input(const block_io_t &data)
     return didInput;
 }
 
-bool FilterChain::output(block_io_t &data)
+bool FilterChain::output(filter_io_t &data)
 {
     if (m_outputReady) {
         data = m_output;
