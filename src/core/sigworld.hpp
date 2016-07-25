@@ -6,7 +6,7 @@ class SigWorld
 {
 public:
     SigWorld();
-    void addRadio(radio_config_t &config);
+    void addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config);
     void init();
     void tick();
 private:

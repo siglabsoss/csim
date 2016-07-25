@@ -29,10 +29,6 @@ public:
     Vector2d     getPosition() const override;
     void         tick() override;
 
-    //Factory
-    static RadioS * create(radio_config_t &config);
-
-private: //methods
     RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain);
 
 private: //members

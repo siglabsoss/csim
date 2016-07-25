@@ -22,7 +22,7 @@ public:
      * addRadio - Add a new radio to the set of radios.
      * @param config The new radios configuration.
      */
-    void addRadio(radio_config_t &config);
+    void addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config);
     void init();
     void bufferSampleForRadio(const iterator &it, std::complex<double> &sample);
 

@@ -5,9 +5,9 @@ SigWorld::SigWorld()
 
 }
 
-void SigWorld::addRadio(radio_config_t &config)
+void SigWorld::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
 {
-    m_radioSet.addRadio(config);
+    m_radioSet.addRadio(radioFactory, config);
 }
 
 void SigWorld::init()
