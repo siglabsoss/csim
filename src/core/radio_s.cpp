@@ -4,10 +4,16 @@
 #include <cassert>
 
 RadioS::RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain) :
+    m_id(config.id),
     m_position(config.position),
     m_mod(modChain),
     m_demod(demodChain)
 {}
+
+radio_id_t RadioS::getId() const
+{
+    return m_id;
+}
 
 bool RadioS::rxByte(uint8_t &byte)
 {

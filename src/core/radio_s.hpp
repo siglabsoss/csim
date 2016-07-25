@@ -7,10 +7,12 @@
 
 #include <core/filter_chain.hpp>
 
+typedef uint32_t radio_id_t;
+
 struct radio_config_t
 {
     Vector2d position;
-    //XXX additional radio configurations go here
+    radio_id_t id;
 };
 
 class RadioS : public AbstractRadio
@@ -27,11 +29,13 @@ public:
 
     //Other
     Vector2d     getPosition() const override;
+    radio_id_t   getId() const;
     void         tick() override;
 
     RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain);
 
 private: //members
+    radio_id_t              m_id;
     Vector2d                m_position;
     FilterChain             m_mod;
     FilterChain             m_demod;

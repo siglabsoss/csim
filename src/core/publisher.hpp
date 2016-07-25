@@ -8,8 +8,8 @@ public:
     void send(const uint8_t *data);
 
 private:
-    zmq::message_t       m_msg;
-    size_t               m_dataOffset;
+    size_t               m_msgLen;
+    std::string          m_topic;
     zmq::context_t       m_context;
     zmq::socket_t        m_socket;
 };

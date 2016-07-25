@@ -12,5 +12,5 @@ public:
     void tick();
 private:
     RadioSet    m_radioSet;
-    std::vector<Publisher *>   m_publishers;
+    Publisher   m_publisher;
 };

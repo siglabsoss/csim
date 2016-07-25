@@ -55,16 +55,7 @@ class FilterChainElement : public AbstractSISO< block_io_t, block_io_t >
 public:
     virtual ~FilterChainElement() {}
 
-    FilterChainElement(FilterChainElement *next) :
-        m_next(next)
-    {
-    }
-    FilterChainElement() :
-        m_next(nullptr)
-    {
-    }
-
-    virtual void tick() {}
+    FilterChainElement(FilterChainElement *next = nullptr, std::string name = std::string("NONAME"));
 
     friend FilterChainElement& operator+(const FilterChainElement &lhs, FilterChainElement &rhs)
     {
@@ -72,6 +63,12 @@ public:
         return rhs;
     }
 
+    const std::string &getName() const;
 
     FilterChainElement *m_next;
+private:
+    std::string         m_name;
+    unsigned int        m_uuid;
+
+    static unsigned int instanceCount;
 };

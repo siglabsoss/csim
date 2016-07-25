@@ -23,7 +23,7 @@ public:
      * @param config The new radios configuration.
      * @return ID of radio
      */
-    int addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config);
+    radio_id_t addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config);
     void init();
     void bufferSampleForRadio(const iterator &it, std::complex<double> &sample);
 

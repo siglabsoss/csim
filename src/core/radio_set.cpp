@@ -11,7 +11,7 @@ RadioSet::RadioSet() :
 
 }
 
-int RadioSet::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
+radio_id_t RadioSet::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
 {
     assert(m_didInit == false); //can't add radios after init (for now)
     RadioS *newRadio = radioFactory(config);
@@ -29,7 +29,7 @@ int RadioSet::addRadio(RadioS *(radioFactory)(const radio_config_t &config), rad
         m_distances(numRadios - 1, i) = distance;
         m_distances(i, numRadios - 1) = distance;
     }
-    return numRadios;
+    return newRadio->getId();
 }
 
 
@@ -66,7 +66,7 @@ int RadioSet::sampleDelayForDistance(double distance)
 
 void RadioSet::bufferSampleForRadio(const RadioSet::iterator &it, std::complex<double> &sample)
 {
-    m_txBuffers[*it].push_back(sample);
+    m_txBuffers[*it].push_front(sample);
 }
 
 void RadioSet::getSampleForRadio(const RadioSet::iterator &it, std::complex<double> &sample)
@@ -79,11 +79,11 @@ void RadioSet::getSampleForRadio(const RadioSet::iterator &it, std::complex<doub
         if (radioOfInterest == i) { //skip ourself
             continue;
         }
-        RadioS *radio = m_radios[i];
+        RadioS *otherRadio = m_radios[i];
         double distance = m_distances(i, radioOfInterest);
         int delay = sampleDelayForDistance(distance);
-        assert (delay <= m_txBuffers[radio].capacity());
-        sample += m_txBuffers[radio].at(delay-1); //TODO power loss
+        assert (delay <= m_txBuffers[otherRadio].capacity());
+        sample += m_txBuffers[otherRadio].at(delay-1); //TODO power loss
     }
 }
 

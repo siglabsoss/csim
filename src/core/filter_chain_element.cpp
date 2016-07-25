@@ -18,3 +18,18 @@ std::ostream& operator<<(std::ostream& os, const block_io_t& obj)
     }
     return os;
 }
+
+const std::string &FilterChainElement::getName() const
+{
+    return m_name;
+}
+
+unsigned int FilterChainElement::instanceCount = 0;
+
+FilterChainElement::FilterChainElement(FilterChainElement *next, std::string name) :
+    m_name(name),
+    m_next(next),
+    m_uuid(instanceCount)
+{
+    instanceCount++;
+}

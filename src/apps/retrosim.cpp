@@ -29,23 +29,20 @@ int main(int argc, char *argv[])
 
     radio_config_t config;
 
-    for (int i = 0; i < 10; i++) {
-        config.position = Vector2d(static_cast<double>(i), static_cast<double>(i));
+    for (int i = 0; i < 3; i++) {
+        config.position = Vector2d(0.0, i*1199.6);
+        config.id = i+1;
         world.addRadio([](const radio_config_t &config)
                 {
                     FilterChain modulation_chain;
 
-                    SineWave *sw = new SineWave(1000);
+                    SineWave *sw = new SineWave(2000);
                     //modulation_chain = *dc4 + *dbtc + *db6 + *db5 + *db4;
                     modulation_chain = *sw;
 
                     FilterChain demodulation_chain;
-                    ComplexToFixed *ctf = new ComplexToFixed;
-                    FixedComplex<16> taps[10];
-                    fixedfir *fir = new fixedfir(10, taps);
-                    FixedToByte *ftb = new FixedToByte;
-
-                    demodulation_chain = *ftb + *fir + *ctf;
+                    sw = new SineWave(300);
+                    demodulation_chain = *sw;
 
                     return new RadioS(config, modulation_chain, demodulation_chain);
                 }, config);

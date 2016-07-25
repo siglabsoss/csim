@@ -3,23 +3,20 @@
 
 SigWorld::SigWorld() :
     m_radioSet(),
-    m_publishers()
+    m_publisher("RF", sizeof(RFSample))
 {
 
 }
 
 void SigWorld::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
 {
-    int m_radioId = m_radioSet.addRadio(radioFactory, config);
-    std::stringstream ss;
-    ss << "RF" << m_radioId;
-    Publisher *pub = new Publisher(ss.str(), sizeof(RFSample));
-    m_publishers.push_back(pub);
+    (void)m_radioSet.addRadio(radioFactory, config);
 }
 
 void SigWorld::init()
 {
     m_radioSet.init();
+    m_publisher.init();
 }
 
 void SigWorld::tick()
@@ -46,11 +43,12 @@ void SigWorld::tick()
         m_radioSet.bufferSampleForRadio(it, txSample);
 
         /* Step 5 - Publish data */
+        sample.id     = (uint64_t)current->getId();
         sample.rxReal = rxSample.real();
         sample.rxImag = rxSample.imag();
         sample.txReal = txSample.real();
         sample.txImag = txSample.imag();
-        m_publishers[count]->send((uint8_t *)(&sample));
+        m_publisher.send((uint8_t *)(&sample));
 
         count++;
     }
