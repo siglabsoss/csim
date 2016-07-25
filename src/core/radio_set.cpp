@@ -11,7 +11,7 @@ RadioSet::RadioSet() :
 
 }
 
-void RadioSet::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
+int RadioSet::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
 {
     assert(m_didInit == false); //can't add radios after init (for now)
     RadioS *newRadio = radioFactory(config);
@@ -29,6 +29,7 @@ void RadioSet::addRadio(RadioS *(radioFactory)(const radio_config_t &config), ra
         m_distances(numRadios - 1, i) = distance;
         m_distances(i, numRadios - 1) = distance;
     }
+    return numRadios;
 }
 
 

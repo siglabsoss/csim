@@ -5,6 +5,7 @@ set(SIGCORE_SOURCES
 	radio_set.cpp
 	sigworld.cpp
 	logger.cpp
+	publisher.cpp
 )
 
 add_library(sigcore ${SIGCORE_SOURCES})

@@ -1,13 +1,20 @@
 #include <core/sigworld.hpp>
+#include <messages/rf_sample.hpp>
 
-SigWorld::SigWorld()
+SigWorld::SigWorld() :
+    m_radioSet(),
+    m_publishers()
 {
 
 }
 
 void SigWorld::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
 {
-    m_radioSet.addRadio(radioFactory, config);
+    int m_radioId = m_radioSet.addRadio(radioFactory, config);
+    std::stringstream ss;
+    ss << "RF" << m_radioId;
+    Publisher *pub = new Publisher(ss.str(), sizeof(RFSample));
+    m_publishers.push_back(pub);
 }
 
 void SigWorld::init()
@@ -17,12 +24,15 @@ void SigWorld::init()
 
 void SigWorld::tick()
 {
+    size_t count = 0;
     for (RadioSet::iterator it = m_radioSet.begin(); it != m_radioSet.end(); it++)
     {
         RadioS *current = *it;
+        RFSample sample; //for publishing externally
+        std::complex<double> rxSample;
+        std::complex<double> txSample;
 
         /* Step 1 - Feed the radio a waveform sample from the environment */
-        std::complex<double> rxSample;
         m_radioSet.getSampleForRadio(it, rxSample);
         current->rxWave(rxSample);
 
@@ -30,10 +40,18 @@ void SigWorld::tick()
         current->tick();
 
         /* Step 3 - Get the current radio's RF output */
-        std::complex<double> txSample;
         current->txWave(txSample);
 
         /* Step 4 - Queue the sample in a buffer */
         m_radioSet.bufferSampleForRadio(it, txSample);
+
+        /* Step 5 - Publish data */
+        sample.rxReal = rxSample.real();
+        sample.rxImag = rxSample.imag();
+        sample.txReal = txSample.real();
+        sample.txImag = txSample.imag();
+        m_publishers[count]->send((uint8_t *)(&sample));
+
+        count++;
     }
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/radio_set.hpp>
+#include <core/publisher.hpp>
 
 class SigWorld
 {
@@ -11,4 +12,5 @@ public:
     void tick();
 private:
     RadioSet    m_radioSet;
+    std::vector<Publisher *>   m_publishers;
 };
