@@ -3,6 +3,9 @@
 #include <core/logger.hpp>
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-security"
+
 namespace
 {
 constexpr size_t LOGGER_BUF_SIZE = 1024;
@@ -123,3 +126,5 @@ void Logger::crit(std::stringstream &ss)
 {
     Logger::crit(ss.str().c_str());
 }
+
+#pragma GCC diagnostic pop
