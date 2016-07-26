@@ -1,3 +1,5 @@
+#if 0 //XXX convert this to Boost unit test
+
 #include <mathlib/cordic.hpp>
 #include <iostream>
 
@@ -40,3 +42,4 @@ int main()
     out.close();
 
 }
+#endif

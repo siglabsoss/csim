@@ -1,8 +1,5 @@
-#define BOOST_TEST_DYN_LINK
-#define BOOST_AUTO_TEST_MAIN
-#define BOOST_TEST_MODULE Complex
+#include <test/unit_test.hpp>
 
-#include <boost/test/included/unit_test.hpp>//boost main()
 #include <cstring>
 #include <stdio.h>//abs()
 #include <iostream>// cout, endl
@@ -17,7 +14,9 @@
 using namespace std;
 using namespace boost;
 
-BOOST_AUTO_TEST_CASE(PYTHON_COMPARISON)
+CSIM_TEST_SUITE_BEGIN(SticherFilter)
+
+CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
     int waves[2] = { 1, 0 };
     int samples[2] = { 200, 200 };
@@ -76,7 +75,7 @@ BOOST_AUTO_TEST_CASE(PYTHON_COMPARISON)
 
 } //Compares python data with stitcher output data.
 
-BOOST_AUTO_TEST_CASE(CONCATENATION)
+CSIM_TEST_CASE(CONCATENATION)
 {
 
     int waves[2] = { 1, 1 };
@@ -107,7 +106,9 @@ BOOST_AUTO_TEST_CASE(CONCATENATION)
         BOOST_CHECK_MESSAGE(
                 (outdatas[i].real / 32768.0 == outdatas2[i].real / 32768.0),
                 i << ": " << outdatas[i].real/32768.0 << " is not equal to " << outdatas2[i].real/32768.0);
-    } //Ensures 2 waves of the same tpye concatenated is the same as one long wave of the same type
+    } //Ensures 2 waves of the same type concatenated is the same as one long wave of the same type
     cout << "DONE" << endl;
 
-} //Ensures 2 waves of the same tpye concatenated is the same as one long wave of the same type
+} //Ensures 2 waves of the same type concatenated is the same as one long wave of the same type
+
+CSIM_TEST_SUITE_END()

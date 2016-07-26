@@ -1,7 +1,5 @@
-#define BOOST_TEST_DYN_LINK
-#define BOOST_AUTO_TEST_MAIN
-#define BOOST_TEST_MODULE Complex
-#include <boost/test/included/unit_test.hpp>
+#include <test/unit_test.hpp>
+
 #include <iostream>
 #include<cstring>
 #include <stdio.h>
@@ -17,7 +15,9 @@
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and subtracts
+CSIM_TEST_SUITE_BEGIN(CICFilter)
+
+CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and subtracts
 {
 
     FixedComplex<16> input[2048]; //Array to hold inputs
@@ -85,3 +85,5 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
 }
+
+CSIM_TEST_SUITE_END()

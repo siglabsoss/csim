@@ -1,6 +1,4 @@
-// In all sub-test files don't use /included/ version
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
+#include <test/unit_test.hpp>
 
 #include <iostream>
 
@@ -10,9 +8,9 @@ using namespace std;
 #include <utils/utils.hpp>
 #include "systemc.h"
 
-BOOST_AUTO_TEST_SUITE(FloatFFT)
+CSIM_TEST_SUITE_BEGIN(FloatFFT)
 
-BOOST_AUTO_TEST_CASE(FLOAT_FFT_TEST)
+CSIM_TEST_CASE(FLOAT_FFT_TEST)
 {
 
     const int fft_size = 8;
@@ -67,7 +65,7 @@ BOOST_AUTO_TEST_CASE(FLOAT_FFT_TEST)
 
 }
 
-BOOST_AUTO_TEST_CASE(BLAH)
+CSIM_TEST_CASE(BLAH)
 {
 
     cout << "hello world" << endl;
@@ -94,4 +92,4 @@ BOOST_AUTO_TEST_CASE(BLAH)
 
 }
 
-BOOST_AUTO_TEST_SUITE_END()
+CSIM_TEST_SUITE_END()

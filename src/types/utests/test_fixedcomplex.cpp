@@ -1,14 +1,11 @@
-#define BOOST_AUTO_TEST_MAIN
-#define BOOST_TEST_MODULE Complex
+#include <test/unit_test.hpp>
 
-// In this file only use the /included/ version
-#include <boost/test/included/unit_test.hpp>
 #include <types/fixedcomplex.hpp>
 #include <iostream>
 
-//BOOST_AUTO_TEST_SUITE(Name)
+CSIM_TEST_SUITE_BEGIN(FixedComplexTests)
 
-BOOST_AUTO_TEST_CASE(Equal_and_notequal)
+CSIM_TEST_CASE(Equal_and_notequal)
 {
 
     sc_int<16> a = (4);
@@ -24,7 +21,7 @@ BOOST_AUTO_TEST_CASE(Equal_and_notequal)
 
 }
 
-BOOST_AUTO_TEST_CASE(CONSTRUCTORS)
+CSIM_TEST_CASE(CONSTRUCTORS)
 {
 
     sc_int<16> a = (65536);
@@ -49,7 +46,7 @@ BOOST_AUTO_TEST_CASE(CONSTRUCTORS)
 
 }
 
-BOOST_AUTO_TEST_CASE(ADDING)
+CSIM_TEST_CASE(ADDING)
 {
     sc_int<16> a = (2);
     sc_int<16> b = (1);
@@ -86,7 +83,7 @@ BOOST_AUTO_TEST_CASE(ADDING)
     BOOST_CHECK(c3.imag.to_int() == (-32768)); //Tests rollover
 }
 
-BOOST_AUTO_TEST_CASE(SUBTRACTING)
+CSIM_TEST_CASE(SUBTRACTING)
 {
     sc_int<16> a = (2);
     sc_int<16> b = (4);
@@ -121,7 +118,7 @@ BOOST_AUTO_TEST_CASE(SUBTRACTING)
 
 }
 
-BOOST_AUTO_TEST_CASE(MULTIPLYING)
+CSIM_TEST_CASE(MULTIPLYING)
 {
     sc_int<16> a = (2);
     sc_int<16> b = (1);
@@ -150,7 +147,7 @@ BOOST_AUTO_TEST_CASE(MULTIPLYING)
 
 }
 
-BOOST_AUTO_TEST_CASE(ROLLOVER)
+CSIM_TEST_CASE(ROLLOVER)
 {
     sc_int<3> a = (4);
     sc_int<3> b = (4);
@@ -163,7 +160,7 @@ BOOST_AUTO_TEST_CASE(ROLLOVER)
 
 }
 
-BOOST_AUTO_TEST_CASE(MULTIPLYING_TO_REAL)
+CSIM_TEST_CASE(MULTIPLYING_TO_REAL)
 {
     sc_int<16> a = (0);
     sc_int<16> b = (1);
@@ -179,7 +176,7 @@ BOOST_AUTO_TEST_CASE(MULTIPLYING_TO_REAL)
     BOOST_CHECK(c3.imag.to_int() == 0);
 }
 
-BOOST_AUTO_TEST_CASE(DIVIDING)
+CSIM_TEST_CASE(DIVIDING)
 {
 
     sc_int<16> a = (2);
@@ -225,7 +222,7 @@ BOOST_AUTO_TEST_CASE(DIVIDING)
     BOOST_CHECK(c3.imag.to_int() == -10); //Tests negative nums
 }
 
-BOOST_AUTO_TEST_CASE(DIVIDING2)
+CSIM_TEST_CASE(DIVIDING2)
 {
 
     sc_int<16> a = (-4224);
@@ -276,7 +273,7 @@ BOOST_AUTO_TEST_CASE(DIVIDING2)
 //	BOOST_CHECK(c3.imag.to_int() == -10);//Tests negative nums
 }
 
-BOOST_AUTO_TEST_CASE(SHIFTING)
+CSIM_TEST_CASE(SHIFTING)
 {
 
     sc_int<16> a = (2);
@@ -306,7 +303,7 @@ BOOST_AUTO_TEST_CASE(SHIFTING)
 
 }
 
-BOOST_AUTO_TEST_CASE(CASTING)
+CSIM_TEST_CASE(CASTING)
 {
     sc_int<16> a = (2);
     sc_int<16> b = (1);
@@ -330,5 +327,5 @@ BOOST_AUTO_TEST_CASE(CASTING)
 
 }
 
-//BOOST_AUTO_TEST_SUITE_END()
+CSIM_TEST_SUITE_END()
 
