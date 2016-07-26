@@ -10,6 +10,11 @@ target_link_libraries(FFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} 
 add_executable(ALU aluverifier.cpp)
 target_link_libraries(ALU ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils)
 
+########################### CORDIC ###########################
+add_executable(cordic cordicverifier.cpp)
+target_link_libraries(cordic ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils)
+
+
 ########################### ALU ###########################
 add_executable(ALU2 aluverifier.cpp)
 target_link_libraries(ALU2 ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils)

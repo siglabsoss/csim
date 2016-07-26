@@ -25,7 +25,7 @@ int main()
         sc_int<20> j = i * 32768;
         c.calculate(j, a, b, &sinup, &sindown, &cosup, &cosdown);
         //	cout << "Cosine: " << cosdown/32768.0 << endl;
-        //	cout << "Sine: " << cosup/32768.0 << endl;
+        //	cout << "Sine: " << sinup/32768.0 << endl;
         //	out << cosdown/32768.0<<",";
 //		out << cosup/32768.0 << endl;
 

@@ -57,10 +57,6 @@ int main(int argc, char *argv[])
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-//    while (i < 10)
-//    {
-//    	out << (input1[i] + input2[i]).real << "," << (input1[i] + input2[i]).imag;
-//    }
     in.close();
     out.close();
 
