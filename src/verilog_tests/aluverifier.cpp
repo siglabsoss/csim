@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
 
     vector<string> vec;
     string line;
-    string outFile("data/ALU/output/out");
-    outFile = outFile +  argv[1] + ".csv";
+    string outFile(argv[2]);
+    //outFile = outFile +  argv[1] + ".csv";
     ofstream out(outFile.c_str());
     if (!out.is_open()) {
           cout << "error reading" << outFile <<  endl;
