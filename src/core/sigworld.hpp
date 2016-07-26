@@ -12,5 +12,4 @@ public:
     void tick();
 private:
     RadioSet    m_radioSet;
-    Publisher   m_publisher;
 };

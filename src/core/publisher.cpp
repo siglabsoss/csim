@@ -2,48 +2,41 @@
 #include <core/logger.hpp>
 #include <errno.h>
 
-Publisher::Publisher(const std::string &topic, size_t msgLen) :
-    m_topic(topic),
-    m_msgLen(msgLen),
+
+Publisher * Publisher::g_instance = nullptr;
+
+Publisher * Publisher::get()
+{
+    if (g_instance == nullptr) {
+        g_instance = new Publisher();
+        g_instance->init();
+    }
+    return g_instance;
+}
+
+Publisher::Publisher() :
     m_context(1),
     m_socket(m_context, ZMQ_PUB)
 {
 
 }
 
-Publisher::Publisher(const Publisher &other) :
-        m_topic(other.m_topic),
-        m_msgLen(other.m_msgLen),
-        m_context(1),
-        m_socket(m_context, ZMQ_PUB)
+bool Publisher::init()
 {
-
-}
-
-Publisher::Publisher(Publisher &&other) :
-        m_topic(other.m_topic),
-        m_msgLen(other.m_msgLen),
-        m_context(1),
-        m_socket(m_context, ZMQ_PUB)
-{
-    other.~Publisher();
-}
-
-bool Publisher::init(uint16_t port)
-{
+    int port = 5555; //XXX retrieve from config
     std::stringstream endpoint;
     endpoint << "tcp://*:" << port;
     m_socket.bind(endpoint.str().c_str());
-    log_info("Bound to port %d for topic %s", port, m_topic.c_str());
+    log_info("Publisher bound to port %d", port);
     return true;
 }
 
-void Publisher::send(const uint8_t *data)
+void Publisher::send(const std::string &channel, const uint8_t *data, size_t len)
 {
-    zmq::message_t msg(m_topic.length() + m_msgLen);
-    memcpy(msg.data(), m_topic.c_str(), m_topic.length());
+    zmq::message_t msg(channel.length() + len);
+    memcpy(msg.data(), channel.c_str(), channel.length());
 
-    size_t dataOffset = m_topic.length();
+    size_t dataOffset = channel.length();
     memcpy((uint8_t *)msg.data() + dataOffset, data, msg.size() - dataOffset);
     int retval = m_socket.send(msg, ZMQ_NOBLOCK);
     if (retval < 0) {
@@ -51,7 +44,3 @@ void Publisher::send(const uint8_t *data)
     }
 }
 
-void Publisher::setMsgLen(size_t msgLen)
-{
-    m_msgLen = msgLen;
-}

@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     radio_config_t config;
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 5; i++) {
         config.position = Vector2d(0.0, i*1199.6);
         config.id = i+1;
         world.addRadio([](const radio_config_t &config)

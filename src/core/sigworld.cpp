@@ -2,8 +2,7 @@
 #include <messages/rf_sample.hpp>
 
 SigWorld::SigWorld() :
-    m_radioSet(),
-    m_publisher("RF", sizeof(RFSample))
+    m_radioSet()
 {
 
 }
@@ -16,7 +15,6 @@ void SigWorld::addRadio(RadioS *(radioFactory)(const radio_config_t &config), ra
 void SigWorld::init()
 {
     m_radioSet.init();
-    m_publisher.init(5656);
 }
 
 void SigWorld::tick()
@@ -48,7 +46,7 @@ void SigWorld::tick()
         sample.rxImag = rxSample.imag();
         sample.txReal = txSample.real();
         sample.txImag = txSample.imag();
-        m_publisher.send((uint8_t *)(&sample));
+        Publisher::get()->send("RF", (uint8_t *)(&sample), sizeof(sample));
 
         count++;
     }

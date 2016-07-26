@@ -1,13 +1,10 @@
 #include <core/filter_chain.hpp>
 
-size_t FilterChain::instanceCount = 0;
 
 FilterChain::FilterChain() :
     m_head(nullptr),
     m_output(),
-    m_publisher("FILT"),
-    m_outputReady(false),
-    m_didInit(false)
+    m_outputReady(false)
 {
 }
 
@@ -15,20 +12,14 @@ FilterChain::FilterChain() :
 FilterChain::FilterChain(const FilterChain &other) :
         m_head(other.m_head),
         m_output(other.m_output),
-        m_publisher(other.m_publisher),
-        m_outputReady(other.m_outputReady),
-        m_didInit(other.m_didInit)
+        m_outputReady(other.m_outputReady)
 {
 
 }
 
 void FilterChain::init()
 {
-    if (!m_didInit) {
-        m_publisher.init(5555 + instanceCount);
-        instanceCount++;
-        m_didInit = true;
-    }
+
 }
 
 bool FilterChain::input(const filter_io_t &data)
@@ -81,9 +72,11 @@ void FilterChain::publish(FilterChainElement *current)
 {
     uint8_t buf[200] = {0};
     uint8_t *head = buf;
+
     memcpy(head, current->getName().c_str(), current->getName().size());
     head += current->getName().size();
+
     size_t size = m_output.serialize(head);
-    m_publisher.setMsgLen(size + current->getName().size());
-    m_publisher.send(buf);
+
+    Publisher::get()->send("FILT", buf, size + current->getName().size());
 }

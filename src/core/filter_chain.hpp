@@ -26,9 +26,5 @@ private: //methods
 private:
     FilterChainElement *    m_head;
     filter_io_t             m_output;
-    Publisher               m_publisher;
     bool                    m_outputReady;
-    bool                    m_didInit;
-
-    static size_t           instanceCount;
 };
