@@ -130,7 +130,7 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
 void fixedfftstage::output(FixedComplex<32> x)
 {
     while (!next->ready) {
-        cout << N << "X" << endl;
+       // cout << N << "X" << endl;
         next->inputandtick(FixedComplex<32>(0, 0));
     }
     next->inputandtick(x);
@@ -156,7 +156,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
     switch (state) {
         default:
         case FFFT_STATE_INITIAL:
-            cout << N << "a" << endl;
+           // cout << N << "a" << endl;
 
             memory[write_pointer] = x;
 
@@ -169,7 +169,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
 
             break;
         case FFFT_STATE_READ:
-            cout << N << "b" << endl;
+            //cout << N << "b" << endl;
 
             butterfly(butterflyresult, memory[read_pointer], x);
             memory[write_pointer] = butterflyresult[1];
@@ -188,7 +188,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
 
             break;
         case FFFT_STATE_OUTPUT:
-            cout << N << "c" << endl;
+            //cout << N << "c" << endl;
             if (N == 8) {
                 int dontcare = 10;
             }
