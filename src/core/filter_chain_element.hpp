@@ -12,7 +12,7 @@ enum io_type_t : uint8_t {
     IO_TYPE_FIXED_COMPLEX_16,
     IO_TYPE_BYTE
 };
-struct block_io_t
+struct filter_io_t
 {
     //Data members
     io_type_t type;
@@ -22,12 +22,33 @@ struct block_io_t
         uint8_t byte;
     };
 
-    block_io_t() :
+    ~filter_io_t() {}
+
+    filter_io_t() :
         type(IO_TYPE_NULL)
     {}
-    ~block_io_t() {}
 
-    block_io_t & operator=(const block_io_t &rhs)
+    filter_io_t(const filter_io_t &other)
+    {
+        if (this != &other) {
+            this->type = other.type;
+            switch (other.type) {
+                case IO_TYPE_COMPLEX_DOUBLE:
+                    this->rf = other.rf;
+                    break;
+                case IO_TYPE_FIXED_COMPLEX_16:
+                    this->fc = other.fc;
+                    break;
+                case IO_TYPE_BYTE:
+                    this->byte = other.byte;
+                    break;
+                case IO_TYPE_NULL:
+                    break;
+            }
+        }
+    }
+
+    filter_io_t & operator=(const filter_io_t &rhs)
     {
         if (this != &rhs) {
             this->type = rhs.type;
@@ -47,24 +68,60 @@ struct block_io_t
         }
         return *this;
     }
-};
-extern std::ostream& operator<<(std::ostream& os, const block_io_t& obj);
 
-class FilterChainElement : public AbstractSISO< block_io_t, block_io_t >
+    size_t serialize(uint8_t *data) const
+    {
+        size_t numBytes = 0;
+        memcpy(data + numBytes, &type, sizeof(type));
+        numBytes += sizeof(type);
+
+        switch(type) {
+            case IO_TYPE_COMPLEX_DOUBLE:
+            {
+                double value = rf.real();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+
+                value = rf.imag();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
+            }
+            case IO_TYPE_FIXED_COMPLEX_16:
+            {
+                int value = fc.real.to_int();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+
+                value = fc.imag.to_int();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
+            }
+            case IO_TYPE_BYTE:
+                memcpy(data + numBytes, &byte, sizeof(byte));
+                numBytes += sizeof(byte);
+                break;
+            case IO_TYPE_NULL:
+                break;
+        }
+
+        return numBytes;
+    }
+
+    void deserialize(const uint8_t *data, filter_io_t &output) const
+    {
+        //TODO implement
+    }
+};
+extern std::ostream& operator<<(std::ostream& os, const filter_io_t& obj);
+
+class FilterChainElement : public AbstractSISO< filter_io_t, filter_io_t >
 {
 public:
     virtual ~FilterChainElement() {}
 
-    FilterChainElement(FilterChainElement *next) :
-        m_next(next)
-    {
-    }
-    FilterChainElement() :
-        m_next(nullptr)
-    {
-    }
-
-    virtual void tick() {}
+    FilterChainElement(std::string name = std::string("NONAME"));
 
     friend FilterChainElement& operator+(const FilterChainElement &lhs, FilterChainElement &rhs)
     {
@@ -72,6 +129,11 @@ public:
         return rhs;
     }
 
+    const std::string &getName() const;
 
     FilterChainElement *m_next;
+private:
+    std::string         m_name;
+
+    static unsigned int instanceCount;
 };

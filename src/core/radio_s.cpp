@@ -4,14 +4,23 @@
 #include <cassert>
 
 RadioS::RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain) :
+    m_id(config.id),
     m_position(config.position),
     m_mod(modChain),
     m_demod(demodChain)
-{}
+{
+    m_mod.init();
+    m_demod.init();
+}
+
+radio_id_t RadioS::getId() const
+{
+    return m_id;
+}
 
 bool RadioS::rxByte(uint8_t &byte)
 {
-    block_io_t data;
+    filter_io_t data;
     bool didRx = m_demod.output(data);
     if (didRx) {
         assert(data.type == IO_TYPE_BYTE); //sanity check on the demodulation filter chain output
@@ -22,7 +31,7 @@ bool RadioS::rxByte(uint8_t &byte)
 
 bool RadioS::txByte(const uint8_t &byte)
 {
-    block_io_t data;
+    filter_io_t data;
     data.type = IO_TYPE_BYTE;
     data.byte = byte;
     return m_mod.input(data);
@@ -30,7 +39,7 @@ bool RadioS::txByte(const uint8_t &byte)
 
 bool RadioS::rxWave(const std::complex<double> &sample_in)
 {
-    block_io_t data;
+    filter_io_t data;
     data.type = IO_TYPE_COMPLEX_DOUBLE;
     data.rf = sample_in;
     return m_demod.input(data);
@@ -38,13 +47,16 @@ bool RadioS::rxWave(const std::complex<double> &sample_in)
 
 bool RadioS::txWave(std::complex<double> &sample_out)
 {
-    block_io_t data;
-    bool didRx = m_mod.output(data);
-    if (didRx) {
+    filter_io_t data;
+    //A properly formed modulation filter chain will always
+    //have an output, but we check anyway
+    bool didTx = m_mod.output(data);
+    //XXX just add an assertion here
+    if (didTx) {
         assert(data.type == IO_TYPE_COMPLEX_DOUBLE); //sanity check on the modulation filter chain output
         sample_out = data.rf;
     }
-    return didRx;
+    return didTx;
 }
 
 Vector2d  RadioS::getPosition() const
@@ -54,5 +66,6 @@ Vector2d  RadioS::getPosition() const
 
 void RadioS::tick()
 {
-
+    m_mod.tick();
+    m_demod.tick();
 }

@@ -7,12 +7,12 @@ using namespace std;
 const float pi = 3.14159265359;
 
 
-bool fixedfftbase::input(const block_io_t &data)
+bool fixedfftbase::input(const filter_io_t &data)
 {
 
 }
 
-bool fixedfftbase::output(block_io_t &data)
+bool fixedfftbase::output(filter_io_t &data)
 {
 
 
@@ -24,7 +24,7 @@ void fixedfftbase::tick()
 
 }
 
-bool fixedfft::input(const block_io_t &data)
+bool fixedfft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
@@ -36,7 +36,7 @@ bool fixedfft::input(const block_io_t &data)
  * output - provide an output sample to the caller.
  * @return false if no output sample is available.
  */
-bool fixedfft::output(block_io_t &data)
+bool fixedfft::output(filter_io_t &data)
 {
     if (m_count > 15) {
         m_count = m_count - 16; //Full cycle of outputs complete

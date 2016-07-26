@@ -25,7 +25,7 @@ fixedfir::fixedfir(int N, FixedComplex<16>* tap) :
     }
 }
 
-bool fixedfir::input(const block_io_t &data)
+bool fixedfir::input(const filter_io_t &data)
 {
 
     //XXX convert data -> sample
@@ -38,11 +38,11 @@ bool fixedfir::input(const block_io_t &data)
  * output - provide an output sample to the caller.
  * @return false if no output sample is available.
  */
-bool fixedfir::output(block_io_t &data)
+bool fixedfir::output(filter_io_t &data)
 {
     data.type = IO_TYPE_FIXED_COMPLEX_16;
     data.fc = m_output;
-    std::cout << m_output << std::endl;
+    //std::cout << m_output << std::endl;
     return true;
 }
 

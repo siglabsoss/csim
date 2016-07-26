@@ -14,7 +14,7 @@ fixedcic::fixedcic(int R, int aregs, int bregs) :
 }
 
 
-bool fixedcic::input(const block_io_t &data)
+bool fixedcic::input(const filter_io_t &data)
 {
     //XXX convert data -> sample
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
@@ -26,7 +26,7 @@ bool fixedcic::input(const block_io_t &data)
  * output - provide an output sample to the caller.
  * @return false if no output sample is available.
  */
-bool fixedcic::output(block_io_t &data)
+bool fixedcic::output(filter_io_t &data)
 {
     if (goodOutput == true) {
         data.type = IO_TYPE_FIXED_COMPLEX_16;

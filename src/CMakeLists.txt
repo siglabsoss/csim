@@ -8,12 +8,13 @@ link_directories(
 	${Boost_LIBRARY_DIRS}
 )
 
+add_subdirectory(apps)
 add_subdirectory(core)
 add_subdirectory(filters)
 add_subdirectory(mathlib)
 add_subdirectory(types)
 add_subdirectory(utils)
-add_subdirectory(utests)
+add_subdirectory(test)
 add_subdirectory(verilog_tests)
 add_subdirectory(systemc)
 

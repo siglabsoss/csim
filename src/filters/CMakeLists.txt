@@ -3,6 +3,7 @@ set(SIGFILTERS_SOURCES
     fixedfir.cpp
     fixediir.cpp
 	fixedfft.cpp
+	floatfft.cpp
     stitcher.cpp)
 
 add_library(sigfilters ${SIGFILTERS_SOURCES})

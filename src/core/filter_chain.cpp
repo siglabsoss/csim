@@ -1,5 +1,6 @@
 #include <core/filter_chain.hpp>
 
+
 FilterChain::FilterChain() :
     m_head(nullptr),
     m_output(),
@@ -7,26 +8,31 @@ FilterChain::FilterChain() :
 {
 }
 
-FilterChain::FilterChain(const FilterChain &other)
+
+FilterChain::FilterChain(const FilterChain &other) :
+        m_head(other.m_head),
+        m_output(other.m_output),
+        m_outputReady(other.m_outputReady)
 {
-    //XXX could use std::move / std::unique_ptr here
-    this->m_head = other.m_head;
-    this->m_output = other.m_output;
-    this->m_outputReady = other.m_outputReady;
+
 }
 
-bool FilterChain::input(const block_io_t &data)
+void FilterChain::init()
+{
+
+}
+
+bool FilterChain::input(const filter_io_t &data)
 {
     if (m_head == nullptr) {
         return false;
     }
 
     bool didInput = m_head->input(data);
-    tick();
     return didInput;
 }
 
-bool FilterChain::output(block_io_t &data)
+bool FilterChain::output(filter_io_t &data)
 {
     if (m_outputReady) {
         data = m_output;
@@ -42,7 +48,7 @@ void FilterChain::tick()
         //Tick the current element
         current->tick();
         //Check if there's output waiting, move on to tick the next element if no output,
-        //otherwise forward the output to the next element
+        //otherwise forward the output to the next element first
         bool didOutput = current->output(m_output);
         if (didOutput) {
             if (current->m_next == nullptr) {
@@ -50,6 +56,8 @@ void FilterChain::tick()
             } else {
                 (void)current->m_next->input(m_output);
             }
+            //Publish the output externally
+            publish(current);
         }
     }
 }
@@ -58,4 +66,17 @@ FilterChain & FilterChain::operator=(const FilterChainElement &rhs)
 {
     this->m_head = (FilterChainElement *)&rhs;
     return *this;
+}
+
+void FilterChain::publish(FilterChainElement *current)
+{
+    uint8_t buf[200] = {0};
+    uint8_t *head = buf;
+
+    memcpy(head, current->getName().c_str(), current->getName().size());
+    head += current->getName().size();
+
+    size_t size = m_output.serialize(head);
+
+    Publisher::get()->send("FILT", buf, size + current->getName().size());
 }

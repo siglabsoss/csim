@@ -1,7 +1,5 @@
-#define BOOST_TEST_DYN_LINK
-#define BOOST_AUTO_TEST_MAIN
-#define BOOST_TEST_MODULE Complex
-#include <boost/test/included/unit_test.hpp>
+#include <test/unit_test.hpp>
+
 #include <iostream>
 #include<cstring>
 #include <stdio.h>
@@ -17,7 +15,9 @@
 using namespace boost;
 using namespace std;
 
-BOOST_AUTO_TEST_CASE(REAL_FILTER)
+CSIM_TEST_SUITE_BEGIN(FIRFilter)
+
+CSIM_TEST_CASE(REAL_FILTER)
 {
     FixedComplex<16> input[1024]; //Array to hold inputs
     FixedComplex<16> output[1024]; //Array to hold outputs
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER)
     fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++)
     {
-        block_io_t data;
+        filter_io_t data;
         data.type =  IO_TYPE_FIXED_COMPLEX_16;
         data.fc = input[k];
         fir.input(data); //Filters data
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE(REAL_FILTER)
 
 }
 
-BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
+CSIM_TEST_CASE(COMPLEX_FILTER)
 {
     FixedComplex<16> input[1024]; //Array to hold inputs
     FixedComplex<16> output[1024]; //Array to hold outputs
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
     fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++) {
-        block_io_t data;
+        filter_io_t data;
         data.type =  IO_TYPE_FIXED_COMPLEX_16;
         data.fc = input[k];
         fir.input(data); //Filters data
@@ -186,3 +186,6 @@ BOOST_AUTO_TEST_CASE(COMPLEX_FILTER)
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
 }
+
+CSIM_TEST_SUITE_END()
+

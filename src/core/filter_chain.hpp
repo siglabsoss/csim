@@ -1,9 +1,10 @@
 #pragma once
 
 #include <core/filter_chain_element.hpp>
+#include <core/publisher.hpp>
 
 
-class FilterChain : public AbstractSISO < block_io_t, block_io_t >
+class FilterChain : public AbstractSISO < filter_io_t, filter_io_t >
 {
 
 public:
@@ -11,14 +12,19 @@ public:
     FilterChain(const FilterChain &other);
     virtual ~FilterChain() {}
 
-    bool input(const block_io_t &data) override;
-    bool output(block_io_t &data) override;
+    void init();
+
+    bool input(const filter_io_t &data) override;
+    bool output(filter_io_t &data) override;
     void tick() override;
 
     FilterChain & operator=(const FilterChainElement &rhs);
 
+private: //methods
+    void publish(FilterChainElement *current);
+
 private:
     FilterChainElement *    m_head;
-    block_io_t              m_output;
+    filter_io_t             m_output;
     bool                    m_outputReady;
 };
