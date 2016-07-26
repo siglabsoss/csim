@@ -65,31 +65,4 @@ CSIM_TEST_CASE(FLOAT_FFT_TEST)
 
 }
 
-CSIM_TEST_CASE(BLAH)
-{
-
-    cout << "hello world" << endl;
-
-//	FixedComplex<8> c1 ( rca)
-
-    float result = 0.2 * 0.2;
-
-    cout << "float " << result << endl;
-
-    const float scalar = 64;
-
-    sc_int<6> f1 = 0.2 * scalar;
-    sc_int<6> f2 = 0.2 * scalar;
-
-    cout << "scaled " << f1 << endl;
-
-    sc_int<12> result2 = (sc_int<6> ) f1 * (sc_int<6> ) f2;
-
-//	sc_int<32> result3 = result2 / scalar;
-
-    cout << "fixed<> " << result2 << endl;
-    cout << "fixed<> " << (float) result2 / (scalar * scalar) << endl;
-
-}
-
 CSIM_TEST_SUITE_END()
