@@ -1,4 +1,6 @@
 #include <core/filter_chain_element.hpp>
+#include <core/logger.hpp>
+#include <string>
 
 #include <iomanip>
 std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
@@ -26,10 +28,10 @@ const std::string &FilterChainElement::getName() const
 
 unsigned int FilterChainElement::instanceCount = 0;
 
-FilterChainElement::FilterChainElement(FilterChainElement *next, std::string name) :
-    m_name(name),
-    m_next(next),
-    m_uuid(instanceCount)
+FilterChainElement::FilterChainElement(std::string name) :
+    m_name(name + std::to_string(instanceCount)),
+    m_next(nullptr)
 {
+    log_info("New filter chain element with name = %s", m_name.c_str());
     instanceCount++;
 }

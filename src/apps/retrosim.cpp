@@ -7,6 +7,7 @@
 #include <filters/sine_wave.hpp>
 
 #include <sys/time.h>
+#include <utility>
 
 timespec timediff(timespec start, timespec end)
 {
@@ -29,7 +30,7 @@ int main(int argc, char *argv[])
 
     radio_config_t config;
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 20; i++) {
         config.position = Vector2d(0.0, i*1199.6);
         config.id = i+1;
         world.addRadio([](const radio_config_t &config)
@@ -44,7 +45,7 @@ int main(int argc, char *argv[])
                     sw = new SineWave(300);
                     demodulation_chain = *sw;
 
-                    return new RadioS(config, modulation_chain, demodulation_chain);
+                    return new RadioS(config, std::move(modulation_chain), std::move(demodulation_chain));
                 }, config);
     }
 

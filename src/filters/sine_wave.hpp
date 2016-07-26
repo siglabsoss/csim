@@ -10,6 +10,7 @@ class SineWave : public FilterChainElement
 public:
     virtual ~SineWave() {}
     SineWave(double ticksPerPeriod) :
+        FilterChainElement(std::string("SineWave")),
         m_ticksPerPeriod(ticksPerPeriod),
         m_count(0)
     {

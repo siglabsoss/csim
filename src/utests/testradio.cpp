@@ -6,12 +6,25 @@
 
 
 #include <boost/test/included/unit_test.hpp>
+#include <filters/sine_wave.hpp>
 
 BOOST_AUTO_TEST_CASE(FILTER_CHAIN_IS_PROPERLY_CHAINED)
 {
     radio_config_t config;
     config.position = Vector2d(0,0);
-    RadioS *radio = RadioS::create(config);
+    config.id = 100;
+
+    FilterChain modulation_chain;
+
+    SineWave *sw = new SineWave(2000);
+    //modulation_chain = *dc4 + *dbtc + *db6 + *db5 + *db4;
+    modulation_chain = *sw;
+
+    FilterChain demodulation_chain;
+    sw = new SineWave(300);
+    demodulation_chain = *sw;
+
+    RadioS *radio = new RadioS(config, std::move(modulation_chain), std::move(demodulation_chain));
 
     uint8_t byte = 0;
 

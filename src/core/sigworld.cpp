@@ -16,7 +16,7 @@ void SigWorld::addRadio(RadioS *(radioFactory)(const radio_config_t &config), ra
 void SigWorld::init()
 {
     m_radioSet.init();
-    m_publisher.init();
+    m_publisher.init(5656);
 }
 
 void SigWorld::tick()

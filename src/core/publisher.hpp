@@ -1,11 +1,17 @@
+#pragma once
+
 #include <zmq.hpp>
 
 class Publisher
 {
 public:
-    Publisher(const std::string &topic, size_t msgLen);
-    bool init();
+    Publisher(const std::string &topic, size_t msgLen = 0);
+    Publisher(const Publisher &other);
+    Publisher(Publisher &&other);
+
+    bool init(uint16_t port);
     void send(const uint8_t *data);
+    void setMsgLen(size_t msgLen);
 
 private:
     size_t               m_msgLen;

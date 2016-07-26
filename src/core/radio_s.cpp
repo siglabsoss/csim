@@ -8,7 +8,10 @@ RadioS::RadioS(const radio_config_t &config, FilterChain modChain, FilterChain d
     m_position(config.position),
     m_mod(modChain),
     m_demod(demodChain)
-{}
+{
+    m_mod.init();
+    m_demod.init();
+}
 
 radio_id_t RadioS::getId() const
 {
