@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
 {
     FixedComplex<16> input1[1024]; //Array to hold inputs
     FixedComplex<16> input2[1024]; //Array to hold inputs
-    string data("data/ALU/input/data_file_complex"); //Input data file
-    data = data + argv[1] + ".csv";
+    string data(argv[1]); //Input data file
+   // data = data + argv[1] + ".csv";
     cout << data << endl;
     ifstream in(data.c_str());
     if (!in.is_open()) {
