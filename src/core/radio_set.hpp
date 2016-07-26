@@ -24,25 +24,14 @@ public:
      * @return ID of radio
      */
     radio_id_t addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config);
+
     void init();
+
     void bufferSampleForRadio(const iterator &it, std::complex<double> &sample);
-
     void getSampleForRadio(const iterator &it, std::complex<double> &sample);
-
-    /**
-     * getLargestSampleDelay - returns the largest delay between any two radios from
-     * the set of radios added. This can be useful in cases where you want to set up
-     * upper bounds on some kind of buffer to store delayed transmissions.
-     *
-     * @return The largest sample delay in number of "ticks"
-     */
-    int getLargestSampleDelay();
 
     iterator begin();
     iterator end();
-
-private: //methods
-    static int sampleDelayForDistance(double distance);
 
 private:
     std::vector<RadioS *> m_radios;
