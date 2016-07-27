@@ -22,17 +22,14 @@ popd
 
 echo $UNIT_TEST_SRCS
 
-if [ -d $CSIM_UTEST_BUILD ]; then
-    echo "NOTE: Removing existing build directory"
-    rm -r $CSIM_UTEST_BUILD
-fi
-
 mkdir -p $CSIM_UTEST_BUILD
 
 pushd $CSIM_UTEST_BUILD
-cmake $CSIM_SRC
+cmake -D CMAKE_BUILD_TYPE=Debug $CSIM_SRC
 make -j utests
 cp -r $CSIM_SRC/data .
 ./bin/utests
+EXIT_CODE=$?
 popd
 
+exit $EXIT_CODE
