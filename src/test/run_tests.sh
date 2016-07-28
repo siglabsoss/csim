@@ -20,8 +20,6 @@ pushd $THIS_DIR
 export UNIT_TEST_SRCS=`find ../ | grep $TEST_FILTER | xargs echo |  sed 's/ /;/g'`
 popd
 
-echo $UNIT_TEST_SRCS
-
 mkdir -p $CSIM_UTEST_BUILD
 
 pushd $CSIM_UTEST_BUILD
