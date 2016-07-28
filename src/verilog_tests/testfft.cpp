@@ -17,7 +17,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    q
     string infile(argv[1]);
     string outfile(argv[2]);
     cout << "program start" << endl;
