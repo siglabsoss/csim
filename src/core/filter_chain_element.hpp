@@ -2,6 +2,7 @@
 
 #include <interfaces/abstract_siso.hpp>
 #include <types/fixedcomplex.hpp>
+#include <memory>
 
 #include <cstdint>
 #include <complex>
@@ -125,13 +126,13 @@ public:
 
     friend FilterChainElement& operator+(const FilterChainElement &lhs, FilterChainElement &rhs)
     {
-        rhs.m_next = (FilterChainElement *)&lhs;
+        rhs.m_next.reset((FilterChainElement *)&lhs);
         return rhs;
     }
 
     const std::string &getName() const;
 
-    FilterChainElement *m_next;
+    std::unique_ptr<FilterChainElement> m_next;
 private:
     std::string         m_name;
 

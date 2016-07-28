@@ -1,13 +1,14 @@
 
 #include <core/radio_s.hpp>
+#include <utility>
 
 #include <cassert>
 
-RadioS::RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain) :
+RadioS::RadioS(const radio_config_t &config, FilterChain &modChain, FilterChain &demodChain) :
     m_id(config.id),
     m_position(config.position),
-    m_mod(modChain),
-    m_demod(demodChain)
+    m_mod(std::move(modChain)),
+    m_demod(std::move(demodChain))
 {
     m_mod.init();
     m_demod.init();

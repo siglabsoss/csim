@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
                     sw = new SineWave(300);
                     demodulation_chain = *sw;
 
-                    return new RadioS(config, std::move(modulation_chain), std::move(demodulation_chain));
+                    return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
                 }, config);
     }
 

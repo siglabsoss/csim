@@ -32,7 +32,7 @@ public:
     radio_id_t   getId() const;
     void         tick() override;
 
-    RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain);
+    RadioS(const radio_config_t &config, FilterChain &modChain, FilterChain &demodChain);
 
 private: //members
     radio_id_t              m_id;
