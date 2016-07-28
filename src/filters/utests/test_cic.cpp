@@ -41,7 +41,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and s
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
         input[i].real = atof(vec[0].c_str());
-        input[i].imag = atof(vec[1].c_str());
+
         //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
@@ -58,7 +58,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and s
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
         answers[l].real = atof(vec[0].c_str());
-        answers[l].imag = atof(vec[1].c_str());
+
 
         //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
         l++;
