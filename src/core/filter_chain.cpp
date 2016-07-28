@@ -43,7 +43,7 @@ bool FilterChain::output(filter_io_t &data)
 
 void FilterChain::tick()
 {
-    for (FilterChainElement *current = m_head.get(); current != nullptr; current = current->m_next.get()) {
+    for (FilterChainElement * current = m_head.get(); current != nullptr; current = current->m_next.get()) {
         //Tick the current element
         current->tick();
         //Check if there's output waiting, move on to tick the next element if no output,
@@ -55,8 +55,10 @@ void FilterChain::tick()
             } else {
                 (void)current->m_next->input(m_output);
             }
-            //Publish the output externally
-            publish(current);
+            //Publish the output externally if desired
+            if (current->shouldPublish()) {
+                publish(current);
+            }
         }
     }
 }

@@ -132,9 +132,14 @@ public:
 
     const std::string &getName() const;
 
+    bool shouldPublish() const;
+
+    void shouldPublish(bool desired);
+
     std::unique_ptr<FilterChainElement> m_next;
 private:
     std::string         m_name;
+    bool                m_shouldPublish;
 
     static unsigned int instanceCount;
 };
