@@ -1,4 +1,5 @@
 #include <core/parameters.hpp>
+#include <core/logger.hpp>
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -45,8 +46,11 @@ Parameters::Parameters() :
 
 void Parameters::get(const std::string &handle, param_value_t &param) const
 {
-    //TODO assert param exists
-    param = m_params.at(handle);
+    try {
+        param = m_params.at(handle);
+    } catch (std::out_of_range &eor) {
+        log_crit("CRITICAL: Attempt to get non-existent parameter %s", handle.c_str());
+    }
 }
 
 void Parameters::get(const std::string &handle, double &value) const
