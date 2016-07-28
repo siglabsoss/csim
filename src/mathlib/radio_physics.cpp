@@ -1,14 +1,18 @@
 #include <mathlib/radio_physics.hpp>
+#include <cfloat>
+#include <core/parameters.hpp>
 
 int RadioPhysics::sampleDelayForDistance(double distance)
 {
-    constexpr double METERS_PER_TICK = 1.19916983; //TODO make configurable
+    double METERS_PER_TICK;
+    param_get("RADIO_METERS_PER_TICK", METERS_PER_TICK);
     return static_cast<uint32_t>(distance / METERS_PER_TICK);
 }
 
 double RadioPhysics::phaseRotationForDistance(double distance)
 {
-    constexpr double WAVELENGTH = 0.32786885245901637; //TODO make configurable
+    double WAVELENGTH;
+    param_get("RADIO_WAVELENGTH", WAVELENGTH);
     double temp = distance / WAVELENGTH;
     temp -= floor(temp);
     return temp * 2 * M_PI;
@@ -32,7 +36,9 @@ void RadioPhysics::complexRotation(std::complex<double> &valOut, double theta)
     valOut.imag( (x * sn) + (y * cs) );
 }
 
-void RadioPhysics::applyPowerLoss(std::complex<double> &valOut, double distance)
+double RadioPhysics::freeSpacePowerLoss(double distance)
 {
-
+    double WAVELENGTH;
+    param_get("RADIO_WAVELENGTH", WAVELENGTH);
+    return pow(4 * M_PI * distance / WAVELENGTH, 2);
 }

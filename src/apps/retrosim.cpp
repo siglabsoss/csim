@@ -9,6 +9,8 @@
 #include <sys/time.h>
 #include <utility>
 
+#include "retrosim_params.hpp"
+
 timespec timediff(timespec start, timespec end)
 {
     timespec temp;
@@ -24,6 +26,7 @@ timespec timediff(timespec start, timespec end)
 
 int main(int argc, char *argv[])
 {
+
     log_info("Starting RetroSim!");
 
     SigWorld world;
