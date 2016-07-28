@@ -60,10 +60,10 @@ CSIM_TEST_CASE(FREE_SPACE_POWER_LOSS)
 {
     std::vector<std::pair<double, double > > expectedResults;
 
-    expectedResults.push_back(std::pair<double, double >(0, 0));
-    expectedResults.push_back(std::pair<double, double >(9425, 130491470289.88402));
-    expectedResults.push_back(std::pair<double, double >(15447, 350515881229.00635));
-    expectedResults.push_back(std::pair<double, double >(99, 14397589.798688836));
+    expectedResults.push_back(std::pair<double, double >(0, 1));
+    expectedResults.push_back(std::pair<double, double >(9425, 1 / 130491470289.88402));
+    expectedResults.push_back(std::pair<double, double >(15447, 1 / 350515881229.00635));
+    expectedResults.push_back(std::pair<double, double >(99, 1 / 14397589.798688836));
 
     for (auto it = expectedResults.begin(); it != expectedResults.end(); it++) {
         std::complex<double> sample(2.0e20, 2.0e20);
