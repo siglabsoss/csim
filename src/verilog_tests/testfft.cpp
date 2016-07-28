@@ -60,13 +60,13 @@ int main(int argc, char *argv[])
     int count = 0; //How many outputs have been collected
 
     int points = 32768;
-
+    filter_io_t data;
+    data.type =  IO_TYPE_FIXED_COMPLEX_32;
     fixedfft fft(points); //8 point fft
     for ( int k = 0; k < (inputs)/points; k++)
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < points; j++) {
-                filter_io_t data;
-                data.type =  IO_TYPE_FIXED_COMPLEX_32;
+
                 data.fc32 = FixedComplex<32>(realInput[(8*k)+j],imagInput[(8*k)+j]);
                 fft.input(data);
                 bool test = fft.output(data);
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
     for (i = 0; i < count; i++) {
         out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
         out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
-        cout << answers[i];
+       // cout << answers[i];
     }//Prints data
 
 

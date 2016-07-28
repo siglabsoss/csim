@@ -1,7 +1,6 @@
 #include <iostream>
 #include <cmath>
 using namespace std;
-
 #include <filters/fixedfft.hpp>
 
 const float pi = 3.14159265359;
@@ -254,8 +253,8 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
 {
 //	sc_int<32> a = pow(2,15);
 //	x = x * a;
-    cout << "output[" << count << "]: " << x.real.to_int()<< ","
-            << x.imag.to_int() << " " << x << endl;
+//   cout << "output[" << count << "]: " << x.real.to_int()<< ","
+//            << x.imag.to_int() << " " << x << endl;
 
     m_output.push(x.to_32());//adds this output to the queue of outputs
     count++;

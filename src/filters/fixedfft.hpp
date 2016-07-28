@@ -4,7 +4,7 @@
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
 #include <queue>
-
+#include <core/logger.hpp>
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
 
