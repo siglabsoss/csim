@@ -79,7 +79,9 @@ void RadioSet::getSampleForRadio(const RadioSet::iterator &it, std::complex<doub
         double distance = m_distances(i, radioOfInterest);
         int delay = RadioPhysics::sampleDelayForDistance(distance);
         assert (delay <= m_txBuffers[otherRadio].capacity());
-        sample += m_txBuffers[otherRadio].at(delay-1) + (m_noise.getNext() * (1.0 / RadioPhysics::freeSpacePowerLoss(distance)));
+        std::complex<double> remoteSample = m_txBuffers[otherRadio].at(delay-1);
+        RadioPhysics::complexRotationForDistance(remoteSample, distance);
+        sample += remoteSample + (m_noise.getNext() * (1.0 / RadioPhysics::freeSpacePowerLoss(distance)));
     }
 }
 
