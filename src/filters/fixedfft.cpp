@@ -26,9 +26,16 @@ void fixedfftbase::tick()
 
 bool fixedfft::input(const filter_io_t &data)
 {
+//    m_count++;//One more input has been received
+//    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
+//    FixedComplex<32> sample = data.fc.to_32();
+//    inputandtick(sample);
+//    return true;
+}
+
+bool fixedfft::inpu(FixedComplex<32> sample)
+{
     m_count++;//One more input has been received
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
-    FixedComplex<16> sample = data.fc;
     inputandtick(sample.to_32());
     return true;
 }
@@ -36,16 +43,36 @@ bool fixedfft::input(const filter_io_t &data)
  * output - provide an output sample to the caller.
  * @return false if no output sample is available.
  */
-bool fixedfft::output(filter_io_t &data)
+bool fixedfft::outpu(FixedComplex<32>* sample)
 {
-    if (m_count > 15) {
-        m_count = m_count - 16; //Full cycle of outputs complete
+    if (m_count > (2*N) - 1) {
+        m_count = m_count - (2*N); //Full cycle of outputs complete
     }
 
-    if (m_count >= 8) {
+    if (m_count >= N) {
+
+        *sample =  printer.m_output.front();
+        printer.m_output.pop();
+        return true;
+
+    }//Time to start outputs
+    else {
+        return false;
+    }//Not ready
+}
+
+
+
+bool fixedfft::output(filter_io_t &data)
+{
+    if (m_count > (2*N) - 1) {
+        m_count = m_count - (2*N); //Full cycle of outputs complete
+    }
+
+    if (m_count >= N) {
         data.type = IO_TYPE_FIXED_COMPLEX_16;
 
-        data.fc = printer.m_output.front();
+      //  data.fc = printer.m_output.front();
         printer.m_output.pop();
 
         return true;
@@ -111,21 +138,46 @@ void fixedfftstage::butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
 FixedComplex<32> fixedfftstage::twiddler(int k)
 {
 
-    int thet;
-    thet = (360 / N) * k * 572; //2pi * 32768 / 360 = 572
-    cordic c;
-    sc_int<32> sin;
-    sc_int<32> cos;
-    sin = c.sin(thet);//Calculates sin
-    int tempsin = sin * -1024 / 32768;//Scales to 1024
-    int phaseShift = 51471;//pi/2 * 32768
-    cos = c.sin(thet + phaseShift);//Calculates cos
-    int tempcos = cos * 1024 / 32768;//Scales to 1024
+        //int scale = 32;
+        int a[] = {0,1,1,2,2,3,3,4,4,5,6,6,7,7,8,8,9,9,10,10,11,11,12,13,13,14,14,15,15,16,16,16,17,17,18,18,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,25,26,26,26,27,27,27,27,28,28,28,29,29,29,29,29,30,30,30,30,30,31,31,31,31,31,31,31,32,32,32,32,32,32,32,32,32,32,32};
+    //  int a = pow(2,15);
+    //  int scale = a/1000.0;
 
-    FixedComplex<32> V(tempcos,tempsin);
-    return V;
+        int W_cos;
+        int W_sin;
+        int theta;
+      //  theta = (360 / N) * k;
+        theta = (360 >> int(log2(N))) * k;
 
-}
+
+        if (theta > 90) {
+            W_cos = -a[-90 + theta];
+            W_sin = -a[180 - theta];
+        } else {
+            W_cos = a[90 - theta];
+            W_sin = -a[theta];
+        }
+      //  cout << "Inputs:" << N << " Theta: " << theta << endl;
+        FixedComplex<32> W(W_cos, W_sin);
+        return W;
+
+    }
+
+//
+//    int thet;
+//    thet = (360 / N) * k * 572; //2pi * 32768 / 360 = 572
+//    cordic c;
+//    sc_int<32> sin;
+//    sc_int<32> cos;
+//    sin = c.sin(thet);//Calculates sin
+//    int tempsin = sin * -1024 / 32768;//Scales to 1024
+//    int phaseShift = 51471;//pi/2 * 32768
+//    cos = c.sin(thet + phaseShift);//Calculates cos
+//    int tempcos = cos * 1024 / 32768;//Scales to 1024
+//
+//    FixedComplex<32> V(tempcos,tempsin);
+//    return V;
+//}
 
 void fixedfftstage::output(FixedComplex<32> x)
 {
@@ -152,7 +204,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
     int as;
     int a = pow(2, 15);
     int scale = a / 1000.0;
-    scale = 1024;//Cannot scale higher that this yet
+    scale = 32;//Cannot scale higher that this yet
     switch (state) {
         default:
         case FFFT_STATE_INITIAL:
@@ -196,9 +248,9 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
 //		as = as/scale;
             outputtemp = memory[read_pointer] * twiddler(read_pointer);
 
-            outputtemp = outputtemp / FixedComplex<32>(scale, 0);
+            outputtemp = outputtemp >> 5;
             output(outputtemp);
-
+         //   cout << "N: " << N << " outputtemp: " << outputtemp;
             if (read_pointer == ((N / 2) - 1)) {
 
                 state = FFFT_STATE_INITIAL;
@@ -227,10 +279,10 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
 {
 //	sc_int<32> a = pow(2,15);
 //	x = x * a;
-    cout << "output[" << count << "]: " << x.real.to_int() / 32.0 << ","
-            << x.imag.to_int() / 32.0 << " " << x << endl;
+    cout << "output[" << count << "]: " << x.real.to_int()<< ","
+            << x.imag.to_int() << " " << x << endl;
 
-    m_output.push(x.to_16());//adds this output to the queue of outputs
+    m_output.push(x.to_32());//adds this output to the queue of outputs
     count++;
 }
 

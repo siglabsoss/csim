@@ -15,75 +15,108 @@
 using namespace std;
 
 
-int main()
+int main(int argc, char *argv[])
 {
-//    string infile("data/fft/input/data_file_complex.csv");
-//    string outfile("data/fft/output/out1.txt");
-//    cout << "program start" << endl;
-//    int i;
-//    int realInput[8] = {5,6,8,-5,6,12,10,9}; // default values
-//    int imagInput[8] = {0};
-//    ifstream in(infile.c_str());
-//
-//    if (!in.is_open()){
-//            cout << "error reading infile" << endl;
-//            assert(1 == 0);// "Could not open data/fft/input/input3.txt");
-//    }//If cannot read from file, return 1;
-//
-//    std::string token;
-//    for (i = 0; i < 8; i++) {
-//        string line;
-//        getline(in,line);
-//        istringstream ss(line);
-//        getline(ss, token, ',');
-//        stringstream strValue;
-//        strValue << token;
-//        int intValue;
-//        strValue >> intValue;
-//        realInput[i] = intValue;
-//        getline(ss, token, ',');
-//        stringstream strValue2;
-//        strValue2 << token;
-//        strValue2 >> intValue;
-//        imagInput[i] = intValue;
-//    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-//
-//    FixedComplex<16> answers[8];//Array to store answers
-//    int count = 0; //How many outputs have been collected
-//    fixedfft fft(8); //8 point fft
-//
-//    for (i = 0; i < 3; i++) {
-//        for (int j = 0; j < 8; j++) {
-//            block_io_t data;
-//            data.type =  IO_TYPE_FIXED_COMPLEX_16;
-//            data.fc = FixedComplex<16>(realInput[j],imagInput[j]);
-//            fft.input(data);
-//            bool test = fft.output(data);
-//            if (test) {
-//                answers[count++] = data.fc;
-//            }
-//        }
-//    }
-///*
-// * If you want bits to be reversed
-//
-//
+    string infile(argv[1]);
+    string outfile(argv[2]);
+    cout << "program start" << endl;
+    int i;
+    int realInput[32769] = {0}; // default values
+    int imagInput[32769] = {0};
+    ifstream in(infile.c_str());
+
+    if (!in.is_open()){
+            cout << "error reading" << infile << endl;
+            assert(1 == 0);// "Could not open data/fft/input/input3.txt");
+    }//If cannot read from file, return 1;
+
+    ofstream out2(outfile.c_str());
+    if (!out2.is_open()){
+               cout << "error reading " << outfile << endl;
+               assert(1 == 0);// "Could not open data/fft/input/input3.txt");
+       }//If cannot read from file, return 1;
+
+    std::string token;
+    string line;
+    int inputs = 0;
+    while(getline(in,line)) {
+
+        istringstream ss(line);
+        getline(ss, token, ',');
+        stringstream strValue;
+        strValue << token;
+        int intValue;
+        strValue >> intValue;
+        realInput[inputs] = intValue;
+        getline(ss, token, ',');
+        stringstream strValue2;
+        strValue2 << token;
+        strValue2 >> intValue;
+        imagInput[inputs++] = intValue;
+
+    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+
+    FixedComplex<32> answers[32769];//Array to store answers
+    int count = 0; //How many outputs have been collected
+    int points = 32768;
+    FixedComplex<32>* p = new FixedComplex<32>;
+    fixedfft fft(points); //8 point fft
+    for ( int k = 0; k < (inputs)/points; k++)
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < points; j++) {
+                filter_io_t data;
+//                data.type =  IO_TYPE_FIXED_COMPLEX_32;
+//                data.fc = FixedComplex<32>(realInput[(8*k)+j],imagInput[(8*k)+j]);
+                fft.inpu(FixedComplex<32>(realInput[(8*k)+j],imagInput[(8*k)+j]));
+                bool test = fft.outpu(p);
+                if (test) {
+                   // answers[count++] = data.fc;
+                    answers[count++] = *p;
+                }
+            }
+        }
+    cout << "Count is: " << count << endl << endl;
+ // If you want bits to be reversed
+
+
 //     cout << "Hopefully correct:" << endl;
 //     FixedComplex<16> temp[8];
 //     for (i = 0; i < 8; i++) {
 //         temp[reverseBits(8, i)] = answers[i];
 //     }//Reformats data in correct order
-//*/
-//
-//     ofstream out2(outfile.c_str());
-//
-//     for (i = 0; i < 8; i++) {
-//         out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
-//         out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
-//         cout << answers[i];
+
+
+//     for (i = 0; i < count; i++) {
+//         out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
+//         out2 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
+//         cout << temp[i];
 //     }//Prints data out in correct order
+
+    for (i = 0; i < count; i++) {
+        out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
+        out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
+        cout << answers[i];
+    }//Prints data out in correct order
+
+
+
+    cout << "program end" << endl;
 //
-//    cout << "program end" << endl;
+//    int a = pow(2, 15);
+//    int scale = a / 1000.0;
+//
+//    fixedfft fft(8);
+//    for (int i = 0; i < 2; i++) {
+//
+//        fft.inputandtick(FixedComplex<32>(5 * scale, 0));
+//        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
+//        fft.inputandtick(FixedComplex<32>(8 * scale, 0));
+//        fft.inputandtick(FixedComplex<32>(-5 * scale, 0));
+//        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
+//        fft.inputandtick(FixedComplex<32>(12 * scale, 0));
+//        fft.inputandtick(FixedComplex<32>(10 * scale, 0));
+//        fft.inputandtick(FixedComplex<32>(9 * scale, 0));
+//    }
 
 }
 

@@ -18,6 +18,7 @@ class fixedfftbase : public FilterChainElement
 public:
     int m_count;
     bool input(const filter_io_t &data) override;
+
         /**
          * output - provide an output sample to the caller.
          * @return false if no output sample is available.
@@ -28,7 +29,7 @@ public:
     virtual void inputandtick(FixedComplex<32> x) = 0;
     virtual ~fixedfftbase();
     int ready;
-    queue<FixedComplex<16> >   m_output;
+    queue<FixedComplex<32> >   m_output;
 
 };
 
@@ -77,7 +78,9 @@ public:
 class fixedfft: public fixedfftbase
 {
 public:
+    bool inpu(FixedComplex<32> sample);
     bool input(const filter_io_t &data) override;
+    bool outpu(FixedComplex<32>* sample);
         /**
          * output - provide an output sample to the caller.
          * @return false if no output sample is available.
