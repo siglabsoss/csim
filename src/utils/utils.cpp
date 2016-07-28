@@ -12,3 +12,13 @@ unsigned int reverseBits(int N, unsigned int num)
     }
     return reverse_num;
 }
+
+double bound(double min, double max, double val)
+{
+    if (val > max) {
+        val = max;
+    } else if (val < min) {
+        val = min;
+    }
+    return val;
+}
