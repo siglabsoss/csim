@@ -26,42 +26,17 @@ void fixedfftbase::tick()
 
 bool fixedfft::input(const filter_io_t &data)
 {
-//    m_count++;//One more input has been received
-//    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
-//    FixedComplex<32> sample = data.fc.to_32();
-//    inputandtick(sample);
-//    return true;
-}
-
-bool fixedfft::inpu(FixedComplex<32> sample)
-{
     m_count++;//One more input has been received
-    inputandtick(sample.to_32());
+    assert(data.type == IO_TYPE_FIXED_COMPLEX_32);
+    FixedComplex<32> sample = data.fc32;
+    inputandtick(sample);
     return true;
 }
+
 /**
  * output - provide an output sample to the caller.
  * @return false if no output sample is available.
  */
-bool fixedfft::outpu(FixedComplex<32>* sample)
-{
-    if (m_count > (2*N) - 1) {
-        m_count = m_count - (2*N); //Full cycle of outputs complete
-    }
-
-    if (m_count >= N) {
-
-        *sample =  printer.m_output.front();
-        printer.m_output.pop();
-        return true;
-
-    }//Time to start outputs
-    else {
-        return false;
-    }//Not ready
-}
-
-
 
 bool fixedfft::output(filter_io_t &data)
 {
@@ -70,9 +45,9 @@ bool fixedfft::output(filter_io_t &data)
     }
 
     if (m_count >= N) {
-        data.type = IO_TYPE_FIXED_COMPLEX_16;
+        data.type = IO_TYPE_FIXED_COMPLEX_32;
 
-      //  data.fc = printer.m_output.front();
+        data.fc32 = printer.m_output.front();
         printer.m_output.pop();
 
         return true;

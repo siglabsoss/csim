@@ -65,13 +65,12 @@ int main(int argc, char *argv[])
         for (int i = 0; i < 2; i++) {
             for (int j = 0; j < points; j++) {
                 filter_io_t data;
-//                data.type =  IO_TYPE_FIXED_COMPLEX_32;
-//                data.fc = FixedComplex<32>(realInput[(8*k)+j],imagInput[(8*k)+j]);
-                fft.inpu(FixedComplex<32>(realInput[(8*k)+j],imagInput[(8*k)+j]));
-                bool test = fft.outpu(p);
+                data.type =  IO_TYPE_FIXED_COMPLEX_32;
+                data.fc32 = FixedComplex<32>(realInput[(8*k)+j],imagInput[(8*k)+j]);
+                fft.input(data);
+                bool test = fft.output(data);
                 if (test) {
-                   // answers[count++] = data.fc;
-                    answers[count++] = *p;
+                    answers[count++] = data.fc32;
                 }
             }
         }
