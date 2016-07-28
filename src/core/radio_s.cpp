@@ -49,9 +49,8 @@ bool RadioS::txWave(std::complex<double> &sample_out)
 {
     filter_io_t data;
     //A properly formed modulation filter chain will always
-    //have an output, but we check anyway
+    //have an output, but we check anyway since it's useful for testing
     bool didTx = m_mod.output(data);
-    //XXX just add an assertion here
     if (didTx) {
         assert(data.type == IO_TYPE_COMPLEX_DOUBLE); //sanity check on the modulation filter chain output
         sample_out = data.rf;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/radio_s.hpp>
+#include <mathlib/complex_gaussian_noise.hpp>
 
 #include <vector>
 #include <map>
@@ -34,9 +35,9 @@ public:
     iterator end();
 
 private:
-    std::vector<RadioS *> m_radios;
-    std::map<RadioS *, boost::circular_buffer<std::complex<double> > > m_txBuffers;
-    MatrixXd    m_distances;
-
-    bool        m_didInit;
+    std::vector<RadioS *>                                               m_radios;
+    std::map<RadioS *, boost::circular_buffer<std::complex<double> > >  m_txBuffers;
+    MatrixXd                                                            m_distances;
+    ComplexGaussianNoise                                                m_noise;
+    bool                                                                m_didInit;
 };
