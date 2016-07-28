@@ -27,7 +27,6 @@ void fixedfftbase::tick()
 bool fixedfft::input(const filter_io_t &data)
 {
     m_count++;
-    //XXX convert data -> sample
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
     FixedComplex<16> sample = data.fc;
     inputandtick(sample.to_32());

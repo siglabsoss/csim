@@ -27,8 +27,6 @@ fixedfir::fixedfir(int N, FixedComplex<16>* tap) :
 
 bool fixedfir::input(const filter_io_t &data)
 {
-
-    //XXX convert data -> sample
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
     FixedComplex<16> sample = data.fc;
     fir(sample);
