@@ -58,8 +58,9 @@ int main(int argc, char *argv[])
 
     FixedComplex<32> answers[32769];//Array to store answers
     int count = 0; //How many outputs have been collected
+
     int points = 32768;
-    FixedComplex<32>* p = new FixedComplex<32>;
+
     fixedfft fft(points); //8 point fft
     for ( int k = 0; k < (inputs)/points; k++)
         for (int i = 0; i < 2; i++) {
@@ -75,8 +76,8 @@ int main(int argc, char *argv[])
             }
         }
     cout << "Count is: " << count << endl << endl;
- // If you want bits to be reversed
 
+    // If you want bits to be reversed
 
 //     cout << "Hopefully correct:" << endl;
 //     FixedComplex<16> temp[8];
@@ -95,27 +96,12 @@ int main(int argc, char *argv[])
         out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
         out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
         cout << answers[i];
-    }//Prints data out in correct order
+    }//Prints data
 
 
 
     cout << "program end" << endl;
-//
-//    int a = pow(2, 15);
-//    int scale = a / 1000.0;
-//
-//    fixedfft fft(8);
-//    for (int i = 0; i < 2; i++) {
-//
-//        fft.inputandtick(FixedComplex<32>(5 * scale, 0));
-//        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
-//        fft.inputandtick(FixedComplex<32>(8 * scale, 0));
-//        fft.inputandtick(FixedComplex<32>(-5 * scale, 0));
-//        fft.inputandtick(FixedComplex<32>(6 * scale, 0));
-//        fft.inputandtick(FixedComplex<32>(12 * scale, 0));
-//        fft.inputandtick(FixedComplex<32>(10 * scale, 0));
-//        fft.inputandtick(FixedComplex<32>(9 * scale, 0));
-//    }
+
 
 }
 

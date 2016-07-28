@@ -22,12 +22,12 @@ CSIM_TEST_CASE(REAL_FILTER)
     FixedComplex<16> input[1024]; //Array to hold inputs
     FixedComplex<16> output[1024]; //Array to hold outputs
     FixedComplex<16> answers[1024];
-    string data("./data/firdata/input/basic1_in.txt"); //Input data file
+    string data("./data/firdata/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open()) {
         cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/basic1_in.txt");
+        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/data1_in.txt");
     }
 
     char ** ptr;
@@ -43,13 +43,13 @@ CSIM_TEST_CASE(REAL_FILTER)
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    string taps("./data/firdata/input/basic1_taps.txt");
+    string taps("./data/firdata/input/taps1.txt");
     FixedComplex<16> tap[41];
 
     ifstream in2(taps.c_str());
     if (!in2.is_open()) {
         cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/basic1_taps.txt");
+        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/taps1.txt");
     }
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 
@@ -67,7 +67,7 @@ CSIM_TEST_CASE(REAL_FILTER)
         j++;
     } //Reads in taps
 
-    string data3("./data/firdata/answers/answers1.txt"); //Answers data file
+    string data3("./data/firdata/answers/answers1.csv"); //Answers data file
 
     ifstream in3(data3.c_str());
     if (!in3.is_open()) {
@@ -114,7 +114,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     ifstream in(data.c_str());
     if (!in.is_open()) {
         cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/data1_in.txt");
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/data2_in.csv");
     }
     char ** ptr;
 
@@ -136,7 +136,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     ifstream in2(taps.c_str());
     if (!in2.is_open()) {
         cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/taps.txt");
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/taps2.txt");
     }
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 
@@ -149,12 +149,12 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         j++;
     } //Reads in taps
 
-    string data3("./data/firdata/output/data1_out.txt"); //Answers data file
+    string data3("./data/firdata/answers/answers2.csv"); //Answers data file
 
     ifstream in3(data3.c_str());
     if (!in3.is_open()) {
         cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/output/data1_out.txt");
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/answers/answers2.csv");
     }
 
     int l = 0;//Number of answers
@@ -165,6 +165,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         imagAnswers[l] = atof(vec[1].c_str());
         l++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+
     fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++) {
         filter_io_t data;
