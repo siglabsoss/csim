@@ -24,7 +24,7 @@ public:
      * @param config The new radios configuration.
      * @return ID of radio
      */
-    radio_id_t addRadio(std::unique_ptr<RadioS> (radioFactory)(const radio_config_t &config), radio_config_t &config);
+    radio_id_t addRadio(std::function< std::unique_ptr<RadioS>() > &radioFactory);
 
     void init();
 

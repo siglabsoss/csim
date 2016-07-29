@@ -14,10 +14,10 @@ RadioSet::RadioSet() :
 
 }
 
-radio_id_t RadioSet::addRadio(std::unique_ptr<RadioS> (radioFactory)(const radio_config_t &config), radio_config_t &config)
+radio_id_t RadioSet::addRadio(std::function< std::unique_ptr<RadioS>() > &radioFactory)
 {
     assert(m_didInit == false); //can't add radios after init (for now)
-    std::unique_ptr<RadioS> newRadio = radioFactory(config);
+    std::unique_ptr<RadioS> newRadio = radioFactory();
     RadioS *newRadioPtr = newRadio.get();
 
     m_radios.push_back(std::move(newRadio));

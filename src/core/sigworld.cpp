@@ -7,9 +7,9 @@ SigWorld::SigWorld() :
 
 }
 
-void SigWorld::addRadio(std::unique_ptr<RadioS> (radioFactory)(const radio_config_t &config), radio_config_t &config)
+void SigWorld::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
 {
-    (void)m_radioSet.addRadio(radioFactory, config);
+    (void)m_radioSet.addRadio(radioFactory);
 }
 
 void SigWorld::init()

@@ -35,23 +35,23 @@ int main(int argc, char *argv[])
     radio_config_t config;
 
     for (int i = 0; i < 2; i++) {
-        config.position = Vector2d(0.0, i*1199.6*10);
-        config.id = i+1;
-        world.addRadio([](const radio_config_t &config)
+        world.addRadio([i]()
                 {
+                    radio_config_t config {
+                        .position = Vector2d(0.0, i*1199.6*10),
+                        .id = static_cast<radio_id_t>(i + 1)
+                    };
                     FilterChain modulation_chain;
-
                     SineWave *sw = new SineWave(2000);
                     modulation_chain = *sw;
 
                     FilterChain demodulation_chain;
-                    sw = new SineWave(300);
                     AutomaticGain *ag = new AutomaticGain();
                     ag->shouldPublish(true);
-                    demodulation_chain = *sw + *ag;
+                    demodulation_chain = *ag;
 
                     return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
-                }, config);
+                });
     }
 
     world.init();

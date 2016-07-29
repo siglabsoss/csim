@@ -8,7 +8,7 @@ class SigWorld
 {
 public:
     SigWorld();
-    void addRadio(std::unique_ptr<RadioS> (radioFactory)(const radio_config_t &config), radio_config_t &config);
+    void addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory);
     void init();
     void tick();
 private:
