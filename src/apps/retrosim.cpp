@@ -5,6 +5,7 @@
 #include <filters/fixed_to_byte.hpp>
 #include <filters/fixedfir.hpp>
 #include <filters/sine_wave.hpp>
+#include <filters/automatic_gain.hpp>
 
 #include <sys/time.h>
 #include <utility>
@@ -33,20 +34,21 @@ int main(int argc, char *argv[])
 
     radio_config_t config;
 
-    for (int i = 0; i < 5; i++) {
-        config.position = Vector2d(0.0, i*1199.6);
+    for (int i = 0; i < 2; i++) {
+        config.position = Vector2d(0.0, i*1199.6*10);
         config.id = i+1;
         world.addRadio([](const radio_config_t &config)
                 {
                     FilterChain modulation_chain;
 
                     SineWave *sw = new SineWave(2000);
-                    //modulation_chain = *dc4 + *dbtc + *db6 + *db5 + *db4;
                     modulation_chain = *sw;
 
                     FilterChain demodulation_chain;
                     sw = new SineWave(300);
-                    demodulation_chain = *sw;
+                    AutomaticGain *ag = new AutomaticGain();
+                    ag->shouldPublish(true);
+                    demodulation_chain = *sw + *ag;
 
                     return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
                 }, config);
