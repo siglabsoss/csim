@@ -11,6 +11,7 @@ enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,
     IO_TYPE_COMPLEX_DOUBLE,
     IO_TYPE_FIXED_COMPLEX_16,
+    IO_TYPE_FIXED_COMPLEX_32,
     IO_TYPE_BYTE
 };
 struct filter_io_t
@@ -20,6 +21,7 @@ struct filter_io_t
     union {
         std::complex<double> rf;
         FixedComplex<16> fc;
+        FixedComplex<32> fc32;
         uint8_t byte;
     };
 
@@ -40,6 +42,9 @@ struct filter_io_t
                 case IO_TYPE_FIXED_COMPLEX_16:
                     this->fc = other.fc;
                     break;
+                case IO_TYPE_FIXED_COMPLEX_32:
+                    this->fc32 = other.fc32;
+                    break;
                 case IO_TYPE_BYTE:
                     this->byte = other.byte;
                     break;
@@ -59,6 +64,9 @@ struct filter_io_t
                     break;
                 case IO_TYPE_FIXED_COMPLEX_16:
                     this->fc = rhs.fc;
+                    break;
+                case IO_TYPE_FIXED_COMPLEX_32:
+                    this->fc32 = rhs.fc32;
                     break;
                 case IO_TYPE_BYTE:
                     this->byte = rhs.byte;
@@ -99,6 +107,17 @@ struct filter_io_t
                 numBytes += sizeof(value);
                 break;
             }
+            case IO_TYPE_FIXED_COMPLEX_32:
+            {
+               int value = fc32.real.to_int();
+               memcpy(data + numBytes, &value, sizeof(value));
+               numBytes += sizeof(value);
+
+               value = fc32.imag.to_int();
+               memcpy(data + numBytes, &value, sizeof(value));
+               numBytes += sizeof(value);
+               break;
+           }
             case IO_TYPE_BYTE:
                 memcpy(data + numBytes, &byte, sizeof(byte));
                 numBytes += sizeof(byte);

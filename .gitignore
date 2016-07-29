@@ -47,3 +47,7 @@ CTestTestfile.cmake
 # Vimdiff conflict resolution original backups
 *.orig
 
+/data/fft/output/results.txt
+/data/fft/output/out1.csv
+/data/fft/output/out2.csv
+/data/stitcher/output/stitching.csv
