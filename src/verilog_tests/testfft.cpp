@@ -59,44 +59,44 @@ int main(int argc, char *argv[])
     FixedComplex<32> answers[32769];//Array to store answers
     int count = 0; //How many outputs have been collected
 
-    int points = 32768;
+    int points = inputs;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
     fixedfft fft(points); //8 point fft
-    for ( int k = 0; k < (inputs)/points; k++)
-        for (int i = 0; i < 2; i++) {
-            for (int j = 0; j < points; j++) {
 
-                data.fc32 = FixedComplex<32>(realInput[(8*k)+j],imagInput[(8*k)+j]);
-                fft.input(data);
-                bool test = fft.output(data);
-                if (test) {
-                    answers[count++] = data.fc32;
-                }
+    for (int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+
+            data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
+            fft.input(data);
+            bool test = fft.output(data);
+            if (test) {
+                answers[count++] = data.fc32;
             }
         }
+    }
     cout << "Count is: " << count << endl << endl;
 
     // If you want bits to be reversed
 
-//     cout << "Hopefully correct:" << endl;
-//     FixedComplex<16> temp[8];
-//     for (i = 0; i < 8; i++) {
-//         temp[reverseBits(8, i)] = answers[i];
-//     }//Reformats data in correct order
+     cout << "Hopefully correct:" << endl;
+     FixedComplex<32> temp[32769];
+     for (i = 0; i < inputs; i++) {
+         temp[reverseBits(inputs, i)] = answers[i];
+     }//Reformats data in correct order
 
+     assert(count == inputs);
+     for (i = 0; i < count; i++) {
+         out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
+         out2 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
+         cout << temp[i];
+     }//Prints data out in correct order
 
-//     for (i = 0; i < count; i++) {
-//         out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
-//         out2 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
-//         cout << temp[i];
-//     }//Prints data out in correct order
-
-    for (i = 0; i < count; i++) {
-        out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
-        out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
-       // cout << answers[i];
-    }//Prints data
+//    for (i = 0; i < count; i++) {
+//        out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
+//        out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
+//       // cout << answers[i];
+//    }//Prints data
 
 
 
