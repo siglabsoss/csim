@@ -1,6 +1,5 @@
 #include <iostream>
 #include <cmath>
-#include <queue>
 using namespace std;
 #include <filters/fixedfft.hpp>
 
@@ -46,7 +45,7 @@ bool fixedfft::output(filter_io_t &data)
 
     if (m_count >= N) {
         data.type = IO_TYPE_FIXED_COMPLEX_32;
-        data.fc32 = FixedComplex<32>(0,0);
+
         data.fc32 = printer.m_output.front();
         printer.m_output.pop();
 
