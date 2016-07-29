@@ -8,13 +8,13 @@ class AutomaticGain : public FilterChainElement
 {
 public:
     virtual ~AutomaticGain() {}
-    AutomaticGain(double desiredPowerW = 10) :
+    AutomaticGain(double desiredPowerW = 0.5) :
         FilterChainElement("AutomaticGain"),
         m_input(),
         m_output(),
         m_gain(1.0),
         m_avgPower(0.0),
-        m_firstRun(true),
+        m_initializing(true),
         m_gotInput(false),
         m_desiredPower(desiredPowerW),
         m_count(0)
@@ -46,34 +46,40 @@ public:
 
         m_output = m_input * m_gain;
 
+
+        //real power = Vpk^2/2R (50 Ohm inductance)
+        double power = pow(m_output.real(), 2) / 100;
+        m_avgPower = (FILTER_WEIGHT * power) + ((1 - FILTER_WEIGHT) * m_avgPower);
+
         m_count++;
         if (m_count > 100000) {
             log_debug("m_avgPower = %f \t m_output = %f\tm_gain = %f", m_avgPower, std::norm(m_output), m_gain);
             m_count = 0;
+            m_initializing = false;
         }
 
-        double power = pow(std::norm(m_output), 2) / 50; //XXX define 50
-        if (m_firstRun) {
-            m_avgPower = power;
-        }else {
-            m_avgPower = 0.1 * power + 0.9 * m_avgPower;
+        if (m_initializing) {
+            return; //don't adjust gain until enough samples were collected
         }
-
         double error = m_desiredPower - m_avgPower;
 
         //bang bang control
         if (error > 0) {
-            m_gain += 0.000001;
+            m_gain += GAIN_CONTROL_INCREMENT;
         } else {
-            m_gain -= 0.000001;
+            m_gain -= GAIN_CONTROL_INCREMENT;
         }
     }
 private:
+    static constexpr double INDUCTANCE_OHMS = 50;
+    static constexpr double FILTER_WEIGHT = 0.00001;
+    static constexpr double GAIN_CONTROL_INCREMENT = 0.000001;
+
     std::complex<double> m_input;
     std::complex<double> m_output;
     double               m_gain;
     double               m_avgPower;
-    bool                 m_firstRun;
+    bool                 m_initializing;
     bool                 m_gotInput;
     double               m_desiredPower;
 
