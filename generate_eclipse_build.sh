@@ -7,11 +7,6 @@ THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CSIM_SRC=$THIS_DIR #source tree root is where this script sits
 CSIM_BUILD=$CSIM_SRC/../csim_build #define the build tree to be a sibling
 
-if [ -d $CSIM_BUILD ]; then
-    echo "NOTE: Removing existing build directory"
-    rm -r $CSIM_BUILD
-fi
-
 mkdir -p $CSIM_BUILD
 
 pushd $CSIM_BUILD
