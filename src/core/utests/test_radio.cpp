@@ -145,7 +145,7 @@ CSIM_TEST_CASE(FILTER_CHAIN_IS_PROPERLY_CHAINED)
     FilterChain modulation_chain;
     modulation_chain = *deo2 + *deo1 + *itrf;
 
-    RadioS *radio = new RadioS(config, std::move(modulation_chain), std::move(demodulation_chain));
+    RadioS *radio = new RadioS(config, modulation_chain, demodulation_chain);
     uint8_t byte = 0;
     std::complex<double> sample(0.5, 0.5);
     bool didOutput = true;
