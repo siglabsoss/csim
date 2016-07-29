@@ -73,12 +73,12 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     FixedComplex<16> atap[100]; //Array for A taps
     FixedComplex<16> btap[100];
 
-    string data("./data/iirdata/input/data1_in.txt"); //Input data file
+    string data("./data/iirdata/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open()) {
         cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/iirdata/input/data1_in.txt");
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/iirdata/input/data1_in.csv");
     }
 
     char ** ptr;

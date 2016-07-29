@@ -33,11 +33,11 @@ CSIM_TEST_CASE(PYTHON_COMPARISON)
     outdatas = stitch.stitch(400, 1000, 100, datas); //(int numsamples, int sampleRate, int frequency) stitches data with clockup and clockdown waves
 
     int size = outdatas.size();
-    string outFile = "data/stitcher/output/stitching2.txt"; //Output data file
+    string outFile = "data/stitcher/output/stitching.txt"; //Output data file
     ofstream out(outFile.c_str());
     if (!out.is_open()) {
            cout << "error reading" << endl;
-           BOOST_REQUIRE_MESSAGE(0 == 1, "Could not write to data/stitcher/output/stitching2.txt");
+           BOOST_REQUIRE_MESSAGE(0 == 1, "Could not write to data/stitcher/output/stitching.txt");
     }
 
     for (int i = 0; i < size; i++) {
@@ -53,11 +53,11 @@ CSIM_TEST_CASE(PYTHON_COMPARISON)
     vector<string> vec;
     vector<double> answers; //Vector to hold answer data read from file
     string line;
-    string data2("data/stitcher/answers/stitcher_answers.txt"); //Answers data file
+    string data2("data/stitcher/answers/answers1.txt"); //Answers data file
     ifstream in2(data2.c_str());
     if (!in2.is_open()) {
         cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from data/stitcher/answers/stitcher_answers.txt");
+        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from data/stitcher/answers/answers1.txt");
     }
 
     int l = 0;

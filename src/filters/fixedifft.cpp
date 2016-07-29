@@ -1,29 +1,29 @@
 #include <iostream>
 #include <cmath>
 using namespace std;
-#include <filters/fixedfft.hpp>
+#include <filters/fixedifft.hpp>
 
 const float pi = 3.14159265359;
 
 
-bool fixedfftbase::input(const filter_io_t &data)
+bool fixedifftbase::input(const filter_io_t &data)
 {
 
 }
 
-bool fixedfftbase::output(filter_io_t &data)
+bool fixedifftbase::output(filter_io_t &data)
 {
 
 
 }
 
 
-void fixedfftbase::tick()
+void fixedifftbase::tick()
 {
 
 }
 
-bool fixedfft::input(const filter_io_t &data)
+bool fixedifft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
     assert(data.type == IO_TYPE_FIXED_COMPLEX_32);
@@ -37,7 +37,7 @@ bool fixedfft::input(const filter_io_t &data)
  * @return false if no output sample is available.
  */
 
-bool fixedfft::output(filter_io_t &data)
+bool fixedifft::output(filter_io_t &data)
 {
     if (m_count > (2*N) - 1) {
         m_count = m_count - (2*N); //Full cycle of outputs complete
@@ -56,23 +56,23 @@ bool fixedfft::output(filter_io_t &data)
     }//Not ready
 }
 
-void fixedfft::tick()
+void fixedifft::tick()
 {
 
 }
 
-fixedfftbase::~fixedfftbase()
+fixedifftbase::~fixedifftbase()
 {
 
 }
 
-void fixedfftstage::init(int Ninput)
+void fixedifftstage::init(int Ninput)
 {
     N = Ninput;
 
     memory = new FixedComplex<32> [N / 2];
 
-    state = FFFT_STATE_INITIAL;
+    state = Fifft_STATE_INITIAL;
 
     read_pointer = 0;
     write_pointer = 0;
@@ -81,20 +81,20 @@ void fixedfftstage::init(int Ninput)
 
     clock = 0;
 
-//	cout << "FFT bufferfly " << N << " was created" << endl;
+//	cout << "ifft bufferfly " << N << " was created" << endl;
 }
 
-fixedfftstage::fixedfftstage(int Ninput)
+fixedifftstage::fixedifftstage(int Ninput)
 {
     init(Ninput);
 }
 
-fixedfftstage::fixedfftstage()
+fixedifftstage::fixedifftstage()
 {
 
 }
 
-void fixedfftstage::dump(void)
+void fixedifftstage::dump(void)
 {
     int i;
     for (i = 0; i < N / 2; i++) {
@@ -102,18 +102,18 @@ void fixedfftstage::dump(void)
     }
 }
 
-void fixedfftstage::butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
+void fixedifftstage::butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
         FixedComplex<32> y)
 {
     array[0] = x + y;
     array[1] = x - y;
 }
 
-FixedComplex<32> fixedfftstage::twiddler(int k)
+FixedComplex<32> fixedifftstage::twiddler(int k)
 {
 
         //int scale = 32;
-        int a[] = {0,4,9,13,18,22,27,31,36,40,44,49,53,58,62,66,71,75,79,83,88,92,96,100,104,108,112,116,120,124,128,132,136,139,143,147,150,154,158,161,165,168,171,175,178,181,184,187,190,193,196,199,202,204,207,210,212,215,217,219,222,224,226,228,230,232,234,236,237,239,241,242,243,245,246,247,248,249,250,251,252,253,254,254,255,255,255,256,256,256,256
+    int a[] = {0,4,9,13,18,22,27,31,36,40,44,49,53,58,62,66,71,75,79,83,88,92,96,100,104,108,112,116,120,124,128,132,136,139,143,147,150,154,158,161,165,168,171,175,178,181,184,187,190,193,196,199,202,204,207,210,212,215,217,219,222,224,226,228,230,232,234,236,237,239,241,242,243,245,246,247,248,249,250,251,252,253,254,254,255,255,255,256,256,256,256
 };
     //  int a = pow(2,15);
     //  int scale = a/1000.0;
@@ -127,10 +127,10 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
 
         if (theta > 90) {
             W_cos = -a[-90 + theta];
-            W_sin = -a[180 - theta];
+            W_sin = a[180 - theta];
         } else {
             W_cos = a[90 - theta];
-            W_sin = -a[theta];
+            W_sin = a[theta];
         }
       //  cout << "Inputs:" << N << " Theta: " << theta << endl;
         FixedComplex<32> W(W_cos, W_sin);
@@ -154,7 +154,7 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
 //    return V;
 //}
 
-void fixedfftstage::output(FixedComplex<32> x)
+void fixedifftstage::output(FixedComplex<32> x)
 {
     while (!next->ready) {
        // cout << N << "X" << endl;
@@ -163,12 +163,12 @@ void fixedfftstage::output(FixedComplex<32> x)
     next->inputandtick(x);
 }
 
-void fixedfftstage::inputandtick(FixedComplex<32> x)
+void fixedifftstage::inputandtick(FixedComplex<32> x)
 {
 
-    //	cout << "FFT(" << N << ") starting in state " << state << " with x " << x << endl;
+    //	cout << "ifft(" << N << ") starting in state " << state << " with x " << x << endl;
 
-    if (state != FFFT_STATE_OUTPUT && x == FixedComplex<32>(0, 0)) {
+    if (state != Fifft_STATE_OUTPUT && x == FixedComplex<32>(0, 0)) {
         cout << "PROBLEMS " << endl;
     }
 
@@ -182,20 +182,20 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
     scale = 32;//Cannot scale higher that this yet
     switch (state) {
         default:
-        case FFFT_STATE_INITIAL:
+        case Fifft_STATE_INITIAL:
            // cout << N << "a" << endl;
 
             memory[write_pointer] = x;
 
             if (write_pointer == ((N / 2) - 1)) {
-                state = FFFT_STATE_READ;
+                state = Fifft_STATE_READ;
                 write_pointer = 0;
             } else {
                 write_pointer++;
             }
 
             break;
-        case FFFT_STATE_READ:
+        case Fifft_STATE_READ:
             //cout << N << "b" << endl;
 
             butterfly(butterflyresult, memory[read_pointer], x);
@@ -205,7 +205,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
             output(butterflyresult[0]);
 
             if (read_pointer == ((N / 2) - 1)) {
-                state = FFFT_STATE_OUTPUT;
+                state = Fifft_STATE_OUTPUT;
                 write_pointer = 0;
                 read_pointer = 0;
             } else {
@@ -214,7 +214,7 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
             }
 
             break;
-        case FFFT_STATE_OUTPUT:
+        case Fifft_STATE_OUTPUT:
             //cout << N << "c" << endl;
             if (N == 8) {
                 int dontcare = 10;
@@ -223,12 +223,12 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
 //		as = as/scale;
             outputtemp = memory[read_pointer] * twiddler(read_pointer);
 
-            outputtemp = outputtemp >> 8;
+            outputtemp = (outputtemp >> 8);
             output(outputtemp);
          //   cout << "N: " << N << " outputtemp: " << outputtemp;
             if (read_pointer == ((N / 2) - 1)) {
 
-                state = FFFT_STATE_INITIAL;
+                state = Fifft_STATE_INITIAL;
                 write_pointer = 0;
                 read_pointer = 0;
             } else {
@@ -239,18 +239,18 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
     }
 
     clock++;
-    ready = (state != FFFT_STATE_OUTPUT);
+    ready = (state != Fifft_STATE_OUTPUT);
 
 }
 
-fixedfftprint::fixedfftprint(int Ninput)
+fixedifftprint::fixedifftprint(int Ninput)
 {
     N = Ninput;
     count = 0;
     ready = 1;
 }
 
-void fixedfftprint::inputandtick(FixedComplex<32> x)
+void fixedifftprint::inputandtick(FixedComplex<32> x)
 {
 //	sc_int<32> a = pow(2,15);
 //	x = x * a;
@@ -261,20 +261,20 @@ void fixedfftprint::inputandtick(FixedComplex<32> x)
     count++;
 }
 
-fixedfftbuffer::fixedfftbuffer(int Ninput)
+fixedifftbuffer::fixedifftbuffer(int Ninput)
 {
     N = Ninput;
     count = 0;
     ready = 1;
 }
 
-void fixedfftbuffer::inputandtick(FixedComplex<32> x)
+void fixedifftbuffer::inputandtick(FixedComplex<32> x)
 {
     buf.push_back(x);
     count++;
 }
 
-fixedfft::fixedfft(int Ninput) :
+fixedifft::fixedifft(int Ninput) :
         printer(Ninput)
 {
 
@@ -283,7 +283,7 @@ fixedfft::fixedfft(int Ninput) :
     stagecount = log2(N);
     int stagesize = 0;
 
-    stages = new fixedfftstage[stagecount];
+    stages = new fixedifftstage[stagecount];
 
     int i;
     for (i = 0; i < stagecount; i++) {
@@ -298,7 +298,7 @@ fixedfft::fixedfft(int Ninput) :
     stages[stagecount - 1].next = &printer;
 }
 
-void fixedfft::inputandtick(FixedComplex<32> x)
+void fixedifft::inputandtick(FixedComplex<32> x)
 {
 //	cout << "input was " << x.real << endl;
 //	sc_int<32> a = pow(2,15);

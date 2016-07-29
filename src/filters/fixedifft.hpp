@@ -5,15 +5,15 @@
 #include <types/fixedcomplex.hpp>
 #include <queue>
 #include <core/logger.hpp>
-#ifndef __FIXEDFFT_H__
-#define __FIXEDFFT_H__
+#ifndef __FIXEDifft_H__
+#define __FIXEDifft_H__
 
-enum FFFT_STATE
+enum Fifft_STATE
 {
-    FFFT_STATE_INITIAL, FFFT_STATE_READ, FFFT_STATE_OUTPUT
+    Fifft_STATE_INITIAL, Fifft_STATE_READ, Fifft_STATE_OUTPUT
 };
 
-class fixedfftbase : public FilterChainElement
+class fixedifftbase : public FilterChainElement
 {
 public:
     int m_count;
@@ -27,25 +27,25 @@ public:
 
     void tick() override;
     virtual void inputandtick(FixedComplex<32> x) = 0;
-    virtual ~fixedfftbase();
+    virtual ~fixedifftbase();
     int ready;
     queue<FixedComplex<32> >   m_output;
 
 };
 
-class fixedfftstage: public fixedfftbase
+class fixedifftstage: public fixedifftbase
 {
 public:
     int                  N;
     FixedComplex<32>    *memory;
-    FFFT_STATE          state;
+    Fifft_STATE          state;
     int                 read_pointer;
     int                 write_pointer;
     int                 clock;
-    fixedfftbase        *next;
+    fixedifftbase        *next;
 
-    fixedfftstage(int Ninput);
-    fixedfftstage();
+    fixedifftstage(int Ninput);
+    fixedifftstage();
     void init(int Ninput);
     void dump(void);
     void inputandtick(FixedComplex<32> x);
@@ -55,27 +55,27 @@ public:
     FixedComplex<32> twiddler(int k);
 
 };
-class fixedfftprint: public fixedfftbase
+class fixedifftprint: public fixedifftbase
 {
 public:
     int N;
     int count;
-    fixedfftprint(int Ninput);
+    fixedifftprint(int Ninput);
     void inputandtick(FixedComplex<32> x);
 };
 
 // saves all output forever
-class fixedfftbuffer: public fixedfftbase
+class fixedifftbuffer: public fixedifftbase
 {
 public:
     int N;
     int count;
     std::vector<FixedComplex<32> > buf;
-    fixedfftbuffer(int Ninput);
+    fixedifftbuffer(int Ninput);
     void inputandtick(FixedComplex<32> x);
 };
 
-class fixedfft: public fixedfftbase
+class fixedifft: public fixedifftbase
 {
 public:
     bool input(const filter_io_t &data) override;
@@ -89,9 +89,9 @@ public:
     void tick() override;
     int N;
     int stagecount;
-    fixedfftstage *stages;
-    fixedfftprint printer;
-    fixedfft(int Ninput);
+    fixedifftstage *stages;
+    fixedifftprint printer;
+    fixedifft(int Ninput);
     void inputandtick(FixedComplex<32> x);
 };
 

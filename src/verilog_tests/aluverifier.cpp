@@ -7,20 +7,21 @@
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
 #include <types/fixedcomplex.hpp>
+#include <string>
 
 using namespace boost;
 using namespace std;
 
-int main()
+int main(int argc, char *argv[])
 {
     FixedComplex<16> input1[1024]; //Array to hold inputs
     FixedComplex<16> input2[1024]; //Array to hold inputs
-
-    string data("data/alu/input/in1.csv"); //Input data file
-
+    string data(argv[1]); //Input data file
+   // data = data + argv[1] + ".csv";
+    cout << data << endl;
     ifstream in(data.c_str());
     if (!in.is_open()) {
-        cout << "error reading" << endl;
+        cout << "error reading" << data <<  endl;
         return 1;
     }
     char ** ptr;
@@ -29,9 +30,13 @@ int main()
 
     vector<string> vec;
     string line;
-    string outFile("data/alu/output/out1.csv");
+    string outFile(argv[2]);
+    //outFile = outFile +  argv[1] + ".csv";
     ofstream out(outFile.c_str());
-
+    if (!out.is_open()) {
+          cout << "error reading" << outFile <<  endl;
+          return 1;
+      }
     int i = 0;
     while (getline(in, line)) {
         cout << line << endl;
@@ -52,10 +57,6 @@ int main()
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-//    while (i < 10)
-//    {
-//    	out << (input1[i] + input2[i]).real << "," << (input1[i] + input2[i]).imag;
-//    }
     in.close();
     out.close();
 

@@ -68,7 +68,7 @@ complex<float> floatfftstage::twiddler(int k)
 void floatfftstage::output(complex<float> x)
 {
     while (!next->ready) {
-        cout << N << "X" << endl;
+        //cout << N << "X" << endl;
         next->inputandtick(0);
     }
     next->inputandtick(x);
@@ -91,7 +91,7 @@ void floatfftstage::inputandtick(complex<float> x)
     switch (state) {
         default:
         case FFT_STATE_INITIAL:
-            cout << N << "a" << endl;
+            //cout << N << "a" << endl;
 
             memory[write_pointer] = x;
 
@@ -104,7 +104,7 @@ void floatfftstage::inputandtick(complex<float> x)
 
             break;
         case FFT_STATE_READ:
-            cout << N << "b" << endl;
+           // cout << N << "b" << endl;
 
             butterfly(butterflyresult, memory[read_pointer], x);
             memory[write_pointer] = butterflyresult[1];
@@ -123,7 +123,7 @@ void floatfftstage::inputandtick(complex<float> x)
 
             break;
         case FFT_STATE_OUTPUT:
-            cout << N << "c" << endl;
+            //cout << N << "c" << endl;
 
             outputtemp = memory[read_pointer] * twiddler(read_pointer);
             output(outputtemp);
