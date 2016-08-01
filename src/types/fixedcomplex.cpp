@@ -158,6 +158,15 @@ FixedComplex<32> FixedComplex<B>::to_32()
     return c;
 }
 
+template<int B>
+FixedComplex<64> FixedComplex<B>::to_64()
+{
+    FixedComplex<64> c;
+    c.real = this->real;
+    c.imag = this->imag;
+    return c;
+}
+
 template class FixedComplex<2> ;
 template class FixedComplex<3> ;
 template class FixedComplex<4> ;
@@ -189,4 +198,4 @@ template class FixedComplex<29> ;
 template class FixedComplex<30> ;
 template class FixedComplex<31> ;
 template class FixedComplex<32> ;
-
+template class FixedComplex<64> ;

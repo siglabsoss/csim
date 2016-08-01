@@ -35,6 +35,7 @@ public:
     FixedComplex operator>>(int shift);
     FixedComplex<16> to_16();
     FixedComplex<32> to_32();
+    FixedComplex<64> to_64();
     string to_string();
     friend ostream& operator<<(ostream& os, const FixedComplex& c)
     {

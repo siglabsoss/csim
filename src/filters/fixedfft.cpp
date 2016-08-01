@@ -113,10 +113,13 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
 {
 
         //int scale = 32;
-    int a[] = {0,1,1,2,2,3,3,4,4,5,6,6,7,7,8,8,9,9,10,10,11,11,12,13,13,14,14,15,15,16,16,16,17,17,18,18,
-            19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,25,26,26,26,27,27,27,27,28,28,28,29,29,29,29,29,
-            30,30,30,30,30,31,31,31,31,31,31,31,32,32,32,32,32,32,32,32,32,32,32};
-
+//    int a[] = {0,1,1,2,2,3,3,4,4,5,6,6,7,7,8,8,9,9,10,10,11,11,12,13,13,14,14,15,15,16,16,16,17,17,18,18,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,25,26,26,26,27,27,27,27,28,28,28,29,29,29,29,29,30,30,30,30,30,31,31,31,31,31,31,31,32,32,32,32,32,32,32,32,32,32,32
+//};
+    int a[] = {0,18,36,54,71,89,107,125,143,160,178,195,213,230,248,265,282,299,316,333,350,
+            367,384,400,416,433,449,465,481,496,512,527,543,558,573,587,602,616,630,644,658,672,685,
+            698,711,724,737,749,761,773,784,796,807,818,828,839,849,859,868,878,887,896,904,912,920,
+            928,935,943,949,956,962,968,974,979,984,989,994,998,1002,1005,1008,1011,1014,1016,1018,
+            1020,1022,1023,1023,1024,1024};
     //  int a = pow(2,15);
     //  int scale = a/1000.0;
 
@@ -124,7 +127,7 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
         int W_sin;
         int theta;
       //  theta = (360 / N) * k;
-        theta = (360 >> int(log2(N))) * k;
+        theta = (360  * k) >> int(log2(N));
 
 
         if (theta > 90) {
@@ -170,12 +173,12 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
 
     //	cout << "FFT(" << N << ") starting in state " << state << " with x " << x << endl;
 
-    if (state != FFFT_STATE_OUTPUT && x == FixedComplex<32>(0, 0)) {
-        cout << "PROBLEMS " << endl;
-    }
+//    if (state != FFFT_STATE_OUTPUT && x == FixedComplex<32>(0, 0)) {
+//        cout << "PROBLEMS " << endl;
+//    }
 
     FixedComplex<32> butterflyresult[2];
-    FixedComplex<32> outputtemp;
+    FixedComplex<64> outputtemp;
 
     int i;
     int as;
@@ -223,10 +226,14 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
             }
 //		as = memory[read_pointer];
 //		as = as/scale;
-            outputtemp = memory[read_pointer] * twiddler(read_pointer);
-
-            outputtemp = outputtemp >> 5;
-            output(outputtemp);
+            outputtemp = (memory[read_pointer] * twiddler(read_pointer)).to_64();
+            if (memory[read_pointer].real > (1<<22) || memory[read_pointer].imag > (1<<22) ) {
+                cout << "PROBLEM2" << endl;
+                cout << memory[read_pointer];
+            }
+//            outputtemp = outputtemp >> 5;
+            outputtemp = outputtemp >> 10;
+            output(outputtemp.to_32());
          //   cout << "N: " << N << " outputtemp: " << outputtemp;
             if (read_pointer == ((N / 2) - 1)) {
 
