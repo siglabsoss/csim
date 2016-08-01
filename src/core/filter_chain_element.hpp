@@ -78,6 +78,34 @@ struct filter_io_t
         return *this;
     }
 
+    filter_io_t & operator=(const std::complex<double> &rhs)
+    {
+        this->type = IO_TYPE_COMPLEX_DOUBLE;
+        this->rf = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const FixedComplex<16> &rhs)
+    {
+        this->type = IO_TYPE_FIXED_COMPLEX_16;
+        this->fc = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const FixedComplex<32> &rhs)
+    {
+        this->type = IO_TYPE_FIXED_COMPLEX_32;
+        this->fc32 = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const uint8_t &rhs)
+    {
+        this->type = IO_TYPE_BYTE;
+        this->byte = rhs;
+        return *this;
+    }
+
     size_t serialize(uint8_t *data) const
     {
         size_t numBytes = 0;

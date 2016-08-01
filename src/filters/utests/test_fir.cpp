@@ -10,7 +10,7 @@
 #include <iomanip> //For setprecision
 #include <stdlib.h>
 
-#include <filters/FixedFIR.hpp>
+#include <filters/fixed_fir.hpp>
 
 using namespace boost;
 using namespace std;

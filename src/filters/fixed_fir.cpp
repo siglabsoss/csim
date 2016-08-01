@@ -1,4 +1,4 @@
-#include <filters/FixedFIR.hpp>
+#include <filters/fixed_fir.hpp>
 
 
 FixedFIR::FixedFIR(int N, FixedComplex<16>* tap) :
@@ -21,8 +21,7 @@ bool FixedFIR::input(const filter_io_t &data)
 
 bool FixedFIR::output(filter_io_t &data)
 {
-    data.type = IO_TYPE_FIXED_COMPLEX_16;
-    data.fc = m_output;
+    data = m_output;
     return true;
 }
 
@@ -54,6 +53,5 @@ FixedComplex<16> FixedFIR::filter(FixedComplex<16> &input)
 
     sum = sum >> 15;
     return sum.to_16();
-
 }
 

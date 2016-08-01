@@ -3,7 +3,6 @@
 
 #include <filters/complex_to_fixed.hpp>
 #include <filters/fixed_to_byte.hpp>
-#include <filters/fixedfir.hpp>
 #include <filters/sine_wave.hpp>
 #include <filters/automatic_gain.hpp>
 
