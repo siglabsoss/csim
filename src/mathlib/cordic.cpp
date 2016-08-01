@@ -135,6 +135,16 @@ void cordic::calculate(sc_int<32> theta, FixedComplex<16> a, FixedComplex<16> b,
 //	cout << "Cosine: " << y[0][0].real/32768.0 << endl;
 //	cout << "Sine: " << y[1][0].real/32768.0 << endl;
 
+    for (int i = 0; i < 2; i++) {
+            if (y[i][0].real > 32768) {
+                y[i][0].real = 32768;
+            }
+            if (y[i][0].imag > 32768) {
+                y[i][0].imag = 32768;
+            }
+    }
+
+
     *cosdown = y[0][0].real;
     *cosup = y[1][0].imag;
     *sindown = y[0][0].imag;
