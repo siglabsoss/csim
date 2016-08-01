@@ -18,6 +18,7 @@ CSIM_TEST_SUITE_BEGIN(xcorrelatorFilter)
 
 CSIM_TEST_CASE(OCTAVE_COMPARISON)
 {
+
     string inFile("data/xcorrelator/input/data_file_complex1.csv");
     ifstream in(inFile.c_str());
         if (!in.is_open()) {
@@ -30,7 +31,6 @@ CSIM_TEST_CASE(OCTAVE_COMPARISON)
         std::string token;
         string line;
         while(getline(in,line)) {
-
                istringstream ss(line);
                getline(ss, token, ',');
                stringstream strValue;
@@ -38,13 +38,15 @@ CSIM_TEST_CASE(OCTAVE_COMPARISON)
                int realIntValue;
                int imagIntValue;
                strValue >> realIntValue;
-
                getline(ss, token, ',');
                stringstream strValue2;
                strValue2 << token;
                strValue2 >> imagIntValue;
                input.push_back(FixedComplex<32>(realIntValue, imagIntValue));
         }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+        cout << "corrlate" << endl;
+        XCorrelator x(16);
+        x.xCorrelate(input,input);
 
 
 

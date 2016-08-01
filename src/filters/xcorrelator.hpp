@@ -11,6 +11,7 @@
 #include <filters/fixedifft.hpp>
 #include <vector>
 #include <utils/utils.hpp>
+#include <queue>
 namespace std {
 
 class XCorrelator
@@ -18,7 +19,7 @@ class XCorrelator
 public:
     XCorrelator(int N);
     virtual ~XCorrelator();
-    vector<FixedComplex<32> > xCorrolate(vector<FixedComplex<32> > x,vector<FixedComplex<32> > y);
+    vector<FixedComplex<32> > xCorrelate(vector<FixedComplex<32> > x,vector<FixedComplex<32> > y);
     vector<FixedComplex<32> > fft(vector<FixedComplex<32> > vals);
     vector<FixedComplex<32> > ifft(vector<FixedComplex<32> > vals);
     int m_n;
