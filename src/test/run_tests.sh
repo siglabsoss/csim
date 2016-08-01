@@ -24,8 +24,17 @@ popd
 mkdir -p $CSIM_UTEST_BUILD
 
 pushd $CSIM_UTEST_BUILD
-cmake -D CMAKE_BUILD_TYPE=Debug $CSIM_SRC
-make -j utests
+if ! cmake -D CMAKE_BUILD_TYPE=Debug $CSIM_SRC ; then
+    EXIT_CODE=$?
+    echo "Error building make files for unit tests!"
+    exit $EXIT_CODE
+fi
+
+if ! make -j utests ; then
+    EXIT_CODE=$?
+    echo "Error building unit tests!"
+    exit $EXIT_CODE
+fi
 cp -r $CSIM_SRC/data .
 ./bin/utests
 EXIT_CODE=$?
