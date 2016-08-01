@@ -18,10 +18,7 @@ bool FixedFIR::input(const filter_io_t &data)
     m_output = filter(sample);
     return true;
 }
-/**
- * output - provide an output sample to the caller.
- * @return false if no output sample is available.
- */
+
 bool FixedFIR::output(filter_io_t &data)
 {
     data.type = IO_TYPE_FIXED_COMPLEX_16;
@@ -47,7 +44,6 @@ FixedComplex<16> FixedFIR::filter(FixedComplex<16> &input)
 
     FixedComplex<32> sum;
 
-    //m_bench[0] = input; //New data on bench
     m_bench.push_front(input);
 
     sum.real = 1 << 14;
