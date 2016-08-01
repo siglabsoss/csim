@@ -4,7 +4,8 @@ using namespace std;
 #include <filters/fixedfft.hpp>
 
 const float pi = 3.14159265359;
-
+//string outfile("../csim/data/fft/output/compareTwiddler.txt");
+//ofstream out3(outfile.c_str());
 
 bool fixedfftbase::input(const filter_io_t &data)
 {
@@ -111,24 +112,14 @@ void fixedfftstage::butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
 
 FixedComplex<32> fixedfftstage::twiddler(int k)
 {
+        int a[] = {0,572,1144,1715,2286,2856,3425,3993,4560,5126,5690,6252,6813,7371,7927,8481,9032,9580,10126,10668,11207,11743,12275,12803,13328,13848,14365,14876,15384,15886,16384,16877,17364,17847,18324,18795,19261,19720,20174,20622,21063,21498,21926,22348,22763,23170,23571,23965,24351,24730,25102,25466,25822,26170,26510,26842,27166,27482,27789,28088,28378,28660,28932,29197,29452,29698,29935,30163,30382,30592,30792,30983,31164,31336,31499,31651,31795,31928,32052,32166,32270,32365,32449,32524,32588,32643,32688,32723,32748,32763,32768};
 
-        //int scale = 32;
-//    int a[] = {0,1,1,2,2,3,3,4,4,5,6,6,7,7,8,8,9,9,10,10,11,11,12,13,13,14,14,15,15,16,16,16,17,17,18,18,19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,25,26,26,26,27,27,27,27,28,28,28,29,29,29,29,29,30,30,30,30,30,31,31,31,31,31,31,31,32,32,32,32,32,32,32,32,32,32,32
-//};
-    int a[] = {0,18,36,54,71,89,107,125,143,160,178,195,213,230,248,265,282,299,316,333,350,
-            367,384,400,416,433,449,465,481,496,512,527,543,558,573,587,602,616,630,644,658,672,685,
-            698,711,724,737,749,761,773,784,796,807,818,828,839,849,859,868,878,887,896,904,912,920,
-            928,935,943,949,956,962,968,974,979,984,989,994,998,1002,1005,1008,1011,1014,1016,1018,
-            1020,1022,1023,1023,1024,1024};
-    //  int a = pow(2,15);
-    //  int scale = a/1000.0;
 
         int W_cos;
         int W_sin;
         int theta;
-      //  theta = (360 / N) * k;
-        theta = (360  * k) >> int(log2(N));
 
+        theta = (360  * k) >> int(log2(N));
 
         if (theta > 90) {
             W_cos = -a[-90 + theta];
@@ -140,24 +131,29 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
       //  cout << "Inputs:" << N << " Theta: " << theta << endl;
         FixedComplex<32> W(W_cos, W_sin);
         return W;
+// //For using cordic
 
-    }
-
-//
 //    int thet;
-//    thet = (360 / N) * k * 572; //2pi * 32768 / 360 = 572
+//    thet = (2 * k * 32768 * pi / N);
 //    cordic c;
-//    sc_int<32> sin;
-//    sc_int<32> cos;
-//    sin = c.sin(thet);//Calculates sin
-//    int tempsin = sin * -1024 / 32768;//Scales to 1024
+//    sc_int<32> sin1;
+//    sc_int<32> cos1;
+//    sin1 = -c.sin(thet);//Calculates sin
 //    int phaseShift = 51471;//pi/2 * 32768
-//    cos = c.sin(thet + phaseShift);//Calculates cos
-//    int tempcos = cos * 1024 / 32768;//Scales to 1024
-//
-//    FixedComplex<32> V(tempcos,tempsin);
+//    cos1 = c.sin(thet + phaseShift);//Calculates cos
+//    FixedComplex<32> V(cos1,sin1);
+
+
+// // For printing out true sin and cos values
+//    float fW_cos;
+//    float fW_sin;
+//    float ftheta;
+//    ftheta = (2 * pi / N) * k;
+//    fW_cos = cos(ftheta);
+//    fW_sin = -sin(ftheta);
+//    out3 << "Theta: " << theta << "  " << ftheta << endl << W << V << "Cos: " << fW_cos * 32768 << " Sin: " << fW_sin  * 32768<< endl << endl;
 //    return V;
-//}
+}
 
 void fixedfftstage::output(FixedComplex<32> x)
 {
@@ -226,13 +222,13 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
             }
 //		as = memory[read_pointer];
 //		as = as/scale;
-            outputtemp = (memory[read_pointer] * twiddler(read_pointer)).to_64();
+            outputtemp = (memory[read_pointer].to_64() * twiddler(read_pointer).to_64());
             if (memory[read_pointer].real > (1<<22) || memory[read_pointer].imag > (1<<22) ) {
                 cout << "PROBLEM2" << endl;
                 cout << memory[read_pointer];
             }
 //            outputtemp = outputtemp >> 5;
-            outputtemp = outputtemp >> 10;
+            outputtemp = outputtemp >> 15;
             output(outputtemp.to_32());
          //   cout << "N: " << N << " outputtemp: " << outputtemp;
             if (read_pointer == ((N / 2) - 1)) {

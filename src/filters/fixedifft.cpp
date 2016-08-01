@@ -113,9 +113,10 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
 {
 
         //int scale = 32;
-    int a[] = {0,1,1,2,2,3,3,4,4,5,6,6,7,7,8,8,9,9,10,10,11,11,12,13,13,14,14,15,15,16,16,16,17,17,18,18,
-            19,19,20,20,21,21,21,22,22,23,23,23,24,24,25,25,25,26,26,26,27,27,27,27,28,28,28,29,29,29,29,29,
-            30,30,30,30,30,31,31,31,31,31,31,31,32,32,32,32,32,32,32,32,32,32,32};
+    int a[] = {0,572,1144,1715,2286,2856,3425,3993,4560,5126,5690,6252,6813,7371,7927,8481,9032,9580,10126,10668,11207,11743,12275,12803,13328,13848,14365,
+            14876,15384,15886,16384,16877,17364,17847,18324,18795,19261,19720,20174,20622,21063,21498,21926,22348,22763,23170,23571,23965,24351,24730,25102,
+            25466,25822,26170,26510,26842,27166,27482,27789,28088,28378,28660,28932,29197,29452,29698,29935,30163,30382,30592,30792,30983,31164,31336,31499,31651,
+            31795,31928,32052,32166,32270,32365,32449,32524,32588,32643,32688,32723,32748,32763,32768};
     //  int a = pow(2,15);
     //  int scale = a/1000.0;
 
@@ -123,8 +124,8 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
         int W_sin;
         int theta;
       //  theta = (360 / N) * k;
-        theta = (360 >> int(log2(N))) * k;
 
+        theta = (360  * k) >> int(log2(N));
 
         if (theta > 90) {
             W_cos = -a[-90 + theta];
@@ -174,7 +175,7 @@ void fixedifftstage::inputandtick(FixedComplex<32> x)
     }
 
     FixedComplex<32> butterflyresult[2];
-    FixedComplex<32> outputtemp;
+    FixedComplex<64> outputtemp;
 
     int i;
     int as;
@@ -222,10 +223,10 @@ void fixedifftstage::inputandtick(FixedComplex<32> x)
             }
 //		as = memory[read_pointer];
 //		as = as/scale;
-            outputtemp = memory[read_pointer] * twiddler(read_pointer);
+            outputtemp = memory[read_pointer].to_64() * twiddler(read_pointer).to_64();
 
-            outputtemp = (outputtemp >> 5);
-            output(outputtemp);
+            outputtemp = (outputtemp >> 15);
+            output(outputtemp.to_32());
          //   cout << "N: " << N << " outputtemp: " << outputtemp;
             if (read_pointer == ((N / 2) - 1)) {
 
