@@ -1,6 +1,6 @@
 set(SIGFILTERS_SOURCES
     cic.cpp
-    fixedfir.cpp
+    FixedFIR.cpp
     fixediir.cpp
 	fixedfft.cpp
 	fixedifft.cpp
