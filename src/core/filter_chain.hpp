@@ -2,14 +2,14 @@
 
 #include <core/filter_chain_element.hpp>
 #include <core/publisher.hpp>
-
+#include <memory>
 
 class FilterChain : public AbstractSISO < filter_io_t, filter_io_t >
 {
 
 public:
     FilterChain();
-    FilterChain(const FilterChain &other);
+    FilterChain(FilterChain &&other);
     virtual ~FilterChain() {}
 
     void init();
@@ -24,7 +24,7 @@ private: //methods
     void publish(FilterChainElement *current);
 
 private:
-    FilterChainElement *    m_head;
+    std::unique_ptr<FilterChainElement> m_head;
     filter_io_t             m_output;
     bool                    m_outputReady;
 };

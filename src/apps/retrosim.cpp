@@ -3,11 +3,13 @@
 
 #include <filters/complex_to_fixed.hpp>
 #include <filters/fixed_to_byte.hpp>
-#include <filters/fixedfir.hpp>
 #include <filters/sine_wave.hpp>
+#include <filters/automatic_gain.hpp>
 
 #include <sys/time.h>
 #include <utility>
+
+#include "retrosim_params.hpp"
 
 timespec timediff(timespec start, timespec end)
 {
@@ -24,29 +26,31 @@ timespec timediff(timespec start, timespec end)
 
 int main(int argc, char *argv[])
 {
+
     log_info("Starting RetroSim!");
 
     SigWorld world;
 
     radio_config_t config;
 
-    for (int i = 0; i < 5; i++) {
-        config.position = Vector2d(0.0, i*1199.6);
-        config.id = i+1;
-        world.addRadio([](const radio_config_t &config)
+    for (int i = 0; i < 2; i++) {
+        world.addRadio([i]()
                 {
+                    radio_config_t config {
+                        .position = Vector2d(0.0, i*1199.6*10),
+                        .id = static_cast<radio_id_t>(i + 1)
+                    };
                     FilterChain modulation_chain;
-
                     SineWave *sw = new SineWave(2000);
-                    //modulation_chain = *dc4 + *dbtc + *db6 + *db5 + *db4;
                     modulation_chain = *sw;
 
                     FilterChain demodulation_chain;
-                    sw = new SineWave(300);
-                    demodulation_chain = *sw;
+                    AutomaticGain *ag = new AutomaticGain();
+                    ag->shouldPublish(true);
+                    demodulation_chain = *ag;
 
-                    return new RadioS(config, std::move(modulation_chain), std::move(demodulation_chain));
-                }, config);
+                    return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
+                });
     }
 
     world.init();

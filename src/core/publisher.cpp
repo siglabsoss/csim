@@ -1,5 +1,6 @@
 #include <core/publisher.hpp>
 #include <core/logger.hpp>
+#include <core/parameters.hpp>
 #include <errno.h>
 
 
@@ -23,7 +24,8 @@ Publisher::Publisher() :
 
 bool Publisher::init()
 {
-    int port = 5555; //XXX retrieve from config
+    int port;
+    param_get("PUB_ZMQ_PORT", port);
     std::stringstream endpoint;
     endpoint << "tcp://*:" << port;
     m_socket.bind(endpoint.str().c_str());

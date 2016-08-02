@@ -10,7 +10,7 @@
 #include <iomanip> //For setprecision
 #include <stdlib.h>
 
-#include <filters/fixedfir.hpp>
+#include <filters/fixed_fir.hpp>
 
 using namespace boost;
 using namespace std;
@@ -83,14 +83,16 @@ CSIM_TEST_CASE(REAL_FILTER)
         l++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
+    FixedFIR fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++)
     {
         filter_io_t data;
         data.type =  IO_TYPE_FIXED_COMPLEX_16;
         data.fc = input[k];
         fir.input(data); //Filters data
-        output[k] = fir.m_output;
+        filter_io_t output_sample;
+        fir.output(output_sample);
+        output[k] = output_sample.fc;
     }
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
@@ -166,13 +168,15 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         l++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    fixedfir fir(j, tap); //Creates instance of fixed FIR filter given j taps.
+    FixedFIR fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++) {
         filter_io_t data;
         data.type =  IO_TYPE_FIXED_COMPLEX_16;
         data.fc = input[k];
         fir.input(data); //Filters data
-        output[k] = fir.m_output;
+        filter_io_t output_sample;
+        fir.output(output_sample);
+        output[k] = output_sample.fc;
      }
 
     for (int k = 0; k < i; k++) {

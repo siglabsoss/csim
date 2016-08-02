@@ -1,5 +1,5 @@
 #include <core/filter_chain.hpp>
-
+#include <utility>
 
 FilterChain::FilterChain() :
     m_head(nullptr),
@@ -9,12 +9,11 @@ FilterChain::FilterChain() :
 }
 
 
-FilterChain::FilterChain(const FilterChain &other) :
-        m_head(other.m_head),
+FilterChain::FilterChain(FilterChain &&other) :
+        m_head(std::move(other.m_head)),
         m_output(other.m_output),
         m_outputReady(other.m_outputReady)
 {
-
 }
 
 void FilterChain::init()
@@ -44,7 +43,7 @@ bool FilterChain::output(filter_io_t &data)
 
 void FilterChain::tick()
 {
-    for (FilterChainElement *current = m_head; current != nullptr; current = current->m_next) {
+    for (FilterChainElement * current = m_head.get(); current != nullptr; current = current->m_next.get()) {
         //Tick the current element
         current->tick();
         //Check if there's output waiting, move on to tick the next element if no output,
@@ -56,15 +55,17 @@ void FilterChain::tick()
             } else {
                 (void)current->m_next->input(m_output);
             }
-            //Publish the output externally
-            publish(current);
+            //Publish the output externally if desired
+            if (current->shouldPublish()) {
+                publish(current);
+            }
         }
     }
 }
 
 FilterChain & FilterChain::operator=(const FilterChainElement &rhs)
 {
-    this->m_head = (FilterChainElement *)&rhs;
+    this->m_head.reset((FilterChainElement *)&rhs);
     return *this;
 }
 

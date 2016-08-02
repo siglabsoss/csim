@@ -1,13 +1,14 @@
 
 #include <core/radio_s.hpp>
+#include <utility>
 
 #include <cassert>
 
-RadioS::RadioS(const radio_config_t &config, FilterChain modChain, FilterChain demodChain) :
+RadioS::RadioS(const radio_config_t &config, FilterChain &modChain, FilterChain &demodChain) :
     m_id(config.id),
     m_position(config.position),
-    m_mod(modChain),
-    m_demod(demodChain)
+    m_mod(std::move(modChain)),
+    m_demod(std::move(demodChain))
 {
     m_mod.init();
     m_demod.init();
@@ -49,9 +50,8 @@ bool RadioS::txWave(std::complex<double> &sample_out)
 {
     filter_io_t data;
     //A properly formed modulation filter chain will always
-    //have an output, but we check anyway
+    //have an output, but we check anyway since it's useful for testing
     bool didTx = m_mod.output(data);
-    //XXX just add an assertion here
     if (didTx) {
         assert(data.type == IO_TYPE_COMPLEX_DOUBLE); //sanity check on the modulation filter chain output
         sample_out = data.rf;

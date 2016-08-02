@@ -7,9 +7,9 @@ SigWorld::SigWorld() :
 
 }
 
-void SigWorld::addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config)
+void SigWorld::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
 {
-    (void)m_radioSet.addRadio(radioFactory, config);
+    (void)m_radioSet.addRadio(radioFactory);
 }
 
 void SigWorld::init()
@@ -22,7 +22,7 @@ void SigWorld::tick()
     size_t count = 0;
     for (RadioSet::iterator it = m_radioSet.begin(); it != m_radioSet.end(); it++)
     {
-        RadioS *current = *it;
+        RadioS * const current = (*it).get();
         RFSample sample; //for publishing externally
         std::complex<double> rxSample;
         std::complex<double> txSample;

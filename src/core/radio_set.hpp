@@ -1,6 +1,7 @@
 #pragma once
 
 #include <core/radio_s.hpp>
+#include <mathlib/complex_gaussian_noise.hpp>
 
 #include <vector>
 #include <map>
@@ -14,7 +15,7 @@ using Eigen::MatrixXd;
 class RadioSet
 {
 public:
-    typedef std::vector<RadioS *>::iterator iterator;
+    typedef std::vector<std::unique_ptr<RadioS> >::iterator iterator;
 
 public:
     RadioSet();
@@ -23,7 +24,7 @@ public:
      * @param config The new radios configuration.
      * @return ID of radio
      */
-    radio_id_t addRadio(RadioS *(radioFactory)(const radio_config_t &config), radio_config_t &config);
+    radio_id_t addRadio(std::function< std::unique_ptr<RadioS>() > &radioFactory);
 
     void init();
 
@@ -34,9 +35,9 @@ public:
     iterator end();
 
 private:
-    std::vector<RadioS *> m_radios;
-    std::map<RadioS *, boost::circular_buffer<std::complex<double> > > m_txBuffers;
-    MatrixXd    m_distances;
-
-    bool        m_didInit;
+    std::vector<std::unique_ptr<RadioS> >                               m_radios;
+    std::map<RadioS *, boost::circular_buffer<std::complex<double> > >  m_txBuffers;
+    MatrixXd                                                            m_distances;
+    ComplexGaussianNoise                                                m_noise;
+    bool                                                                m_didInit;
 };

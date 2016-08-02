@@ -7,8 +7,9 @@ CSIM_UTEST_BUILD=$CSIM_SRC/../csim_utest_build #define the build tree to be a si
 
 #Construct semicolon separated list of unit test source files relative to this directory
 #because that's where the CMakeLists.txt file lives.
-#XXX as the number of files grows, this logic will need to be udpated because xargs will exceed the
-#maximum number of command line arguments
+#XXX as the number of files grows, this logic may need to be udpated because the maximum
+#number of command line arguments could be exhausted although xargs supposedly handles
+#that
 
 if [ $# -eq 0 ]; then
     TEST_FILTER=utests/.*cpp
@@ -20,13 +21,20 @@ pushd $THIS_DIR
 export UNIT_TEST_SRCS=`find ../ | grep $TEST_FILTER | xargs echo |  sed 's/ /;/g'`
 popd
 
-echo $UNIT_TEST_SRCS
-
 mkdir -p $CSIM_UTEST_BUILD
 
 pushd $CSIM_UTEST_BUILD
-cmake -D CMAKE_BUILD_TYPE=Debug $CSIM_SRC
-make -j utests
+if ! cmake -D CMAKE_BUILD_TYPE=Debug $CSIM_SRC ; then
+    EXIT_CODE=$?
+    echo "Error building make files for unit tests!"
+    exit $EXIT_CODE
+fi
+
+if ! make -j utests ; then
+    EXIT_CODE=$?
+    echo "Error building unit tests!"
+    exit $EXIT_CODE
+fi
 cp -r $CSIM_SRC/data .
 ./bin/utests
 EXIT_CODE=$?

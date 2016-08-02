@@ -2,6 +2,7 @@
 
 #include <interfaces/abstract_siso.hpp>
 #include <types/fixedcomplex.hpp>
+#include <memory>
 
 #include <cstdint>
 #include <complex>
@@ -77,6 +78,34 @@ struct filter_io_t
         return *this;
     }
 
+    filter_io_t & operator=(const std::complex<double> &rhs)
+    {
+        this->type = IO_TYPE_COMPLEX_DOUBLE;
+        this->rf = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const FixedComplex<16> &rhs)
+    {
+        this->type = IO_TYPE_FIXED_COMPLEX_16;
+        this->fc = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const FixedComplex<32> &rhs)
+    {
+        this->type = IO_TYPE_FIXED_COMPLEX_32;
+        this->fc32 = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const uint8_t &rhs)
+    {
+        this->type = IO_TYPE_BYTE;
+        this->byte = rhs;
+        return *this;
+    }
+
     size_t serialize(uint8_t *data) const
     {
         size_t numBytes = 0;
@@ -144,15 +173,20 @@ public:
 
     friend FilterChainElement& operator+(const FilterChainElement &lhs, FilterChainElement &rhs)
     {
-        rhs.m_next = (FilterChainElement *)&lhs;
+        rhs.m_next.reset((FilterChainElement *)&lhs);
         return rhs;
     }
 
     const std::string &getName() const;
 
-    FilterChainElement *m_next;
+    bool shouldPublish() const;
+
+    void shouldPublish(bool desired);
+
+    std::unique_ptr<FilterChainElement> m_next;
 private:
     std::string         m_name;
+    bool                m_shouldPublish;
 
     static unsigned int instanceCount;
 };

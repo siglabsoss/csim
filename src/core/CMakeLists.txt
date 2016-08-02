@@ -6,6 +6,7 @@ set(SIGCORE_SOURCES
 	sigworld.cpp
 	logger.cpp
 	publisher.cpp
+	parameters.cpp
 )
 
 add_library(sigcore ${SIGCORE_SOURCES})

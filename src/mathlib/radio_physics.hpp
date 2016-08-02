@@ -10,5 +10,5 @@ public:
     static double phaseRotationForDistance(double distance);
     static void complexRotationForDistance(std::complex<double> &valOut, double distance);
     static void complexRotation(std::complex<double> &valOut, double theta);
-    static void applyPowerLoss(std::complex<double> &valOut, double distance);
+    static double freeSpacePowerLoss(double distance);
 };
