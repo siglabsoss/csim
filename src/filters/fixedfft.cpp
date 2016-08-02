@@ -228,10 +228,6 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
 //		as = memory[read_pointer];
 //		as = as/scale;
             outputtemp = (memory[read_pointer].to_64() * twiddler(read_pointer).to_64());
-            if (memory[read_pointer].real > (1<<22) || memory[read_pointer].imag > (1<<22) ) {
-                cout << "PROBLEM2" << endl;
-                cout << memory[read_pointer];
-            }
 //            outputtemp = outputtemp >> 5;
             outputtemp = outputtemp >> 15;
             output(outputtemp.to_32());
