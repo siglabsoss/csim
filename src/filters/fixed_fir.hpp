@@ -4,9 +4,9 @@
 #include <iterator>     // ostream_operator
 #include <iomanip> //For setprecision
 
-
-#include <types/fixedcomplex.hpp>
 #include <core/filter_chain_element.hpp>
+#include <types/fixedcomplex.hpp>
+
 #include <boost/circular_buffer.hpp>
 
 class FixedFIR : public FilterChainElement

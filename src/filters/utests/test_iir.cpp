@@ -29,18 +29,18 @@ CSIM_TEST_CASE(REAL_FILTER)
 {
 
     for (int i = 0; i < NUM_Y_REGISTERS; i++) {
-        a[i].real = (temp1[i] * 32768); //Scales coefficients a
+        a[i].real(temp1[i]);
     }
 
     for (int i = 0; i < NUM_X_REGISTERS; i++) {
-        b[i].real = (temp2[i] * 32768); //Scales coefficients b
+        b[i].real(temp2[i]);
     }
 
     FixedComplex<16> output[1024];
     FixedComplex<16> input[1024];
 
     for (int i = 1; i < 5; i++) {
-        input[i - 1].real = ((double) i / 10.00) * 32768; //Scales input data
+        input[i - 1].real((double) i / 10.00);
     }
 
     fixediir iir(NUM_X_REGISTERS, NUM_Y_REGISTERS, a, b);
@@ -54,13 +54,11 @@ CSIM_TEST_CASE(REAL_FILTER)
       iir.input(data); //Filters data
       output[i] = iir.m_output;
     }
-    BOOST_CHECK(abs(output[0].real / 32768.00 - .05) < .001);
-    BOOST_CHECK(abs(output[1].real / 32768.00 - .125) < .001);
-    BOOST_CHECK(abs(output[2].real / 32768.00 - .1625) < .001);
-    BOOST_CHECK(abs(output[3].real / 32768.00 - .176250) < .001);
+    BOOST_CHECK(abs(output[0].real() - .05) < .001);
+    BOOST_CHECK(abs(output[1].real() - .125) < .001);
+    BOOST_CHECK(abs(output[2].real() - .1625) < .001);
+    BOOST_CHECK(abs(output[3].real() - .176250) < .001);
 }
-
-
 
 
 CSIM_TEST_CASE(COMPLEX_FILTER)
@@ -89,8 +87,8 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     while (getline(in, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        input[i].real = atof(vec[0].c_str()) * 32768;
-        input[i].imag = atof(vec[1].c_str()) * 32768;
+        input[i].real(atof(vec[0].c_str()));
+        input[i].imag(atof(vec[1].c_str()));
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
@@ -105,7 +103,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        atap[j].real = atof(vec[0].c_str()) * 32768;
+        atap[j].real(atof(vec[0].c_str()));
         j++;
     } //Reads in taps
 
@@ -120,7 +118,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     while (getline(in4, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        btap[m].real = atof(vec[0].c_str()) * 32768;
+        btap[m].real(atof(vec[0].c_str()));
         m++;
     } //Reads in taps
 
@@ -152,11 +150,11 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
-                abs(output[k].real / 32768.00 - realAnswers[k]) < .001,
-                output[k].real/32768.00 << " is not the same as " << realAnswers[k]);
+                abs(output[k].real() - realAnswers[k]) < .001,
+                output[k].real() << " is not the same as " << realAnswers[k]);
         BOOST_CHECK_MESSAGE(
-                abs(output[k].imag / 32768.00 - imagAnswers[k]) < .001,
-                output[k].imag/32768.00 << " is not the same as " << imagAnswers[k]);
+                abs(output[k].imag() - imagAnswers[k]) < .001,
+                output[k].imag() << " is not the same as " << imagAnswers[k]);
 //        cout << output[k].real / 32768.00 << " is the same as "
 //                << realAnswers[k] << endl;
     }

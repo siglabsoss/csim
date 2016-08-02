@@ -38,8 +38,12 @@ CSIM_TEST_CASE(REAL_FILTER)
     while (getline(in, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        input[i].real = atof(vec[0].c_str()) * 32768;
-        input[i].imag = atof(vec[1].c_str()) * 32768;
+        double real = atof(vec[0].c_str());
+        double imag = atof(vec[1].c_str());
+        input[i].real(real);
+        input[i].imag(imag);
+        //std::cout << "input = " << input[i] << std::endl;
+        //std::cout << "raw = (" << real << ", " << imag << ")" << std::endl;
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
@@ -61,7 +65,7 @@ CSIM_TEST_CASE(REAL_FILTER)
 
         Tokenizer tok(line2);
         vec2.assign(tok.begin(), tok.end());
-        tap[j].real = atof(vec2[0].c_str()) * 32768;
+        tap[j].real(atof(vec2[0].c_str()));
 
         // cout<< setprecision(30)<< j+1 << ": Tap: " << tap[j].real.to_int() << " " << atof(vec2[0].c_str()) << " Is actually " << vec2[0].c_str() <<endl;
         j++;
@@ -78,8 +82,8 @@ CSIM_TEST_CASE(REAL_FILTER)
     while (getline(in3, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        answers[l].real = atof(vec[0].c_str()) * 32768;
-        answers[l].imag = atof(vec[1].c_str()) * 32768;
+        answers[l].real(atof(vec[0].c_str()));
+        answers[l].imag(atof(vec[1].c_str()));
         l++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
@@ -87,8 +91,9 @@ CSIM_TEST_CASE(REAL_FILTER)
     for (int k = 0; k < i; k++)
     {
         filter_io_t data;
-        data.type =  IO_TYPE_FIXED_COMPLEX_16;
-        data.fc = input[k];
+        //data.type =  IO_TYPE_FIXED_COMPLEX_16;
+        //data.fc = input[k];
+        data = input[k];
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
@@ -96,9 +101,9 @@ CSIM_TEST_CASE(REAL_FILTER)
     }
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
-                abs(output[k].real / 32768.00 - answers[k].real / 32768.00)
+                abs(output[k].real() - answers[k].real())
                         < .001,
-                output[k].real/32768.00 << " is not the same as " << answers[k].real/32768.00);
+                output[k].real() << " is not the same as " << answers[k].real());
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
 }
@@ -128,9 +133,12 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     while (getline(in, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        input[i].real = atof(vec[0].c_str()) * 32768;
-        input[i].imag = atof(vec[1].c_str()) * 32768;
-        //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
+        double real = atof(vec[0].c_str());
+        double imag = atof(vec[1].c_str());
+        input[i].real(real);
+        input[i].imag(imag);
+        //std::cout << "input = " << input[i] << std::endl;
+        //std::cout << "raw = (" << real << ", " << imag << ")" << std::endl;
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
     string taps("./data/firdata/input/taps.txt");
@@ -147,7 +155,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     while (getline(in2, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        tap[j].real = atof(vec[0].c_str()) * 32768;
+        tap[j].real(atof(vec[0].c_str()));
         j++;
     } //Reads in taps
 
@@ -171,8 +179,9 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     FixedFIR fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++) {
         filter_io_t data;
-        data.type =  IO_TYPE_FIXED_COMPLEX_16;
-        data.fc = input[k];
+        //data.type =  IO_TYPE_FIXED_COMPLEX_16;
+        //data.fc = input[k];
+        data = input[k];
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
@@ -181,11 +190,11 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
-                abs(output[k].real / 32768.00 - realAnswers[k]) < .001,
-                input[k].real/32768.00 << " is not the same as " << realAnswers[k]);
+                abs(output[k].real() - realAnswers[k]) < .001,
+                input[k].real() << " is not the same as " << realAnswers[k]);
         BOOST_CHECK_MESSAGE(
-                abs(output[k].imag / 32768.00 - imagAnswers[k]) < .001,
-                output[k].imag/32768.00 << " is not the same as " << imagAnswers[k]);
+                abs(output[k].imag() - imagAnswers[k]) < .001,
+                output[k].imag() << " is not the same as " << imagAnswers[k]);
      //   cout << input[k].real / 32768.00 << " is the same as "
       //          << realAnswers[k] << endl;
     } //Compares all outputs with solution to ensure they are .001 within each other.

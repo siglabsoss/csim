@@ -34,10 +34,10 @@ public:
 
     int                         m_numXRegisters;
     int                         m_numYRegisters;
-    vector<FixedComplex<16> >   m_a; //a coefficients
-    vector<FixedComplex<16> >   m_b; //b coefficients
-    vector<FixedComplex<16> >   m_x; //x registers
-    vector<FixedComplex<16> >   m_y; //y registers
+    std::vector<FixedComplex<16> >   m_a; //a coefficients
+    std::vector<FixedComplex<16> >   m_b; //b coefficients
+    std::vector<FixedComplex<16> >   m_x; //x registers
+    std::vector<FixedComplex<16> >   m_y; //y registers
     FixedComplex<16>            m_output;
 
 };

@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <cstdint>
-#include <complex>
+
 
 enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,
@@ -18,10 +18,10 @@ struct filter_io_t
 {
     //Data members
     io_type_t type;
+    FixedComplex<16> fc;
+    FixedComplex<32> fc32;
     union {
         std::complex<double> rf;
-        FixedComplex<16> fc;
-        FixedComplex<32> fc32;
         uint8_t byte;
     };
 
@@ -126,22 +126,22 @@ struct filter_io_t
             }
             case IO_TYPE_FIXED_COMPLEX_16:
             {
-                int value = fc.real.to_int();
+                int value = fc.real().to_int();
                 memcpy(data + numBytes, &value, sizeof(value));
                 numBytes += sizeof(value);
 
-                value = fc.imag.to_int();
+                value = fc.imag().to_int();
                 memcpy(data + numBytes, &value, sizeof(value));
                 numBytes += sizeof(value);
                 break;
             }
             case IO_TYPE_FIXED_COMPLEX_32:
             {
-               int value = fc32.real.to_int();
+               int value = fc32.real().to_int();
                memcpy(data + numBytes, &value, sizeof(value));
                numBytes += sizeof(value);
 
-               value = fc32.imag.to_int();
+               value = fc32.imag().to_int();
                memcpy(data + numBytes, &value, sizeof(value));
                numBytes += sizeof(value);
                break;
