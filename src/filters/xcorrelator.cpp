@@ -4,12 +4,11 @@
  *  Created on: Jul 28, 2016
  *      Author: ubuntu
  */
-#include <fstream>
-#include <xcorrelator.hpp>
-string outfile10("../csim/data/xcorrelator/output/data.txt");
-ofstream out10(outfile10.c_str());
 
-namespace std {
+#include <xcorrelator.hpp>
+
+
+using namespace std;
 
 XCorrelator::XCorrelator(int N)
 {
@@ -20,65 +19,29 @@ XCorrelator::XCorrelator(int N)
 
 vector<FixedComplex<32> > XCorrelator::xCorrelate(vector<FixedComplex<32> > x, vector<FixedComplex<32> > y)
 {
-    if (!out10.is_open())
-    {
-        cout << "WHY";
-    }
-    vector<FixedComplex<32> > p1 = fft(x);
-    vector<FixedComplex<32> > p2 = fft(y);
-    assert(p1.size() == m_n);
-    assert(p2.size() == m_n);
-    vector<FixedComplex<32> > temp;
-
-
-    for (int i = 0; i < p1.size(); i++) {
-            temp.push_back(FixedComplex<32>(0,0));
-    }//Reformats data in correct order
-
-    for (int i = 0; i < p1.size(); i++) {
-            temp[i] = (p1[reverseBits(m_n, i)]);
-    }//Reformats data in correct order
-
-    for (int i = 0; i < p1.size(); i++) {
-        p1[i]= temp[i];
-    }//p1 is not bit reversed
-
-    for (int i = 0; i < p1.size(); i++) {
-        temp[i] = (p2[reverseBits(m_n, i)]);
-    }//Reformats data in correct order
-
-    for (int i = 0; i < p1.size(); i++) {
-        p2[i] = temp[i];
-    }//p2 is not bit reversed
+    vector<FixedComplex<32> > p1 = fft(x);//FFT(x)
+    vector<FixedComplex<32> > p2 = fft(y);//FFT(y)
+    assert(p1.size() == m_n); //Same number of outputs into FFT as inputs
+    assert(p2.size() == m_n); //Same number of outputs into FFT as inputs
 
     for (int i = 0; i < p2.size(); i++) {
         p2[i].imag = -p2[i].imag;
-    }//p2 is now conjugate
+    }//conj(FFT(Y)))
 
     for (int i = 0; i < p1.size(); i++) {
-        temp[i] = p1[i] * p2[i];
-    }// temp = FFT(x) * conj(FFT(Y))
+        p1[i] = p1[i] * p2[i];
+    }//FFT(x) * conj(FFT(Y))
 
-    for (int i = 0; i < p1.size(); i++) {
-        out10 << temp[i].real.to_int() <<","<< temp[i].imag.to_int()<<endl;
-    }// temp = FFT(x) * conj(FFT(Y))
+    p1 = ifft(p1);// IFFT(FFT(x) * conj(FFT(Y)))
 
-    temp = ifft(temp);
-
-    for (int i = 0; i < p1.size(); i++) {
-        p1[reverseBits(p1.size(), i)].real = temp[i].real/p1.size();
-        p1[reverseBits(p1.size(), i)].imag = temp[i].imag/p1.size();
-    }//Reformats data in correct order
-
-    return p1;
+    return fftshift(p1);
 }
 
 vector<FixedComplex<32> > XCorrelator::fft(vector<FixedComplex<32> > vals)
 {
+    vector<FixedComplex<32> > bitReversedAnswers;
     vector<FixedComplex<32> > answers;
-    int count = 0;
     filter_io_t data;
-
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
     data.fc32 = FixedComplex<32>(0,0);
 
@@ -88,10 +51,14 @@ vector<FixedComplex<32> > XCorrelator::fft(vector<FixedComplex<32> > vals)
             m_fft->input(data);
             bool test = m_fft->output(data);
             if (test) {
-                  answers.push_back(data.fc32);
+                bitReversedAnswers.push_back(data.fc32);
             }//If an output is ready
         }//For every input
     }//run twice to get all outputs
+
+    for (int i = 0; i < m_n; i++) {
+             answers.push_back(bitReversedAnswers[reverseBits(m_n, i)]);
+     }//Reformats data in correct order
 
     return answers;
 }
@@ -99,7 +66,7 @@ vector<FixedComplex<32> > XCorrelator::fft(vector<FixedComplex<32> > vals)
 vector<FixedComplex<32> > XCorrelator::ifft(vector<FixedComplex<32> > vals)
 {
     vector<FixedComplex<32> > answers;
-    int count = 0;
+    vector<FixedComplex<32> > bitReversedAnswers;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
     data.fc32 = FixedComplex<32>(0,0);
@@ -109,12 +76,39 @@ vector<FixedComplex<32> > XCorrelator::ifft(vector<FixedComplex<32> > vals)
             m_ifft->input(data);
             bool test = m_ifft->output(data);
             if (test) {
-                  answers.push_back(data.fc32);
+                bitReversedAnswers.push_back(data.fc32);
             }//If an output is ready
         }//For every input
     }//run twice to get all output
 
+    FixedComplex<32> temp; //to hold swap
+
+    for (int i = 0; i < m_n; i++) {
+        temp.real = bitReversedAnswers[reverseBits(m_n, i)].real/m_n;
+        temp.imag = bitReversedAnswers[reverseBits(m_n, i)].imag/m_n;
+        answers.push_back(temp);
+    }//Reformats data in correct order
+
     return answers;
+}
+
+
+vector<FixedComplex<32> > XCorrelator::fftshift(vector<FixedComplex<32> > vals)
+{
+    int size = vals.size() >> 1;
+    if (vals.size() % 2 == 1) {
+        size++; //Take ceiling
+    }
+
+    FixedComplex<32> temp;//to hold swap
+
+    for (int i = 0; i < size; i++) {
+        temp = vals[i];
+        vals[i] = vals[size+i];
+        vals[size+i] = temp;
+    }
+    vals.erase(vals.begin());//Erase first value to match octave output
+    return vals;
 }
 
 
@@ -123,4 +117,5 @@ XCorrelator::~XCorrelator()
     // TODO Auto-generated destructor stub
 }
 
-} /* namespace std */
+
+

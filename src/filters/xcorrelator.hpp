@@ -22,6 +22,7 @@ public:
     vector<FixedComplex<32> > xCorrelate(vector<FixedComplex<32> > x,vector<FixedComplex<32> > y);
     vector<FixedComplex<32> > fft(vector<FixedComplex<32> > vals);
     vector<FixedComplex<32> > ifft(vector<FixedComplex<32> > vals);
+    vector<FixedComplex<32> > fftshift(vector<FixedComplex<32> > vals);
     int m_n;
     fixedfft* m_fft;
     fixedifft* m_ifft;

@@ -50,7 +50,7 @@ CSIM_TEST_CASE(OCTAVE_COMPARISON)
     vector<FixedComplex<32> > answers;
     XCorrelator x(16);
     answers = x.xCorrelate(input,input);
-
+    cout << "6" << endl;
     for (int i = 0; i < answers.size(); i++) {
         cout << answers[i];
     }
