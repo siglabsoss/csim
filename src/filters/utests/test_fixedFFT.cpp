@@ -102,8 +102,8 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 
         for (i = 0; i < inputs; i++) {
-            BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .1 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 100 , "I: " << i << " " << temp[i].real << " " << trueAnswers[i].real );
-            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .1 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 100, "I: " << i << " " << temp[i].imag << " " << trueAnswers[i].imag );
+            BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .10 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 100 , "I: " << i << " " << temp[i].real << " " << trueAnswers[i].real );
+            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .10 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 100, "I: " << i << " " << temp[i].imag << " " << trueAnswers[i].imag );
 //            BOOST_CHECK_MESSAGE(abs(temp[i].real - trueAnswers[i].real) < 10000, "I: " << i << " " << temp[i].real << " " << trueAnswers[i].real );
 //            BOOST_CHECK_MESSAGE(abs(trueAnswers[i].imag - temp[i].imag ) < 10000, "I: " << i << " " << temp[i].imag << " " << trueAnswers[i].imag );
  //           cout << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) << endl;

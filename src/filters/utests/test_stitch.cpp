@@ -14,7 +14,7 @@
 using namespace std;
 using namespace boost;
 
-CSIM_TEST_SUITE_BEGIN(SticherFilter)
+CSIM_TEST_SUITE_BEGIN(StitcherFilter)
 
 CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
