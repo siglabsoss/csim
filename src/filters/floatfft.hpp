@@ -1,9 +1,10 @@
 #include <complex>
 #include <vector>
+#include <queue>
 
 #ifndef __FLOATFFT_H__
 #define __FLOATFFT_H__
-
+using namespace std;
 enum FFT_STATE
 {
     FFT_STATE_INITIAL, FFT_STATE_READ, FFT_STATE_OUTPUT
@@ -12,7 +13,7 @@ enum FFT_STATE
 class floatfftbase
 {
 public:
-    virtual void inputandtick(complex<float> x) = 0;
+    virtual void inputandtick(complex<float> x) {};
     int ready;
 };
 
@@ -46,6 +47,7 @@ public:
     int count;
     floatfftprint(int Ninput);
     void inputandtick(complex<float> x);
+    queue<complex<float> > answers;
 };
 
 // saves all output forever
