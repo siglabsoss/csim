@@ -7,37 +7,31 @@
 
 #include <mathlib/cordic.hpp>
 
-using namespace std;
-
 cordic::cordic() :
-        vals(NUM_HARDWIRED_VALUES),
-        sign(NUM_HARDWIRED_VALUES),
-        quad(-1)
+        m_vals(NUM_HARDWIRED_VALUES)
 {
     //See Hard-wiring the machine: http://www.qc.cuny.edu/Academics/Degrees/DMNS/Faculty%20Documents/Sultan1.pdf
     for (int i = 0; i < NUM_HARDWIRED_VALUES; i++) {
 
         if (i == 0) {
-            vals[i] = 0.78539816339744830961;
+            m_vals[i] = 0.7853981634;
         } else if (i == 1) {
-            vals[i] = 0.463647609;
+            m_vals[i] = 0.463647609;
         } else if (i == 2) {
-            vals[i] = 0.2449786631;
+            m_vals[i] = 0.2449786631;
         } else if (i == 3) {
-            vals[i] = 0.1243549945;
+            m_vals[i] = 0.1243549945;
         } else if (i == 4) {
-            vals[i] = 0.06241881;
-        } else if (i == 5) {
-            vals[i] = 0.0312398334;
+            m_vals[i] = 0.06241881;
         } else {
-            vals[i] = 1.0 / (1 << i);
+            m_vals[i] = 1.0 / (1 << i);
         }
     } //Calculates and sets values to rotate by
 }
 
-void cordic::rotate(cordic_theta_t theta)
+int cordic::rotateToFirstQuadrant(cordic_theta_t &theta)
 {
-    //std::cout << "Theta = " << theta;
+    int quad = 0;
     while (theta >= cordic_theta_t(2 * M_PI)) { //input greater than 2pi
         theta = theta - (2 * M_PI);
     }
@@ -54,112 +48,91 @@ void cordic::rotate(cordic_theta_t theta)
     } else { //1st quadrant
         quad = 1;
     }
+    return quad;
+}
 
-    cordic_theta_t x = 0.0; //starting point for rotations
+void cordic::calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_complex_t &cosine)
+{
+    int quadrant = rotateToFirstQuadrant(theta);
 
-    //std::cout << " in quadrant " << quad << std::endl;
+    cordic_complex_t y[2] = {cordic_complex_t(1.0, 0.0), cordic_complex_t(0.0, 1.0)};
+    cordic_complex_t c1, c2, c3, c4;
+    cordic_theta_t x = 0.0;
+    int direction = 0;
     for (int i = 0; i < NUM_HARDWIRED_VALUES; i++) {
         if (x <= theta) {
-            sign[i] = 1;
-            x = x + vals[i];
-        } //rotate ccw
-        else // ( x > theta)
-        {
-            sign[i] = -1;
-            x = x - vals[i];
-        } //rotate cw
-    }
-}
-
-cordic_scalar_t cordic::sin(cordic_scalar_t theta)
-{
-    cordic_complex_t a(1.0, 0.0);
-    cordic_complex_t b(0.0, 0.0);
-    cordic_scalar_t cosdown;
-    cordic_scalar_t cosup;
-    cordic_scalar_t sinup;
-    cordic_scalar_t sindown;
-
-    calculate(theta, a, b, &sinup, &sindown, &cosup, &cosdown);
-    return sinup;
-}
-
-void cordic::calculate(cordic_theta_t theta, cordic_complex_t a, cordic_complex_t b,
-        cordic_scalar_t* sinup, cordic_scalar_t* sindown, cordic_scalar_t* cosup,
-        cordic_scalar_t* cosdown)
-{
-    rotate(theta);
-
-    y[0] = a;
-    y[1] = b;
-
-    for (int i = 0; i < NUM_HARDWIRED_VALUES; i++) {
-        double inverse_2exp = vals[i];
-        temp = y[0]; //temporary storage for later calculation
-        c1 = y[0];
-        c2 = y[1] * cordic_scalar_t(inverse_2exp);
-
-        if (sign[i] == 1) {
-            c2 = c2 * cordic_scalar_t(-1.0);
+            direction = 1; //rotate ccw
+            x = x + m_vals[i];
+        } else {
+            direction = -1; //rotate cw
+            x = x - m_vals[i];
         }
 
-        y[0] = c1 + c2; //Upper value
-        c1 = y[1]; //((z[1][1] * y[1][0]) >> 15) z[1][1] = 1 << 15
-        c2 = temp * cordic_scalar_t(inverse_2exp);
+        cordic_scalar_t factor(direction * m_vals[i]);
+        c1 = y[0]; //a
+        c2 = y[1] * factor; //-b/2^n
+        c3 = y[0] * factor; //a/2^n
+        c4 = y[1]; //b
 
-        if (sign[i] == -1) {
-            c2 = c2 * cordic_scalar_t(-1.0);
-        }
-        y[1] = c2 + c1; //Lower value
+        y[0] = c1 - c2; //a + (-b/2^n)
+        y[1] = c3 + c4; //a/2^n + b
+
+        //std::cout /*<< "y0 = " << y[0]*/ << "\ty1 = " << y[1] << "\t dir = " << direction << "\tx = " << x << "\tval[i] = " << m_vals[i] << std::endl;
     }
 
     y[0] = y[0] * cordic_scalar_t(k);
     y[1] = y[1] * cordic_scalar_t(k);
 
-    signs();
+    rotateToQuadrant(y, quadrant);
 
-    cout << "Cosine, " << y[0].real() << ", " << theta << ", " << quad << endl;
-	//cout << "Sine, " << y[1].real() << ", " << theta << endl;
+    //std::cout << quadrant << ", " << y[0].real() << ", " << y[0].imag() << ", " << y[1].real() << ", " << y[1].imag() << ", " << theta << ", " << x << ", " << abs(theta - x) << std::endl;
 
+    clipResults(y);
+
+    //XXX is this right?
+    cosine  = y[0];
+    sine    = y[1];
+}
+
+void cordic::clipResults(cordic_complex_t y[2])
+{
     for (int i = 0; i < 2; i++) {
         if (y[i].real() > 1.0) {
             y[i].real(1.0);
+        } else if (y[i].real() < -1.0) {
+            y[i].real(-1.0);
         }
+
         if (y[i].imag() > 1.0) {
             y[i].imag(1.0);
+        } else if (y[i].imag() < -1.0) {
+            y[i].imag(-1.0);
         }
     }
-
-    *cosdown = y[0].real();
-    *cosup = y[1].imag();
-    *sindown = y[0].imag();
-    *sinup = y[1].real();
-
-    return;
-
 }
 
-void cordic::signs()
+void cordic::rotateToQuadrant(cordic_complex_t y[2], int quadrant)
 {
-    if (quad == 4) {
+    cordic_complex_t temp;
+    if (quadrant == 4) {
         temp = y[0];
         y[0] = y[1];
         y[1] = temp * cordic_scalar_t(-1);
     } //swap sin and cosine. sin is negative
-    else if (quad == 3) {
+    else if (quadrant == 3) {
         y[0] = y[0] * cordic_scalar_t(-1);
         y[1] = y[1] * cordic_scalar_t(-1);
     } //both are negative
-    else if (quad == 2) {
+    else if (quadrant == 2) {
         temp = y[0];
         y[0] = y[1] * cordic_scalar_t(-1);
         y[1] = temp;
-    } else if (quad == 1){//swap sin and cosine. cosine is negative
+    } else if (quadrant == 1){//swap sin and cosine. cosine is negative
         /* do nothing */
     } else {
         assert(false);
     }
-} //swaps cosine and sign or changes sign if necessary.
+} //swaps cosine and sines or changes signs if necessary.
 
 cordic::~cordic()
 {

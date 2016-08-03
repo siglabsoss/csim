@@ -15,13 +15,6 @@
 
 template <size_t N>
 using FixedComplex = std::complex <sc_dt::sc_fixed <N, 1> >;
-/*
-template <size_t N>
-class FixedComplex : public std::complex <sc_dt::sc_fixed <N, 1> >
-{
-public:
-    FixedComplex<16> to_16();
-    FixedComplex<32> to_32();
-    FixedComplex<64> to_64();
-};
-*/
+
+template <size_t N, size_t M>
+using FixedComplex2 = std::complex <sc_dt::sc_fixed <N, M> >;
