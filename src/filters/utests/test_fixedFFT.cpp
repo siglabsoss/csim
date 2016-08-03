@@ -189,34 +189,34 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
             }
         }
     }
+    inputs = 0;
+
 
     while(getline(in2,line)) {
 
-           istringstream ss(line);
-           getline(ss, token, ',');
-           stringstream strValue;
-           strValue << token;
-           int intValue;
-           strValue >> intValue;
-           realInput[inputs] = intValue;
-           getline(ss, token, ',');
-           stringstream strValue2;
-           strValue2 << token;
-           strValue2 >> intValue;
-           imagInput[inputs++] = intValue;
-       }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+        istringstream ss(line);
+        getline(ss, token, ',');
+        stringstream strValue;
+        strValue << token;
+        int intValue;
+        strValue >> intValue;
+        realInput[inputs] = intValue;
+        getline(ss, token, ',');
+        stringstream strValue2;
+        strValue2 << token;
+        strValue2 >> intValue;
+        imagInput[inputs++] = intValue;
+    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 
+    for (int j = 0; j < points; j++) {
 
-
-for (int j = 0; j < points; j++) {
-
-           data.fc32 = FixedComplex<32>(0,0);
-           fft.input(data);
-           bool test = fft.output(data);
-           if (test) {
-               answers[count++] = data.fc32;
-           }
-}
+        data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
+        fft.input(data);
+        bool test = fft.output(data);
+        if (test) {
+           answers[count++] = data.fc32;
+        }
+    }
 
     FixedComplex<32> temp[32769];
     for (i = 0; i < inputs; i++) {
@@ -231,11 +231,6 @@ for (int j = 0; j < points; j++) {
                 "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << "Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
         }
-
-
-    inputs = 0;
-
-
 
     numAnswers = 0;
 
@@ -260,10 +255,10 @@ for (int j = 0; j < points; j++) {
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
 
 
-    for (int i = 0; i < 1; i++) {
+    for (int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
 
-            data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
+            data.fc32 = FixedComplex<32>(0,0);
             fft.input(data);
             bool test = fft.output(data);
             if (test) {
@@ -271,15 +266,7 @@ for (int j = 0; j < points; j++) {
             }
         }
     }
-    for (int j = 0; j < points; j++) {
 
-               data.fc32 = FixedComplex<32>(0,0);
-               fft.input(data);
-               bool test = fft.output(data);
-               if (test) {
-                   answers[count++] = data.fc32;
-               }
-    }
 
 
     for (i = 0; i < inputs; i++) {
@@ -369,7 +356,7 @@ for (int j = 0; j < points; j++) {
 //        }
 //
 //
-//}//Used for comparing percent error of two files for the FFT.
+//}//Used for comparing percent error
 
 
 CSIM_TEST_SUITE_END()
