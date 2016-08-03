@@ -164,9 +164,9 @@ void fixedifftstage::inputandtick(FixedComplex<32> x)
 
     //	cout << "ifft(" << N << ") starting in state " << state << " with x " << x << endl;
 
-    if (state != Fifft_STATE_OUTPUT && x == FixedComplex<32>(0, 0)) {
-        cout << "PROBLEMS " << endl;
-    }
+//    if (state != Fifft_STATE_OUTPUT && x == FixedComplex<32>(0, 0)) {
+//        cout << "PROBLEMS " << endl;
+//    }
 
     FixedComplex<32> butterflyresult[2];
     FixedComplex<64> outputtemp;
