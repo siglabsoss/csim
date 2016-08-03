@@ -21,15 +21,15 @@ CSIM_TEST_SUITE_BEGIN(FixedFFT)
 CSIM_TEST_CASE(FFT_OCTAVE)
 {
     string infile("../csim/data/fft/input/data_file_complex1.csv");
-       string answersfile("../csim/data/fft/answer/answers1.csv");
+       string answersfile("../csim/data/fft/answers/answers1.csv");
 
        int i = 0;
        int realInput[32769] = {0}; // default values
        int imagInput[32769] = {0};
        ifstream in(infile.c_str());
-       BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open data/fft/input/input3.txt");
+       BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
        ifstream ans(answersfile.c_str());
-       BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open ../csim/data/fft/answers/answers1.csv");
+       BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open " << answersfile);
 
        std::string token;
        string line;
@@ -116,20 +116,20 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 {
     string infile("../csim/data/fft/input/data_file_complex2.csv");
     string infile2("../csim/data/fft/input/data_file_complex3.csv");
-    string answersfile("../csim/data/fft/answer/answers2.csv");
-    string answersfile2("../csim/data/fft/answer/answers3.csv");
+    string answersfile("../csim/data/fft/answers/answers2.csv");
+    string answersfile2("../csim/data/fft/answers/answers3.csv");
 
     int i = 0;
     int realInput[32769] = {0}; // default values
     int imagInput[32769] = {0};
     ifstream in(infile.c_str());
     ifstream in2(infile2.c_str());
-    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open ../csim/data/fft/input/data_file_complex2.csv");
-    BOOST_REQUIRE_MESSAGE(in2.is_open(), "Could not open ../csim/data/fft/input/data_file_complex3.csv");
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
+    BOOST_REQUIRE_MESSAGE(in2.is_open(), "Could not open " << infile2);
     ifstream ans(answersfile.c_str());
-    BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open ../csim/data/fft/answers/answers2.csv");
+    BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open " << answersfile);
     ifstream ans2(answersfile2.c_str());
-    BOOST_REQUIRE_MESSAGE(ans2.is_open(), "Could not open ../csim/data/fft/answers/answers3.csv");
+    BOOST_REQUIRE_MESSAGE(ans2.is_open(), "Could not open " << answersfile2);
 
     std::string token;
     string line;
