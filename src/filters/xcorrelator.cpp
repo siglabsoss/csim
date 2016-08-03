@@ -5,7 +5,7 @@
  *      Author: ubuntu
  */
 
-#include <xcorrelator.hpp>
+#include <filters/xcorrelator.hpp>
 
 
 using namespace std;
@@ -14,13 +14,15 @@ XCorrelator::XCorrelator(int N)
 {
     m_n = N;
     m_fft = new fixedfft(N);
+
     m_ifft = new fixedifft(N);
 }
 
 vector<FixedComplex<32> > XCorrelator::xCorrelate(vector<FixedComplex<32> > x, vector<FixedComplex<32> > y)
 {
-    vector<FixedComplex<32> > p1 = fft(x);//FFT(x)
-    vector<FixedComplex<32> > p2 = fft(y);//FFT(y)
+
+    vector<FixedComplex<32> > p1 = fft(x);//output is FFT(x)
+    vector<FixedComplex<32> > p2 = fft(y);//output is FFT(y)
     assert(p1.size() == m_n); //Same number of outputs into FFT as inputs
     assert(p2.size() == m_n); //Same number of outputs into FFT as inputs
 
@@ -39,6 +41,7 @@ vector<FixedComplex<32> > XCorrelator::xCorrelate(vector<FixedComplex<32> > x, v
 
 vector<FixedComplex<32> > XCorrelator::fft(vector<FixedComplex<32> > vals)
 {
+    fixedfft fft(m_n);
     vector<FixedComplex<32> > bitReversedAnswers;
     vector<FixedComplex<32> > answers;
     filter_io_t data;
@@ -48,8 +51,8 @@ vector<FixedComplex<32> > XCorrelator::fft(vector<FixedComplex<32> > vals)
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < m_n; j++) {
             data.fc32 = vals[j];
-            m_fft->input(data);
-            bool test = m_fft->output(data);
+            fft.input(data);
+            bool test = fft.output(data);
             if (test) {
                 bitReversedAnswers.push_back(data.fc32);
             }//If an output is ready
@@ -65,29 +68,27 @@ vector<FixedComplex<32> > XCorrelator::fft(vector<FixedComplex<32> > vals)
 
 vector<FixedComplex<32> > XCorrelator::ifft(vector<FixedComplex<32> > vals)
 {
-    vector<FixedComplex<32> > answers;
+    fixedifft ifft(m_n);
     vector<FixedComplex<32> > bitReversedAnswers;
+    vector<FixedComplex<32> > answers;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
     data.fc32 = FixedComplex<32>(0,0);
+
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < m_n; j++) {
             data.fc32 = vals[j];
-            m_ifft->input(data);
-            bool test = m_ifft->output(data);
+            ifft.input(data);
+            bool test = ifft.output(data);
             if (test) {
                 bitReversedAnswers.push_back(data.fc32);
             }//If an output is ready
         }//For every input
-    }//run twice to get all output
-
-    FixedComplex<32> temp; //to hold swap
+    }//run twice to get all outputs
 
     for (int i = 0; i < m_n; i++) {
-        temp.real = bitReversedAnswers[reverseBits(m_n, i)].real/m_n;
-        temp.imag = bitReversedAnswers[reverseBits(m_n, i)].imag/m_n;
-        answers.push_back(temp);
-    }//Reformats data in correct order
+             answers.push_back(bitReversedAnswers[reverseBits(m_n, i)]);
+     }//Reformats data in correct order
 
     return answers;
 }
