@@ -7,15 +7,11 @@
 
 #include <filters/xcorrelator.hpp>
 
-
 using namespace std;
 
 XCorrelator::XCorrelator(int N)
 {
     m_n = N;
-    m_fft = new fixedfft(N);
-
-    m_ifft = new fixedifft(N);
 }
 
 vector<FixedComplex<32> > XCorrelator::xCorrelate(vector<FixedComplex<32> > x, vector<FixedComplex<32> > y)
@@ -96,7 +92,7 @@ vector<FixedComplex<32> > XCorrelator::ifft(vector<FixedComplex<32> > vals)
 
 vector<FixedComplex<32> > XCorrelator::fftshift(vector<FixedComplex<32> > vals)
 {
-    int size = vals.size() >> 1;
+    int size = vals.size() >> 1; //size/2
     if (vals.size() % 2 == 1) {
         size++; //Take ceiling
     }
@@ -107,16 +103,11 @@ vector<FixedComplex<32> > XCorrelator::fftshift(vector<FixedComplex<32> > vals)
         temp = vals[i];
         vals[i] = vals[size+i];
         vals[size+i] = temp;
-    }
+    }//Swaps front half and back half of vector
     vals.erase(vals.begin());//Erase first value to match octave output
     return vals;
-}
+}//Swaps front half and back half of vector.
 
-
-XCorrelator::~XCorrelator()
-{
-    // TODO Auto-generated destructor stub
-}
 
 
 

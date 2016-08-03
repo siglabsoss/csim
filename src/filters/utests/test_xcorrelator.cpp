@@ -77,15 +77,10 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_64)
     BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
 
     for (int i = 0; i < answers.size(); i++) {
-  //      BOOST_CHECK_CLOSE((double)answers[i].real.to_int(),(double)output[i].real.to_int(), .1);
-//        BOOST_CHECK_CLOSE(answers[i].imag.to_int(),output[i].imag.to_int(), .1);
-//        BOOST_CHECK_MESSAGE(abs( abs(answers[i].real - abs (output[i].real))) < 1000, "The answer " << answers[i].real << "is not close to " << output[i].real);
-//        BOOST_CHECK_MESSAGE(abs( abs(answers[i].imag - abs (output[i].imag))) < 1000, "The answer " << answers[i].imag << "is not close to " << output[i].imag);
         BOOST_CHECK_MESSAGE(abs((output[i].real - answers[i].real)/(float)answers[i].real) < .05 || abs(abs(output[i].real) - abs(answers[i].real)) < 100 ,
-                "I: " << i << " Output: " << output[i].real << " Answer: " << answers[i].real << "Ratio: " << abs((output[i].real - answers[i].real)/(float)answers[i].real) );
+                "I: " << i << " Output: " << output[i].real << " Answer: " << answers[i].real << " Ratio: " << abs((output[i].real - answers[i].real)/(float)answers[i].real) );
         BOOST_CHECK_MESSAGE(abs((answers[i].imag - output[i].imag )/(float)answers[i].imag) < .05 || abs(abs(output[i].imag) - abs(answers[i].imag)) < 3,
-                "I: " << i << " Output: " << output[i].imag << " Answer: " << answers[i].imag << "Ratio: " << abs((output[i].imag - answers[i].imag)/(float)answers[i].imag) );
-
+                "I: " << i << " Output: " << output[i].imag << " Answer: " << answers[i].imag << " Ratio: " << abs((output[i].imag - answers[i].imag)/(float)answers[i].imag) );
     }
     cout << answers.size() << endl;
 }
@@ -93,7 +88,6 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_64)
 
 CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_128)
 {
-
     string inFile("data/xcorrelator/input/data_file_complex2.csv");
     string answersFile("data/xcorrelator/answers/answers2.csv");
     ifstream in(inFile.c_str());
@@ -126,12 +120,9 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_128)
     XCorrelator x(input.size());
     output = x.xCorrelate(input,input);
 
-
     ifstream ans(answersFile.c_str());
-    if (!ans.is_open()) {
-       cout << "error reading" << endl;
-       BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from " << answersFile);
-    }
+    BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not read from " << answersFile);
+
 
     vector<FixedComplex<32> > answers;
     while(getline(ans,line)) {
@@ -152,17 +143,11 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_128)
     BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
 
     for (int i = 0; i < answers.size(); i++) {
-  //      BOOST_CHECK_CLOSE((double)answers[i].real.to_int(),(double)output[i].real.to_int(), .1);
-//        BOOST_CHECK_CLOSE(answers[i].imag.to_int(),output[i].imag.to_int(), .1);
-//        BOOST_CHECK_MESSAGE(abs( abs(answers[i].real - abs (output[i].real))) < 1000, "The answer " << answers[i].real << "is not close to " << output[i].real);
-//        BOOST_CHECK_MESSAGE(abs( abs(answers[i].imag - abs (output[i].imag))) < 1000, "The answer " << answers[i].imag << "is not close to " << output[i].imag);
         BOOST_CHECK_MESSAGE(abs((output[i].real - answers[i].real)/(float)answers[i].real) < .05 || abs(abs(output[i].real) - abs(answers[i].real)) < 100 ,
                 "I: " << i << " Output: " << output[i].real << " Answer: " << answers[i].real << "Ratio: " << abs((output[i].real - answers[i].real)/(float)answers[i].real) );
         BOOST_CHECK_MESSAGE(abs((answers[i].imag - output[i].imag )/(float)answers[i].imag) < .05 || abs(abs(output[i].imag) - abs(answers[i].imag)) < 3,
                 "I: " << i << " Output: " << output[i].imag << " Answer: " << answers[i].imag << "Ratio: " << abs((output[i].imag - answers[i].imag)/(float)answers[i].imag) );
-
     }
-    cout << answers.size() << endl;
 }
 
 
@@ -172,10 +157,69 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_256)
     string inFile("data/xcorrelator/input/data_file_complex3.csv");
     string answersFile("data/xcorrelator/answers/answers3.csv");
     ifstream in(inFile.c_str());
-    if (!in.is_open()) {
-       cout << "error reading" << endl;
-       BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from " << inFile);
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << inFile);
+
+    vector<string> vec;
+    vector<FixedComplex<32> > input; //Vector to hold answer data read from file
+    std::string token;
+    string line;
+
+    while(getline(in,line)) {
+       istringstream ss(line);
+       getline(ss, token, ',');
+       stringstream strValue;
+       strValue << token;
+       int realIntValue;
+       int imagIntValue;
+       strValue >> realIntValue;
+       getline(ss, token, ',');
+       stringstream strValue2;
+       strValue2 << token;
+       strValue2 >> imagIntValue;
+       input.push_back(FixedComplex<32>(realIntValue, imagIntValue));
+    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+
+    vector<FixedComplex<32> > output;
+    XCorrelator x(input.size());
+    output = x.xCorrelate(input,input);
+
+    ifstream ans(answersFile.c_str());
+    BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not read from " << answersFile);
+    vector<FixedComplex<32> > answers;
+    while(getline(ans,line)) {
+       istringstream ss(line);
+       getline(ss, token, ',');
+       stringstream strValue;
+       strValue << token;
+       int realIntValue;
+       int imagIntValue;
+       strValue >> realIntValue;
+       getline(ss, token, ',');
+       stringstream strValue2;
+       strValue2 << token;
+       strValue2 >> imagIntValue;
+       answers.push_back(FixedComplex<32>(realIntValue, imagIntValue));
+    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+
+    BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
+
+    for (int i = 0; i < answers.size(); i++) {
+        BOOST_CHECK_MESSAGE(abs((output[i].real - answers[i].real)/(float)answers[i].real) < .05 || abs(abs(output[i].real) - abs(answers[i].real)) < 100 ,
+                "I: " << i << " Output: " << output[i].real << " Answer: " << answers[i].real << "Ratio: " << abs((output[i].real - answers[i].real)/(float)answers[i].real) );
+        BOOST_CHECK_MESSAGE(abs((answers[i].imag - output[i].imag )/(float)answers[i].imag) < .05 || abs(abs(output[i].imag) - abs(answers[i].imag)) < 3,
+                "I: " << i << " Output: " << output[i].imag << " Answer: " << answers[i].imag << "Ratio: " << abs((output[i].imag - answers[i].imag)/(float)answers[i].imag) );
     }
+}
+
+CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_512)
+{
+
+    string inFile("data/xcorrelator/input/data_file_complex4x.csv");
+    string answersFile("data/xcorrelator/answers/answers4x.csv");
+    ifstream in(inFile.c_str());
+
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << inFile);
+
 
     vector<string> vec;
     vector<FixedComplex<32> > input; //Vector to hold answer data read from file
@@ -203,10 +247,7 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_256)
 
 
     ifstream ans(answersFile.c_str());
-    if (!ans.is_open()) {
-       cout << "error reading" << endl;
-       BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from " << answersFile);
-    }
+    BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not read from " << answersFile);
 
     vector<FixedComplex<32> > answers;
     while(getline(ans,line)) {
@@ -227,112 +268,24 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_256)
     BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
 
     for (int i = 0; i < answers.size(); i++) {
-  //      BOOST_CHECK_CLOSE((double)answers[i].real.to_int(),(double)output[i].real.to_int(), .1);
-//        BOOST_CHECK_CLOSE(answers[i].imag.to_int(),output[i].imag.to_int(), .1);
-//        BOOST_CHECK_MESSAGE(abs( abs(answers[i].real - abs (output[i].real))) < 1000, "The answer " << answers[i].real << "is not close to " << output[i].real);
-//        BOOST_CHECK_MESSAGE(abs( abs(answers[i].imag - abs (output[i].imag))) < 1000, "The answer " << answers[i].imag << "is not close to " << output[i].imag);
-        BOOST_CHECK_MESSAGE(abs((output[i].real - answers[i].real)/(float)answers[i].real) < .05 || abs(abs(output[i].real) - abs(answers[i].real)) < 100 ,
+        BOOST_CHECK_MESSAGE(abs((output[i].real - answers[i].real)/(float)answers[i].real) < .10 || abs(abs(output[i].real) - abs(answers[i].real)) < 100 ,
                 "I: " << i << " Output: " << output[i].real << " Answer: " << answers[i].real << "Ratio: " << abs((output[i].real - answers[i].real)/(float)answers[i].real) );
-        BOOST_CHECK_MESSAGE(abs((answers[i].imag - output[i].imag )/(float)answers[i].imag) < .05 || abs(abs(output[i].imag) - abs(answers[i].imag)) < 3,
+        BOOST_CHECK_MESSAGE(abs((answers[i].imag - output[i].imag )/(float)answers[i].imag) < .10 || abs(abs(output[i].imag) - abs(answers[i].imag)) < 3,
                 "I: " << i << " Output: " << output[i].imag << " Answer: " << answers[i].imag << "Ratio: " << abs((output[i].imag - answers[i].imag)/(float)answers[i].imag) );
-
     }
-
-    cout << answers.size() << endl;
 }
-
-//CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_512)
-//{
-
-//    string inFile("data/xcorrelator/input/data_file_complex4.csv");
-//    string answersFile("data/xcorrelator/answers/answers4.csv");
-//    ifstream in(inFile.c_str());
-//    if (!in.is_open()) {
-//       cout << "error reading" << endl;
-//       BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from " << inFile);
-//    }
-//
-//    vector<string> vec;
-//    vector<FixedComplex<32> > input; //Vector to hold answer data read from file
-//    std::string token;
-//    string line;
-//
-//    while(getline(in,line)) {
-//       istringstream ss(line);
-//       getline(ss, token, ',');
-//       stringstream strValue;
-//       strValue << token;
-//       int realIntValue;
-//       int imagIntValue;
-//       strValue >> realIntValue;
-//       getline(ss, token, ',');
-//       stringstream strValue2;
-//       strValue2 << token;
-//       strValue2 >> imagIntValue;
-//       input.push_back(FixedComplex<32>(realIntValue, imagIntValue));
-//    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-//
-//    vector<FixedComplex<32> > output;
-//    XCorrelator x(input.size());
-//    output = x.xCorrelate(input,input);
-//
-//
-//    ifstream ans(answersFile.c_str());
-//    if (!ans.is_open()) {
-//       cout << "error reading" << endl;
-//       BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from " << answersFile);
-//    }
-//
-//    vector<FixedComplex<32> > answers;
-//    while(getline(ans,line)) {
-//       istringstream ss(line);
-//       getline(ss, token, ',');
-//       stringstream strValue;
-//       strValue << token;
-//       int realIntValue;
-//       int imagIntValue;
-//       strValue >> realIntValue;
-//       getline(ss, token, ',');
-//       stringstream strValue2;
-//       strValue2 << token;
-//       strValue2 >> imagIntValue;
-//       answers.push_back(FixedComplex<32>(realIntValue, imagIntValue));
-//    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-//
-//    BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
-//
-//    for (int i = 0; i < answers.size(); i++) {
-//  //      BOOST_CHECK_CLOSE((double)answers[i].real.to_int(),(double)output[i].real.to_int(), .1);
-////        BOOST_CHECK_CLOSE(answers[i].imag.to_int(),output[i].imag.to_int(), .1);
-////        BOOST_CHECK_MESSAGE(abs( abs(answers[i].real - abs (output[i].real))) < 1000, "The answer " << answers[i].real << "is not close to " << output[i].real);
-////        BOOST_CHECK_MESSAGE(abs( abs(answers[i].imag - abs (output[i].imag))) < 1000, "The answer " << answers[i].imag << "is not close to " << output[i].imag);
-//        BOOST_CHECK_MESSAGE(abs((output[i].real - answers[i].real)/(float)answers[i].real) < .05 || abs(abs(output[i].real) - abs(answers[i].real)) < 100 ,
-//                "I: " << i << " Output: " << output[i].real << " Answer: " << answers[i].real << "Ratio: " << abs((output[i].real - answers[i].real)/(float)answers[i].real) );
-//        BOOST_CHECK_MESSAGE(abs((answers[i].imag - output[i].imag )/(float)answers[i].imag) < .05 || abs(abs(output[i].imag) - abs(answers[i].imag)) < 3,
-//                "I: " << i << " Output: " << output[i].imag << " Answer: " << answers[i].imag << "Ratio: " << abs((output[i].imag - answers[i].imag)/(float)answers[i].imag) );
-//
-//    }
-//
-//    cout << answers.size() << endl;
-//}
 
 CSIM_TEST_CASE(COMPLEX_CROSS_CORRELATOR_OCTAVE_COMPARISON_32)
 {
 
     string inFile1("data/xcorrelator/input/data_file_complex5.csv");
     ifstream in1(inFile1.c_str());
-    if (!in1.is_open()) {
-       cout << "error reading" << endl;
-       BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from " << inFile1);
-    }
-
+    BOOST_REQUIRE_MESSAGE(in1.is_open(), "Could not read from " << inFile1);
 
     string inFile2("data/xcorrelator/input/data_file_complex6.csv");
     ifstream in2(inFile2.c_str());
-    if (!in2.is_open()) {
-       cout << "error reading" << endl;
-       BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from " << inFile2);
-    }
+    BOOST_REQUIRE_MESSAGE(in2.is_open(), "Could not read from " << inFile2);
+
 
     vector<string> vec;
     vector<FixedComplex<32> > input1; //Vector to hold answer data read from file
