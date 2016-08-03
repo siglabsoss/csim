@@ -253,7 +253,7 @@ void fixedifftprint::inputandtick(FixedComplex<32> x)
 //   cout << "output[" << count << "]: " << x.real.to_int()<< ","
 //            << x.imag.to_int() << " " << x << endl;
 
-    m_output.push(x.to_32())/N;//adds this output to the queue of outputs
+    m_output.push(FixedComplex<32>(x.real/N, x.imag/N));//adds this output to the queue of outputs
     count++;
 }
 
