@@ -18,3 +18,7 @@ target_link_libraries(ALU ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} 
 add_executable(ALU2 aluverifier.cpp)
 target_link_libraries(ALU2 ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils )
 
+########################### BitReverse ###########################
+add_executable(bitReverse bitReverse.cpp)
+target_link_libraries(bitReverse ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils )
+

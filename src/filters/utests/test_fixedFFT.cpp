@@ -101,9 +101,9 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 
         for (i = 0; i < inputs; i++) {
-            BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 3000 ,
+            BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 10 ,
                     "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << "Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 3000,
+            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 10,
                     "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << "Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
         }
@@ -225,9 +225,9 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 
 
     for (i = 0; i < inputs; i++) {
-        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 100 ,
+        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 10 ,
                 "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 100,
+        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 10,
                 "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
         }
@@ -275,26 +275,27 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 
 
     for (i = 0; i < inputs; i++) {
-        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 100 ,
+        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 4 ,
            "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 100,
+        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 4,
            "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
     }
 }//Checks for two consecutive sets of inputs in the same FFT.
 
-
+//
+//
 //CSIM_TEST_CASE(FFT_VERILOG)
 //{
-//       string infile("../csim/data/fft/output/out1.txt");
-//       string answersfile("../csim/data/fft/input/verilog.txt");
+//       string infile("../csim/data/fft/output/out1BitReversed.txt");
+//       string answersfile("../csim/data/fft/output/answers32768BitReversed.csv");
 //
 //       int i = 0;
-//       FixedComplex<32> bitReversedOutput[32768];
+//       FixedComplex<32> bitReversedInput[32768];
 //       ifstream in(infile.c_str());
-//       BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open data/fft/input/verilog.txt");
+//       BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
 //       ifstream ans(answersfile.c_str());
-//       BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open ../csim/data/fft/output/out1.txt");
+//       BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open " << answersfile);
 //
 //       std::string token;
 //       string line;
@@ -306,12 +307,12 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //           strValue << token;
 //           int intValue;
 //           strValue >> intValue;
-//           bitReversedOutput[inputs].real = intValue;
+//           bitReversedInput[inputs].real = intValue;
 //           getline(ss, token, ',');
 //           stringstream strValue2;
 //           strValue2 << token;
 //           strValue2 >> intValue;
-//           bitReversedOutput[inputs++].imag = intValue;
+//           bitReversedInput[inputs++].imag = intValue;
 //       }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 //
 //       int numAnswers = 0;
@@ -340,18 +341,18 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 ////        }//Reformats data in correct order
 //
 //
-//       FixedComplex<32> temp[32769];
-//       for (i = 0; i < inputs; i++) {
-//           temp[i] = bitReversedOutput[i];
-//       }
+////       FixedComplex<32> temp[32769];
+////       for (i = 0; i < inputs; i++) {
+////           temp[i] = bitReversedOutput[i];
+////       }
 //
 //
 //
-//        for (i = 0; i < 10; i++) {
-//            BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) <  .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 10 ,
-//                    "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-//            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 10,
-//                    "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
+//        for (i = 0; i < inputs; i++) {
+//            BOOST_CHECK_MESSAGE(abs((bitReversedInput[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) <  .10 || abs(abs(bitReversedInput[i].real) - abs(trueAnswers[i].real)) < 10 ,
+//                    "I: " << i << " Input: " << bitReversedInput[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((bitReversedInput[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
+//            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - bitReversedInput[i].imag )/(float)trueAnswers[i].imag) < .10 || abs(abs(bitReversedInput[i].imag) - abs(trueAnswers[i].imag)) < 10,
+//                    "I: " << i << " Input: " << bitReversedInput[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((bitReversedInput[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 //
 //        }
 //
