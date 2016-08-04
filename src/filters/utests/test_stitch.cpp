@@ -15,7 +15,7 @@ using namespace std;
 using namespace boost;
 
 CSIM_TEST_SUITE_BEGIN(SticherFilter)
-
+#if 0
 CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
     int waves[2] = { 1, 0 };
@@ -110,5 +110,6 @@ CSIM_TEST_CASE(CONCATENATION)
     cout << "DONE" << endl;
 
 } //Ensures 2 waves of the same type concatenated is the same as one long wave of the same type
+#endif
 
 CSIM_TEST_SUITE_END()
