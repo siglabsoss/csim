@@ -52,4 +52,4 @@ add_definitions(-DSC_DISABLE_API_VERSION_CHECK)
 add_definitions(-DSC_INCLUDE_DYNAMIC_PROCESSES)
 
 add_subdirectory(src)
-
+add_subdirectory(3rd)
