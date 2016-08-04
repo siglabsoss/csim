@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
      for (i = 0; i < count; i++) {
          out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int()/inputs <<"," ;
          out2 << setw(11) << setfill(' ') << temp[i].imag.to_int()/inputs << endl;
-//         cout << temp[i];
+         cout << temp[i];
      }//Prints data out in correct order
 
 //    for (i = 0; i < count; i++) {

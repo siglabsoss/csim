@@ -14,7 +14,7 @@
 using namespace std;
 using namespace boost;
 
-CSIM_TEST_SUITE_BEGIN(SticherFilter)
+CSIM_TEST_SUITE_BEGIN(StitcherFilter)
 #if 0
 CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
@@ -45,7 +45,7 @@ CSIM_TEST_CASE(PYTHON_COMPARISON)
                 << endl;
         //	cout << outdatas[i];
     }
-    cout << "DONE" << endl;
+
 
     char ** ptr;
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
@@ -107,7 +107,7 @@ CSIM_TEST_CASE(CONCATENATION)
                 (outdatas[i].real / 32768.0 == outdatas2[i].real / 32768.0),
                 i << ": " << outdatas[i].real/32768.0 << " is not equal to " << outdatas2[i].real/32768.0);
     } //Ensures 2 waves of the same type concatenated is the same as one long wave of the same type
-    cout << "DONE" << endl;
+
 
 } //Ensures 2 waves of the same type concatenated is the same as one long wave of the same type
 #endif

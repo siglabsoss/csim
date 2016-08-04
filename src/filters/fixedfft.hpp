@@ -43,6 +43,7 @@ public:
     int                 write_pointer;
     int                 clock;
     fixedfftbase        *next;
+    int theta;
 
     fixedfftstage(int Ninput);
     fixedfftstage();
