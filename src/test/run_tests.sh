@@ -35,7 +35,7 @@ if ! make -j utests ; then
     echo "Error building unit tests!"
     exit $EXIT_CODE
 fi
-cp -r $CSIM_SRC/data .
+cp -r $CSIM_SRC/../data .
 ./bin/utests
 EXIT_CODE=$?
 popd
