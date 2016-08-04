@@ -40,7 +40,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and s
     while (getline(in, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        input[i].real = atof(vec[0].c_str());
+        input[i].real(atof(vec[0].c_str()) / (1 << 15));
 
         //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
         i++;
@@ -57,7 +57,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and s
     while (getline(in3, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        answers[l].real = atof(vec[0].c_str());
+        answers[l].real(atof(vec[0].c_str()) / (1 << 15));
 
 
         //   cout << setprecision(30) << i+1 << ": Real: " << input[i].real.to_int() << " " << atof(vec[0].c_str()) << " Is actually " << vec[0].c_str() << endl;//" Imaginary: "<< input[j].imag.to_int() << endl;
@@ -80,8 +80,8 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and s
 
     for (int k = 0; k < l; k++) {
         // cout << k << endl;
-        BOOST_CHECK_MESSAGE(abs(output[k].real - answers[k].real) < 1,
-                output[k].real << " is not the same as " << answers[k].real << " ");
+        BOOST_CHECK_MESSAGE(abs(output[k].real() - answers[k].real()) < 1,
+                output[k].real() << " is not the same as " << answers[k].real() << " ");
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
 }
