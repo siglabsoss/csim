@@ -10,30 +10,44 @@
 
 #include <iostream>
 #include <types/fixedcomplex.hpp>
+
+typedef sc_fixed<20, 5> cordic_theta_t;
+typedef FixedComplex2<20, 5> cordic_complex_t;
+typedef sc_fixed<20, 5> cordic_scalar_t;
+
+//These typedefs can be used to enable floating point
+//typedef double cordic_theta_t;
+//typedef std::complex<double> cordic_complex_t;
+//typedef double cordic_scalar_t;
+
+
 class cordic
 {
 public:
-
     cordic();
-    void rotate(sc_int<32> theta); //Calculates which direction to rotate
-    void calculate(sc_int<32> theta, FixedComplex<16> a, FixedComplex<16> b,
-            sc_int<32>* sinup, sc_int<32>* sindown, sc_int<32>* cosup,
-            sc_int<32>* cosdown); //Calculates sine and cosine
-    void signs(); //swaps cosine and sign or changes sign if necessary
-    sc_int<32> sin(sc_int<32> theta);
+
+    /**
+     * Rotates a given angle to the fist quadrant
+     * @param theta (radians) to rotate, modified to resulting theta in first quadrant
+     * @return the quadrant in which the original angle laid in
+     */
+    int rotateToFirstQuadrant(cordic_theta_t &theta);
+
+    /**
+     * Clips the complex values between [-1.0, 1.0]
+     */
+    void clipResults(cordic_complex_t y[2]);
+
+    void calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_complex_t &cosine);
+
+    void rotateToQuadrant(cordic_complex_t y[2], int quadrant); //swaps cosine and sign or changes sign if necessary
     virtual ~cordic();
 
-    int vals[16]; //Holds rotation values
-    int sign[16]; //Holds which direction to rotate
+    std::vector <cordic_scalar_t > m_vals;
 
-    int quad;
-    double k; //Constant
-    FixedComplex<32> y[2][1]; //right aray to multiply (2x1)
-    FixedComplex<32> z[2][2]; //left matrixto multiply by(2x2)
-    FixedComplex<32> temp; //temporary storage for later calculation
-    FixedComplex<32> c1; //a-(1/2^n)b
-    FixedComplex<32> c2; //a(1/2^n)+b
-
+private:
+    static constexpr size_t NUM_HARDWIRED_VALUES = 32;
+    static constexpr double k = .685985744494; // k is a scaling factor that's a function of the number of hardwired values, this particular value was found emperically
 };
 
 #endif /* CORDIC_H_ */

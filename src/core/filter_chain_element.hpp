@@ -5,23 +5,27 @@
 #include <memory>
 
 #include <cstdint>
-#include <complex>
+
 
 enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,
     IO_TYPE_COMPLEX_DOUBLE,
     IO_TYPE_FIXED_COMPLEX_16,
     IO_TYPE_FIXED_COMPLEX_32,
+    IO_TYPE_FIXED_COMPLEX_16_NEW,
+    IO_TYPE_FIXED_COMPLEX_32_NEW,
     IO_TYPE_BYTE
 };
 struct filter_io_t
 {
     //Data members
     io_type_t type;
+    FixedComplex<16> fc;
+    FixedComplex<32> fc32;
+    FixedComplex2<16, 1> fcn;
+    FixedComplex2<32, 1> fcn32;
     union {
         std::complex<double> rf;
-        FixedComplex<16> fc;
-        FixedComplex<32> fc32;
         uint8_t byte;
     };
 
@@ -45,6 +49,12 @@ struct filter_io_t
                 case IO_TYPE_FIXED_COMPLEX_32:
                     this->fc32 = other.fc32;
                     break;
+                case IO_TYPE_FIXED_COMPLEX_16_NEW:
+                    this->fcn = other.fcn;
+                    break;
+                case IO_TYPE_FIXED_COMPLEX_32_NEW:
+                    this->fcn32 = other.fcn32;
+                    break;
                 case IO_TYPE_BYTE:
                     this->byte = other.byte;
                     break;
@@ -67,6 +77,12 @@ struct filter_io_t
                     break;
                 case IO_TYPE_FIXED_COMPLEX_32:
                     this->fc32 = rhs.fc32;
+                    break;
+                case IO_TYPE_FIXED_COMPLEX_16_NEW:
+                    this->fcn = rhs.fcn;
+                    break;
+                case IO_TYPE_FIXED_COMPLEX_32_NEW:
+                    this->fcn32 = rhs.fcn32;
                     break;
                 case IO_TYPE_BYTE:
                     this->byte = rhs.byte;
@@ -96,6 +112,20 @@ struct filter_io_t
     {
         this->type = IO_TYPE_FIXED_COMPLEX_32;
         this->fc32 = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const FixedComplex2<16, 1> &rhs)
+    {
+        this->type = IO_TYPE_FIXED_COMPLEX_16_NEW;
+        this->fcn = rhs;
+        return *this;
+    }
+
+    filter_io_t & operator=(const FixedComplex2<32, 1> &rhs)
+    {
+        this->type = IO_TYPE_FIXED_COMPLEX_32_NEW;
+        this->fcn32 = rhs;
         return *this;
     }
 
@@ -137,21 +167,27 @@ struct filter_io_t
             }
             case IO_TYPE_FIXED_COMPLEX_32:
             {
-               int value = fc32.real.to_int();
-               memcpy(data + numBytes, &value, sizeof(value));
-               numBytes += sizeof(value);
+                int value = fc32.real.to_int();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
 
-               value = fc32.imag.to_int();
-               memcpy(data + numBytes, &value, sizeof(value));
-               numBytes += sizeof(value);
+                value = fc32.imag.to_int();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
+           }
+            case IO_TYPE_FIXED_COMPLEX_16_NEW:
+                break; //XXX TODO
+            case IO_TYPE_FIXED_COMPLEX_32_NEW:
+                break; //XXX TODO
+           case IO_TYPE_BYTE:
+           {
+               memcpy(data + numBytes, &byte, sizeof(byte));
+               numBytes += sizeof(byte);
                break;
            }
-            case IO_TYPE_BYTE:
-                memcpy(data + numBytes, &byte, sizeof(byte));
-                numBytes += sizeof(byte);
-                break;
-            case IO_TYPE_NULL:
-                break;
+           case IO_TYPE_NULL:
+               break;
         }
 
         return numBytes;

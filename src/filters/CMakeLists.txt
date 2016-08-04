@@ -5,7 +5,7 @@ set(SIGFILTERS_SOURCES
     fixedfft.cpp
     fixedifft.cpp
     floatfft.cpp
-    stitcher.cpp
+    #stitcher.cpp
     xcorrelator.cpp
     )
 

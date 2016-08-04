@@ -16,8 +16,8 @@ fixedcic::fixedcic(int R, int aregs, int bregs) :
 
 bool fixedcic::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
-    FixedComplex<16> sample = data.fc;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
+    FixedComplex2<16, 1> sample = data.fcn;
     cic(sample);
     return true;
 }
@@ -28,8 +28,8 @@ bool fixedcic::input(const filter_io_t &data)
 bool fixedcic::output(filter_io_t &data)
 {
     if (goodOutput == true) {
-        data.type = IO_TYPE_FIXED_COMPLEX_16;
-        data.fc = m_output;
+        data = m_output;
+        //XXX should goodOutput be reset here?
         return true;
     }//Valid data
     else {
@@ -42,13 +42,13 @@ void fixedcic::tick()
 
 }
 
-void fixedcic::cic(FixedComplex<16> &input)
+void fixedcic::cic(FixedComplex2<16, 1> &input)
 {
     goodOutput = false;
-    FixedComplex<32> temp; //Storage for integrate output
+    FixedComplex2<16, 1> temp; //Storage for integrate output
     temp = integrate(input); //Calculate filtered data
     if (!(this->downsample())) {//If not downsampled
-        m_output = ((this->comb(temp))).to_16(); //converts final value of comb to 16 bits.
+        m_output = ((this->comb(temp))); //converts final value of comb to 16 bits.
         goodOutput= true;
     }
 }
@@ -58,41 +58,37 @@ void fixedcic::reset()
     m_samples = 0; //reset sample count
 
     for (int i = 0; i < m_numBRegisters; i++) {
-         m_b[i].real = 0;
-         m_b[i].imag = 0;
+         m_b[i].real(0);
+         m_b[i].imag(0);
 
      } //Initialize registers
 
      for (int i = 0; i < m_numARegisters; i++) {
-         m_a[i].real = 0;
-         m_a[i].imag = 0;
+         m_a[i].real(0);
+         m_a[i].imag(0);
      } //Initialize registers
 }
 
-FixedComplex<32> fixedcic::integrate(FixedComplex<16> current)
+FixedComplex2<16, 1> fixedcic::integrate(FixedComplex2<16, 1> current)
 {
-    FixedComplex<32> CenterTap;
-
-    CenterTap = current.to_32();
-
     for (int i = 0; i < m_numBRegisters; i++) {
-        CenterTap = CenterTap + m_b[i].to_32(); //Accumulate for each b register
-        m_b[i] = CenterTap;
+        current = current + m_b[i]; //Accumulate for each b register
+        m_b[i] = current;
     }
 
-    return CenterTap;
+    return current;
 } //Performs filtering
 
-FixedComplex<32> fixedcic::comb(FixedComplex<32> current)
+FixedComplex2<16, 1> fixedcic::comb(FixedComplex2<16, 1> current)
 {
-    FixedComplex<32> final;
-    FixedComplex<32> temp; //storage for swap
+    FixedComplex2<16, 1> final;
+    FixedComplex2<16, 1> temp; //storage for swap
 
-    final = current.to_32();
+    final = current;
 
     for (int i = 0; i < m_numARegisters; i++) {
         temp = final;
-        final = final - m_a[i].to_32(); //Accumulate for each b register
+        final = final - m_a[i]; //Accumulate for each b register
         m_a[i] = temp;
     }
 

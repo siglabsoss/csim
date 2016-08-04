@@ -42,6 +42,8 @@ CTestTestfile.cmake
 *.out
 *.app
 
+/build
+/build_utest
 /bin
 
 # Vimdiff conflict resolution original backups
