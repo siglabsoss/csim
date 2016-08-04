@@ -82,24 +82,24 @@ int main(int argc, char *argv[])
     assert(count == inputs);
 
 
-     cout << "Hopefully correct:" << endl;
-     FixedComplex<32> temp[32769];
-    for (i = 0; i < inputs; i++) {
-        temp[reverseBits(inputs, i)] = answers[i];
-    }//Reformats data in correct order
-
-     for (i = 0; i < count; i++) {
-         out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
-         out2 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
-       //  cout << temp[i];
-     }//Prints data out in correct order
+//     cout << "Hopefully correct:" << endl;
+//     FixedComplex<32> temp[32769];
+//    for (i = 0; i < inputs; i++) {
+//        temp[reverseBits(inputs, i)] = answers[i];
+//    }//Reformats data in correct order
+//
+//     for (i = 0; i < count; i++) {
+//         out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
+//         out2 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
+//       //  cout << temp[i];
+//     }//Prints data out in correct order
 
 
      string outfile3("../csim/data/fft/output/out1BitReversed.txt");
      ofstream out3(outfile3.c_str());
      for (i = 0; i < count; i++) {
-              out3 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
-              out3 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
+              out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
+              out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
             //  cout << temp[i];
           }//Prints data out in bit reversed order
 
