@@ -20,9 +20,9 @@ CSIM_TEST_SUITE_BEGIN(CICFilter)
 CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and subtracts
 {
 
-    FixedComplex<16> input[2048]; //Array to hold inputs
-    FixedComplex<16> output[2048]; //Array to hold outputs
-    FixedComplex<16> answers[2048];
+    FixedComplex2<16, 1> input[2048]; //Array to hold inputs
+    FixedComplex2<16, 1> output[2048]; //Array to hold outputs
+    FixedComplex2<16, 1> answers[2048];
     string data("./data/cicdata/input/cic_data_in.txt"); //Input data file
 
     ifstream in(data.c_str());
@@ -69,12 +69,11 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and s
     for (int k = 0; k < i; k++)
       {
           filter_io_t data;
-          data.type =  IO_TYPE_FIXED_COMPLEX_16;
-          data.fc = input[k];
+          data = input[k];
           cic.input(data); //Filters data
           bool test = cic.output(data);
           if (test) {
-              output[m++] = data.fc;
+              output[m++] = data.fcn;
           }
 }
 

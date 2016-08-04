@@ -1,7 +1,7 @@
 #include <filters/fixed_fir.hpp>
 
 
-FixedFIR::FixedFIR(int N, FixedComplex<16>* tap) :
+FixedFIR::FixedFIR(int N, FixedComplex2<16, 1>* tap) :
     m_taps(N),
     m_bench(N),
     m_output()
@@ -13,8 +13,8 @@ FixedFIR::FixedFIR(int N, FixedComplex<16>* tap) :
 
 bool FixedFIR::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
-    FixedComplex<16> sample = data.fc;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
+    FixedComplex2<16, 1> sample = data.fcn;
 
 
     m_output = filter(sample);
@@ -40,10 +40,10 @@ void FixedFIR::reset()
     }
 }
 
-FixedComplex<16> FixedFIR::filter(FixedComplex<16> &input)
+FixedComplex2<16, 1> FixedFIR::filter(FixedComplex2<16, 1> &input)
 {
 
-    FixedComplex<16> sum;
+    FixedComplex2<16, 1> sum;
 
     m_bench.push_front(input);
 

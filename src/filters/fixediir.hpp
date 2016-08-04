@@ -26,19 +26,19 @@ public:
 
     void tick() override;
 
-    fixediir(int registerXSize, int registerYSize, FixedComplex<16>* aCoeffs,
-               FixedComplex<16>* bCoeffs); //Constructor
-    void iir(FixedComplex<16> &input); //Filtering input data
+    fixediir(int registerXSize, int registerYSize, FixedComplex2<16, 1>* aCoeffs,
+               FixedComplex2<16, 1>* bCoeffs); //Constructor
+    void iir(FixedComplex2<16, 1> &input); //Filtering input data
     void reset(); //resets registers
-    FixedComplex<16> calculate(FixedComplex<16> current); // Calculate output based on input
+    FixedComplex2<16, 1> calculate(FixedComplex2<16, 1> current); // Calculate output based on input
 
     int                         m_numXRegisters;
     int                         m_numYRegisters;
-    std::vector<FixedComplex<16> >   m_a; //a coefficients
-    std::vector<FixedComplex<16> >   m_b; //b coefficients
-    std::vector<FixedComplex<16> >   m_x; //x registers
-    std::vector<FixedComplex<16> >   m_y; //y registers
-    FixedComplex<16>            m_output;
+    std::vector<FixedComplex2<16, 1> >   m_a; //a coefficients
+    std::vector<FixedComplex2<16, 1> >   m_b; //b coefficients
+    std::vector<FixedComplex2<16, 1> >   m_x; //x registers
+    std::vector<FixedComplex2<16, 1> >   m_y; //y registers
+    FixedComplex2<16, 1>            m_output;
 
 };
 

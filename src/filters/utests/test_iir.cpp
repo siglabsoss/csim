@@ -15,8 +15,8 @@
 #define NUM_X_REGISTERS 2
 #define NUM_Y_REGISTERS 5
 
-FixedComplex<16> a[NUM_Y_REGISTERS];
-FixedComplex<16> b[NUM_X_REGISTERS]; //b coefficients
+FixedComplex2<16, 1> a[NUM_Y_REGISTERS];
+FixedComplex2<16, 1> b[NUM_X_REGISTERS]; //b coefficients
 float temp1[NUM_Y_REGISTERS] = { 1, .5, .5, .6, .7 }; // a coefficients
 float temp2[NUM_X_REGISTERS] = { .5, .5 }; //b coefficients
 
@@ -36,8 +36,8 @@ CSIM_TEST_CASE(REAL_FILTER)
         b[i].real(temp2[i]);
     }
 
-    FixedComplex<16> output[1024];
-    FixedComplex<16> input[1024];
+    FixedComplex2<16, 1> output[1024];
+    FixedComplex2<16, 1> input[1024];
 
     for (int i = 1; i < 5; i++) {
         input[i - 1].real((double) i / 10.00);
@@ -46,11 +46,10 @@ CSIM_TEST_CASE(REAL_FILTER)
     fixediir iir(NUM_X_REGISTERS, NUM_Y_REGISTERS, a, b);
 
     filter_io_t data;
-    data.type =  IO_TYPE_FIXED_COMPLEX_16;
     for (int i = 0; i < 4; i ++) {
 
 
-      data.fc = input[i];
+      data = input[i];
       iir.input(data); //Filters data
       output[i] = iir.m_output;
     }
@@ -64,12 +63,12 @@ CSIM_TEST_CASE(REAL_FILTER)
 CSIM_TEST_CASE(COMPLEX_FILTER)
 {
 
-    FixedComplex<16> input[1024]; //Array to hold inputs
-    FixedComplex<16> output[1024]; //Array to hold outputs
+    FixedComplex2<16, 1> input[1024]; //Array to hold inputs
+    FixedComplex2<16, 1> output[1024]; //Array to hold outputs
     double realAnswers[1024]; //Array to hold answers
     double imagAnswers[1024]; //Arrayto hodl answers
-    FixedComplex<16> atap[100]; //Array for A taps
-    FixedComplex<16> btap[100];
+    FixedComplex2<16, 1> atap[100]; //Array for A taps
+    FixedComplex2<16, 1> btap[100];
 
     string data("./data/iirdata/input/data1_in.csv"); //Input data file
 
@@ -141,9 +140,8 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     assert(l == i);//Length of inputs is length of answers/outputs.
     fixediir iir(j, j, atap, btap);
     filter_io_t data2;
-    data2.type =  IO_TYPE_FIXED_COMPLEX_16;
     for (int j = 0; j < i; j ++) {
-        data2.fc = input[j];
+        data2 = input[j];
         iir.input(data2); //Filters data
         output[j] = iir.m_output;
     }

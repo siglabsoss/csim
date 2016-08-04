@@ -12,7 +12,7 @@
 class FixedFIR : public FilterChainElement
 {
 public:
-    FixedFIR(int N, FixedComplex<16>* tap);
+    FixedFIR(int N, FixedComplex2<16, 1>* tap);
 
     bool input(const filter_io_t &data) override;
     /**
@@ -25,11 +25,11 @@ public:
 
 private: //methods
     void reset();
-    FixedComplex<16> filter(FixedComplex<16> &input);
+    FixedComplex2<16, 1> filter(FixedComplex2<16, 1> &input);
 
 private: //members
-    std::vector< FixedComplex<16> >   m_taps;
-    boost::circular_buffer< FixedComplex<16> > m_bench;
+    std::vector< FixedComplex2<16, 1> >   m_taps;
+    boost::circular_buffer< FixedComplex2<16, 1> > m_bench;
 
-    FixedComplex<16>                  m_output;
+    FixedComplex2<16, 1>                  m_output;
 };

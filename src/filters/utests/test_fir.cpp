@@ -19,9 +19,9 @@ CSIM_TEST_SUITE_BEGIN(FIRFilter)
 
 CSIM_TEST_CASE(REAL_FILTER)
 {
-    FixedComplex<16> input[1024]; //Array to hold inputs
-    FixedComplex<16> output[1024]; //Array to hold outputs
-    FixedComplex<16> answers[1024];
+    FixedComplex2<16, 1> input[1024]; //Array to hold inputs
+    FixedComplex2<16, 1> output[1024]; //Array to hold outputs
+    FixedComplex2<16, 1> answers[1024];
     string data("./data/firdata/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
@@ -48,7 +48,7 @@ CSIM_TEST_CASE(REAL_FILTER)
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
     string taps("./data/firdata/input/taps1.txt");
-    FixedComplex<16> tap[41];
+    FixedComplex2<16, 1> tap[41];
 
     ifstream in2(taps.c_str());
     if (!in2.is_open()) {
@@ -91,13 +91,11 @@ CSIM_TEST_CASE(REAL_FILTER)
     for (int k = 0; k < i; k++)
     {
         filter_io_t data;
-        //data.type =  IO_TYPE_FIXED_COMPLEX_16;
-        //data.fc = input[k];
         data = input[k];
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output[k] = output_sample.fc;
+        output[k] = output_sample.fcn;
     }
     for (int k = 0; k < i; k++) {
         BOOST_CHECK_MESSAGE(
@@ -110,11 +108,11 @@ CSIM_TEST_CASE(REAL_FILTER)
 
 CSIM_TEST_CASE(COMPLEX_FILTER)
 {
-    FixedComplex<16> input[1024]; //Array to hold inputs
-    FixedComplex<16> output[1024]; //Array to hold outputs
+    FixedComplex2<16, 1> input[1024]; //Array to hold inputs
+    FixedComplex2<16, 1> output[1024]; //Array to hold outputs
     double realAnswers[1024];
     double imagAnswers[1024];
-    FixedComplex<16> tap[100];
+    FixedComplex2<16, 1> tap[100];
 
     string data("./data/firdata/input/data1_in.txt"); //Input data file
 
@@ -179,13 +177,11 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     FixedFIR fir(j, tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++) {
         filter_io_t data;
-        //data.type =  IO_TYPE_FIXED_COMPLEX_16;
-        //data.fc = input[k];
         data = input[k];
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output[k] = output_sample.fc;
+        output[k] = output_sample.fcn;
      }
 
     for (int k = 0; k < i; k++) {

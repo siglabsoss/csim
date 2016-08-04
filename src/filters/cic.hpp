@@ -29,9 +29,9 @@ public:
     void tick() override;
     fixedcic();
     fixedcic(int R, int aregs, int bregs); //Constructor takes in decimation factor and number of regs on each side.
-    void cic(FixedComplex<16> &input); //actual filtering of data. Returns number of outputs
-    FixedComplex<16> integrate(FixedComplex<16> current); //integrate side of filter
-    FixedComplex<16> comb(FixedComplex<16> current); //comb side of filter
+    void cic(FixedComplex2<16, 1> &input); //actual filtering of data. Returns number of outputs
+    FixedComplex2<16, 1> integrate(FixedComplex2<16, 1> current); //integrate side of filter
+    FixedComplex2<16, 1> comb(FixedComplex2<16, 1> current); //comb side of filter
     bool downsample(); //returns false when the sample should be passed
     void reset();
 
@@ -40,9 +40,9 @@ public:
     int                         m_numARegisters; //number of a registers
     int                         m_r; //Decimation factor
     int                         m_samples; //How many samples have been processed
-    std::vector<FixedComplex<16> >   m_a; //a registers
-    std::vector<FixedComplex<16> >   m_b; //b registers
-    FixedComplex<16>            m_output;
+    std::vector<FixedComplex2<16, 1> >   m_a; //a registers
+    std::vector<FixedComplex2<16, 1> >   m_b; //b registers
+    FixedComplex2<16, 1>            m_output;
 };
 
 #endif /* CIC_H_ */

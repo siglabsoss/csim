@@ -28,8 +28,8 @@ void fixediir::reset()
 bool fixediir::input(const filter_io_t &data)
 {
 
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16);
-    FixedComplex<16> sample = data.fc;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
+    FixedComplex2<16, 1> sample = data.fcn;
     iir(sample);
     return true;
 }
@@ -39,8 +39,7 @@ bool fixediir::input(const filter_io_t &data)
  */
 bool fixediir::output(filter_io_t &data)
 {
-    data.type = IO_TYPE_FIXED_COMPLEX_16;
-    data.fc = m_output;
+    data = m_output;
     return true;
 }
 
@@ -50,7 +49,7 @@ void fixediir::tick()
 }
 
 fixediir::fixediir(int registerXSize, int registerYSize,
-        FixedComplex<16>* aCoeffs, FixedComplex<16>* bCoeffs) :
+        FixedComplex2<16, 1>* aCoeffs, FixedComplex2<16, 1>* bCoeffs) :
                 m_numXRegisters(registerXSize),
                 m_numYRegisters(registerYSize),
                 m_a(m_numYRegisters),
@@ -67,10 +66,10 @@ fixediir::fixediir(int registerXSize, int registerYSize,
 
 } //Constructs filter based on number of registers on each side and the values of those registers
 
-void fixediir::iir(FixedComplex<16> &input)
+void fixediir::iir(FixedComplex2<16, 1> &input)
 {
 
-    FixedComplex<16> currenty, centerTap;
+    FixedComplex2<16, 1> currenty, centerTap;
     centerTap = (input * m_b[0]); // x[0] * b[0]
 
     for (int i = 1; i < m_numXRegisters; i++)
