@@ -7,8 +7,17 @@
 
 #ifndef FixedComplex_H_
 #define FixedComplex_H_
-using namespace std;
+
+
+#include <complex>
+
+#define SC_INCLUDE_FX
 #include <systemc.h>
+
+template <size_t N, size_t M>
+using FixedComplex2 = std::complex <sc_dt::sc_fixed <N, M> >;
+
+using namespace std;
 #include <iostream>
 template<int B> //How many bits the number will have
 class FixedComplex
