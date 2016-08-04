@@ -2,8 +2,8 @@
 
 #http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CSIM_SRC=$THIS_DIR/../../ #Points to root of repo
-CSIM_UTEST_BUILD=$CSIM_SRC/../csim_utest_build #define the build tree to be a sibling
+CSIM_SRC=$THIS_DIR/../ #Points to root of repo
+CSIM_UTEST_BUILD=$CSIM_SRC/../build_utest #define the build tree to be a sibling
 
 #Construct semicolon separated list of unit test source files relative to this directory
 #because that's where the CMakeLists.txt file lives.
