@@ -156,25 +156,25 @@ struct filter_io_t
             }
             case IO_TYPE_FIXED_COMPLEX_16:
             {
-                int value = fc.real;
+                int value = fc.real.to_int();
                 memcpy(data + numBytes, &value, sizeof(value));
                 numBytes += sizeof(value);
 
-                value = fc.imag;
+                value = fc.imag.to_int();
                 memcpy(data + numBytes, &value, sizeof(value));
                 numBytes += sizeof(value);
                 break;
             }
             case IO_TYPE_FIXED_COMPLEX_32:
             {
-               int value = fc32.real;
-               memcpy(data + numBytes, &value, sizeof(value));
-               numBytes += sizeof(value);
+                int value = fc32.real.to_int();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
 
-               value = fc32.imag;
-               memcpy(data + numBytes, &value, sizeof(value));
-               numBytes += sizeof(value);
-               break;
+                value = fc32.imag.to_int();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
            }
             case IO_TYPE_FIXED_COMPLEX_16_NEW:
                 break; //XXX TODO
