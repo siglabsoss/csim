@@ -30,8 +30,8 @@ public:
     fixedcic();
     fixedcic(int R, int aregs, int bregs); //Constructor takes in decimation factor and number of regs on each side.
     void cic(FixedComplex<16> &input); //actual filtering of data. Returns number of outputs
-    FixedComplex<32> integrate(FixedComplex<16> current); //integrate side of filter
-    FixedComplex<32> comb(FixedComplex<32> current); //comb side of filter
+    FixedComplex<16> integrate(FixedComplex<16> current); //integrate side of filter
+    FixedComplex<16> comb(FixedComplex<16> current); //comb side of filter
     bool downsample(); //returns false when the sample should be passed
     void reset();
 
@@ -40,8 +40,8 @@ public:
     int                         m_numARegisters; //number of a registers
     int                         m_r; //Decimation factor
     int                         m_samples; //How many samples have been processed
-    vector<FixedComplex<32> >   m_a; //a registers
-    vector<FixedComplex<32> >   m_b; //b registers
+    std::vector<FixedComplex<16> >   m_a; //a registers
+    std::vector<FixedComplex<16> >   m_b; //b registers
     FixedComplex<16>            m_output;
 };
 
