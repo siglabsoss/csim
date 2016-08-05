@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     cout << inputs << endl;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
-    fixedfft fft(points); //8 point fft
+    fixedfft fft(points, 368640 ); //8 point fft
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
@@ -82,21 +82,21 @@ int main(int argc, char *argv[])
     assert(count == inputs);
 
 
-//     cout << "Hopefully correct:" << endl;
-//     FixedComplex<32> temp[32769];
-//    for (i = 0; i < inputs; i++) {
-//        temp[reverseBits(inputs, i)] = answers[i];
-//    }//Reformats data in correct order
-//
+     cout << "Hopefully correct:" << endl;
+     FixedComplex<32> temp[32769];
+    for (i = 0; i < inputs; i++) {
+        temp[reverseBits(inputs, i)] = answers[i];
+    }//Reformats data in correct order
+
 //     for (i = 0; i < count; i++) {
 //         out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
 //         out2 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
 //       //  cout << temp[i];
 //     }//Prints data out in correct order
+//
 
-
-     string outfile3("../csim/data/fft/output/out1BitReversed.txt");
-     ofstream out3(outfile3.c_str());
+//     string outfile3("../data/fft/output/out1BitReversed.txt");
+//     ofstream out3(outfile3.c_str());
      for (i = 0; i < count; i++) {
               out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
               out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
