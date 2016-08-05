@@ -124,7 +124,7 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
 
 
 
-	int increment = (360*4096) / (N);
+	int increment = (360*256) / (N);
 
 	for (int i = 0; i <= ((N/4)); i++) {
 
@@ -137,7 +137,7 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
 
 	if (k > (N/4)) {
 		W_cos = -a[(-N/4) + k ];
-		W_sin = -a[(N/2) - k];
+		W_sin = a[(N/2) - k];
 	}
 	else {
 		if (N == 2) {
@@ -146,7 +146,7 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
 		}
 		else {
 			W_cos = a[(N/4) - k];
-			W_sin = -a[k];
+			W_sin = a[k];
 		}
 	}
 
