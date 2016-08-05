@@ -76,7 +76,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
        int points = inputs;
        filter_io_t data;
        data.type =  IO_TYPE_FIXED_COMPLEX_32;
-       fixedfft fft(points); //8 point fft
+       fixedfft fft(points, 368641 ); //x point fft, y table size
 
        for (int i = 0; i < 2; i++) {
            for (int j = 0; j < points; j++) {
@@ -176,7 +176,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     int points = inputs;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
-    fixedfft fft(points); //8 point fft
+    fixedfft fft(points, 737280 ); //x point fft, y table size
 
     for (int i = 0; i < 1; i++) {
         for (int j = 0; j < points; j++) {
