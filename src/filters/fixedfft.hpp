@@ -4,6 +4,7 @@
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
 #include <queue>
+#include <cmath>
 #include <core/logger.hpp>
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
@@ -44,7 +45,7 @@ public:
     int                 clock;
     fixedfftbase        *next;
     int theta;
-
+    int tableSize;
     fixedfftstage(int Ninput);
     fixedfftstage();
     void init(int Ninput);
@@ -92,7 +93,7 @@ public:
     int stagecount;
     fixedfftstage *stages;
     fixedfftprint printer;
-    fixedfft(int Ninput);
+    fixedfft(int Ninput, int tableSize);
     void inputandtick(FixedComplex<32> x);
 };
 
