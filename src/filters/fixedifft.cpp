@@ -129,10 +129,10 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
 	for (int i = 0; i <= ((N/4)); i++) {
 
 		a[i] = lookupTable2[i * increment];
-		if ((a[i] - b[i]) > 10)
-		{
-			cout << a[i] << " " << b[i] << endl;
-		}
+//		if ((a[i] - b[i]) > 10)
+//		{
+//			cout << a[i] << " " << b[i] << endl;
+//		}
 	}
 
 	if (k > (N/4)) {
