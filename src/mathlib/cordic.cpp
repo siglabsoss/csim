@@ -32,23 +32,39 @@ cordic::cordic() :
 int cordic::rotateToFirstQuadrant(cordic_theta_t &theta)
 {
     int quad = 0;
-    while (theta >= cordic_theta_t(2 * M_PI)) { //input greater than 2pi
+    while (theta >= (2 * M_PI)) { //input greater than 2pi
         theta = theta - (2 * M_PI);
     }
 
-    if (theta >= cordic_theta_t(1.5 * M_PI)) { //4th quadrant 1.5pi
+    if (theta >= (1.5 * M_PI)) { //4th quadrant 1.5pi
         quad = 4;
         theta = theta - (1.5 * M_PI);
-    } else if (theta >= cordic_theta_t(M_PI)) { //3rd quadrant pi
+    } else if (theta >= (M_PI)) { //3rd quadrant pi
         quad = 3;
         theta = theta - M_PI;
-    } else if (theta >= cordic_theta_t(0.5 * M_PI)) { //2nd quadrant 0.5pi
+    } else if (theta >= (0.5 * M_PI)) { //2nd quadrant 0.5pi
         quad = 2;
         theta = theta - (0.5 * M_PI);
     } else { //1st quadrant
         quad = 1;
     }
     return quad;
+}
+
+cordic_scalar_t cordic::sin(const cordic_theta_t &theta)
+{
+    cordic_complex_t sine;
+    cordic_complex_t cosine;
+    calculate(theta, sine, cosine);
+    return sine.real();
+}
+
+cordic_scalar_t cordic::cos(const cordic_theta_t &theta)
+{
+    cordic_complex_t sine;
+    cordic_complex_t cosine;
+    calculate(theta, sine, cosine);
+    return cosine.real();
 }
 
 void cordic::calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_complex_t &cosine)
@@ -134,8 +150,4 @@ void cordic::rotateToQuadrant(cordic_complex_t y[2], int quadrant)
     }
 } //swaps cosine and sines or changes signs if necessary.
 
-cordic::~cordic()
-{
-
-}
 
