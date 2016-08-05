@@ -44,6 +44,7 @@ public:
     int                 clock;
     fixedifftbase        *next;
 
+
     fixedifftstage(int Ninput);
     fixedifftstage();
     void init(int Ninput);
