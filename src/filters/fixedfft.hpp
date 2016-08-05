@@ -5,6 +5,7 @@
 #include <types/fixedcomplex.hpp>
 #include <queue>
 #include <cmath>
+#include <iomanip>
 #include <core/logger.hpp>
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
