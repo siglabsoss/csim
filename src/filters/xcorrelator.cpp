@@ -25,9 +25,16 @@ vector<FixedComplex<32> > XCorrelator::xCorrelate(vector<FixedComplex<32> > x, v
     for (int i = 0; i < p2.size(); i++) {
         p2[i].imag = -p2[i].imag;
     }//conj(FFT(Y)))
-
+    FixedComplex<64> debug;
     for (int i = 0; i < p1.size(); i++) {
+        debug = p1[i].to_64() * p2[i].to_64();
         p1[i] = p1[i] * p2[i];
+        if (debug.real > p1[i].to_64().real) {
+            cout << "OVERFLOW" << endl;
+        }
+        if (debug.imag > p1[i].to_64().imag) {
+            cout << "OVERFLOW" << endl;
+        }
     }//FFT(x) * conj(FFT(Y))
 
     p1 = ifft(p1);// IFFT(FFT(x) * conj(FFT(Y)))
@@ -37,7 +44,7 @@ vector<FixedComplex<32> > XCorrelator::xCorrelate(vector<FixedComplex<32> > x, v
 
 vector<FixedComplex<32> > XCorrelator::fft(vector<FixedComplex<32> > vals)
 {
-    fixedfft fft(m_n);
+    fixedfft fft(m_n, 2);
     vector<FixedComplex<32> > bitReversedAnswers;
     vector<FixedComplex<32> > answers;
     filter_io_t data;
