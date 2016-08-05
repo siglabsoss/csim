@@ -87,8 +87,8 @@ int main(int argc, char *argv[])
     assert(count == inputs);
 
 
-//     cout << "Hopefully correct:" << endl;
-//     FixedComplex<32> temp[32769];
+     cout << "Hopefully correct:" << endl;
+     FixedComplex<32> temp[32769];
 //    for (i = 0; i < inputs; i++) {
 //        temp[reverseBits(inputs, i)] = answers[i];
 //    }//Reformats data in correct order
