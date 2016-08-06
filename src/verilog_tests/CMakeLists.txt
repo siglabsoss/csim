@@ -14,9 +14,19 @@ target_link_libraries(HighResourceFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZERO
 add_executable(LowResourceFFT testfft.cpp)
 target_link_libraries(LowResourceFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils sigcore)
 
+########################### HighResourceIFFT ###########################
+add_executable(HighResourceIFFT testifft.cpp)
+target_link_libraries(IFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils sigcore)
+
+########################### LowResourceIFFT ###########################
+add_executable(LowResourceIFFT testifft.cpp)
+target_link_libraries(IFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils sigcore)
+
+
 ########################### IFFT ###########################
 add_executable(IFFT testifft.cpp)
 target_link_libraries(IFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils sigcore)
+
 
 ########################### ALU ###########################
 add_executable(ALU aluverifier.cpp)
