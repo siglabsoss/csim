@@ -177,9 +177,27 @@ struct filter_io_t
                 break;
            }
             case IO_TYPE_FIXED_COMPLEX_16_NEW:
-                break; //XXX TODO
+            {
+                double value = fcn.real().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+
+                value = fcn.imag().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
+            }
             case IO_TYPE_FIXED_COMPLEX_32_NEW:
-                break; //XXX TODO
+            {
+                double value = fcn32.real().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+
+                value = fcn32.imag().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
+            }
            case IO_TYPE_BYTE:
            {
                memcpy(data + numBytes, &byte, sizeof(byte));
