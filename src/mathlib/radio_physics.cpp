@@ -5,7 +5,8 @@
 
 int RadioPhysics::sampleDelayForDistance(double distance)
 {
-    double LIGHTSPEED, SAMPLERATE;
+    double LIGHTSPEED;
+    int64_t SAMPLERATE;
     param_get("PHY_LIGHTSPEED", LIGHTSPEED);
     param_get("RADIO_DIGITAL_SAMPLERATE", SAMPLERATE);
 
