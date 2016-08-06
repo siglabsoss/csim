@@ -5,16 +5,22 @@
 
 int RadioPhysics::sampleDelayForDistance(double distance)
 {
-    double METERS_PER_TICK;
-    param_get("RADIO_METERS_PER_TICK", METERS_PER_TICK);
-    return static_cast<uint32_t>(distance / METERS_PER_TICK);
+    double LIGHTSPEED, SAMPLERATE;
+    param_get("PHY_LIGHTSPEED", LIGHTSPEED);
+    param_get("RADIO_DIGITAL_SAMPLERATE", SAMPLERATE);
+
+    double meters_per_tick = LIGHTSPEED / SAMPLERATE;
+    return static_cast<uint32_t>(distance / meters_per_tick);
 }
 
 double RadioPhysics::phaseRotationForDistance(double distance)
 {
-    double WAVELENGTH;
-    param_get("RADIO_WAVELENGTH", WAVELENGTH);
-    double temp = distance / WAVELENGTH;
+    double LIGHTSPEED, FREQ;
+    param_get("PHY_LIGHTSPEED", LIGHTSPEED);
+    param_get("RADIO_CARRIER_FREQ", FREQ);
+
+    double wavelength = LIGHTSPEED / FREQ;
+    double temp = distance / wavelength;
     temp -= floor(temp);
     return temp * 2 * M_PI;
 }
@@ -42,8 +48,11 @@ double RadioPhysics::freeSpacePowerLoss(double distance)
     if (distance < DBL_EPSILON) {
         return 1.0f;
     }
-    double WAVELENGTH;
-    param_get("RADIO_WAVELENGTH", WAVELENGTH);
-    double loss = (1.0 / pow(4 * M_PI * distance / WAVELENGTH, 2));
+    double LIGHTSPEED, FREQ;
+    param_get("PHY_LIGHTSPEED", LIGHTSPEED);
+    param_get("RADIO_CARRIER_FREQ", FREQ);
+
+    double wavelength = LIGHTSPEED / FREQ;
+    double loss = (1.0 / pow(4 * M_PI * distance / wavelength, 2));
     return bound(0.0, 1.0, loss);
 }

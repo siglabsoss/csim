@@ -17,7 +17,7 @@ struct param_value_t
 
     type_t type;
     union {
-        int i;
+        int64_t i;
         double f;
     } val;
 };
@@ -27,10 +27,10 @@ class Parameters
 public:
     static Parameters *get();
 
-    void get(const std::string &handle, int &value) const;
+    void get(const std::string &handle, int64_t &value) const;
     void get(const std::string &handle, double &value) const;
 
-    void set(const std::string &handle, int value);
+    void set(const std::string &handle, int64_t value);
     void set(const std::string &handle, double value);
 
 private:

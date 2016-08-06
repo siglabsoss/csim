@@ -5,8 +5,11 @@
 #include <mathlib/radio_physics.hpp>
 #include <core/parameters.hpp>
 
-PARAM_DEFINE(RADIO_WAVELENGTH, 0.32786885245901637);
-PARAM_DEFINE(RADIO_METERS_PER_TICK, 1.19916983);
+//parameters used by the system under test. defined here so that changes to the app
+//parameters doesn't unnecessarily break the test
+PARAM_DEFINE(RADIO_CARRIER_FREQ, 9.15e8);
+PARAM_DEFINE(PHY_LIGHTSPEED, 3.0e8);
+PARAM_DEFINE(RADIO_DIGITAL_SAMPLERATE, 2.5e8);
 
 CSIM_TEST_SUITE_BEGIN(RadioPhysicsSuite)
 
@@ -16,7 +19,7 @@ CSIM_TEST_CASE(SAMPLE_DELAY_CALCULATION)
 
     expectedResults.push_back(std::pair<double, int>(10.0,                  static_cast<int>(8.339102394)));
     expectedResults.push_back(std::pair<double, int>(0.0,                   static_cast<int>(0.0)));
-    expectedResults.push_back(std::pair<double, int>(1564798653.13352694,   static_cast<int>(1304901619.425771361)));
+    expectedResults.push_back(std::pair<double, int>(1564798653.13352694,   static_cast<int>(1303998877.61)));
 
     for (auto it = expectedResults.begin(); it != expectedResults.end(); it++) {
         BOOST_CHECK_EQUAL(RadioPhysics::sampleDelayForDistance((*it).first), (*it).second);

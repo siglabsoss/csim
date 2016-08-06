@@ -23,7 +23,7 @@ struct filter_io_t
     FixedComplex<16> fc;
     FixedComplex<32> fc32;
     FixedComplex2<16, 1> fcn;
-    FixedComplex2<32, 1> fcn32;
+    FixedComplex2<32, 2> fcn32;
     union {
         std::complex<double> rf;
         uint8_t byte;
@@ -122,7 +122,7 @@ struct filter_io_t
         return *this;
     }
 
-    filter_io_t & operator=(const FixedComplex2<32, 1> &rhs)
+    filter_io_t & operator=(const FixedComplex2<32, 2> &rhs)
     {
         this->type = IO_TYPE_FIXED_COMPLEX_32_NEW;
         this->fcn32 = rhs;

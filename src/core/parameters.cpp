@@ -61,7 +61,7 @@ void Parameters::get(const std::string &handle, double &value) const
     value = param.val.f;
 }
 
-void Parameters::get(const std::string &handle, int &value) const
+void Parameters::get(const std::string &handle, int64_t &value) const
 {
     param_value_t param;
     get(handle, param);
@@ -75,7 +75,7 @@ void Parameters::set(const std::string &handle, const param_value_t &param)
     m_params[paramName] = param;
 }
 
-void Parameters::set(const std::string &handle, int value)
+void Parameters::set(const std::string &handle, int64_t value)
 {
     param_value_t param(param_value_t::PARAM_TYPE_INT, &value);
     set(handle, param);

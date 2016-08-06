@@ -36,15 +36,15 @@ int cordic::rotateToFirstQuadrant(cordic_theta_t &theta)
         theta = theta - (2 * M_PI);
     }
 
-    if (theta >= (1.5 * M_PI)) { //4th quadrant 1.5pi
+    if (theta >= (M_PI_2 + M_PI)) { //4th quadrant 1.5pi
         quad = 4;
-        theta = theta - (1.5 * M_PI);
+        theta = theta - (M_PI_2 + M_PI);
     } else if (theta >= (M_PI)) { //3rd quadrant pi
         quad = 3;
         theta = theta - M_PI;
-    } else if (theta >= (0.5 * M_PI)) { //2nd quadrant 0.5pi
+    } else if (theta >= M_PI_2) { //2nd quadrant 0.5pi
         quad = 2;
-        theta = theta - (0.5 * M_PI);
+        theta = theta - M_PI_2;
     } else { //1st quadrant
         quad = 1;
     }
