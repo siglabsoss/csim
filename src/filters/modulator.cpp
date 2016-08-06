@@ -5,6 +5,7 @@
 #include <cassert>
 
 Modulator::Modulator(mod_scheme_t scheme = MOD_SCHEME_BPSK) :
+    FilterChainElement("Modulator"),
     m_constellations(),
     m_bitsPerSymbol(0),
     m_inputBuffer(),
