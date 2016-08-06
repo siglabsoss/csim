@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
 
 
-    fixedfft fft(points, 368641 ); //x point fft, y table size
+    fixedfft fft(points, 200000 ); //x point fft, y table size
 
 
 
@@ -85,10 +85,9 @@ int main(int argc, char *argv[])
     cout << "Count is: " << count << endl << endl;
 
     assert(count == inputs);
-
-
-     cout << "Hopefully correct:" << endl;
-     FixedComplex<32> temp[32769];
+//
+//     cout << "Hopefully correct:" << endl;
+//     FixedComplex<32> temp[32769];
 //    for (i = 0; i < inputs; i++) {
 //        temp[reverseBits(inputs, i)] = answers[i];
 //    }//Reformats data in correct order

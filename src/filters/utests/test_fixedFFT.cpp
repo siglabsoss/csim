@@ -20,8 +20,8 @@ CSIM_TEST_SUITE_BEGIN(FixedFFT)
 
 CSIM_TEST_CASE(FFT_OCTAVE)
 {
-    string infile("../csim/data/fft/input/data_file_complex1.csv");
-       string answersfile("../csim/data/fft/answers/answers1.csv");
+    string infile("./data/fft/input/data_file_complex1.csv");
+       string answersfile("./data/fft/answers/answers1.csv");
 
        int i = 0;
        int realInput[32769] = {0}; // default values
@@ -76,7 +76,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
        int points = inputs;
        filter_io_t data;
        data.type =  IO_TYPE_FIXED_COMPLEX_32;
-       fixedfft fft(points, 368641 ); //x point fft, y table size
+       fixedfft fft(points, 5000000 ); //x point fft, y table size
 
        for (int i = 0; i < 2; i++) {
            for (int j = 0; j < points; j++) {
@@ -101,9 +101,9 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 
         for (i = 0; i < inputs; i++) {
-            BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 10 ,
+            BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .05 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 10 ,
                     "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << "Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 10,
+            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .05 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 10,
                     "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << "Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
         }
@@ -114,10 +114,10 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 CSIM_TEST_CASE(FFT_TWO_INPUTS)
 {
-    string infile("../csim/data/fft/input/data_file_complex2.csv");
-    string infile2("../csim/data/fft/input/data_file_complex3.csv");
-    string answersfile("../csim/data/fft/answers/answers2.csv");
-    string answersfile2("../csim/data/fft/answers/answers3.csv");
+    string infile("./data/fft/input/data_file_complex2.csv");
+    string infile2("./data/fft/input/data_file_complex3.csv");
+    string answersfile("./data/fft/answers/answers2.csv");
+    string answersfile2("./data/fft/answers/answers3.csv");
 
     int i = 0;
     int realInput[32769] = {0}; // default values
@@ -176,7 +176,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     int points = inputs;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
-    fixedfft fft(points, 737280 ); //x point fft, y table size
+    fixedfft fft(points, 30000 ); //x point fft, y table size
 
     for (int i = 0; i < 1; i++) {
         for (int j = 0; j < points; j++) {
@@ -225,9 +225,9 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 
 
     for (i = 0; i < inputs; i++) {
-        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 10 ,
+        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .02 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 10 ,
                 "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 10,
+        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .02 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 10,
                 "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
         }

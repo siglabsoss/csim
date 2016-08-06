@@ -47,6 +47,7 @@ public:
     fixedfftbase        *next;
     int theta;
     int tableSize;
+    int* mainTablePointer;
     fixedfftstage(int Ninput);
     fixedfftstage();
     void init(int Ninput);
@@ -56,6 +57,7 @@ public:
     void butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
             FixedComplex<32> y);
     FixedComplex<32> twiddler(int k);
+
 
 };
 class fixedfftprint: public fixedfftbase
@@ -92,6 +94,7 @@ public:
     void tick() override;
     int N;
     int stagecount;
+    int* mainTable;
     fixedfftstage *stages;
     fixedfftprint printer;
     fixedfft(int Ninput, int tableSize);
