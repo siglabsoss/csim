@@ -67,7 +67,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 		strValue2 >> intValue;
 		trueAnswers[numAnswers++].imag = intValue;
 
-	}//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+	}//Reads in answers from file. Parsing by commas. Format is: real,imag\n
 
 
 	FixedComplex<32> answers[32769];//Array to store answers
@@ -86,9 +86,9 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 			bool test = fft.output(data);
 			if (test) {
 				answers[count++] = data.fc32;
-			}
-		}
-	}
+			}//If output is ready
+		}//Insert all input
+	}//Insert input again to get output
 
 
 	assert(count == inputs);
@@ -148,8 +148,9 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         imagInput[inputs++] = intValue;
 
     }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+
     int numAnswers = 0;
-    FixedComplex<32> trueAnswers[32768];
+    FixedComplex<32> trueAnswers[32768]; //Array to hold answers from answers file
     while(getline(ans,line)) {
 
         istringstream ss(line);
@@ -165,10 +166,10 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         strValue2 >> intValue;
         trueAnswers[numAnswers++].imag = intValue;
 
-    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+    }//Reads in inputs from answers file. Parsing by commas. Format is: real,imag\n
 
 
-    FixedComplex<32> answers[32769];//Array to store answers
+    FixedComplex<32> output[32769];//Array to store answers
     int count = 0; //How many outputs have been collected
 
     int points = inputs;
@@ -176,17 +177,17 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
     fixedfft fft(points ); //x point fft, y table size
 
-    for (int i = 0; i < 1; i++) {
-        for (int j = 0; j < points; j++) {
 
-            data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
-            fft.input(data);
-            bool test = fft.output(data);
-            if (test) {
-               answers[count++] = data.fc32;
-            }
-        }
-    }
+	for (int j = 0; j < points; j++) {
+
+		data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
+		fft.input(data);
+		bool test = fft.output(data);
+		if (test) {
+		   output[count++] = data.fc32;
+		}//If output is ready
+	}//Insert first set of data
+
     inputs = 0;
 
 
@@ -212,13 +213,13 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         fft.input(data);
         bool test = fft.output(data);
         if (test) {
-           answers[count++] = data.fc32;
+        	output[count++] = data.fc32;
         }
-    }
+    }//second set of data, gets first set of answers out
 
     FixedComplex<32> temp[32769];
     for (i = 0; i < inputs; i++) {
-        temp[reverseBits(inputs, i)] = answers[i];
+        temp[reverseBits(inputs, i)] = output[i];
     }//Reformats data in correct order
 
 
@@ -228,9 +229,27 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .02 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 1,
                 "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
-        }
+        }//Ensures output and answers are reasonably close for first set of data
 
     numAnswers = 0;
+
+    count = 0; //How many outputs have been collected
+    data.type =  IO_TYPE_FIXED_COMPLEX_32;
+
+    for (int j = 0; j < points; j++) {
+
+		data.fc32 = FixedComplex<32>(0,0);
+		fft.input(data);
+		bool test = fft.output(data);
+		if (test) {
+			output[count++] = data.fc32;
+		}// if output is ready
+	}//Get 2nd set of data out
+
+
+    for (i = 0; i < inputs; i++) {
+        temp[reverseBits(inputs, i)] = output[i];
+    }//Reformats data in correct order
 
     while(getline(ans2,line)) {
 
@@ -247,29 +266,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         strValue2 >> intValue;
         trueAnswers[numAnswers++].imag = intValue;
 
-    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-
-    count = 0; //How many outputs have been collected
-    data.type =  IO_TYPE_FIXED_COMPLEX_32;
-
-
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < points; j++) {
-
-            data.fc32 = FixedComplex<32>(0,0);
-            fft.input(data);
-            bool test = fft.output(data);
-            if (test) {
-                answers[count++] = data.fc32;
-            }
-        }
-    }
-
-
-
-    for (i = 0; i < inputs; i++) {
-        temp[reverseBits(inputs, i)] = answers[i];
-    }//Reformats data in correct order
+    }//Reads in answers from file. Parsing by commas. Format is: real,imag\n
 
 
     for (i = 0; i < inputs; i++) {
