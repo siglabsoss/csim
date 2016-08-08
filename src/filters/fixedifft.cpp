@@ -3,7 +3,7 @@
 using namespace std;
 #include <filters/fixedifft.hpp>
 
-const float pi = 3.1415926535897932384626433832795;
+const long double pi = 3.141592653589793238L;
 
 
 bool fixedifftbase::input(const filter_io_t &data)
@@ -280,9 +280,9 @@ fixedifft::fixedifft(int Ninput, int tableSize) :
     N = Ninput;
     stagecount = log2(N);
     int stagesize = 0;
-    mainTable = new int[tableSize];
+    mainTable = new int[tableSize + 1]; //in case tableSize is a multiple of 180
 	for (int i = 0; i < tableSize; i++) {
-		mainTable[i] = round(sin(((pi/tableSize) * i)/2) * 32768);
+		mainTable[i] = round(sin(((pi/tableSize + 1) * i)/2) * 32768);
 
 	}
 
