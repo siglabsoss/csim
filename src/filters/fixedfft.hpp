@@ -97,7 +97,7 @@ public:
     int* mainTable;
     fixedfftstage *stages;
     fixedfftprint printer;
-    fixedfft(int Ninput, int tableSize);
+    fixedfft(int Ninput, int tableSize = 0);
     void inputandtick(FixedComplex<32> x);
 };
 

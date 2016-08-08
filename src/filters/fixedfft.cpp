@@ -300,6 +300,14 @@ void fixedfftbuffer::inputandtick(FixedComplex<32> x)
 fixedfft::fixedfft(int Ninput, int tableSize) :
         printer(Ninput)
 {
+	if (tableSize == 0) {
+		if (Ninput < 32) {
+			tableSize = 180 * 32;
+		}
+		else {
+			tableSize = 180 * Ninput >> 4;
+		}
+	}
 	int errors = 0;
     m_count = 0;
     N = Ninput;
@@ -308,7 +316,11 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
     mainTable = new int[tableSize + 1];// + 1 in case tableSize is a multiple of 180
 	for (int i = 0; i < tableSize + 1; i++) {
 		mainTable[i] = round(sin(((pi/tableSize) * i)/2) * 32768); //Get values of main table.
+//		if (mainTable[i] != globalLookupTable[i]) {
+//			cout << mainTable[i] << " " << globalLookupTable[i] << endl;
+//		}
 	}
+
 
 	stages = new fixedfftstage[stagecount];
     int i;
@@ -321,7 +333,6 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
             stages[i - 1].next = &stages[i];
         }
     }
-
     stages[stagecount - 1].next = &printer;
 }
 
