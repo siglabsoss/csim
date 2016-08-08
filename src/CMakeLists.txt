@@ -69,4 +69,4 @@ add_subdirectory(utils)
 add_subdirectory(test)
 add_subdirectory(verilog_tests)
 add_subdirectory(systemc)
-
+add_subdirectory(3rd)
