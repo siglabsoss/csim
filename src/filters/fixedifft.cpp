@@ -41,7 +41,7 @@ bool fixedifft::input(const filter_io_t &data)
 bool fixedifft::output(filter_io_t &data)
 {
     if (m_count > (2*N) - 1) {
-        m_count = m_count - (2*N); //Full cycle of outputs complete
+        m_count = m_count - (N + 1); //Full cycle of outputs complete
     }
 
     if (m_count >= N) {
