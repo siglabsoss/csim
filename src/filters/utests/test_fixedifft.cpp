@@ -100,7 +100,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 	}//Reformats data in correct order
 
 
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < inputs; i++) {
 		BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 3 ,
 		"I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
 		BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 3,
@@ -254,17 +254,17 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
     count = 0; //How many outputs have been collected
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
 
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < points; j++) {
 
-            data.fc32 = FixedComplex<32>(0,0);
-            ifft.input(data);
-            bool test = ifft.output(data);
-            if (test) {
-                answers[count++] = data.fc32;
-            }
-        }
-    }
+	for (int j = 0; j < points; j++) {
+
+		data.fc32 = FixedComplex<32>(0,0);
+		ifft.input(data);
+		bool test = ifft.output(data);
+		if (test) {
+			answers[count++] = data.fc32;
+		}
+	}
+
 
     for (i = 0; i < inputs; i++) {
         temp[reverseBits(inputs, i)] = answers[i];
