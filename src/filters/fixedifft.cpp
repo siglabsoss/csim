@@ -6,6 +6,7 @@ using namespace std;
 const long double pi = 3.141592653589793238L;
 
 
+
 bool fixedifftbase::input(const filter_io_t &data)
 {
 
@@ -132,8 +133,8 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
 	}
 
 	if (k > (N/4)) {
-		W_cos = -a[(-N/4) + k ];
-		W_sin = a[(N/2) - k];
+		W_cos = -b[(-N/4) + k ];
+		W_sin = b[(N/2) - k];
 	}
 	else {
 		if (N == 2) {
@@ -141,8 +142,8 @@ FixedComplex<32> fixedifftstage::twiddler(int k)
 			W_sin = 0;
 		}
 		else {
-			W_cos = a[(N/4) - k];
-			W_sin = a[k];
+			W_cos = b[(N/4) - k];
+			W_sin = b[k];
 		}
 	}
 
@@ -275,15 +276,22 @@ void fixedifftbuffer::inputandtick(FixedComplex<32> x)
 fixedifft::fixedifft(int Ninput, int tableSize) :
         printer(Ninput)
 {
+	if (tableSize == 0) {
+		if (Ninput < 32) {
+			tableSize = 180 * 32;
+		}
+		else {
+			tableSize = 180 * Ninput >> 4;
+		}
+	}
 
     m_count = 0;
     N = Ninput;
     stagecount = log2(N);
     int stagesize = 0;
     mainTable = new int[tableSize + 1]; //in case tableSize is a multiple of 180
-	for (int i = 0; i < tableSize; i++) {
-		mainTable[i] = round(sin(((pi/tableSize + 1) * i)/2) * 32768);
-
+	for (int i = 0; i < tableSize + 1; i++) {
+		mainTable[i] = round(sin(((pi/tableSize) * i)/2) * 32768); //Get values of main table.
 	}
 
     stages = new fixedifftstage[stagecount];

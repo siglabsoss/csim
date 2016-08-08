@@ -21,10 +21,8 @@ CSIM_TEST_SUITE_BEGIN(FixedIFFT)
 
 CSIM_TEST_CASE(IFFT_OCTAVE)
 {
-
-
-	string infile("./data/ifft/input/data_file_complex2.csv");
-	string answersfile("./data/ifft/answers/answers2.csv");
+	string infile("./data/ifft/input/data_file_complex1.csv");
+	string answersfile("./data/ifft/answers/answers1.csv");
 
 	int i = 0;
 	int realInput[32769] = {0}; // default values
@@ -80,7 +78,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 	int points = inputs;
 	filter_io_t data;
 	data.type =  IO_TYPE_FIXED_COMPLEX_32;
-	fixedifft ifft(points, 2000000); //8 point fft
+	fixedifft ifft(points); //8 point fft
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
@@ -102,7 +100,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 	}//Reformats data in correct order
 
 
-	for (i = 0; i < inputs; i++) {
+	for (i = 0; i < 10; i++) {
 		BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 3 ,
 		"I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
 		BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 3,
@@ -178,7 +176,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
     int points = inputs;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
-    fixedifft ifft(points, 100000); //8 point fft
+    fixedifft ifft(points); //8 point fft
 
     for (int i = 0; i < 1; i++) {
         for (int j = 0; j < points; j++) {
@@ -313,7 +311,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 	int points = inputs;
 	filter_io_t data;
 	data.type =  IO_TYPE_FIXED_COMPLEX_32;
-	fixedfft fft(points, 1000000);
+	fixedfft fft(points);
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
@@ -336,7 +334,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 	points = inputs;
 
 	data.type =  IO_TYPE_FIXED_COMPLEX_32;
-	fixedifft ifft(points,1000000);
+	fixedifft ifft(points);
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
