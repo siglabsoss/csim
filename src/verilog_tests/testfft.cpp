@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
 
 
-    fixedfft fft(points, 368640); //x point fft, y table size
+    fixedfft fft(points, 46080); //x point fft, y table size
 
 
 
