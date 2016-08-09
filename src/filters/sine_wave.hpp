@@ -36,7 +36,7 @@ public:
         m_output.rf = std::complex<double>(10.0 * cos(theta), 10.0 * sin(theta));
         m_count++;
         if (m_count > m_ticksPerPeriod) {
-            m_count = 0;
+            m_count -= m_ticksPerPeriod;
         }
     }
 private:
