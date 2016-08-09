@@ -43,7 +43,8 @@ public:
     int                 write_pointer;
     int                 clock;
     fixedifftbase        *next;
-
+    int* mainTablePointer;
+    int tableSize;
     fixedifftstage(int Ninput);
     fixedifftstage();
     void init(int Ninput);
@@ -88,10 +89,12 @@ public:
 
     void tick() override;
     int N;
+    int tableSize;
     int stagecount;
+    int* mainTable;
     fixedifftstage *stages;
     fixedifftprint printer;
-    fixedifft(int Ninput);
+    fixedifft(int Ninput, int tableSize = 0);
     void inputandtick(FixedComplex<32> x);
 };
 

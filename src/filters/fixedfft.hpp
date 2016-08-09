@@ -4,6 +4,8 @@
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
 #include <queue>
+#include <cmath>
+#include <iomanip>
 #include <core/logger.hpp>
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
@@ -44,7 +46,8 @@ public:
     int                 clock;
     fixedfftbase        *next;
     int theta;
-
+    int tableSize;
+    int* mainTablePointer;
     fixedfftstage(int Ninput);
     fixedfftstage();
     void init(int Ninput);
@@ -54,6 +57,7 @@ public:
     void butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
             FixedComplex<32> y);
     FixedComplex<32> twiddler(int k);
+
 
 };
 class fixedfftprint: public fixedfftbase
@@ -90,9 +94,10 @@ public:
     void tick() override;
     int N;
     int stagecount;
+    int* mainTable;
     fixedfftstage *stages;
     fixedfftprint printer;
-    fixedfft(int Ninput);
+    fixedfft(int Ninput, int tableSize = 0);
     void inputandtick(FixedComplex<32> x);
 };
 

@@ -53,7 +53,6 @@ add_definitions(-DSC_INCLUDE_DYNAMIC_PROCESSES)
 
 include_directories(
 	${Boost_INCLUDE_DIRS}
-	${CMAKE_SOURCE_DIR}/../3rd
 	${C_SIM_SOURCE_ROOT}
 )
 

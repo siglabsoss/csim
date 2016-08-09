@@ -10,7 +10,7 @@
 #include <complex>
 #include <iostream>
 
-#include <json/json.h>
+#include <3rd/json/json.h>
 #include <types/fixedcomplex.hpp>
 
 #ifndef PLOTTER_H_

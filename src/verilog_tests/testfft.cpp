@@ -64,7 +64,12 @@ int main(int argc, char *argv[])
     cout << inputs << endl;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
-    fixedfft fft(points); //8 point fft
+
+
+    fixedfft fft(points, 46080); //x point fft, y table size
+
+
+
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
@@ -80,8 +85,7 @@ int main(int argc, char *argv[])
     cout << "Count is: " << count << endl << endl;
 
     assert(count == inputs);
-
-
+//
 //     cout << "Hopefully correct:" << endl;
 //     FixedComplex<32> temp[32769];
 //    for (i = 0; i < inputs; i++) {
@@ -95,7 +99,7 @@ int main(int argc, char *argv[])
 //     }//Prints data out in correct order
 
 
-     string outfile3("../csim/data/fft/output/out1BitReversed.txt");
+     string outfile3("../data/fft/output/out1BitReversed.txt");
      ofstream out3(outfile3.c_str());
      for (i = 0; i < count; i++) {
               out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
