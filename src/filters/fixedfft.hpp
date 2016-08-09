@@ -10,8 +10,6 @@
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
 
-typedef FixedComplex32 fft_complex_t;
-
 enum FFFT_STATE
 {
     FFFT_STATE_INITIAL, FFFT_STATE_READ, FFFT_STATE_OUTPUT
@@ -30,10 +28,10 @@ public:
     bool output(filter_io_t &data) override;
 
     void tick() override;
-    virtual void inputandtick(fft_complex_t x) = 0;
+    virtual void inputandtick(FixedComplex32 x) = 0;
     virtual ~fixedfftbase();
     int ready;
-    queue<fft_complex_t >   m_output;
+    queue<FixedComplex32 >   m_output;
 
 };
 
@@ -41,7 +39,7 @@ class fixedfftstage: public fixedfftbase
 {
 public:
     int                  N;
-    fft_complex_t    *memory;
+    FixedComplex32    *memory;
     FFFT_STATE          state;
     int                 read_pointer;
     int                 write_pointer;
@@ -54,11 +52,11 @@ public:
     fixedfftstage();
     void init(int Ninput);
     void dump(void);
-    void inputandtick(fft_complex_t x);
-    void output(fft_complex_t x);
-    void butterfly(fft_complex_t array[2], fft_complex_t x,
-            fft_complex_t y);
-    fft_complex_t twiddler(int k);
+    void inputandtick(FixedComplex32 x);
+    void output(FixedComplex32 x);
+    void butterfly(FixedComplex32 array[2], FixedComplex32 x,
+            FixedComplex32 y);
+    FixedComplex32 twiddler(int k);
 
 
 };
@@ -68,7 +66,7 @@ public:
     int N;
     int count;
     fixedfftprint(int Ninput);
-    void inputandtick(fft_complex_t x);
+    void inputandtick(FixedComplex32 x);
 };
 
 // saves all output forever
@@ -77,9 +75,9 @@ class fixedfftbuffer: public fixedfftbase
 public:
     int N;
     int count;
-    std::vector<fft_complex_t > buf;
+    std::vector<FixedComplex32 > buf;
     fixedfftbuffer(int Ninput);
-    void inputandtick(fft_complex_t x);
+    void inputandtick(FixedComplex32 x);
 };
 
 class fixedfft: public fixedfftbase
@@ -101,7 +99,7 @@ public:
     fixedfftstage *stages;
     fixedfftprint printer;
     fixedfft(int Ninput, int tableSize = 0);
-    void inputandtick(fft_complex_t x);
+    void inputandtick(FixedComplex32 x);
 };
 
 #endif

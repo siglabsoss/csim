@@ -26,10 +26,10 @@ public:
     bool output(filter_io_t &data) override;
 
     void tick() override;
-    virtual void inputandtick(FixedComplex<32> x) = 0;
+    virtual void inputandtick(FixedComplex32 x) = 0;
     virtual ~fixedifftbase();
     int ready;
-    queue<FixedComplex<32> >   m_output;
+    queue<FixedComplex32 >   m_output;
 
 };
 
@@ -37,7 +37,7 @@ class fixedifftstage: public fixedifftbase
 {
 public:
     int                  N;
-    FixedComplex<32>    *memory;
+    FixedComplex32    *memory;
     Fifft_STATE          state;
     int                 read_pointer;
     int                 write_pointer;
@@ -49,11 +49,11 @@ public:
     fixedifftstage();
     void init(int Ninput);
     void dump(void);
-    void inputandtick(FixedComplex<32> x);
-    void output(FixedComplex<32> x);
-    void butterfly(FixedComplex<32> array[2], FixedComplex<32> x,
-            FixedComplex<32> y);
-    FixedComplex<32> twiddler(int k);
+    void inputandtick(FixedComplex32 x);
+    void output(FixedComplex32 x);
+    void butterfly(FixedComplex32 array[2], FixedComplex32 x,
+            FixedComplex32 y);
+    FixedComplex32 twiddler(int k);
 
 };
 class fixedifftprint: public fixedifftbase
@@ -62,7 +62,7 @@ public:
     int N;
     int count;
     fixedifftprint(int Ninput);
-    void inputandtick(FixedComplex<32> x);
+    void inputandtick(FixedComplex32 x);
 };
 
 // saves all output forever
@@ -71,9 +71,9 @@ class fixedifftbuffer: public fixedifftbase
 public:
     int N;
     int count;
-    std::vector<FixedComplex<32> > buf;
+    std::vector<FixedComplex32 > buf;
     fixedifftbuffer(int Ninput);
-    void inputandtick(FixedComplex<32> x);
+    void inputandtick(FixedComplex32 x);
 };
 
 class fixedifft: public fixedifftbase
@@ -95,7 +95,7 @@ public:
     fixedifftstage *stages;
     fixedifftprint printer;
     fixedifft(int Ninput, int tableSize = 0);
-    void inputandtick(FixedComplex<32> x);
+    void inputandtick(FixedComplex32 x);
 };
 
 #endif

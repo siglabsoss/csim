@@ -51,7 +51,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 	}//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 	int numAnswers = 0;
-	std::vector<fft_complex_t> trueAnswers(32768);
+	std::vector<FixedComplex32> trueAnswers(32768);
 	while(getline(ans,line)) {
 
 		istringstream ss(line);
@@ -70,7 +70,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 	}//Reads in answers from file. Parsing by commas. Format is: real,imag\n
 
 
-	std::vector<fft_complex_t> answers(32769);
+	std::vector<FixedComplex32> answers(32769);
 	int count = 0; //How many outputs have been collected
 
 	int points = inputs;
@@ -80,7 +80,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
 
-			data = fft_complex_t(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
+			data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
 			fft.input(data);
 			bool test = fft.output(data);
 			if (test) {
@@ -93,7 +93,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 	assert(count == inputs);
 	// If you want bits to be reversed
 
-	std::vector<fft_complex_t> temp(32769);
+	std::vector<FixedComplex32> temp(32769);
 	for (i = 0; i < inputs; i++) {
 		temp[reverseBits(inputs, i)] = answers[i];
 	}//Reformats data in correct order
@@ -153,7 +153,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 
     int numAnswers = 0;
-    std::vector<fft_complex_t> trueAnswers(32768); //array to hold answers from file
+    std::vector<FixedComplex32> trueAnswers(32768); //array to hold answers from file
     while(getline(ans,line)) {
 
         istringstream ss(line);
@@ -172,7 +172,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     }//Reads in inputs from answers file. Parsing by commas. Format is: real,imag\n
 
 
-    std::vector<fft_complex_t> output(32769); //Array to store answers
+    std::vector<FixedComplex32> output(32769); //Array to store answers
     int count = 0; //How many outputs have been collected
 
     int points = inputs;
@@ -182,7 +182,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 
 	for (int j = 0; j < points; j++) {
 
-		data = fft_complex_t(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
+		data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
@@ -211,7 +211,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 
     for (int j = 0; j < points; j++) {
 
-        data = fft_complex_t(realInput[j] / 32768.0, imagInput[j] / 32768.0);
+        data = FixedComplex32(realInput[j] / 32768.0, imagInput[j] / 32768.0);
         fft.input(data);
         bool test = fft.output(data);
         if (test) {
@@ -219,7 +219,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         }
     }//second set of data, gets first set of answers out
 
-    std::vector<fft_complex_t> temp(32769);
+    std::vector<FixedComplex32> temp(32769);
     for (i = 0; i < inputs; i++) {
         temp[reverseBits(inputs, i)] = output[i];
     }//Reformats data in correct order
@@ -242,7 +242,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     count = 0; //How many outputs have been collected
     for (int j = 0; j < points; j++) {
 
-		data = fft_complex_t(0,0);
+		data = FixedComplex32(0,0);
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
@@ -294,7 +294,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //       string answersfile("../csim/data/fft/output/answers32768BitReversed.csv");
 //
 //       int i = 0;
-//       fft_complex_t bitReversedInput[32768];
+//       FixedComplex32 bitReversedInput[32768];
 //       ifstream in(infile.c_str());
 //       BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
 //       ifstream ans(answersfile.c_str());
@@ -319,7 +319,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //       }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 //
 //       int numAnswers = 0;
-//       fft_complex_t trueAnswers[32768];
+//       FixedComplex32 trueAnswers[32768];
 //       while(getline(ans,line)) {
 //
 //         istringstream ss(line);
@@ -338,13 +338,13 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //     }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 //
 ////
-////        fft_complex_t temp[32769];
+////        FixedComplex32 temp[32769];
 ////        for (i = 0; i < inputs; i++) {
 ////            temp[i] = bitReversedOutput[reverseBits(inputs, i)];
 ////        }//Reformats data in correct order
 //
 //
-////       fft_complex_t temp[32769];
+////       FixedComplex32 temp[32769];
 ////       for (i = 0; i < inputs; i++) {
 ////           temp[i] = bitReversedOutput[i];
 ////       }
