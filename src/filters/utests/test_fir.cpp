@@ -195,6 +195,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
       //          << realAnswers[k] << endl;
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
+    cout << "DONE WITH FIR" << endl;
 }
 
 CSIM_TEST_SUITE_END()

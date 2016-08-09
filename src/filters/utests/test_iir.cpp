@@ -156,6 +156,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 //        cout << output[k].real / 32768.00 << " is the same as "
 //                << realAnswers[k] << endl;
     }
+    cout << "DONE WITH IIR" << endl;
 
 }
 

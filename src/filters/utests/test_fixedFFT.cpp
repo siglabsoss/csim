@@ -20,6 +20,7 @@ CSIM_TEST_SUITE_BEGIN(FixedFFT)
 
 CSIM_TEST_CASE(FFT_OCTAVE)
 {
+	cout << "STARTING FFT" << endl;
 	string infile("./data/fft/input/data_file_complex1.csv");
 	string answersfile("./data/fft/answers/answers1.csv");
 
@@ -51,6 +52,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 	}//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 	int numAnswers = 0;
+
 	FixedComplex<32> trueAnswers[32768];
 	while(getline(ans,line)) {
 
@@ -76,7 +78,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 	int points = inputs;
 	filter_io_t data;
 	data.type =  IO_TYPE_FIXED_COMPLEX_32;
-	fixedfft fft(points,2949120 ); //x point fft, y table size
+	fixedfft fft(points); //x point fft, y table size
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
@@ -92,7 +94,6 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 
 	assert(count == inputs);
-	// If you want bits to be reversed
 
 	FixedComplex<32> temp[32769];
 	for (i = 0; i < inputs; i++) {
@@ -276,6 +277,8 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
            "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
     }
+
+    cout << "DONE WITH FFT" << endl;
 }//Checks for two consecutive sets of inputs in the same FFT.
 
 //
