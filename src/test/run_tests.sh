@@ -11,7 +11,7 @@ CSIM_UTEST_BUILD=$CSIM_SRC/../build_utest #define the build tree to be a sibling
 #number of command line arguments could be exhausted although xargs supposedly handles
 #that
 
-if [ $# -eq 1]; then
+if [ $# -eq 0 ]; then
     TEST_FILTER=utests/.*cpp
 else
     TEST_FILTER=$1
