@@ -14,7 +14,7 @@ public:
         FilterChainElement(std::string("Mixer")),
         m_fs(fs),
         m_count(0),
-        m_ticksPerPeriod(fs/hz)
+        m_ticksPerPeriod((int32_t)fs/hz)
     {
         m_output.type = IO_TYPE_COMPLEX_DOUBLE;
     }
