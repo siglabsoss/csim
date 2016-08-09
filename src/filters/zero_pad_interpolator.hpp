@@ -23,6 +23,6 @@ public:
 private:
     std::vector < FixedComplex32 > m_inputBuffer;
     std::vector < FixedComplex32 > m_outputBuffer;
-    bool                                         m_shouldOutput;
-    size_t                                       m_outputIdx;
+    bool                           m_shouldOutput;
+    size_t                         m_outputIdx;
 };
