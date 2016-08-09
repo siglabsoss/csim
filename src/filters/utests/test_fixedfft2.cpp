@@ -102,9 +102,9 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 
 	for (i = 0; i < inputs; i++) {
-		BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .20 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 5000 ,
+		BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .05 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 1000 ,
 		"I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << "Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-		BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .20 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 5000,
+		BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .05 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 1000,
 		"I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
 
 	}
