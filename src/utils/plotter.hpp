@@ -4,7 +4,7 @@
  *  Created on: Jun 23, 2016
  *      Author: ubuntu
  */
-#include <zmq.hpp>
+#include <3rd/zmq.hpp>
 #include <string>
 #include <vector>
 #include <complex>
