@@ -6,8 +6,6 @@
 
 #include <cstdint>
 
-typedef FixedComplex2<16, 1> FixedComplex16;
-typedef FixedComplex2<32, 2> FixedComplex32;
 
 enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,

@@ -10,12 +10,14 @@
 
 
 #include <complex>
-
-#define SC_INCLUDE_FX
-#include <systemc.h>
+#include <types/fixedpoint.hpp>
 
 template <size_t N, size_t M>
-using FixedComplex2 = std::complex <sc_dt::sc_fixed <N, M> >;
+using FixedComplex2 = std::complex <FixedPoint <N, M> >;
+
+typedef FixedComplex2<16, 1> FixedComplex16;
+typedef FixedComplex2<32, 17> FixedComplex32;
+typedef FixedComplex2<64, 2> FixedComplex64;
 
 using namespace std;
 #include <iostream>
