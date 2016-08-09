@@ -15,8 +15,8 @@
 #define NUM_X_REGISTERS 2
 #define NUM_Y_REGISTERS 5
 
-FixedComplex2<16, 1> a[NUM_Y_REGISTERS];
-FixedComplex2<16, 1> b[NUM_X_REGISTERS]; //b coefficients
+FixedComplex16 a[NUM_Y_REGISTERS];
+FixedComplex16 b[NUM_X_REGISTERS]; //b coefficients
 float temp1[NUM_Y_REGISTERS] = { 1, .5, .5, .6, .7 }; // a coefficients
 float temp2[NUM_X_REGISTERS] = { .5, .5 }; //b coefficients
 
@@ -36,8 +36,8 @@ CSIM_TEST_CASE(REAL_FILTER)
         b[i].real(temp2[i]);
     }
 
-    FixedComplex2<16, 1> output[1024];
-    FixedComplex2<16, 1> input[1024];
+    FixedComplex16 output[1024];
+    FixedComplex16 input[1024];
 
     for (int i = 1; i < 5; i++) {
         input[i - 1].real((double) i / 10.00);
@@ -63,12 +63,12 @@ CSIM_TEST_CASE(REAL_FILTER)
 CSIM_TEST_CASE(COMPLEX_FILTER)
 {
 
-    FixedComplex2<16, 1> input[1024]; //Array to hold inputs
-    FixedComplex2<16, 1> output[1024]; //Array to hold outputs
+    FixedComplex16 input[1024]; //Array to hold inputs
+    FixedComplex16 output[1024]; //Array to hold outputs
     double realAnswers[1024]; //Array to hold answers
     double imagAnswers[1024]; //Arrayto hodl answers
-    FixedComplex2<16, 1> atap[100]; //Array for A taps
-    FixedComplex2<16, 1> btap[100];
+    FixedComplex16 atap[100]; //Array for A taps
+    FixedComplex16 btap[100];
 
     string data("./data/iirdata/input/data1_in.csv"); //Input data file
 

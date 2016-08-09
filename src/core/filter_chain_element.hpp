@@ -6,6 +6,8 @@
 
 #include <cstdint>
 
+typedef FixedComplex2<16, 1> FixedComplex16;
+typedef FixedComplex2<32, 2> FixedComplex32;
 
 enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,
@@ -22,8 +24,8 @@ struct filter_io_t
     io_type_t type;
     FixedComplex<16> fc;
     FixedComplex<32> fc32;
-    FixedComplex2<16, 1> fcn;
-    FixedComplex2<32, 2> fcn32;
+    FixedComplex16 fcn;
+    FixedComplex32 fcn32;
     union {
         std::complex<double> rf;
         uint8_t byte;
@@ -115,14 +117,14 @@ struct filter_io_t
         return *this;
     }
 
-    filter_io_t & operator=(const FixedComplex2<16, 1> &rhs)
+    filter_io_t & operator=(const FixedComplex16 &rhs)
     {
         this->type = IO_TYPE_FIXED_COMPLEX_16_NEW;
         this->fcn = rhs;
         return *this;
     }
 
-    filter_io_t & operator=(const FixedComplex2<32, 2> &rhs)
+    filter_io_t & operator=(const FixedComplex32 &rhs)
     {
         this->type = IO_TYPE_FIXED_COMPLEX_32_NEW;
         this->fcn32 = rhs;

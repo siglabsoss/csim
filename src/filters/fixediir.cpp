@@ -29,7 +29,7 @@ bool fixediir::input(const filter_io_t &data)
 {
 
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
-    FixedComplex2<16, 1> sample = data.fcn;
+    FixedComplex16 sample = data.fcn;
     iir(sample);
     return true;
 }
@@ -49,7 +49,7 @@ void fixediir::tick()
 }
 
 fixediir::fixediir(int registerXSize, int registerYSize,
-        FixedComplex2<16, 1>* aCoeffs, FixedComplex2<16, 1>* bCoeffs) :
+        FixedComplex16* aCoeffs, FixedComplex16* bCoeffs) :
                 m_numXRegisters(registerXSize),
                 m_numYRegisters(registerYSize),
                 m_a(m_numYRegisters),
@@ -66,10 +66,10 @@ fixediir::fixediir(int registerXSize, int registerYSize,
 
 } //Constructs filter based on number of registers on each side and the values of those registers
 
-void fixediir::iir(FixedComplex2<16, 1> &input)
+void fixediir::iir(FixedComplex16 &input)
 {
 
-    FixedComplex2<16, 1> currenty, centerTap;
+    FixedComplex16 currenty, centerTap;
     centerTap = (input * m_b[0]); // x[0] * b[0]
 
     for (int i = 1; i < m_numXRegisters; i++)

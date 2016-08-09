@@ -8,6 +8,7 @@ set(SIGFILTERS_SOURCES
     #stitcher.cpp
     xcorrelator.cpp
     modulator.cpp
+    interpolator.cpp
     )
 
 add_library(sigfilters ${SIGFILTERS_SOURCES})
