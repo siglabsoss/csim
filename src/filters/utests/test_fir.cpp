@@ -19,16 +19,14 @@ CSIM_TEST_SUITE_BEGIN(FIRFilter)
 
 CSIM_TEST_CASE(REAL_FILTER)
 {
+	cout << "STARTING FIR" << endl;
     FixedComplex2<16, 1> input[1024]; //Array to hold inputs
     FixedComplex2<16, 1> output[1024]; //Array to hold outputs
     FixedComplex2<16, 1> answers[1024];
     string data("./data/firdata/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
-    if (!in.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/data1_in.txt");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data);
 
     char ** ptr;
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
@@ -51,10 +49,7 @@ CSIM_TEST_CASE(REAL_FILTER)
     FixedComplex2<16, 1> tap[41];
 
     ifstream in2(taps.c_str());
-    if (!in2.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/taps1.txt");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps);
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 
     vector<string> vec2;
@@ -114,13 +109,10 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     double imagAnswers[1024];
     FixedComplex2<16, 1> tap[100];
 
-    string data("./data/firdata/input/data1_in.txt"); //Input data file
+    string data("./data/firdata/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
-    if (!in.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/data2_in.csv");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data);
     char ** ptr;
 
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
@@ -142,12 +134,9 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     string taps("./data/firdata/input/taps.txt");
 
     ifstream in2(taps.c_str());
-    if (!in2.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/taps2.txt");
-    }
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 
+    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
+    BOOST_REQUIRE_MESSAGE(in2.is_open(), "Could not read from " << taps);
     int j = 0; //number of taps
 
     while (getline(in2, line)) {
@@ -160,10 +149,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     string data3("./data/firdata/answers/answers2.csv"); //Answers data file
 
     ifstream in3(data3.c_str());
-    if (!in3.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/answers/answers2.csv");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data3);
 
     int l = 0;//Number of answers
     while (getline(in3, line)) {
@@ -191,8 +177,6 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         BOOST_CHECK_MESSAGE(
                 abs(output[k].imag() - imagAnswers[k]) < .001,
                 output[k].imag() << " is not the same as " << imagAnswers[k]);
-     //   cout << input[k].real / 32768.00 << " is the same as "
-      //          << realAnswers[k] << endl;
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
     cout << "DONE WITH FIR" << endl;
