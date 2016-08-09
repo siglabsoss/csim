@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
     int points = inputs;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
-    fixedifft ifft(inputs, 46080); //8 point ifft
+    fixedifft ifft(inputs, 23040); //8 point ifft
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {

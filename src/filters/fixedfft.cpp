@@ -133,8 +133,8 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
     }
 
     if (k > (N/4)) {
-        W_cos = -a[(-N/4) + k ];
-        W_sin = -a[(N/2) - k];
+        W_cos = -b[(-N/4) + k ];
+        W_sin = -b[(N/2) - k];
     }
     else {
         if (N == 2) {
@@ -142,8 +142,8 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
             W_sin = 0;
         }
         else {
-            W_cos = a[(N/4) - k];
-            W_sin = -a[k];
+            W_cos = b[(N/4) - k];
+            W_sin = -b[k];
         }
     }
 
