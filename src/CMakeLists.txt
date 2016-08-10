@@ -67,6 +67,7 @@ add_subdirectory(filters)
 add_subdirectory(mathlib)
 add_subdirectory(types)
 add_subdirectory(utils)
+add_subdirectory(3rd)
 
 if (BUILD_UTESTS)
     add_subdirectory(filters/utests)
