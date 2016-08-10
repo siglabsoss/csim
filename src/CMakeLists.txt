@@ -60,13 +60,21 @@ link_directories(
 	${Boost_LIBRARY_DIRS}
 )
 
-add_subdirectory(apps)
+option(BUILD_UTESTS "Option to build unit tests" false)
+
 add_subdirectory(core)
 add_subdirectory(filters)
 add_subdirectory(mathlib)
 add_subdirectory(types)
 add_subdirectory(utils)
-add_subdirectory(test)
-add_subdirectory(verilog_tests)
-add_subdirectory(systemc)
+
+if (BUILD_UTESTS)
+    add_subdirectory(filters/utests)
+    add_subdirectory(mathlib/utests)
+    add_subdirectory(types/utests)
+else()
+    add_subdirectory(apps)
+    add_subdirectory(verilog_tests)
+    add_subdirectory(systemc)
+endif()
 

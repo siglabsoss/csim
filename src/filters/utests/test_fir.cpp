@@ -114,7 +114,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     double imagAnswers[1024];
     FixedComplex16 tap[100];
 
-    string data("./data/firdata/input/data1_in.txt"); //Input data file
+    string data("./data/firdata/input/data2_in.csv"); //Input data file
 
     ifstream in(data.c_str());
     if (!in.is_open()) {
