@@ -73,10 +73,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     string data("./data/iirdata/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
-    if (!in.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/iirdata/input/data1_in.csv");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data);
 
     char ** ptr;
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
@@ -93,10 +90,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     string taps("./data/iirdata/input/ataps.txt");
     ifstream in2(taps.c_str());
-    if (!in2.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/iirdata/input/ataps.txt");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps);
     int j = 0;
     while (getline(in2, line)) {
 
@@ -108,10 +102,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     string taps2("./data/iirdata/input/btaps.txt");
     ifstream in4(taps2.c_str());
-    if (!in4.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/iirdata/input/btaps.txt");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps2);
 
     int m = 0;
     while (getline(in4, line)) {
@@ -123,11 +114,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     string data3("./data/iirdata/answers/answers1.txt"); //Answers data file
     ifstream in3(data3.c_str());
-    if (!in3.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/iirdata/answers/answers1.txt");
-    }
-
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data3);
     int l = 0;
     while (getline(in3, line)) {
         Tokenizer tok(line);

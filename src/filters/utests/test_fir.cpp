@@ -25,10 +25,7 @@ CSIM_TEST_CASE(REAL_FILTER)
     string data("./data/firdata/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
-    if (!in.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/data1_in.txt");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data);
 
     char ** ptr;
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
@@ -51,10 +48,7 @@ CSIM_TEST_CASE(REAL_FILTER)
     FixedComplex16 tap[41];
 
     ifstream in2(taps.c_str());
-    if (!in2.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/taps1.txt");
-    }
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps);
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 
     vector<string> vec2;
@@ -160,11 +154,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     string data3("./data/firdata/answers/answers2.csv"); //Answers data file
 
     ifstream in3(data3.c_str());
-    if (!in3.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/answers/answers2.csv");
-    }
-
+    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data3);
     int l = 0;//Number of answers
     while (getline(in3, line)) {
         Tokenizer tok(line);
