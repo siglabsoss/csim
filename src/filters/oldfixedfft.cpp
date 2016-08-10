@@ -138,7 +138,7 @@ FixedComplex<32> fixedfftstage::twiddler(int k)
     }
     else {
         if (N == 2) {
-            W_cos = 32768;
+            W_cos = 32768 * 1;
             W_sin = 0;
         }
         else {
@@ -176,9 +176,6 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
 
     int i;
     int as;
-    int a = pow(2, 15);
-    int scale = a / 1000.0;
-    scale = 32;//Cannot scale higher that this yet
     switch (state) {
         default:
         case FFFT_STATE_INITIAL:
@@ -218,8 +215,8 @@ void fixedfftstage::inputandtick(FixedComplex<32> x)
             if (N == 8) {
                 int dontcare = 10;
             }
-            outputtemp = (memory[read_pointer].to_64() * twiddler(read_pointer).to_64());
-            outputtemp = outputtemp >> 15;
+            outputtemp = (memory[read_pointer].to_64() * twiddler(read_pointer).to_64());//Two 32 bit numbers multiplied may be 64 bits
+            outputtemp = outputtemp >> (15 + 0);//Table is scaled by 32768
             output(outputtemp.to_32());
          //   cout << "N: " << N << " outputtemp: " << outputtemp;
             if (read_pointer == ((N / 2) - 1)) {
@@ -273,7 +270,7 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
 			tableSize = 180 * 32;
 		}
 		else {
-			tableSize = 180 * Ninput >> 4;
+			tableSize = 180 * Ninput >> 4 ;
 		}
 	}
 	int errors = 0;
@@ -283,10 +280,7 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
     int stagesize = 0;
     mainTable = new int[tableSize + 1];// + 1 in case tableSize is a multiple of 180
 	for (int i = 0; i < tableSize + 1; i++) {
-		mainTable[i] = round(sin(((pi/tableSize) * i)/2) * 32768); //Get values of main table.
-//		if (mainTable[i] != globalLookupTable[i]) {
-//			cout << mainTable[i] << " " << globalLookupTable[i] << endl;
-//		}
+		mainTable[i] = round(sin(((pi/tableSize) * i)/2) * 32768 * 1); //Get values of main table.
 	}
 
 
