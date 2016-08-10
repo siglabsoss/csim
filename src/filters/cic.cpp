@@ -17,7 +17,7 @@ fixedcic::fixedcic(int R, int aregs, int bregs) :
 bool fixedcic::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
-    FixedComplex2<16, 1> sample = data.fcn;
+    FixedComplex16 sample = data.fcn;
     cic(sample);
     return true;
 }
@@ -42,10 +42,10 @@ void fixedcic::tick()
 
 }
 
-void fixedcic::cic(FixedComplex2<16, 1> &input)
+void fixedcic::cic(FixedComplex16 &input)
 {
     goodOutput = false;
-    FixedComplex2<16, 1> temp; //Storage for integrate output
+    FixedComplex16 temp; //Storage for integrate output
     temp = integrate(input); //Calculate filtered data
     if (!(this->downsample())) {//If not downsampled
         m_output = ((this->comb(temp))); //converts final value of comb to 16 bits.
@@ -69,7 +69,7 @@ void fixedcic::reset()
      } //Initialize registers
 }
 
-FixedComplex2<16, 1> fixedcic::integrate(FixedComplex2<16, 1> current)
+FixedComplex16 fixedcic::integrate(FixedComplex16 current)
 {
     for (int i = 0; i < m_numBRegisters; i++) {
         current = current + m_b[i]; //Accumulate for each b register
@@ -79,10 +79,10 @@ FixedComplex2<16, 1> fixedcic::integrate(FixedComplex2<16, 1> current)
     return current;
 } //Performs filtering
 
-FixedComplex2<16, 1> fixedcic::comb(FixedComplex2<16, 1> current)
+FixedComplex16 fixedcic::comb(FixedComplex16 current)
 {
-    FixedComplex2<16, 1> final;
-    FixedComplex2<16, 1> temp; //storage for swap
+    FixedComplex16 final;
+    FixedComplex16 temp; //storage for swap
 
     final = current;
 

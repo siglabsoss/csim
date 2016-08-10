@@ -53,7 +53,7 @@ public:
 
         m_count++;
         if (m_count > 100000) {
-            log_debug("m_avgPower = %f \t m_output = %f\tm_gain = %f", m_avgPower, std::norm(m_output), m_gain);
+            //log_debug("m_avgPower = %f \t m_output = %f\tm_gain = %f", m_avgPower, std::norm(m_output), m_gain);
             m_count = 0;
             m_initializing = false;
         }

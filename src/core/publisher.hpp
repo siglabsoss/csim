@@ -1,6 +1,6 @@
 #pragma once
 
-#include <zmq.hpp>
+#include <3rd/zmq.hpp>
 
 class Publisher
 {

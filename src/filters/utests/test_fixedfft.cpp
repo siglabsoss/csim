@@ -20,13 +20,12 @@ CSIM_TEST_SUITE_BEGIN(FixedFFT)
 
 CSIM_TEST_CASE(FFT_OCTAVE)
 {
-	cout << "STARTING FFT" << endl;
 	string infile("./data/fft/input/data_file_complex1.csv");
 	string answersfile("./data/fft/answers/answers1.csv");
 
 	int i = 0;
-	int realInput[32769] = {0}; // default values
-	int imagInput[32769] = {0};
+	std::vector<double> realInput(32769);
+	std::vector<double> imagInput(32769);
 	ifstream in(infile.c_str());
 	BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
 	ifstream ans(answersfile.c_str());
@@ -52,8 +51,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 	}//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 	int numAnswers = 0;
-
-	FixedComplex<32> trueAnswers[32768];
+	std::vector<FixedComplex32> trueAnswers(32768);
 	while(getline(ans,line)) {
 
 		istringstream ss(line);
@@ -62,50 +60,54 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 		strValue << token;
 		int intValue;
 		strValue >> intValue;
-		trueAnswers[numAnswers].real = intValue;
+		trueAnswers[numAnswers].real(intValue / 32768.0);
 		getline(ss, token, ',');
 		stringstream strValue2;
 		strValue2 << token;
 		strValue2 >> intValue;
-		trueAnswers[numAnswers++].imag = intValue;
+		trueAnswers[numAnswers++].imag(intValue / 32768.0);
 
 	}//Reads in answers from file. Parsing by commas. Format is: real,imag\n
 
 
-	FixedComplex<32> answers[32769];//Array to store answers
+	std::vector<FixedComplex32> answers(32769);
 	int count = 0; //How many outputs have been collected
 
 	int points = inputs;
 	filter_io_t data;
-	data.type =  IO_TYPE_FIXED_COMPLEX_32;
-	fixedfft fft(points); //x point fft, y table size
+	fixedfft fft(points,2949120 ); //x point fft, y table size
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
 
-			data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
+			data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
 			fft.input(data);
 			bool test = fft.output(data);
 			if (test) {
-				answers[count++] = data.fc32;
+				answers[count++] = data.fcn32;
 			}//If output is ready
 		}//Insert all input
 	}//Insert input again to get output
 
 
 	assert(count == inputs);
+	// If you want bits to be reversed
 
-	FixedComplex<32> temp[32769];
+	std::vector<FixedComplex32> temp(32769);
 	for (i = 0; i < inputs; i++) {
 		temp[reverseBits(inputs, i)] = answers[i];
 	}//Reformats data in correct order
 
 
 	for (i = 0; i < inputs; i++) {
-		BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .05 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 1000 ,
-		"I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << "Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-		BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .05 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 1000,
-		"I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
+	    double ratioReal = abs((temp[i].real() - trueAnswers[i].real())/trueAnswers[i].real());
+	    double ratioImag = abs((trueAnswers[i].imag() - temp[i].imag() )/trueAnswers[i].imag());
+	    double realDiff = abs(temp[i].real() - trueAnswers[i].real());
+	    double imagDiff = abs(temp[i].imag() - trueAnswers[i].imag());
+		BOOST_CHECK_MESSAGE(ratioReal < .20 || realDiff < 5000 / 32768.0 ,
+		"I: " << i << " Output: " << temp[i].real() << " Answer: " << trueAnswers[i].real() << " Ratio: " << ratioReal );
+		BOOST_CHECK_MESSAGE(ratioImag < .20 || imagDiff < 5000 / 32768.0,
+		"I: " << i << " Output: " << temp[i].imag() << " Answer: " << trueAnswers[i].imag() << " Ratio: " << ratioImag );
 
 	}
 }
@@ -151,7 +153,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 
     int numAnswers = 0;
-    FixedComplex<32> trueAnswers[32768]; //Array to hold answers from answers file
+    std::vector<FixedComplex32> trueAnswers(32768); //array to hold answers from file
     while(getline(ans,line)) {
 
         istringstream ss(line);
@@ -160,32 +162,31 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         strValue << token;
         int intValue;
         strValue >> intValue;
-        trueAnswers[numAnswers].real = intValue;
+        trueAnswers[numAnswers].real(intValue / 32768.0);
         getline(ss, token, ',');
         stringstream strValue2;
         strValue2 << token;
         strValue2 >> intValue;
-        trueAnswers[numAnswers++].imag = intValue;
+        trueAnswers[numAnswers++].imag(intValue / 32768.0);
 
     }//Reads in inputs from answers file. Parsing by commas. Format is: real,imag\n
 
 
-    FixedComplex<32> output[32769];//Array to store answers
+    std::vector<FixedComplex32> output(32769); //Array to store answers
     int count = 0; //How many outputs have been collected
 
     int points = inputs;
     filter_io_t data;
-    data.type =  IO_TYPE_FIXED_COMPLEX_32;
     fixedfft fft(points ); //x point fft, y table size
 
 
 	for (int j = 0; j < points; j++) {
 
-		data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
+		data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-		   output[count++] = data.fc32;
+		   output[count++] = data.fcn32;
 		}//If output is ready
 	}//Insert first set of data
 
@@ -210,40 +211,42 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 
     for (int j = 0; j < points; j++) {
 
-        data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
+        data = FixedComplex32(realInput[j] / 32768.0, imagInput[j] / 32768.0);
         fft.input(data);
         bool test = fft.output(data);
         if (test) {
-        	output[count++] = data.fc32;
+        	output[count++] = data.fcn32;
         }
     }//second set of data, gets first set of answers out
 
-    FixedComplex<32> temp[32769];
+    std::vector<FixedComplex32> temp(32769);
     for (i = 0; i < inputs; i++) {
         temp[reverseBits(inputs, i)] = output[i];
     }//Reformats data in correct order
 
 
     for (i = 0; i < inputs; i++) {
-        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .02 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 1 ,
-                "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .02 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 1,
-                "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
+        double realRatio = abs((temp[i].real() - trueAnswers[i].real())/trueAnswers[i].real());
+        double imagRatio = abs((trueAnswers[i].imag() - temp[i].imag() )/trueAnswers[i].imag());
+        double realDiff  = abs(temp[i].real() - trueAnswers[i].real());
+        double imagDiff  = abs(temp[i].imag() - trueAnswers[i].imag());
+        BOOST_CHECK_MESSAGE(realRatio < .03 || realDiff < 1 / 32768.0 ,
+                "I: " << i << " Output: " << temp[i].real() << " Answer: " << trueAnswers[i].real() << " Ratio: " << realRatio );
+        BOOST_CHECK_MESSAGE(imagRatio < .03 || imagDiff < 1 / 32768.0,
+                "I: " << i << " Output: " << temp[i].imag() << " Answer: " << trueAnswers[i].imag() << " Ratio: " << imagRatio );
 
         }//Ensures output and answers are reasonably close for first set of data
 
     numAnswers = 0;
 
     count = 0; //How many outputs have been collected
-    data.type =  IO_TYPE_FIXED_COMPLEX_32;
-
     for (int j = 0; j < points; j++) {
 
-		data.fc32 = FixedComplex<32>(0,0);
+		data = FixedComplex32(0,0);
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-			output[count++] = data.fc32;
+			output[count++] = data.fcn32;
 		}// if output is ready
 	}//Get 2nd set of data out
 
@@ -260,25 +263,27 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         strValue << token;
         int intValue;
         strValue >> intValue;
-        trueAnswers[numAnswers].real = intValue;
+        trueAnswers[numAnswers].real(intValue / 32768.0);
         getline(ss, token, ',');
         stringstream strValue2;
         strValue2 << token;
         strValue2 >> intValue;
-        trueAnswers[numAnswers++].imag = intValue;
+        trueAnswers[numAnswers++].imag(intValue / 32768.0);
 
     }//Reads in answers from file. Parsing by commas. Format is: real,imag\n
 
 
     for (i = 0; i < inputs; i++) {
-        BOOST_CHECK_MESSAGE(abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) < .01 || abs(abs(temp[i].real) - abs(trueAnswers[i].real)) < 4 ,
-           "I: " << i << " Output: " << temp[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((temp[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-        BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - temp[i].imag )/(float)trueAnswers[i].imag) < .01 || abs(abs(temp[i].imag) - abs(trueAnswers[i].imag)) < 4,
-           "I: " << i << " Output: " << temp[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((temp[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
+        double realRatio = abs((temp[i].real() - trueAnswers[i].real())/trueAnswers[i].real());
+        double imagRatio = abs((trueAnswers[i].imag() - temp[i].imag() )/trueAnswers[i].imag());
+        double realDiff = abs(temp[i].real() - trueAnswers[i].real());
+        double imagDiff = abs(temp[i].imag() - trueAnswers[i].imag());
+        BOOST_CHECK_MESSAGE(realRatio < .01 || realDiff < 4 / 32768.0,
+           "I: " << i << " Output: " << temp[i].real() << " Answer: " << trueAnswers[i].real() << " Ratio: " << realDiff );
+        BOOST_CHECK_MESSAGE(imagRatio < .01 || imagDiff < 4 / 32768.0,
+           "I: " << i << " Output: " << temp[i].imag() << " Answer: " << trueAnswers[i].imag() << " Ratio: " << imagDiff );
 
     }
-
-    cout << "DONE WITH FFT" << endl;
 }//Checks for two consecutive sets of inputs in the same FFT.
 
 //
@@ -289,7 +294,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //       string answersfile("../csim/data/fft/output/answers32768BitReversed.csv");
 //
 //       int i = 0;
-//       FixedComplex<32> bitReversedInput[32768];
+//       FixedComplex32 bitReversedInput[32768];
 //       ifstream in(infile.c_str());
 //       BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
 //       ifstream ans(answersfile.c_str());
@@ -314,7 +319,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //       }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 //
 //       int numAnswers = 0;
-//       FixedComplex<32> trueAnswers[32768];
+//       FixedComplex32 trueAnswers[32768];
 //       while(getline(ans,line)) {
 //
 //         istringstream ss(line);
@@ -333,13 +338,13 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //     }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
 //
 ////
-////        FixedComplex<32> temp[32769];
+////        FixedComplex32 temp[32769];
 ////        for (i = 0; i < inputs; i++) {
 ////            temp[i] = bitReversedOutput[reverseBits(inputs, i)];
 ////        }//Reformats data in correct order
 //
 //
-////       FixedComplex<32> temp[32769];
+////       FixedComplex32 temp[32769];
 ////       for (i = 0; i < inputs; i++) {
 ////           temp[i] = bitReversedOutput[i];
 ////       }
@@ -356,7 +361,6 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //
 //
 //}//Used for comparing percent error
-
 
 CSIM_TEST_SUITE_END()
 

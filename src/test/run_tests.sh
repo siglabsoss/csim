@@ -5,39 +5,34 @@ THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 CSIM_SRC=$THIS_DIR/../ #Points to root of repo
 CSIM_UTEST_BUILD=$CSIM_SRC/../build_utest #define the build tree to be a sibling
 
-#Construct semicolon separated list of unit test source files relative to this directory
-#because that's where the CMakeLists.txt file lives.
-#XXX as the number of files grows, this logic may need to be udpated because the maximum
-#number of command line arguments could be exhausted although xargs supposedly handles
-#that
-
-if [ $# -eq 0 ]; then
-    TEST_FILTER=utests/.*cpp
-else
-    TEST_FILTER=$1
-fi
-
-pushd $THIS_DIR
-export UNIT_TEST_SRCS=`find ../ | grep $TEST_FILTER | xargs echo |  sed 's/ /;/g'`
-popd
-
 mkdir -p $CSIM_UTEST_BUILD
 
 pushd $CSIM_UTEST_BUILD
-if ! cmake -D CMAKE_BUILD_TYPE=Debug $CSIM_SRC ; then
+if ! cmake -D CMAKE_BUILD_TYPE=Debug -DBUILD_UTESTS=true $CSIM_SRC ; then
     EXIT_CODE=$?
     echo "Error building make files for unit tests!"
     exit $EXIT_CODE
 fi
 
-if ! make -j3 utests ; then
+if ! make -j3 ; then
     EXIT_CODE=$?
     echo "Error building unit tests!"
     exit $EXIT_CODE
 fi
 cp -r $CSIM_SRC/../data .
-./bin/utests
-EXIT_CODE=$?
+
+FAILURE_COUNT=0
+
+for filename in ./bin/test_*; do
+    echo "Running " $filename
+    $filename
+    EXIT_CODE=$?
+    if [ $EXIT_CODE -ne 0 ]; then
+        let "FAILURE_COUNT+=1"
+    fi
+done
 popd
 
-exit $EXIT_CODE
+echo "Number of test failures = " $FAILURE_COUNT
+
+exit $FAILURE_COUNT

@@ -24,7 +24,7 @@ Publisher::Publisher() :
 
 bool Publisher::init()
 {
-    int port;
+    int64_t port;
     param_get("PUB_ZMQ_PORT", port);
     std::stringstream endpoint;
     endpoint << "tcp://*:" << port;

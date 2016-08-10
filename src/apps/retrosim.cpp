@@ -3,6 +3,7 @@
 
 #include <filters/complex_to_fixed.hpp>
 #include <filters/fixed_to_byte.hpp>
+#include <filters/modulator.hpp>
 #include <filters/sine_wave.hpp>
 #include <filters/automatic_gain.hpp>
 
@@ -41,12 +42,14 @@ int main(int argc, char *argv[])
                         .id = static_cast<radio_id_t>(i + 1)
                     };
                     FilterChain modulation_chain;
-                    SineWave *sw = new SineWave(2000);
-                    modulation_chain = *sw;
+                    Modulator *bpsk = new Modulator(Modulator::MOD_SCHEME_BPSK);
+                    SineWave *sw = new SineWave(1000);
+                    bpsk->shouldPublish(true);
+                    modulation_chain = *sw + *bpsk;
 
                     FilterChain demodulation_chain;
                     AutomaticGain *ag = new AutomaticGain();
-                    ag->shouldPublish(true);
+                    //ag->shouldPublish(true);
                     demodulation_chain = *ag;
 
                     return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));

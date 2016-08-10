@@ -7,6 +7,8 @@ set(SIGFILTERS_SOURCES
     floatfft.cpp
     #stitcher.cpp
     xcorrelator.cpp
+    modulator.cpp
+    zero_pad_interpolator.cpp
     )
 
 add_library(sigfilters ${SIGFILTERS_SOURCES})

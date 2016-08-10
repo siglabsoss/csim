@@ -11,21 +11,25 @@
 #include <iostream>
 #include <types/fixedcomplex.hpp>
 
-typedef sc_fixed<20, 5> cordic_theta_t;
-typedef FixedComplex2<20, 5> cordic_complex_t;
-typedef sc_fixed<20, 5> cordic_scalar_t;
+typedef sc_fixed<32, 5> cordic_theta_t;
+typedef FixedComplex2<32, 5> cordic_complex_t;
+typedef sc_fixed<32, 5> cordic_scalar_t;
 
 //These typedefs can be used to enable floating point
-//typedef double cordic_theta_t;
-//typedef std::complex<double> cordic_complex_t;
-//typedef double cordic_scalar_t;
+//typedef float cordic_theta_t;
+//typedef std::complex<float> cordic_complex_t;
+//typedef float cordic_scalar_t;
 
 
 class cordic
 {
 public:
     cordic();
+    cordic_scalar_t sin(const cordic_theta_t &theta);
+    cordic_scalar_t cos(const cordic_theta_t &theta);
+    void calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_complex_t &cosine);
 
+private: //methods
     /**
      * Rotates a given angle to the fist quadrant
      * @param theta (radians) to rotate, modified to resulting theta in first quadrant
@@ -38,14 +42,12 @@ public:
      */
     void clipResults(cordic_complex_t y[2]);
 
-    void calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_complex_t &cosine);
-
     void rotateToQuadrant(cordic_complex_t y[2], int quadrant); //swaps cosine and sign or changes sign if necessary
-    virtual ~cordic();
 
+private: //members
     std::vector <cordic_scalar_t > m_vals;
 
-private:
+private: //constants
     static constexpr size_t NUM_HARDWIRED_VALUES = 32;
     static constexpr double k = .685985744494; // k is a scaling factor that's a function of the number of hardwired values, this particular value was found emperically
 };

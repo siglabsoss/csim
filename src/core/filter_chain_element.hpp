@@ -22,8 +22,8 @@ struct filter_io_t
     io_type_t type;
     FixedComplex<16> fc;
     FixedComplex<32> fc32;
-    FixedComplex2<16, 1> fcn;
-    FixedComplex2<32, 1> fcn32;
+    FixedComplex16 fcn;
+    FixedComplex32 fcn32;
     union {
         std::complex<double> rf;
         uint8_t byte;
@@ -115,14 +115,14 @@ struct filter_io_t
         return *this;
     }
 
-    filter_io_t & operator=(const FixedComplex2<16, 1> &rhs)
+    filter_io_t & operator=(const FixedComplex16 &rhs)
     {
         this->type = IO_TYPE_FIXED_COMPLEX_16_NEW;
         this->fcn = rhs;
         return *this;
     }
 
-    filter_io_t & operator=(const FixedComplex2<32, 1> &rhs)
+    filter_io_t & operator=(const FixedComplex32 &rhs)
     {
         this->type = IO_TYPE_FIXED_COMPLEX_32_NEW;
         this->fcn32 = rhs;
@@ -177,9 +177,27 @@ struct filter_io_t
                 break;
            }
             case IO_TYPE_FIXED_COMPLEX_16_NEW:
-                break; //XXX TODO
+            {
+                double value = fcn.real().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+
+                value = fcn.imag().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
+            }
             case IO_TYPE_FIXED_COMPLEX_32_NEW:
-                break; //XXX TODO
+            {
+                double value = fcn32.real().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+
+                value = fcn32.imag().to_double();
+                memcpy(data + numBytes, &value, sizeof(value));
+                numBytes += sizeof(value);
+                break;
+            }
            case IO_TYPE_BYTE:
            {
                memcpy(data + numBytes, &byte, sizeof(byte));
