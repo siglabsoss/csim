@@ -14,9 +14,8 @@ CSIM_TEST_SUITE_BEGIN(ModulatorFunctionality)
 CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_ZERO_BIT_SYMBOL)
 {
     Modulator mod(Modulator::MOD_SCHEME_BPSK);
-
+    filter_io_t output;
     for (int i = 0; i < 100; i++) {
-        filter_io_t output;
         mod.tick();
         mod.output(output);
         BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), -1.0, DBL_EPSILON);
