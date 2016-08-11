@@ -42,12 +42,12 @@ CSIM_TEST_CASE(CONSTANT_INPUTS)
                 outputCount++;
                 //std::cout << outputCount << ": " << output << std::endl;
             } else {
-               noOutputCount++;
+               //noOutputCount++;
             }
         }
     }
     //std::cout << "No outputs for " << noOutputCount << " counts" << std::endl;
-    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLE_SETS*NUM_SAMPLES - 2*NUM_SAMPLES + 1);
+    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLE_SETS*NUM_SAMPLES - (2*NUM_SAMPLES - 1));
 }
 
 CSIM_TEST_CASE(FFT_OCTAVE)
