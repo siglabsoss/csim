@@ -50,6 +50,7 @@ void fixediir::tick()
 
 fixediir::fixediir(int registerXSize, int registerYSize,
         FixedComplex16* aCoeffs, FixedComplex16* bCoeffs) :
+                FilterChainElement("FixedIIR"),
                 m_numXRegisters(registerXSize),
                 m_numYRegisters(registerYSize),
                 m_a(m_numYRegisters),
