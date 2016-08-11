@@ -166,15 +166,15 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
      }
 
     for (int k = 0; k < 40; k++) {
-//        BOOST_CHECK_MESSAGE(
-//                abs(output[k].real() - realAnswers[k]) < .001,
-//                input[k].real() << " is not the same as " << realAnswers[k]);
-//        BOOST_CHECK_MESSAGE(
-//                abs(output[k].imag() - imagAnswers[k]) < .001,
-//                output[k].imag() << " is not the same as " << imagAnswers[k]);
-     //   cout << input[k].real / 32768.00 << " is the same as "
-      //          << realAnswers[k] << endl;
-        cout <<  output[k].real().range().to_int64()  << "," << output[k].imag().range().to_int64() << endl;
+        BOOST_CHECK_MESSAGE(
+                abs(output[k].real() - realAnswers[k]) < .001,
+                input[k].real() << " is not the same as " << realAnswers[k]);
+        BOOST_CHECK_MESSAGE(
+                abs(output[k].imag() - imagAnswers[k]) < .001,
+                output[k].imag() << " is not the same as " << imagAnswers[k]);
+        cout << input[k].real / 32768.00 << " is the same as "
+                << realAnswers[k] << endl;
+
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
 }
