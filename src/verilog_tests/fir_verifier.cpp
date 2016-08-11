@@ -88,8 +88,8 @@ int main(int argc, char *argv[])
      }
 
     for (int k = 0; k < i; k++) {
-    	out << setw(11) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
-    	out << setw(11) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
+    	out << setw(6) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
+    	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
     } //Prints all outputs
 
 }
