@@ -67,8 +67,8 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     FixedComplex16 output[1024]; //Array to hold outputs
     double realAnswers[1024]; //Array to hold answers
     double imagAnswers[1024]; //Arrayto hodl answers
-    FixedComplex16 atap[100]; //Array for A taps
-    FixedComplex16 btap[100];
+    vector<FixedComplex16> atap(100); //Array for A taps
+    vector<FixedComplex16> btap(100);
 
     string data("./data/iir/input/data1_in.csv"); //Input data file
 

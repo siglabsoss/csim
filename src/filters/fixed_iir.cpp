@@ -49,7 +49,7 @@ void fixediir::tick()
 }
 
 fixediir::fixediir(int registerXSize, int registerYSize,
-        FixedComplex16* aCoeffs, FixedComplex16* bCoeffs) :
+		vector<FixedComplex16> aCoeffs, vector<FixedComplex16> bCoeffs) :
                 m_numXRegisters(registerXSize),
                 m_numYRegisters(registerYSize),
                 m_a(m_numYRegisters),
@@ -74,12 +74,10 @@ void fixediir::iir(FixedComplex16 &input)
 
     for (int i = 1; i < m_numXRegisters; i++)
         centerTap = centerTap + (m_x[i] * m_b[i]); //Accumulate for each x register
-
     currenty = (centerTap); // Coefficient of a[0] = 1
     for (int i = 1; i < m_numYRegisters; i++) {
         currenty = (currenty) - (m_a[i] * m_y[i]); //Accumulate
     }
-
     for (int i = m_numXRegisters - 1; i > 1; i--)
         m_x[i] = m_x[i - 1]; //Moves everything up one register
 

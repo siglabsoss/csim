@@ -26,8 +26,8 @@ public:
 
     void tick() override;
 
-    fixediir(int registerXSize, int registerYSize, FixedComplex16* aCoeffs,
-               FixedComplex16* bCoeffs); //Constructor
+    fixediir(int registerXSize, int registerYSize, vector<FixedComplex16> aCoeffs,
+    		vector<FixedComplex16> bCoeffs); //Constructor
     void iir(FixedComplex16 &input); //Filtering input data
     void reset(); //resets registers
     FixedComplex16 calculate(FixedComplex16 current); // Calculate output based on input

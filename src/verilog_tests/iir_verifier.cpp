@@ -46,8 +46,8 @@ int main(int argc, char *argv[])
 	FixedComplex16 output[1024]; //Array to hold outputs
 	double realAnswers[1024]; //Array to hold answers
 	double imagAnswers[1024]; //Arrayto hodl answers
-	FixedComplex16 atap[100]; //Array for A taps
-	FixedComplex16 btap[100];
+	vector<FixedComplex16> atap(100); //Array for A taps
+	vector<FixedComplex16> btap(100);
 
 
 	char ** ptr;
