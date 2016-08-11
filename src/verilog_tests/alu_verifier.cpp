@@ -39,14 +39,14 @@ int main(int argc, char *argv[])
       }
     int i = 0;
     while (getline(in, line)) {
-        cout << line << endl;
+       
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
         input1[0].real = (vec[0].c_str());
         input1[0].imag = (vec[1].c_str());
         input2[0].real = (vec[2].c_str());
         input2[0].imag = (vec[3].c_str());
-        cout << i << endl;
+      
         out << (input1[0] + input2[0]).real << " "
                 << (input1[0] + input2[0]).imag << " ";
         out << (input1[0] - input2[0]).real << " "
