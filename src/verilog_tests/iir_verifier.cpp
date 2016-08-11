@@ -24,13 +24,19 @@ int main(int argc, char *argv[])
 		cout << "Could not read from " << data;
 	}
 
-	string taps(argv[2]);
+	string outfile(argv[2]);
+	ofstream out(outfile.c_str());
+	if (!out.is_open()) {
+		cout << "Could not read from " << outfile;
+	}
+
+	string taps(argv[3]);
 	ifstream in2(taps.c_str());
 	if (!in2.is_open()) {
 		cout << "Could not read from " << taps;
 	}
 
-	string taps2(argv[3]);
+	string taps2(argv[4]);
 	ifstream in4(taps2.c_str());
 	if (!in4.is_open()) {
 		cout << "Could not read from " << taps2;
@@ -75,7 +81,7 @@ int main(int argc, char *argv[])
 	} //Reads in B taps
 
 
-	fixediir iir(j, j, atap, btap);
+	fixediir iir(j, m, atap, btap);
 	filter_io_t data2;
 	for (int j = 0; j < i; j ++) {
 		data2 = input[j];
