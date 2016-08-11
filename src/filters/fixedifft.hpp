@@ -13,19 +13,9 @@ enum Fifft_STATE
     Fifft_STATE_INITIAL, Fifft_STATE_READ, Fifft_STATE_OUTPUT
 };
 
-class fixedifftbase : public FilterChainElement
+class fixedifftbase
 {
 public:
-    int m_count;
-    bool input(const filter_io_t &data) override;
-
-        /**
-         * output - provide an output sample to the caller.
-         * @return false if no output sample is available.
-         */
-    bool output(filter_io_t &data) override;
-
-    void tick() override;
     virtual void inputandtick(FixedComplex32 x) = 0;
     virtual ~fixedifftbase();
     int ready;
@@ -76,7 +66,7 @@ public:
     void inputandtick(FixedComplex32 x);
 };
 
-class fixedifft: public fixedifftbase
+class fixedifft: public FilterChainElement
 {
 public:
     bool input(const filter_io_t &data) override;
@@ -93,6 +83,7 @@ public:
     int stagecount;
     bool newInput;
     int* mainTable;
+    int m_count;
     fixedifftstage *stages;
     fixedifftprint printer;
     fixedifft(int Ninput, int tableSize = 0);

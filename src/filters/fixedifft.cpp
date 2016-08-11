@@ -5,25 +5,6 @@ using namespace std;
 
 const long double pi = 3.141592653589793238L;
 
-
-
-bool fixedifftbase::input(const filter_io_t &data)
-{
-
-}
-
-bool fixedifftbase::output(filter_io_t &data)
-{
-
-
-}
-
-
-void fixedifftbase::tick()
-{
-
-}
-
 bool fixedifft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
@@ -269,6 +250,7 @@ void fixedifftbuffer::inputandtick(FixedComplex32 x)
 }
 
 fixedifft::fixedifft(int Ninput, int tableSize) :
+        FilterChainElement("FixedIFFT"),
         printer(Ninput),
         newInput(false)
 {

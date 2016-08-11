@@ -6,22 +6,6 @@ using namespace std;
 string outfile("../csim/data/fft/output/compareTwiddler.txt");
 ofstream out3(outfile.c_str());
 
-
-bool fixedfftbase::input(const filter_io_t &data)
-{
-    return false;
-}
-
-bool fixedfftbase::output(filter_io_t &data)
-{
-    return false;
-}
-
-void fixedfftbase::tick()
-{
-
-}
-
 bool fixedfft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
@@ -266,6 +250,7 @@ void fixedfftbuffer::inputandtick(FixedComplex32 x)
 }
 
 fixedfft::fixedfft(int Ninput, int tableSize) :
+        FilterChainElement("FixedFFT"),
         printer(Ninput),
         newInput(false)
 {
