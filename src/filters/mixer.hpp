@@ -9,36 +9,12 @@
 class Mixer : public FilterChainElement
 {
 public:
-    virtual ~Mixer() {}
-    Mixer(uint32_t fs, int32_t hz) :
-        FilterChainElement(std::string("Mixer")),
-        m_fs(fs),
-        m_count(0),
-        m_ticksPerPeriod((int32_t)fs/hz)
-    {
-        m_output.type = IO_TYPE_COMPLEX_DOUBLE;
-    }
-    bool input(const filter_io_t &data) override
-    {
-    	m_hold = data;
-        return true;
-    }
+    virtual ~Mixer();
+    Mixer(uint32_t fs, int32_t hz);
+    bool input(const filter_io_t &data) override;
+    bool output(filter_io_t &data) override;
+    void tick(void) override;
 
-    bool output(filter_io_t &data) override
-    {
-        data = m_output.rf * m_hold.rf;
-        return true;
-    }
-
-    void tick(void) override
-    {
-        double theta = (((2 * M_PI) / m_ticksPerPeriod) * m_count);
-        m_output.rf = std::complex<double>(cos(theta), sin(theta));
-        m_count++;
-        if (m_count > m_ticksPerPeriod) {
-            m_count -= m_ticksPerPeriod;
-        }
-    }
 private:
     uint32_t m_fs;
     filter_io_t m_output;
@@ -46,7 +22,6 @@ private:
     size_t m_count;
     int32_t m_ticksPerPeriod;
     std::vector<std::complex<double> > m_vec;
-
 };
 
 
