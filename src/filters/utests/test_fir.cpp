@@ -172,8 +172,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         BOOST_CHECK_MESSAGE(
                 abs(output[k].imag() - imagAnswers[k]) < .001,
                 output[k].imag() << " is not the same as " << imagAnswers[k]);
-        cout << input[k].real / 32768.00 << " is the same as "
-                << realAnswers[k] << endl;
+
 
     } //Compares all outputs with solution to ensure they are .001 within each other.
 
