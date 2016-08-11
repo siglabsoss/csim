@@ -2,6 +2,7 @@
 #include <core/logger.hpp>
 
 ZeroPadInterpolator::ZeroPadInterpolator(size_t chunkSize) :
+    FilterChainElement("FixedZeroPadInterp"),
     m_inputBuffer(chunkSize),
     m_outputBuffer(chunkSize*2),
     m_shouldOutput(false),

@@ -3,6 +3,7 @@
 using namespace std;
 
 fixedcic::fixedcic(int R, int aregs, int bregs) :
+    FilterChainElement("FixedCIC"),
     m_r(R),
     m_numBRegisters(bregs),
     m_numARegisters(aregs),

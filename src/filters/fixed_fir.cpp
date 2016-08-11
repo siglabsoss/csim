@@ -2,6 +2,7 @@
 
 
 FixedFIR::FixedFIR(int N, FixedComplex16* tap) :
+    FilterChainElement("FixedFIR"),
     m_taps(N),
     m_bench(N),
     m_output()
