@@ -6,6 +6,11 @@
 #include <filters/modulator.hpp>
 #include <filters/sine_wave.hpp>
 #include <filters/automatic_gain.hpp>
+#include <filters/fixedfft.hpp>
+#include <filters/fixedifft.hpp>
+#include <filters/mixer.hpp>
+#include <filters/zero_pad_interpolator.hpp>
+#include <filters/linear_gain_amplifier.hpp>
 
 #include <sys/time.h>
 #include <utility>
@@ -25,16 +30,9 @@ timespec timediff(timespec start, timespec end)
     return temp;
 }
 
-int main(int argc, char *argv[])
+void constructRadios(SigWorld &world)
 {
-
-    log_info("Starting RetroSim!");
-
-    SigWorld world;
-
-    radio_config_t config;
-
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 1; i++) {
         world.addRadio([i]()
                 {
                     radio_config_t config {
@@ -42,10 +40,23 @@ int main(int argc, char *argv[])
                         .id = static_cast<radio_id_t>(i + 1)
                     };
                     FilterChain modulation_chain;
-                    Modulator *bpsk = new Modulator(Modulator::MOD_SCHEME_BPSK);
-                    SineWave *sw = new SineWave(1000);
-                    bpsk->shouldPublish(true);
-                    modulation_chain = *sw + *bpsk;
+                    Modulator           *qam16   = new Modulator(Modulator::MOD_SCHEME_QAM16);
+                    fixedfft            *fft     = new fixedfft(8, 0);
+                    ZeroPadInterpolator *zpi     = new ZeroPadInterpolator(8);
+                    LinearGainAmplifier *lga     = new LinearGainAmplifier(2);
+                    fixedifft           *ifft    = new fixedifft(8*2, 0);
+
+                    int frequency = 25000000;
+                    Mixer *mixer                = new Mixer(10*frequency, frequency);
+
+                    //qam16->shouldPublish(true);
+                    //fft->shouldPublish(true);
+                    //zpi->shouldPublish(true);
+                    //lga->shouldPublish(true);
+                    //ifft->shouldPublish(true);
+                    mixer->shouldPublish(true);
+                    modulation_chain = *mixer + *ifft + *lga + *zpi + *fft + *qam16;
+                    //modulation_chain = *mixer + *ifft + *zpi + *fft + *qam16;
 
                     FilterChain demodulation_chain;
                     AutomaticGain *ag = new AutomaticGain();
@@ -55,6 +66,16 @@ int main(int argc, char *argv[])
                     return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
                 });
     }
+}
+
+int main(int argc, char *argv[])
+{
+
+    log_info("Starting RetroSim!");
+
+    SigWorld world;
+
+    constructRadios(world);
 
     world.init();
 
@@ -79,6 +100,5 @@ int main(int argc, char *argv[])
             log_debug("Running at %fHz", 1000000 / diff_seconds);
         }
     }
-
     return 0;
 }
