@@ -70,7 +70,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     FixedComplex16 atap[100]; //Array for A taps
     FixedComplex16 btap[100];
 
-    string data("./data/iirdata/input/data1_in.csv"); //Input data file
+    string data("./data/iir/input/data1_in.csv"); //Input data file
 
     ifstream in(data.c_str());
     BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data);
@@ -88,7 +88,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    string taps("./data/iirdata/input/ataps.txt");
+    string taps("./data/iir/input/ataps.txt");
     ifstream in2(taps.c_str());
     BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps);
     int j = 0;
@@ -100,7 +100,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         j++;
     } //Reads in taps
 
-    string taps2("./data/iirdata/input/btaps.txt");
+    string taps2("./data/iir/input/btaps.txt");
     ifstream in4(taps2.c_str());
     BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps2);
 
@@ -112,7 +112,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         m++;
     } //Reads in taps
 
-    string data3("./data/iirdata/answers/answers1.txt"); //Answers data file
+    string data3("./data/iir/answers/answers1.txt"); //Answers data file
     ifstream in3(data3.c_str());
     BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data3);
     int l = 0;
