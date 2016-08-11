@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
     while (getline(taps, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        tap[j].real(atof(vec[0].c_str()));
+        tap[j].real(atof(vec[0].c_str())/32768.0);
         j++;
     } //Reads in taps
 
