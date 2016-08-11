@@ -237,7 +237,7 @@ CSIM_TEST_CASE(DIVIDING2)
 
     c3 = c1 / c2;
 
-    cout << "c3 was" << c3 << endl;
+
 
 //	BOOST_CHECK(c3.real.to_int() == 2);//Tests normal division
 //	BOOST_CHECK(c3.imag.to_int() == -2);//Tests normal division
