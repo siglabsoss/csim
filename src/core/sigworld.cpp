@@ -24,8 +24,8 @@ void SigWorld::tick()
     {
         RadioS * const current = (*it).get();
         RFSample sample; //for publishing externally
-        std::complex<double> rxSample;
-        std::complex<double> txSample;
+        ComplexDouble rxSample;
+        ComplexDouble txSample;
 
         /* Step 1 - Feed the radio a waveform sample from the environment */
         m_radioSet.getSampleForRadio(it, rxSample);

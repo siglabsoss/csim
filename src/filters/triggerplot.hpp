@@ -51,7 +51,7 @@ private:
     uint32_t m_max_triggers;
     uint32_t m_triggers;
     plotter m_p;
-    std::vector<std::complex<double> > m_vec;
+    std::vector<ComplexDouble > m_vec;
 
 };
 

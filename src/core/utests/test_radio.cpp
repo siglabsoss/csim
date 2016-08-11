@@ -112,7 +112,7 @@ public:
     {
         if (m_didReceiveInput) {
             m_output.type = IO_TYPE_COMPLEX_DOUBLE;
-            m_output.rf = std::complex<double>(static_cast<double>(m_byte / 2), static_cast<double>(m_byte / 2));
+            m_output.rf = ComplexDouble(static_cast<double>(m_byte / 2), static_cast<double>(m_byte / 2));
         }
     }
 private:
@@ -147,7 +147,7 @@ CSIM_TEST_CASE(FILTER_CHAIN_IS_PROPERLY_CHAINED)
 
     RadioS *radio = new RadioS(config, modulation_chain, demodulation_chain);
     uint8_t byte = 0;
-    std::complex<double> sample(0.5, 0.5);
+    ComplexDouble sample(0.5, 0.5);
     bool didOutput = true;
 
     /* Demodulation */

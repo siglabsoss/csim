@@ -16,7 +16,7 @@ ComplexGaussianNoise::ComplexGaussianNoise(double stddev) :
 {
 }
 
-std::complex<double> ComplexGaussianNoise::getNext()
+ComplexDouble ComplexGaussianNoise::getNext()
 {
-    return std::complex<double>(m_realDistribution(m_realGenerator), m_imagDistribution(m_imagGenerator));
+    return ComplexDouble(m_realDistribution(m_realGenerator), m_imagDistribution(m_imagGenerator));
 }

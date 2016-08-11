@@ -42,16 +42,16 @@ CSIM_TEST_CASE(PHASE_DELAY_CALCULATION)
 
 CSIM_TEST_CASE(PHASE_ROTATION_CALCULATION)
 {
-    std::vector<std::pair<double, std::complex<double> > > expectedResults;
+    std::vector<std::pair<double, ComplexDouble > > expectedResults;
 
-    expectedResults.push_back(std::pair<double, std::complex<double> >(0, std::complex<double>(1.0, 0.0)));
-    expectedResults.push_back(std::pair<double, std::complex<double> >(M_PI / 2, std::complex<double>(0.0, 1.0)));
-    expectedResults.push_back(std::pair<double, std::complex<double> >(M_PI, std::complex<double>(-1.0, 0.0)));
-    expectedResults.push_back(std::pair<double, std::complex<double> >(3 * M_PI / 2, std::complex<double>(0.0, -1.0)));
-    expectedResults.push_back(std::pair<double, std::complex<double> >(2 * M_PI, std::complex<double>(1.0, 0.0)));
+    expectedResults.push_back(std::pair<double, ComplexDouble >(0, ComplexDouble(1.0, 0.0)));
+    expectedResults.push_back(std::pair<double, ComplexDouble >(M_PI / 2, ComplexDouble(0.0, 1.0)));
+    expectedResults.push_back(std::pair<double, ComplexDouble >(M_PI, ComplexDouble(-1.0, 0.0)));
+    expectedResults.push_back(std::pair<double, ComplexDouble >(3 * M_PI / 2, ComplexDouble(0.0, -1.0)));
+    expectedResults.push_back(std::pair<double, ComplexDouble >(2 * M_PI, ComplexDouble(1.0, 0.0)));
 
     for (auto it = expectedResults.begin(); it != expectedResults.end(); it++) {
-        std::complex<double> sample(1.0, 0.0);
+        ComplexDouble sample(1.0, 0.0);
         RadioPhysics::complexRotation(sample, it->first);
         //for some reason BOOST_CHECK_CLOSE wasn't working, using BOOST_CHECK on the difference instead
         BOOST_CHECK(abs((sample.real() - it->second.real())) < DBL_EPSILON);
@@ -69,7 +69,7 @@ CSIM_TEST_CASE(FREE_SPACE_POWER_LOSS)
     expectedResults.push_back(std::pair<double, double >(99, 1 / 14397589.798688836));
 
     for (auto it = expectedResults.begin(); it != expectedResults.end(); it++) {
-        std::complex<double> sample(2.0e20, 2.0e20);
+        ComplexDouble sample(2.0e20, 2.0e20);
         double fspl = RadioPhysics::freeSpacePowerLoss(it->first);
         BOOST_CHECK_CLOSE(fspl, it->second, DBL_EPSILON);
     }

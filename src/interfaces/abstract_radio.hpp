@@ -3,6 +3,8 @@
 #include <Eigen/Dense>
 #include <cstdint>
 
+#include <types/complexdouble.hpp>
+
 using Eigen::Vector2d;
 
 /**
@@ -15,12 +17,12 @@ public:
     virtual ~AbstractRadio() {}
 
     //Demodulation
-    virtual bool         rxWave(const std::complex<double> &sample_in) = 0;
+    virtual bool         rxWave(const ComplexDouble &sample_in) = 0;
     virtual bool         rxByte(uint8_t &byte) = 0;
 
     //Modulation
     virtual bool         txByte(const uint8_t &byte) = 0;
-    virtual bool         txWave(std::complex<double> &sample_out) = 0;
+    virtual bool         txWave(ComplexDouble &sample_out) = 0;
 
     virtual Vector2d     getPosition() const = 0;
 

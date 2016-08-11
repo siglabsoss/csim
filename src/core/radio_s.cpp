@@ -38,7 +38,7 @@ bool RadioS::txByte(const uint8_t &byte)
     return m_mod.input(data);
 }
 
-bool RadioS::rxWave(const std::complex<double> &sample_in)
+bool RadioS::rxWave(const ComplexDouble &sample_in)
 {
     filter_io_t data;
     data.type = IO_TYPE_COMPLEX_DOUBLE;
@@ -46,7 +46,7 @@ bool RadioS::rxWave(const std::complex<double> &sample_in)
     return m_demod.input(data);
 }
 
-bool RadioS::txWave(std::complex<double> &sample_out)
+bool RadioS::txWave(ComplexDouble &sample_out)
 {
     filter_io_t data;
     //A properly formed modulation filter chain will always

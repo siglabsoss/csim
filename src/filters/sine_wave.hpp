@@ -33,7 +33,7 @@ public:
         //using 10 for 10V, which is the peak voltage for a 1W / 30dBm sine wave
         double amplitude = 10.0;
         double theta = (((2 * M_PI) / m_ticksPerPeriod) * m_count);
-        m_output.rf = std::complex<double>(10.0 * cos(theta), 10.0 * sin(theta));
+        m_output.rf = ComplexDouble(10.0 * cos(theta), 10.0 * sin(theta));
         m_count++;
         if (m_count > m_ticksPerPeriod) {
             m_count -= m_ticksPerPeriod;

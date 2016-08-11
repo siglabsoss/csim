@@ -2,10 +2,10 @@
 
 #include <interfaces/abstract_siso.hpp>
 #include <types/fixedcomplex.hpp>
+#include <types/complexdouble.hpp>
 #include <memory>
 
 #include <cstdint>
-
 
 enum io_type_t : uint8_t {
     IO_TYPE_NULL = 0,
@@ -25,7 +25,7 @@ struct filter_io_t
     FixedComplex16 fcn;
     FixedComplex32 fcn32;
     union {
-        std::complex<double> rf;
+        ComplexDouble rf;
         uint8_t byte;
     };
 
@@ -94,7 +94,7 @@ struct filter_io_t
         return *this;
     }
 
-    filter_io_t & operator=(const std::complex<double> &rhs)
+    filter_io_t & operator=(const ComplexDouble &rhs)
     {
         this->type = IO_TYPE_COMPLEX_DOUBLE;
         this->rf = rhs;

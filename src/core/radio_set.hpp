@@ -28,15 +28,15 @@ public:
 
     void init();
 
-    void bufferSampleForRadio(const iterator &it, std::complex<double> &sample);
-    void getSampleForRadio(const iterator &it, std::complex<double> &sample);
+    void bufferSampleForRadio(const iterator &it, ComplexDouble &sample);
+    void getSampleForRadio(const iterator &it, ComplexDouble &sample);
 
     iterator begin();
     iterator end();
 
 private:
     std::vector<std::unique_ptr<RadioS> >                               m_radios;
-    std::map<RadioS *, boost::circular_buffer<std::complex<double> > >  m_txBuffers;
+    std::map<RadioS *, boost::circular_buffer<ComplexDouble > >  m_txBuffers;
     MatrixXd                                                            m_distances;
     ComplexGaussianNoise                                                m_noise;
     bool                                                                m_didInit;

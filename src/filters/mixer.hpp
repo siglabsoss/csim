@@ -21,7 +21,7 @@ private:
     filter_io_t m_hold;
     size_t m_count;
     int32_t m_ticksPerPeriod;
-    std::vector<std::complex<double> > m_vec;
+    std::vector<ComplexDouble > m_vec;
 };
 
 

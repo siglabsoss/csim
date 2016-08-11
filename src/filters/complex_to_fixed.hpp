@@ -29,5 +29,5 @@ public:
     }
 private:
     filter_io_t m_output;
-    std::complex<double> m_input;
+    ComplexDouble m_input;
 };
