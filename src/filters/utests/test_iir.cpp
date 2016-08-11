@@ -9,7 +9,7 @@
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
 #include <stdlib.h>
-#include <filters/fixediir.hpp>
+#include <filters/fixed_iir.hpp>
 
 
 #define NUM_X_REGISTERS 2
@@ -142,8 +142,10 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
                 output[k].imag() << " is not the same as " << imagAnswers[k]);
 //        cout << output[k].real / 32768.00 << " is the same as "
 //                << realAnswers[k] << endl;
+    	cout << output[k].real().range().to_int64() << " " << output[k].imag().range().to_int64() << endl;
     }
-    cout << "DONE WITH IIR" << endl;
+
+
 
 }
 

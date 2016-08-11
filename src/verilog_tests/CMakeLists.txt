@@ -37,3 +37,7 @@ target_link_libraries(ALU2 ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY}
 ########################### FIR ###########################
 add_executable(FIR fir_verifier.cpp)
 target_link_libraries(FIR ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY}  sigfilters sigtypes sigmath sigutils sigcore ${SystemC_LIBRARIES} pthread)
+
+########################### IIR ###########################
+add_executable(IIR iir_verifier.cpp)
+target_link_libraries(IIR ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY}  sigfilters sigtypes sigmath sigutils sigcore ${SystemC_LIBRARIES} pthread)
