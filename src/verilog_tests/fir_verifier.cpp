@@ -17,20 +17,19 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    FixedComplex16 input[32769]; //Array to hold inputs
-    FixedComplex16 output[32769]; //Array to hold outputs
-    double realAnswers[32769];
-    double imagAnswers[32769];
-    FixedComplex16 tap[32769];
-    FixedComplex16 tempTap[32769];
+
+    FixedComplex16 input[32768]; //Array to hold inputs
+    FixedComplex16 output[32768]; //Array to hold outputs
+    double realAnswers[32768];
+    double imagAnswers[32768];
+    vector<FixedComplex16>  tap(32768);
+
 
     string infile(argv[1]);
 	string outfile(argv[2]);
 	string tapsFile(argv[3]);
 
 	cout << "program start" << endl;
-	int realInput[32769] = {0}; // default values
-	int imagInput[32769] = {0};
 
 	ifstream in(infile.c_str());
 	if (!in.is_open()){
@@ -41,7 +40,7 @@ int main(int argc, char *argv[])
 	ofstream out(outfile.c_str());
 	if (!out.is_open()){
 		cout << "error reading output " << outfile << endl;
-		return 1;;
+		return 1;
 	}//If cannot read from file, return 1;
 
 	ifstream taps(tapsFile.c_str());
@@ -56,7 +55,7 @@ int main(int argc, char *argv[])
     string line;
     int i = 0;
     while (getline(in, line)) {
-        Tokenizer tok(line);
+    	Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
         double real = atof(vec[0].c_str());
         double imag = atof(vec[1].c_str());
@@ -71,7 +70,7 @@ int main(int argc, char *argv[])
     while (getline(taps, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        tap[j].real(atof(vec[0].c_str())/32768.0);
+        tap[j].real((atof(vec[0].c_str())/32768.0));
         j++;
     } //Reads in taps
 

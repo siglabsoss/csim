@@ -1,7 +1,7 @@
 #include <filters/fixed_fir.hpp>
 
 
-FixedFIR::FixedFIR(int N, FixedComplex16* tap) :
+FixedFIR::FixedFIR(int N, vector<FixedComplex16> tap) :
     m_taps(N),
     m_bench(N),
     m_output()

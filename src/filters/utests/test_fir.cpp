@@ -44,7 +44,7 @@ CSIM_TEST_CASE(REAL_FILTER)
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
     string taps("./data/fir/input/taps1.txt");
-    FixedComplex16 tap[41];
+    vector<FixedComplex16> tap(41);
 
     ifstream in2(taps.c_str());
     BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps);
@@ -103,7 +103,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     FixedComplex16 output[1024]; //Array to hold outputs
     double realAnswers[1024];
     double imagAnswers[1024];
-    FixedComplex16 tap[100];
+   vector<FixedComplex16> tap(100);
 
     string data("./data/fir/input/data2_in.csv"); //Input data file
 

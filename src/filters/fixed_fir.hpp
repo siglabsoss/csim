@@ -12,7 +12,7 @@
 class FixedFIR : public FilterChainElement
 {
 public:
-    FixedFIR(int N, FixedComplex16* tap);
+    FixedFIR(int N, vector<FixedComplex16> tap);
 
     bool input(const filter_io_t &data) override;
     /**
