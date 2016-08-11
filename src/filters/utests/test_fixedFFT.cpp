@@ -18,6 +18,38 @@ using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(FixedFFT)
 
+CSIM_TEST_CASE(CONSTANT_INPUTS)
+{
+    constexpr size_t NUM_SAMPLES = 8;
+    constexpr size_t NUM_SAMPLE_SETS = 10;
+    filter_io_t data, output;
+    data = FixedComplex32(M_SQRT1_2/3,  M_SQRT1_2/3); //QAM16 0000 symbol
+    fixedfft fft(NUM_SAMPLES);
+    size_t outputCount = 0;
+    size_t noOutputCount = 0;
+    for (int i = 0; i < NUM_SAMPLE_SETS; i++) {
+        for (int j = 0; j < NUM_SAMPLES; j++) {
+            fft.input(data);
+            fft.tick();
+            if (fft.output(output)) {
+                if (outputCount % NUM_SAMPLES == 0) {
+                    BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
+                    BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
+                } else {
+                    BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 0.0, 0.1);
+                    BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 0.0, 0.1);
+                }
+                outputCount++;
+                //std::cout << outputCount << ": " << output << std::endl;
+            } else {
+               noOutputCount++;
+            }
+        }
+    }
+    //std::cout << "No outputs for " << noOutputCount << " counts" << std::endl;
+    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLE_SETS*NUM_SAMPLES - 2*NUM_SAMPLES + 1);
+}
+
 CSIM_TEST_CASE(FFT_OCTAVE)
 {
 	string infile("./data/fft/input/data_file_complex1.csv");
