@@ -53,8 +53,11 @@ bool Modulator::input(const filter_io_t &data)
 }
 bool Modulator::output(filter_io_t &data)
 {
-    data = m_output;
-    return true;
+    if (m_tickCount == 1) {
+        data = m_output;
+        return true;
+    }
+    return false;
 }
 void Modulator::tick(void)
 {
