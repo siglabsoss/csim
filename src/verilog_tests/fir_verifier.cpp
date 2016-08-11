@@ -34,19 +34,19 @@ int main(int argc, char *argv[])
 
 	ifstream in(infile.c_str());
 	if (!in.is_open()){
-		cout << "error reading" << infile << endl;
+		cout << "error reading input " << infile << endl;
 		return 1;
 	}//If cannot read from file, return 1;
 
 	ofstream out(outfile.c_str());
 	if (!out.is_open()){
-		cout << "error reading " << outfile << endl;
+		cout << "error reading output " << outfile << endl;
 		return 1;;
 	}//If cannot read from file, return 1;
 
 	ifstream taps(tapsFile.c_str());
 	if (!taps.is_open()){
-		cout << "error reading" << taps << endl;
+		cout << "error reading taps " << taps << endl;
 		return 1;
 	}//If cannot read from file, return 1;
 
@@ -60,8 +60,8 @@ int main(int argc, char *argv[])
         vec.assign(tok.begin(), tok.end());
         double real = atof(vec[0].c_str());
         double imag = atof(vec[1].c_str());
-        input[i].real(real);
-        input[i].imag(imag);
+        input[i].real(real/32768.0);
+        input[i].imag(imag/32768.0);
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
