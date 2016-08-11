@@ -1,4 +1,5 @@
 #include <core/filter_chain.hpp>
+#include <core/logger.hpp>
 #include <utility>
 
 FilterChain::FilterChain() :
@@ -53,7 +54,10 @@ void FilterChain::tick()
             if (current->m_next == nullptr) {
                 m_outputReady = true; //last block in the chain output data
             } else {
-                (void)current->m_next->input(m_output);
+                bool didInput = current->m_next->input(m_output);
+                if (!didInput) {
+                    log_err("Filter element %s dropped input sample from %s !", current->m_next->getName().c_str(), current->getName().c_str());
+                }
             }
             //Publish the output externally if desired
             if (current->shouldPublish()) {
