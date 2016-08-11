@@ -17,12 +17,12 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    FixedComplex16 input[1024]; //Array to hold inputs
-    FixedComplex16 output[1024]; //Array to hold outputs
-    double realAnswers[1024];
-    double imagAnswers[1024];
-    FixedComplex16 tap[100];
-    FixedComplex16 tempTap[100];
+    FixedComplex16 input[32769]; //Array to hold inputs
+    FixedComplex16 output[32769]; //Array to hold outputs
+    double realAnswers[32769];
+    double imagAnswers[32769];
+    FixedComplex16 tap[32769];
+    FixedComplex16 tempTap[32769];
 
     string infile(argv[1]);
 	string outfile(argv[2]);
