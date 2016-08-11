@@ -9,7 +9,7 @@
  * NOTE: First a coefficient must be 1
  *
  */
-#include <filters/fixediir.hpp>
+#include <filters/fixed_iir.hpp>
 
 void fixediir::reset()
 {
