@@ -157,4 +157,24 @@ CSIM_TEST_CASE(FRACTIONAL_MULTIPLICATION)
     BOOST_CHECK_EQUAL(result, expectedResult);
 }
 
+CSIM_TEST_CASE(FRACTIONAL_VS_INTEGER)
+{
+    std::vector <std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > > tests;
+    tests.push_back( std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > ( 0.54030,  ( 0.54030 * 32768)));
+    tests.push_back( std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > (-0.41615,  (-0.41615 * 32768)));
+    tests.push_back( std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > (-0.98999,  (-0.98999 * 32768)));
+    tests.push_back( std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > (-0.65364,  (-0.65364 * 32768)));
+    tests.push_back( std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > ( 0.28366,  ( 0.28366 * 32768)));
+    tests.push_back( std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > (-0.99999,  (-0.99999 * 32768)));
+    tests.push_back( std::pair <sc_fixed<16, 1>, sc_fixed<16, 16> > ( 0.99999,  ( 0.99999 * 32768)));
+
+
+    for (auto it = tests.begin(); it != tests.end(); it++) {
+        int64_t result = sc_fixed<8, 1>(it->first).range().to_uint64();
+        int64_t a = it->first.range().to_uint64();
+        int64_t b = it->second.range().to_uint64();
+        BOOST_CHECK_EQUAL(a, b);
+    }
+}
+
 CSIM_TEST_SUITE_END()
