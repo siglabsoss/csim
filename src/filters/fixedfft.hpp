@@ -94,6 +94,7 @@ public:
     void tick() override;
     int N;
     int stagecount;
+    bool newInput;
     //int* mainTable;
     int* mainTable;
     fixedfftstage *stages;

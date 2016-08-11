@@ -91,6 +91,7 @@ public:
     int N;
     int tableSize;
     int stagecount;
+    bool newInput;
     int* mainTable;
     fixedifftstage *stages;
     fixedifftprint printer;
