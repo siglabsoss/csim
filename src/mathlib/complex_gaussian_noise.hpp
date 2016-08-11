@@ -13,8 +13,7 @@ public:
     ComplexDouble getNext();
 
 private:
-    std::default_random_engine m_realGenerator;
-    std::default_random_engine m_imagGenerator;
+    std::default_random_engine m_sampleGenerator;
     std::normal_distribution<double> m_realDistribution;
     std::normal_distribution<double> m_imagDistribution;
 };
