@@ -2,11 +2,11 @@
 
 #include <core/radio_s.hpp>
 #include <mathlib/complex_gaussian_noise.hpp>
+#include <types/circularbuffer.hpp>
 
 #include <vector>
 #include <map>
 #include <Eigen/Dense>
-#include <boost/circular_buffer.hpp>
 
 using Eigen::MatrixXd;
 
@@ -36,7 +36,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<RadioS> >                               m_radios;
-    std::map<RadioS *, boost::circular_buffer<ComplexDouble > >  m_txBuffers;
+    std::map<RadioS *, CircularBuffer<ComplexDouble > >  m_txBuffers;
     MatrixXd                                                            m_distances;
     ComplexGaussianNoise                                                m_noise;
     bool                                                                m_didInit;

@@ -37,6 +37,9 @@ void SigWorld::tick()
         /* Step 3 - Get the current radio's RF output */
         current->txWave(txSample);
 
+        //XXX temporary
+        current->txByte(0xAA);
+
         /* Step 4 - Queue the sample in a buffer */
         m_radioSet.bufferSampleForRadio(it, txSample);
 

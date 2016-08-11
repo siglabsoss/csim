@@ -11,9 +11,9 @@
 
 using namespace std;
 
-void plotter::send(Json::Value jsn)
+void plotter::send(const Json::Value &jsn) const
 {
-
+    Json::FastWriter writer;
     std::string message = writer.write(jsn);
     //cout << message << endl; //Prints json to be send
 

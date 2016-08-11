@@ -6,8 +6,7 @@
 
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
-
-#include <boost/circular_buffer.hpp>
+#include <types/circularbuffer.hpp>
 
 class FixedFIR : public FilterChainElement
 {
@@ -29,7 +28,7 @@ private: //methods
 
 private: //members
     std::vector< FixedComplex16 >   m_taps;
-    boost::circular_buffer< FixedComplex16 > m_bench;
+    CircularBuffer< FixedComplex16 > m_bench;
 
     FixedComplex16                  m_output;
 };

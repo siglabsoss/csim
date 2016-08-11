@@ -55,7 +55,7 @@ void RadioSet::init()
         //Now we have our max delay to radio 'cur', use it for our ringbuffer size
         int maxDelay = RadioPhysics::sampleDelayForDistance(maxDistance);
         log_debug("Radio %d is farthest away from radio %d with a distance of %f (%d samples)", maxRadioIdx, cur, maxDistance, maxDelay);
-        m_txBuffers[m_radios[cur].get()] = boost::circular_buffer<ComplexDouble >(static_cast<size_t>(maxDelay), ComplexDouble(0.0, 0.0));
+        m_txBuffers[m_radios[cur].get()] = CircularBuffer<ComplexDouble >(static_cast<size_t>(maxDelay), ComplexDouble(0.0, 0.0));
     }
     m_didInit = true;
 }
