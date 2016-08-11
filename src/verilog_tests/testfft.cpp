@@ -96,8 +96,8 @@ int main(int argc, char *argv[])
      string outfile3("../data/fft/output/out1BitReversed.txt");
      ofstream out3(outfile3.c_str());
      for (i = 0; i < count; i++) {
-              out2 << setw(11) << setfill(' ') <<  answers[i].real()  << endl;
-
+              out2 << setw(11) << setfill(' ') <<  answers[i].real().range().to_int64()   << ",";
+              out2 << setw(11) << setfill(' ') <<  answers[i].imag().range().to_int64()   << endl;
             //  cout << temp[i];
           }//Prints data out in bit reversed order
 

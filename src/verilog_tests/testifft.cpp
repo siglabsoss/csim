@@ -92,8 +92,8 @@ int main(int argc, char *argv[])
 //     }//Prints data out in correct order
 
     for (i = 0; i < count; i++) {
-        out2 << setw(11) << setfill(' ') <<  answers[i].real()<<"," ;
-        out2 << setw(11) << setfill(' ') << answers[i].imag() << endl;
+        out2 << setw(11) << setfill(' ') <<  answers[i].real().range().to_int64()   << ",";
+        out2 << setw(11) << setfill(' ') <<  answers[i].imag().range().to_int64()   << endl;
        // cout << answers[i];
     }//Prints data
 
