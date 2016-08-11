@@ -3,8 +3,8 @@
 
 ZeroPadInterpolator::ZeroPadInterpolator(size_t chunkSize) :
     FilterChainElement("FixedZeroPadInterp"),
-    m_inputBuffer(chunkSize),
-    m_outputBuffer(chunkSize*2),
+    m_inputBuffer(chunkSize, FixedComplex32(0.0,0.0)),
+    m_outputBuffer(chunkSize*2, FixedComplex32(0.0,0.0)),
     m_shouldOutput(false),
     m_outputIdx(0)
 {
@@ -43,8 +43,15 @@ void ZeroPadInterpolator::tick(void)
 {
     if (m_inputBuffer.size() == m_inputBuffer.capacity()) { //we have enough input data
         if (!m_shouldOutput) { //we're not currently outputting
+            size_t half = m_inputBuffer.size() / 2;
+            size_t secondHalfStart = m_outputBuffer.size() - (m_inputBuffer.size() - half);
             for(size_t i = 0; i < m_inputBuffer.size(); i++) {
-                m_outputBuffer[m_inputBuffer.size()/2 + i] = m_inputBuffer[i];
+                if (i < half) {
+                    m_outputBuffer[i] = m_inputBuffer[i]; //first half goes on the left side
+                } else {
+                    m_outputBuffer[secondHalfStart + (i - half)] = m_inputBuffer[i]; //second half on the right, leaving zeros in the middle
+                }
+
             }
             m_inputBuffer.clear();
             m_shouldOutput = true;

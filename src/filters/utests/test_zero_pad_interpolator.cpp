@@ -8,63 +8,91 @@ CSIM_TEST_CASE(PROPERLY_ZERO_PADDED)
 {
     size_t chunkSize = 1024;
     ZeroPadInterpolator interp(chunkSize);
-    filter_io_t data, output;
-    data = FixedComplex32(1.0, 1.0);
+    filter_io_t data1, data2, output;
+    data1 = FixedComplex32(1.0, 1.0);
+    data2 = FixedComplex32(-1.0,-1.0);
 
     //Load up the interpolator with one less than chunk size elements and expect no output
     for (size_t i = 0; i < chunkSize - 1; i++) {
-        BOOST_CHECK(interp.input(data) == true);
+        if (i < chunkSize / 2) {
+            BOOST_CHECK(interp.input(data1) == true);
+        }else {
+            BOOST_CHECK(interp.input(data2) == true);
+        }
         interp.tick();
         BOOST_CHECK(interp.output(output) == false);
     }
 
-    interp.input(data);
+    interp.input(data2);
     interp.tick();
 
-    //After inputting one chunkSize worth, expect zero padded output
-    for (size_t i = 0; i < chunkSize * 2; i++) {
+    size_t leftSectionEnd = chunkSize / 2;
+    size_t middleSectionBegin = chunkSize / 2;
+    size_t middleSectionEnd = middleSectionBegin + chunkSize;
+    size_t rightSectionBegin = middleSectionEnd;
+    size_t rightSectionEnd = chunkSize * 2;
+
+    for (size_t i = 0; i < leftSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        if (i < chunkSize / 2) { //left side zero padding
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
-        } else if( i >= 3 * chunkSize / 2) { //right side zero padding
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
-        } else { //actual data that matches the input
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 1.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 1.0, DBL_EPSILON);
-        }
+        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 1.0, DBL_EPSILON);
         interp.tick();
     }
+
+    for (size_t i = middleSectionBegin; i < middleSectionEnd; i++) {
+        BOOST_CHECK(interp.output(output) == true);
+        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
+        interp.tick();
+    }
+
+    for (size_t i = rightSectionBegin; i < rightSectionEnd; i++) {
+        BOOST_CHECK(interp.output(output) == true);
+        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), -1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), -1.0, DBL_EPSILON);
+        interp.tick();
+    }
+
     //We should have drained the output by now
     BOOST_CHECK(interp.output(output) == false);
 
 
     //Load up the interpolator with one less than chunk size elements and expect no output
     for (size_t i = 0; i < chunkSize - 1; i++) {
-        BOOST_CHECK(interp.input(data) == true);
+        if (i < chunkSize / 2) {
+            BOOST_CHECK(interp.input(data1) == true);
+        }else {
+            BOOST_CHECK(interp.input(data2) == true);
+        }
         interp.tick();
         BOOST_CHECK(interp.output(output) == false);
     }
 
-    interp.input(data);
+    interp.input(data2);
     interp.tick();
 
-    //After inputting one chunkSize worth, expect zero padded output
-    for (size_t i = 0; i < chunkSize * 2; i++) {
+
+    for (size_t i = 0; i < leftSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        if (i < chunkSize / 2) { //left side zero padding
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
-        } else if( i >= 3 * chunkSize / 2) { //right side zero padding
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
-        } else { //actual data that matches the input
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 1.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 1.0, DBL_EPSILON);
-        }
+        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 1.0, DBL_EPSILON);
         interp.tick();
     }
+
+    for (size_t i = middleSectionBegin; i < middleSectionEnd; i++) {
+        BOOST_CHECK(interp.output(output) == true);
+        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
+        interp.tick();
+    }
+
+    for (size_t i = rightSectionBegin; i < rightSectionEnd; i++) {
+        BOOST_CHECK(interp.output(output) == true);
+        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), -1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), -1.0, DBL_EPSILON);
+        interp.tick();
+    }
+
     //We should have drained the output by now
     BOOST_CHECK(interp.output(output) == false);
 }
@@ -99,5 +127,6 @@ CSIM_TEST_CASE(OUTPUT_BUFFER_OVERFLOW)
     //Check that we do start outputting here
     BOOST_CHECK(interp.output(output) == true);
 }
+
 
 CSIM_TEST_SUITE_END()
