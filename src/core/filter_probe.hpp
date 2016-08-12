@@ -8,7 +8,7 @@ class FilterProbe : public FilterChainElement
 {
 public:
     virtual ~FilterProbe();
-    FilterProbe(size_t numElements);
+    FilterProbe(const std::string &name, size_t numElements);
 
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;

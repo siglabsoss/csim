@@ -36,6 +36,8 @@ private:
         socket->connect("tcp://localhost:5556"); //Port number
         usleep(1000000.0 / 4.0);
     }
+
+    plotter(const plotter &other) = delete;
 public:
 
     static const plotter & get(); //singleton

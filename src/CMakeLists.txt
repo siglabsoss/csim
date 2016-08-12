@@ -70,6 +70,7 @@ add_subdirectory(utils)
 add_subdirectory(3rd)
 
 if (BUILD_UTESTS)
+    add_subdirectory(core/utests)
     add_subdirectory(filters/utests)
     add_subdirectory(mathlib/utests)
     add_subdirectory(types/utests)

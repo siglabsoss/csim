@@ -11,7 +11,7 @@
 #include <filters/mixer.hpp>
 #include <filters/zero_pad_interpolator.hpp>
 #include <filters/linear_gain_amplifier.hpp>
-#include <probes/triggerplot.hpp>
+#include <probes/sample_count_trigger.hpp>
 
 #include <sys/time.h>
 #include <utility>
@@ -44,14 +44,14 @@ void constructRadios(SigWorld &world)
                     constexpr size_t FFT_WINDOW_SIZE = 1024;
 
                     FilterChain modulation_chain;
-                    Modulator           *qam16    = new Modulator(Modulator::MOD_SCHEME_QAM16);
+                    Modulator           *qam16    = new Modulator(Modulator::MOD_SCHEME_BPSK);
                     fixedfft            *fft      = new fixedfft(FFT_WINDOW_SIZE, 0);
                     ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE);
                     LinearGainAmplifier *lga      = new LinearGainAmplifier(2);
                     fixedifft           *ifft     = new fixedifft(FFT_WINDOW_SIZE*2, 0);
-                    TriggerPlot         *tp1      = new TriggerPlot(1000, 1);
-                    TriggerPlot         *tp2      = new TriggerPlot(1000, 1);
-                    TriggerPlot         *tp3      = new TriggerPlot(1000, 1);
+                    SampleCountTrigger  *tp1      = new SampleCountTrigger("FFT trigger", 1000, 1, 10000);
+                    SampleCountTrigger  *tp2      = new SampleCountTrigger("IFFT trigger", 1000, 1, 10000);
+                    SampleCountTrigger  *tp3      = new SampleCountTrigger("Mixer trigger", 1000, 1, 400000);
 
                     //XXX use parameter for frequency
                     int frequency               = 25000000;
@@ -65,6 +65,7 @@ void constructRadios(SigWorld &world)
                     ifft->shouldPublish(true);
                     mixer->shouldPublish(true);
                     */
+
                     modulation_chain = *tp3 + *mixer + *tp2 +  *ifft + *lga + *zpi + *tp1 +  *fft + *qam16;
 
                     FilterChain demodulation_chain;

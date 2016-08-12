@@ -1,8 +1,8 @@
 
 #include <core/filter_probe.hpp>
 
-FilterProbe::FilterProbe(size_t numElements) :
-    FilterChainElement("Probe"),
+FilterProbe::FilterProbe(const std::string &name, size_t numElements) :
+    FilterChainElement(name),
     m_validInput(false),
     m_history(numElements),
     m_p(plotter::get())
@@ -32,11 +32,6 @@ bool FilterProbe::output(filter_io_t &data)
     return false;
 }
 
-void FilterProbe::tick(void)
-{
-
-}
-
 const filter_io_t& FilterProbe::getLatest() const
 {
     return m_history[0];
@@ -54,13 +49,13 @@ void FilterProbe::clear()
 
 void FilterProbe::nplot(const std::string &title)
 {
-    m_p.nplot(m_history, title);
+    m_p.nplot(m_history, getName() + title);
 }
 void FilterProbe::nplotfft(const std::string &title)
 {
-    m_p.nplotfft(m_history, title);
+    m_p.nplotfft(m_history, getName() + title);
 }
 void FilterProbe::nplotqam(const std::string &title)
 {
-    m_p.nplotqam(m_history, title);
+    m_p.nplotqam(m_history, getName() + title);
 }
