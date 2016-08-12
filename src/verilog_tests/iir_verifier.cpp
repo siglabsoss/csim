@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 		cout << "Could not read from " << taps2;
 	}
 
-	FixedComplex16 input[32768]; //Array to hold inputs
-	FixedComplex16 output[32768]; //Array to hold outputs
+	vector<FixedComplex16> input(32768); //Array to hold inputs
+	vector<FixedComplex16> output(32768); //Array to hold outputs
 	double realAnswers[1024]; //Array to hold answers
 	double imagAnswers[1024]; //Arrayto hodl answers
 	vector<FixedComplex16> atap(100); //Array for A taps
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 		i++;
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-	int j = 0;
+	int j = 0; //Number of A taps
 	while (getline(in2, line)) {
 
 		Tokenizer tok(line);
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 		j++;
 	} //Reads in A taps
 
-	int m = 0;
+	int m = 0; // Number of B taps
 	while (getline(in4, line)) {
 		Tokenizer tok(line);
 		vec.assign(tok.begin(), tok.end());
