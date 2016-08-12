@@ -1,16 +1,4 @@
 #include <test/unit_test.hpp>
-
-#include <iostream>
-#include<cstring>
-#include <stdio.h>
-#include <iostream>     // cout, endl
-#include <vector> //For storing parsed data from file
-#include <iterator>     // ostream_operator
-#include <boost/tokenizer.hpp> //For parsing data from file
-#include <iomanip> //For setprecision
-#include <stdlib.h>
-#include <bitset>
-
 #include <filters/fixed_fir.hpp>
 
 using namespace boost;
