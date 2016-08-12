@@ -1,7 +1,7 @@
 #include <test/unit_test.hpp>
 
 #include <iostream>
-#include<cstring>
+#include <cstring>
 #include <stdio.h>
 #include <iostream>     // cout, endl
 #include <vector> //For storing parsed data from file
@@ -10,20 +10,20 @@
 #include <iomanip> //For setprecision
 #include <stdlib.h>
 
-#include <filters/cic.hpp>
+#include <filters/fixed_cic.hpp>
 
 using namespace boost;
 using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(CICFilter)
 
-CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and subtracts
+CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only adds and subtracts
 {
 
     FixedComplex16 input[2048]; //Array to hold inputs
     FixedComplex16 output[2048]; //Array to hold outputs
     FixedComplex16 answers[2048];
-    string data("./data/cicdata/input/cic_data_in.txt"); //Input data file
+    string data("./data/cic/input/cic_data_in.txt"); //Input data file
 
     ifstream in(data.c_str());
     BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data);
@@ -44,7 +44,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only ads and s
         i++;
     } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
-    string data3("./data/cicdata/answers/answers1.txt"); //Answers data file
+    string data3("./data/cic/answers/answers1.txt"); //Answers data file
     ifstream in3(data3.c_str());
     BOOST_REQUIRE_MESSAGE(in3.is_open(), "Could not read from " << data3);
 
