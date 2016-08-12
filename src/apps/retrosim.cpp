@@ -53,12 +53,11 @@ void constructRadios(SigWorld &world)
                     //SampleCountTrigger  *tp1      = new SampleCountTrigger("FFT trigger", 1000, 1, 10000);
                     LevelTrigger        *lt1      = new LevelTrigger("FFT Level", 1000, 10);
                     SampleCountTrigger  *tp2      = new SampleCountTrigger("IFFT trigger", 1000, 1, 10000);
-                    SampleCountTrigger  *tp3      = new SampleCountTrigger("Mixer trigger", 1000, 1, 400000);
+                    SampleCountTrigger  *tp3      = new SampleCountTrigger("Mixer trigger", 1000, 1, 8000);
                     SampleCountTrigger  *tp4      = new SampleCountTrigger("QAM trigger", 1000, 1, 15000);
 
                     //XXX use parameter for frequency
-                    int frequency               = 25000000;
-                    Mixer *mixer                = new Mixer(10*frequency, frequency);
+                    Mixer *mixer                = new Mixer(3);
 
                     /*
                     qam16->shouldPublish(true);

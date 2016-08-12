@@ -3,37 +3,41 @@
 
 Mixer::~Mixer() {}
 
-Mixer::Mixer(uint32_t fs, int32_t hz) :
+Mixer::Mixer(uint32_t samplesPerPeriod) :
     FilterChainElement(std::string("Mixer")),
-    m_fs(fs),
     m_count(0),
-    m_ticksPerPeriod(static_cast<int32_t>(fs)/hz)
+    m_samplesPerPeriod(samplesPerPeriod),
+    m_inputValid(false)
 {
-    m_output.type = IO_TYPE_COMPLEX_DOUBLE;
 }
 
 bool Mixer::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
-    m_hold = data;
+    m_inputValid = true;
+    m_input = data.toComplexDouble();
     return true;
 }
 
 bool Mixer::output(filter_io_t &data)
 {
-    data = m_output.fcn32 * m_hold.fcn32;
-    //Convert to complex double
-    data = ComplexDouble(data.fcn32.real(), data.fcn32.imag());
-    return true;
+    if (m_inputValid) {
+        m_inputValid = false;
+        data = m_carrier * m_input;
+        return true;
+    }
+    return false;
 }
 
 void Mixer::tick(void)
 {
-    double theta = (((2 * M_PI) / m_ticksPerPeriod) * m_count);
-    m_output.fcn32 = FixedComplex32(cos(theta), sin(theta));
-    m_count++;
-    if (m_count > m_ticksPerPeriod) {
-        m_count -= m_ticksPerPeriod;
+    if (m_inputValid) {
+        double theta = (((2 * M_PI) / m_samplesPerPeriod) * m_count);
+        m_carrier = ComplexDouble(cos(theta), sin(theta));
+        m_count++;
+        if (m_count >= m_samplesPerPeriod) {
+            m_count -= m_samplesPerPeriod;
+        }
     }
 }
 
