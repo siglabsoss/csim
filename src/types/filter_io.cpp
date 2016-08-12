@@ -127,6 +127,13 @@ filter_io_t & filter_io_t::operator=(const FixedComplex32 &rhs)
     return *this;
 }
 
+filter_io_t & filter_io_t::operator=(const uint8_t &rhs)
+{
+    this->type = IO_TYPE_BYTE;
+    this->byte = rhs;
+    return *this;
+}
+
 ComplexDouble filter_io_t::toComplexDouble() const
 {
     double real = 0, imag = 0;
