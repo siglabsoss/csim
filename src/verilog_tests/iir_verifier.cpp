@@ -1,5 +1,5 @@
 #include <iostream>
-#include<cstring>
+#include <cstring>
 #include <stdio.h>
 #include <iostream>     // cout, endl
 #include <vector> //For storing parsed data from file
@@ -7,8 +7,6 @@
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
 #include <stdlib.h>
-#include <bitset>
-#include <algorithm>
 
 #include <filters/fixed_iir.hpp>
 
@@ -81,7 +79,7 @@ int main(int argc, char *argv[])
 	} //Reads in B taps
 
 
-	fixediir iir(m, j, atap, btap);
+	fixediir iir(atap, btap);
 	filter_io_t data2;
 	for (int j = 0; j < i; j ++) {
 		data2 = input[j];

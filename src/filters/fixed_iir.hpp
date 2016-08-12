@@ -10,8 +10,12 @@
 
 #include <types/fixedcomplex.hpp>
 #include <core/filter_chain_element.hpp>
+/*
+ * Note that a[0] will be converted to 1
+ * Block diagram: https://www.music.mcgill.ca/~gary/307/week2/img15.gif
+ */
 
-//Note that a[0] must be 1
+
 
 class fixediir : public FilterChainElement
 {
@@ -26,7 +30,7 @@ public:
 
     void tick() override;
 
-    fixediir(int registerXSize, int registerYSize, vector<FixedComplex16> aCoeffs,
+    fixediir(vector<FixedComplex16> aCoeffs,
     		vector<FixedComplex16> bCoeffs); //Constructor
     void iir(FixedComplex16 &input); //Filtering input data
     void reset(); //resets registers

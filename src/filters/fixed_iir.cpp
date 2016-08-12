@@ -48,22 +48,16 @@ void fixediir::tick()
 
 }
 
-fixediir::fixediir(int registerXSize, int registerYSize,
-		vector<FixedComplex16> aCoeffs, vector<FixedComplex16> bCoeffs) :
-                m_numXRegisters(registerXSize),
-                m_numYRegisters(registerYSize),
+fixediir::fixediir(vector<FixedComplex16> aCoeffs, vector<FixedComplex16> bCoeffs) :
+                m_numXRegisters(bCoeffs.size()),
+                m_numYRegisters(aCoeffs.size()),
                 m_a(m_numYRegisters),
                 m_b(m_numXRegisters),
                 m_x(m_numXRegisters),
                 m_y(m_numYRegisters)
 {
-
-    for (int i = 0; i < m_numYRegisters; i++)
-        m_a[i] = aCoeffs[i]; //Gets coefficient data for right side
-
-    for (int i = 0; i < m_numXRegisters; i++)
-        m_b[i] = bCoeffs[i]; //Gets coefficient data for left side
-
+        m_a = aCoeffs; //Gets coefficient data for right side
+        m_b = bCoeffs; //Gets coefficient data for left side
 } //Constructs filter based on number of registers on each side and the values of those registers
 
 void fixediir::iir(FixedComplex16 &input)

@@ -15,8 +15,8 @@
 #define NUM_X_REGISTERS 2
 #define NUM_Y_REGISTERS 5
 
-FixedComplex16 a[NUM_Y_REGISTERS];
-FixedComplex16 b[NUM_X_REGISTERS]; //b coefficients
+vector<FixedComplex16 > a (NUM_Y_REGISTERS);
+vector<FixedComplex16> b(NUM_X_REGISTERS); //b coefficients
 float temp1[NUM_Y_REGISTERS] = { 1, .5, .5, .6, .7 }; // a coefficients
 float temp2[NUM_X_REGISTERS] = { .5, .5 }; //b coefficients
 
@@ -43,7 +43,7 @@ CSIM_TEST_CASE(REAL_FILTER)
         input[i - 1].real((double) i / 10.00);
     }
 
-    fixediir iir(NUM_X_REGISTERS, NUM_Y_REGISTERS, a, b);
+    fixediir iir(a, b);
 
     filter_io_t data;
     for (int i = 0; i < 4; i ++) {
@@ -125,7 +125,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     } //Gets each line of answers. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
     assert(l == i);//Length of inputs is length of answers/outputs.
-    fixediir iir(j, j, atap, btap);
+    fixediir iir(atap, btap);
     filter_io_t data2;
     for (int j = 0; j < i; j ++) {
         data2 = input[j];
