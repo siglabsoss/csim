@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 		cout << "Could not read from " << taps2;
 	}
 
-	FixedComplex16 input[1024]; //Array to hold inputs
-	FixedComplex16 output[1024]; //Array to hold outputs
+	FixedComplex16 input[32768]; //Array to hold inputs
+	FixedComplex16 output[32768]; //Array to hold outputs
 	double realAnswers[1024]; //Array to hold answers
 	double imagAnswers[1024]; //Arrayto hodl answers
 	vector<FixedComplex16> atap(100); //Array for A taps
@@ -58,8 +58,8 @@ int main(int argc, char *argv[])
 	while (getline(in, line)) {
 		Tokenizer tok(line);
 		vec.assign(tok.begin(), tok.end());
-		input[i].real(atof(vec[0].c_str()));
-		input[i].imag(atof(vec[1].c_str()));
+		input[i].real(atof(vec[0].c_str())/32768.0);
+		input[i].imag(atof(vec[1].c_str())/32768.0);
 		i++;
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
 		Tokenizer tok(line);
 		vec.assign(tok.begin(), tok.end());
-		atap[j].real(atof(vec[0].c_str()));
+		atap[j].real(atof(vec[0].c_str())/32768.0);
 		j++;
 	} //Reads in A taps
 
@@ -76,12 +76,12 @@ int main(int argc, char *argv[])
 	while (getline(in4, line)) {
 		Tokenizer tok(line);
 		vec.assign(tok.begin(), tok.end());
-		btap[m].real(atof(vec[0].c_str()));
+		btap[m].real(atof(vec[0].c_str())/32768.0);
 		m++;
 	} //Reads in B taps
 
 
-	fixediir iir(j, m, atap, btap);
+	fixediir iir(m, j, atap, btap);
 	filter_io_t data2;
 	for (int j = 0; j < i; j ++) {
 		data2 = input[j];
@@ -90,7 +90,9 @@ int main(int argc, char *argv[])
 	}
 
 	for (int k = 0; k < i; k++) {
-		cout << output[k].real().range().to_int64() << " " << output[k].imag().range().to_int64() << endl;
+	//	cout << output[k].real().range().to_int64() << " " << output[k].imag().range().to_int64() << endl;
+    	out << setw(6) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
+    	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
 	}
 
 }
