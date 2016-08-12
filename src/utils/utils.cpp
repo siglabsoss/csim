@@ -1,4 +1,8 @@
 #include <cmath>
+#include <utils/utils.hpp>
+
+using namespace std;
+using namespace boost;
 
 unsigned int reverseBits(int N, unsigned int num)
 {
@@ -21,4 +25,54 @@ double bound(double min, double max, double val)
         val = min;
     }
     return val;
+}
+
+vector<FixedComplex16> complexRead16Scaled(string inFile)
+{
+	ifstream in(inFile.c_str());
+	vector<FixedComplex16> input;
+	char ** ptr;
+	typedef tokenizer<escaped_list_separator<char> > Tokenizer;
+	vector<string> vec;
+	string line;
+	FixedComplex16 temp;
+	while (getline(in, line)) {
+		Tokenizer tok(line);
+		vec.assign(tok.begin(), tok.end());
+		temp.real(atof(vec[0].c_str())/32768.0);
+		if (vec.size() == 2) {
+		temp.imag(atof(vec[1].c_str())/32768.0);
+		}
+		else {
+			temp.imag(0);
+		}
+		input.push_back(temp);
+	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+
+	return input;
+}
+
+vector<FixedComplex16> complexRead16Unscaled(string inFile)
+{
+	ifstream in(inFile.c_str());
+	vector<FixedComplex16> input;
+	char ** ptr;
+	typedef tokenizer<escaped_list_separator<char> > Tokenizer;
+	vector<string> vec;
+	string line;
+	FixedComplex16 temp;
+	while (getline(in, line)) {
+		Tokenizer tok(line);
+		vec.assign(tok.begin(), tok.end());
+		temp.real(atof(vec[0].c_str()));
+		if (vec.size() == 2) {
+			temp.imag(atof(vec[1].c_str()));
+		}
+		else {
+			temp.imag(0);
+		}
+		input.push_back(temp);
+	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+
+	return input;
 }
