@@ -49,7 +49,7 @@ void constructRadios(SigWorld &world)
                     ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE);
                     LinearGainAmplifier *lga      = new LinearGainAmplifier(2);
                     fixedifft           *ifft     = new fixedifft(FFT_WINDOW_SIZE*2, 0);
-                    TriggerPlot         *tp1      = new TriggerPlot(10, 1);
+                    TriggerPlot         *tp1      = new TriggerPlot(1000, 1);
                     TriggerPlot         *tp2      = new TriggerPlot(1000, 1);
                     TriggerPlot         *tp3      = new TriggerPlot(1000, 1);
 
@@ -65,8 +65,7 @@ void constructRadios(SigWorld &world)
                     ifft->shouldPublish(true);
                     mixer->shouldPublish(true);
                     */
-                    //modulation_chain = *tp3 + *mixer + *tp2 +  *ifft + *lga + *zpi + *tp1 +  *fft + *qam16;
-                    modulation_chain = *mixer + *ifft + *lga + *zpi + *tp1 + *fft + *qam16;
+                    modulation_chain = *tp3 + *mixer + *tp2 +  *ifft + *lga + *zpi + *tp1 +  *fft + *qam16;
 
                     FilterChain demodulation_chain;
                     AutomaticGain *ag = new AutomaticGain();
