@@ -60,7 +60,6 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     string taps("./data/fir/input/taps2.txt");
     tap = complexRead16Unscaled(taps);
     BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps); //Reads taps file
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 
     string data3("./data/fir/answers/answers2.csv"); //Answers data file
     answers = complexRead16Unscaled(data3);
