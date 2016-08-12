@@ -38,7 +38,8 @@ void SigWorld::tick()
         current->txWave(txSample);
 
         //XXX temporary
-        current->txByte(0xAA);
+        current->txByte(0xA5);
+        //current->txByte(0xF0);
 
         /* Step 4 - Queue the sample in a buffer */
         m_radioSet.bufferSampleForRadio(it, txSample);

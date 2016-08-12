@@ -20,8 +20,11 @@ protected:
     void                            nplotfft(const std::string &title);
     void                            nplotqam(const std::string &title);
 
+    const filter_io_t &             getLatest() const;
+    size_t                          getSize() const;
+
     bool                            m_validInput;
     CircularBuffer<filter_io_t>     m_history;
-    plotter                         m_p;
+    const plotter &                 m_p;
 private:
 };

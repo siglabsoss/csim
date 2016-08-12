@@ -8,6 +8,7 @@
 #include <string>
 #include <complex>
 #include <iostream>
+#include <mutex>
 
 #include <3rd/json/json.h>
 #include <types/fixedcomplex.hpp>
@@ -21,9 +22,12 @@ using namespace std;
 
 class plotter
 {
-public:
+private:
     zmq::context_t *context;
     zmq::socket_t *socket;
+    static plotter *m_instance;
+
+    //static std::mutex  m_mutex;
 
     plotter()
     {
@@ -32,6 +36,10 @@ public:
         socket->connect("tcp://localhost:5556"); //Port number
         usleep(1000000.0 / 4.0);
     }
+public:
+
+    static const plotter & get(); //singleton
+
 
     void send(const Json::Value &jsn) const;
 
@@ -83,37 +91,11 @@ public:
     void conv_real_int(const CircularBuffer<filter_io_t > &obj, Json::Value& t1) const
     {
         for (int i = 0; i < obj.size(); i++) {
-            double real = 0;
-            double imag = 0;
-            switch(obj[i].type) {
-                case IO_TYPE_NULL:
-                    break;
-                case IO_TYPE_COMPLEX_DOUBLE:
-                    real = obj[i].rf.real();
-                    imag = obj[i].rf.imag();
-                    break;
-                case IO_TYPE_FIXED_COMPLEX_16:
-                    real = obj[i].fc.real / 32768.0;
-                    imag = obj[i].fc.imag / 32768.0;
-                    break;
-                case IO_TYPE_FIXED_COMPLEX_32:
-                    real = obj[i].fc32.real / 32768.0;
-                    imag = obj[i].fc32.imag / 32768.0;
-                    break;
-                case IO_TYPE_FIXED_COMPLEX_16_NEW:
-                    real = obj[i].fcn.real().to_double();
-                    imag = obj[i].fcn.imag().to_double();
-                    break;
-                case IO_TYPE_FIXED_COMPLEX_32_NEW:
-                    real = obj[i].fcn32.real().to_double();
-                    imag = obj[i].fcn32.imag().to_double();
-                    break;
-                case IO_TYPE_BYTE:
-                    break;
-            }
+
+            ComplexDouble val = obj[i].toComplexDouble();
             //std::cout << "(" << real << "," << imag << ")" << std::endl;
-            t1["arg0"]["r"][i] = real;
-            t1["arg0"]["i"][i] = imag;
+            t1["arg0"]["r"][i] = val.real();
+            t1["arg0"]["i"][i] = val.imag();
         }
     }
 

@@ -1,8 +1,10 @@
 
 #include <core/radio_s.hpp>
+#include <types/filter_io.hpp>
 #include <utility>
 
 #include <cassert>
+
 
 RadioS::RadioS(const radio_config_t &config, FilterChain &modChain, FilterChain &demodChain) :
     m_id(config.id),

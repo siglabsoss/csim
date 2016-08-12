@@ -11,7 +11,7 @@
 #include <filters/mixer.hpp>
 #include <filters/zero_pad_interpolator.hpp>
 #include <filters/linear_gain_amplifier.hpp>
-#include <filters/triggerplot.hpp>
+#include <probes/triggerplot.hpp>
 
 #include <sys/time.h>
 #include <utility>
@@ -44,23 +44,29 @@ void constructRadios(SigWorld &world)
                     constexpr size_t FFT_WINDOW_SIZE = 1024;
 
                     FilterChain modulation_chain;
-                    Modulator           *qam16   = new Modulator(Modulator::MOD_SCHEME_QAM16);
-                    fixedfft            *fft     = new fixedfft(FFT_WINDOW_SIZE, 0);
-                    ZeroPadInterpolator *zpi     = new ZeroPadInterpolator(FFT_WINDOW_SIZE);
-                    LinearGainAmplifier *lga     = new LinearGainAmplifier(2);
-                    fixedifft           *ifft    = new fixedifft(FFT_WINDOW_SIZE*2, 0);
-                    TriggerPlot         *tp      = new TriggerPlot(100, 1, 100000);
+                    Modulator           *qam16    = new Modulator(Modulator::MOD_SCHEME_QAM16);
+                    fixedfft            *fft      = new fixedfft(FFT_WINDOW_SIZE, 0);
+                    ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE);
+                    LinearGainAmplifier *lga      = new LinearGainAmplifier(2);
+                    fixedifft           *ifft     = new fixedifft(FFT_WINDOW_SIZE*2, 0);
+                    TriggerPlot         *tp1      = new TriggerPlot(10, 1);
+                    TriggerPlot         *tp2      = new TriggerPlot(1000, 1);
+                    TriggerPlot         *tp3      = new TriggerPlot(1000, 1);
 
-                    int frequency = 25000000;
+                    //XXX use parameter for frequency
+                    int frequency               = 25000000;
                     Mixer *mixer                = new Mixer(10*frequency, frequency);
 
+                    /*
                     qam16->shouldPublish(true);
                     fft->shouldPublish(true);
                     zpi->shouldPublish(true);
                     lga->shouldPublish(true);
                     ifft->shouldPublish(true);
                     mixer->shouldPublish(true);
-                    modulation_chain = *tp + *mixer + *ifft + *lga + *zpi + *fft + *qam16;
+                    */
+                    //modulation_chain = *tp3 + *mixer + *tp2 +  *ifft + *lga + *zpi + *tp1 +  *fft + *qam16;
+                    modulation_chain = *mixer + *ifft + *lga + *zpi + *tp1 + *fft + *qam16;
 
                     FilterChain demodulation_chain;
                     AutomaticGain *ag = new AutomaticGain();

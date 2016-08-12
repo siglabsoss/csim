@@ -4,9 +4,9 @@
 FilterProbe::FilterProbe(size_t numElements) :
     FilterChainElement("Probe"),
     m_validInput(false),
-    m_history(numElements)
+    m_history(numElements),
+    m_p(plotter::get())
 {
-
 }
 
 FilterProbe::~FilterProbe()
@@ -25,6 +25,7 @@ bool FilterProbe::output(filter_io_t &data)
 {
     if (m_validInput) {
         data = m_history[0];
+        m_validInput = false;
         return true;
     }
 
@@ -34,6 +35,16 @@ bool FilterProbe::output(filter_io_t &data)
 void FilterProbe::tick(void)
 {
 
+}
+
+const filter_io_t& FilterProbe::getLatest() const
+{
+    return m_history[0];
+}
+
+size_t FilterProbe::getSize() const
+{
+    return m_history.size();
 }
 
 void FilterProbe::clear()
