@@ -1,11 +1,25 @@
 
 #include <core/filter_probe.hpp>
 
+FilterProbe::FilterProbe(const std::string &name, size_t numElements, plot_type_t plot) :
+    FilterChainElement(name),
+    m_validInput(false),
+    m_history(numElements),
+    m_p(plotter::get()),
+    m_didTrigger(false),
+    m_plotType(plot),
+    m_samplesSinceTrigger(0)
+{
+}
+
 FilterProbe::FilterProbe(const std::string &name, size_t numElements) :
     FilterChainElement(name),
     m_validInput(false),
     m_history(numElements),
-    m_p(plotter::get())
+    m_p(plotter::get()),
+    m_didTrigger(false),
+    m_plotType(PLOT_TYPE_NPLOT),
+    m_samplesSinceTrigger(0)
 {
 }
 
@@ -18,6 +32,14 @@ bool FilterProbe::input(const filter_io_t &data)
 {
     m_validInput = true;
     m_history.push_front(data);
+    if (m_didTrigger) {
+        m_samplesSinceTrigger++;
+        if ( (m_samplesSinceTrigger >= m_history.capacity()/2) && (m_history.size() == m_history.capacity()) ) {
+            plot();
+            m_didTrigger = false;
+            m_samplesSinceTrigger = 0;
+        }
+    }
     return true;
 }
 
@@ -32,6 +54,20 @@ bool FilterProbe::output(filter_io_t &data)
     return false;
 }
 
+void FilterProbe::plot()
+{
+    switch (m_plotType) {
+        case PLOT_TYPE_NPLOT:
+            return nplot();
+        case PLOT_TYPE_NPLOTFFT:
+            nplotfft();
+            break;
+        case PLOT_TYPE_NPLOTQAM:
+            nplotqam();
+            break;
+    }
+}
+
 const filter_io_t& FilterProbe::getLatest() const
 {
     return m_history[0];
@@ -42,20 +78,21 @@ size_t FilterProbe::getSize() const
     return m_history.size();
 }
 
-void FilterProbe::clear()
+void FilterProbe::trigger(const std::string &title)
 {
-    m_history.clear();
+    m_triggerName = title;
+    m_didTrigger = true;
 }
 
-void FilterProbe::nplot(const std::string &title)
+void FilterProbe::nplot()
 {
-    m_p.nplot(m_history, getName() + title);
+    m_p.nplot(m_history, getName() + " - " + m_triggerName);
 }
-void FilterProbe::nplotfft(const std::string &title)
+void FilterProbe::nplotfft()
 {
-    m_p.nplotfft(m_history, getName() + title);
+    m_p.nplotfft(m_history, getName() + " - " + m_triggerName);
 }
-void FilterProbe::nplotqam(const std::string &title)
+void FilterProbe::nplotqam()
 {
-    m_p.nplotqam(m_history, getName() + title);
+    m_p.nplotqam(m_history, getName() + " - " + m_triggerName);
 }

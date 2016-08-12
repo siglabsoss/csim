@@ -39,8 +39,8 @@ public:
             m_count = 0;
             std::cout << "SampleCountTriggered!" << std::endl;
             std::ostringstream title;
-            title << " - " << m_triggers + 1;
-            nplot(title.str());
+            title << m_triggers + 1;
+            trigger(title.str());
             m_triggers++;
         }
     }

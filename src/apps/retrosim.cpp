@@ -12,6 +12,7 @@
 #include <filters/zero_pad_interpolator.hpp>
 #include <filters/linear_gain_amplifier.hpp>
 #include <probes/sample_count_trigger.hpp>
+#include <probes/level_trigger.hpp>
 
 #include <sys/time.h>
 #include <utility>
@@ -44,14 +45,16 @@ void constructRadios(SigWorld &world)
                     constexpr size_t FFT_WINDOW_SIZE = 1024;
 
                     FilterChain modulation_chain;
-                    Modulator           *qam16    = new Modulator(Modulator::MOD_SCHEME_BPSK);
+                    Modulator           *qam16    = new Modulator(Modulator::MOD_SCHEME_QAM16);
                     fixedfft            *fft      = new fixedfft(FFT_WINDOW_SIZE, 0);
                     ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE);
                     LinearGainAmplifier *lga      = new LinearGainAmplifier(2);
                     fixedifft           *ifft     = new fixedifft(FFT_WINDOW_SIZE*2, 0);
-                    SampleCountTrigger  *tp1      = new SampleCountTrigger("FFT trigger", 1000, 1, 10000);
+                    //SampleCountTrigger  *tp1      = new SampleCountTrigger("FFT trigger", 1000, 1, 10000);
+                    LevelTrigger        *lt1      = new LevelTrigger("FFT Level", 1000, 10);
                     SampleCountTrigger  *tp2      = new SampleCountTrigger("IFFT trigger", 1000, 1, 10000);
                     SampleCountTrigger  *tp3      = new SampleCountTrigger("Mixer trigger", 1000, 1, 400000);
+                    SampleCountTrigger  *tp4      = new SampleCountTrigger("QAM trigger", 1000, 1, 15000);
 
                     //XXX use parameter for frequency
                     int frequency               = 25000000;
@@ -66,7 +69,7 @@ void constructRadios(SigWorld &world)
                     mixer->shouldPublish(true);
                     */
 
-                    modulation_chain = *tp3 + *mixer + *tp2 +  *ifft + *lga + *zpi + *tp1 +  *fft + *qam16;
+                    modulation_chain = *tp3 + *mixer + *tp2 +  *ifft + *lga + *zpi + *lt1 +  *fft + *tp4 + *qam16;
 
                     FilterChain demodulation_chain;
                     AutomaticGain *ag = new AutomaticGain();

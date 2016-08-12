@@ -14,11 +14,14 @@ void SigWorld::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
 
 void SigWorld::init()
 {
+    std::srand(std::time(0));
     m_radioSet.init();
 }
 
 void SigWorld::tick()
 {
+    int random_variable = std::rand();
+    uint8_t byte = random_variable % 256;
     size_t count = 0;
     for (RadioSet::iterator it = m_radioSet.begin(); it != m_radioSet.end(); it++)
     {
@@ -38,7 +41,7 @@ void SigWorld::tick()
         current->txWave(txSample);
 
         //XXX temporary
-        current->txByte(0xA5);
+        current->txByte(byte);
         //current->txByte(0xF0);
 
         /* Step 4 - Queue the sample in a buffer */
