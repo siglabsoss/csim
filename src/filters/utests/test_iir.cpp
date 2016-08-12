@@ -1,24 +1,7 @@
 #include <test/unit_test.hpp>
-
 #include <iostream>
-#include <cstring>
-#include <stdio.h>
-#include <iostream>     // cout, endl
-#include <vector> //For storing parsed data from file
-#include <iterator>     // ostream_operator
-#include <boost/tokenizer.hpp> //For parsing data from file
-#include <iomanip> //For setprecision
-#include <stdlib.h>
 #include <filters/fixed_iir.hpp>
-
-
-#define NUM_X_REGISTERS 2
-#define NUM_Y_REGISTERS 5
-
-vector<FixedComplex16 > a (NUM_Y_REGISTERS);
-vector<FixedComplex16> b(NUM_X_REGISTERS); //b coefficients
-float temp1[NUM_Y_REGISTERS] = { 1, .5, .5, .6, .7 }; // a coefficients
-float temp2[NUM_X_REGISTERS] = { .5, .5 }; //b coefficients
+#include <utils/utils.hpp>
 
 using namespace boost;
 using namespace std;
@@ -27,6 +10,12 @@ CSIM_TEST_SUITE_BEGIN(IIRFilter)
 
 CSIM_TEST_CASE(REAL_FILTER)
 {
+	int NUM_X_REGISTERS = 2;
+	int  NUM_Y_REGISTERS = 5;
+	vector<FixedComplex16 > a (NUM_Y_REGISTERS);
+	vector<FixedComplex16> b(NUM_X_REGISTERS); //b coefficients
+	float temp1[NUM_Y_REGISTERS] = { 1, .5, .5, .6, .7 }; // a coefficients
+	float temp2[NUM_X_REGISTERS] = { .5, .5 }; //b coefficients
 
     for (int i = 0; i < NUM_Y_REGISTERS; i++) {
         a[i].real(temp1[i]);
@@ -47,8 +36,6 @@ CSIM_TEST_CASE(REAL_FILTER)
 
     filter_io_t data;
     for (int i = 0; i < 4; i ++) {
-
-
       data = input[i];
       iir.input(data); //Filters data
       output[i] = iir.m_output;
@@ -62,91 +49,43 @@ CSIM_TEST_CASE(REAL_FILTER)
 
 CSIM_TEST_CASE(COMPLEX_FILTER)
 {
+    vector <FixedComplex16> input; //Vector to hold inputs
+    vector<FixedComplex16> output; //Vector to hold outputs
+    vector <FixedComplex16> answers; //Vector to hold inputs
+    vector<FixedComplex16> atap; //Vector for A taps
+    vector<FixedComplex16> btap; //Vector for B taps
 
-    FixedComplex16 input[1024]; //Array to hold inputs
-    FixedComplex16 output[1024]; //Array to hold outputs
-    double realAnswers[1024]; //Array to hold answers
-    double imagAnswers[1024]; //Arrayto hodl answers
-    vector<FixedComplex16> atap(100); //Array for A taps
-    vector<FixedComplex16> btap(100);
+    string inFile("./data/iir/input/data1_in.csv"); //Input data file
+    input = complexRead16Unscaled(inFile);
 
-    string data("./data/iir/input/data1_in.csv"); //Input data file
+    string ataps("./data/iir/input/ataps.txt");
+    atap = complexRead16Unscaled(ataps);
 
-    ifstream in(data.c_str());
-    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data);
+    string btaps("./data/iir/input/btaps.txt");
+    btap = complexRead16Unscaled(btaps);
 
-    char ** ptr;
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
-    vector<string> vec;
-    string line;
-    int i = 0; //Number of inputs
-    while (getline(in, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        input[i].real(atof(vec[0].c_str()));
-        input[i].imag(atof(vec[1].c_str()));
-        i++;
-    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+    string answersFile("./data/iir/answers/answers1.txt"); //Answers data file
+    answers = complexRead16Unscaled(answersFile);
 
-    string taps("./data/iir/input/ataps.txt");
-    ifstream in2(taps.c_str());
-    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps);
-    int j = 0;
-    while (getline(in2, line)) {
 
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        atap[j].real(atof(vec[0].c_str()));
-        j++;
-    } //Reads in taps
-
-    string taps2("./data/iir/input/btaps.txt");
-    ifstream in4(taps2.c_str());
-    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << taps2);
-
-    int m = 0;
-    while (getline(in4, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        btap[m].real(atof(vec[0].c_str()));
-        m++;
-    } //Reads in taps
-
-    string data3("./data/iir/answers/answers1.txt"); //Answers data file
-    ifstream in3(data3.c_str());
-    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not read from " << data3);
-    int l = 0;
-    while (getline(in3, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        realAnswers[l] = atof(vec[0].c_str());
-        imagAnswers[l] = atof(vec[1].c_str());
-        l++;
-    } //Gets each line of answers. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
-    assert(l == i);//Length of inputs is length of answers/outputs.
     fixediir iir(atap, btap);
-    filter_io_t data2;
-    for (int j = 0; j < i; j ++) {
-        data2 = input[j];
-        iir.input(data2); //Filters data
-        output[j] = iir.m_output;
+    filter_io_t data;
+    for (int j = 0; j < input.size(); j ++) {
+        data = input[j];
+        iir.input(data); //Filters data
+        output.push_back(iir.m_output);
     }
 
-    for (int k = 0; k < i; k++) {
+    assert(output.size() == answers.size());//Length of inputs is length of answers/outputs.
+
+    for (int k = 0; k < output.size(); k++) {
         BOOST_CHECK_MESSAGE(
-                abs(output[k].real() - realAnswers[k]) < .001,
-                output[k].real() << " is not the same as " << realAnswers[k]);
+                abs(output[k].real() - answers[k].real()) < .001,
+                output[k].real() << " is not the same as " << answers[k].real());
         BOOST_CHECK_MESSAGE(
-                abs(output[k].imag() - imagAnswers[k]) < .001,
-                output[k].imag() << " is not the same as " << imagAnswers[k]);
-//        cout << output[k].real / 32768.00 << " is the same as "
-//                << realAnswers[k] << endl;
- //   	cout << output[k].real().range().to_int64() << " " << output[k].imag().range().to_int64() << endl;
+                abs(output[k].imag() - answers[k].imag()) < .001,
+                output[k].imag() << " is not the same as " << answers[k].imag());
     }
-
-
-
 }
 
 CSIM_TEST_SUITE_END()
