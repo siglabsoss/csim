@@ -12,10 +12,10 @@ CSIM_TEST_CASE(REAL_FILTER)
 {
 	int NUM_X_REGISTERS = 2;
 	int  NUM_Y_REGISTERS = 5;
-	vector<FixedComplex16 > a (NUM_Y_REGISTERS);
-	vector<FixedComplex16> b(NUM_X_REGISTERS); //b coefficients
-	float temp1[NUM_Y_REGISTERS] = { 1, .5, .5, .6, .7 }; // a coefficients
-	float temp2[NUM_X_REGISTERS] = { .5, .5 }; //b coefficients
+	vector<FixedComplex16 > a (5);
+	vector<FixedComplex16> b(2); //b coefficients
+	float temp1[5] = { 1, .5, .5, .6, .7 }; // a coefficients
+	float temp2[2] = { .5, .5 }; //b coefficients
 
     for (int i = 0; i < NUM_Y_REGISTERS; i++) {
         a[i].real(temp1[i]);
