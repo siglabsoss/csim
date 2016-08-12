@@ -8,9 +8,8 @@
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
 #include <stdlib.h>
-
 #include <utils/utils.hpp> //reverseBits()
-#include <filters/fixedfft.hpp>
+#include <filters/oldfixedfft.hpp>
 
 using namespace std;
 
@@ -66,7 +65,7 @@ int main(int argc, char *argv[])
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
 
 
-    fixedfft fft(points, 23040); //x point fft, y table size
+    oldfixedfft fft(points, 23040); //x point fft, y table size
 
 
 
@@ -99,11 +98,11 @@ int main(int argc, char *argv[])
 //     }//Prints data out in correct order
 
 
-     string outfile3("../data/fft/output/out1BitReversed.txt");
+     string outfile3("../data/fft/output/out1BitReversedold.txt");
      ofstream out3(outfile3.c_str());
      for (i = 0; i < count; i++) {
-              out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
-              out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
+              out3 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
+              out3 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
             //  cout << temp[i];
           }//Prints data out in bit reversed order
 

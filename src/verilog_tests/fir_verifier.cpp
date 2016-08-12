@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
         j++;
     } //Reads in taps
 
-    FixedFIR fir(j, tap); //Creates instance of fixed FIR filter given j taps.
+    FixedFIR fir(tap); //Creates instance of fixed FIR filter given j taps.
     for (int k = 0; k < i; k++) {
         filter_io_t data;
         data = input[k];
