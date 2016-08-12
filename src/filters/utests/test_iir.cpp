@@ -142,7 +142,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
                 output[k].imag() << " is not the same as " << imagAnswers[k]);
 //        cout << output[k].real / 32768.00 << " is the same as "
 //                << realAnswers[k] << endl;
-    	cout << output[k].real().range().to_int64() << " " << output[k].imag().range().to_int64() << endl;
+ //   	cout << output[k].real().range().to_int64() << " " << output[k].imag().range().to_int64() << endl;
     }
 
 
