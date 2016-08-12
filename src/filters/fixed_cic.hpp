@@ -8,13 +8,14 @@
 #ifndef CIC_H_
 #define CIC_H_
 
-#include <stdio.h>
-#include <iostream>
 #include <vector>
 
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
-
+/*
+ *
+ * Block diagram: http://www.ni.com/cms/images/devzone/ph/image3222866864835185780.jpg
+ */
 class fixedcic : public FilterChainElement
 {
 public:
