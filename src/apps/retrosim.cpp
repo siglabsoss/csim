@@ -47,7 +47,7 @@ void constructRadios(SigWorld &world)
                     FilterChain modulation_chain;
                     Modulator           *qam16    = new Modulator(Modulator::MOD_SCHEME_QAM16);
                     fixedfft            *fft      = new fixedfft(FFT_WINDOW_SIZE, 0);
-                    ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE);
+                    ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE, 2);
                     LinearGainAmplifier *lga      = new LinearGainAmplifier(2);
                     fixedifft           *ifft     = new fixedifft(FFT_WINDOW_SIZE*2, 0);
                     //SampleCountTrigger  *tp1      = new SampleCountTrigger("FFT trigger", 1000, 1, 10000);

@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include <core/filter_chain_element.hpp>
@@ -5,7 +6,7 @@
 class ZeroPadInterpolator : public FilterChainElement
 {
 public:
-    ZeroPadInterpolator(size_t chunkSize);
+    ZeroPadInterpolator(size_t chunkSize, size_t upSampleFactor);
 
     /**
      * Input is expected to be an FFT in fixed point form

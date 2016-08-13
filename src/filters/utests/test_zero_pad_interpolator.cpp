@@ -7,7 +7,8 @@ CSIM_TEST_SUITE_BEGIN(InterpolationFunctionality)
 CSIM_TEST_CASE(PROPERLY_ZERO_PADDED)
 {
     size_t chunkSize = 1024;
-    ZeroPadInterpolator interp(chunkSize);
+    size_t upSampleFactor = 4;
+    ZeroPadInterpolator interp(chunkSize, upSampleFactor);
     filter_io_t data1, data2, output;
     data1 = FixedComplex32(1.0, 1.0);
     data2 = FixedComplex32(-1.0,-1.0);
@@ -26,11 +27,14 @@ CSIM_TEST_CASE(PROPERLY_ZERO_PADDED)
     interp.input(data2);
     interp.tick();
 
-    size_t leftSectionEnd = chunkSize / 2;
+
+    size_t rightSectionEnd = chunkSize * upSampleFactor;
+    size_t rightSectionBegin = rightSectionEnd - chunkSize / 2;
+    size_t middleSectionEnd = rightSectionBegin;
     size_t middleSectionBegin = chunkSize / 2;
-    size_t middleSectionEnd = middleSectionBegin + chunkSize;
-    size_t rightSectionBegin = middleSectionEnd;
-    size_t rightSectionEnd = chunkSize * 2;
+    size_t leftSectionEnd = middleSectionBegin;
+
+
 
     for (size_t i = 0; i < leftSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
@@ -100,7 +104,7 @@ CSIM_TEST_CASE(PROPERLY_ZERO_PADDED)
 CSIM_TEST_CASE(INPUT_BUFFER_OVERFLOW)
 {
     size_t chunkSize = 8;
-    ZeroPadInterpolator interp(chunkSize);
+    ZeroPadInterpolator interp(chunkSize, 4);
     filter_io_t data, output;
     data = FixedComplex32(1.0, 1.0);
 
@@ -113,7 +117,7 @@ CSIM_TEST_CASE(INPUT_BUFFER_OVERFLOW)
 CSIM_TEST_CASE(OUTPUT_BUFFER_OVERFLOW)
 {
     size_t chunkSize = 8;
-    ZeroPadInterpolator interp(chunkSize);
+    ZeroPadInterpolator interp(chunkSize, 4);
     filter_io_t data, output;
     data = FixedComplex32(1.0, 1.0);
 

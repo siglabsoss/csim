@@ -1,10 +1,10 @@
 #include <filters/zero_pad_interpolator.hpp>
 #include <core/logger.hpp>
 
-ZeroPadInterpolator::ZeroPadInterpolator(size_t chunkSize) :
+ZeroPadInterpolator::ZeroPadInterpolator(size_t chunkSize, size_t upSampleFactor) :
     FilterChainElement("FixedZeroPadInterp"),
     m_inputBuffer(chunkSize, FixedComplex32(0.0,0.0)),
-    m_outputBuffer(chunkSize*2, FixedComplex32(0.0,0.0)),
+    m_outputBuffer(chunkSize*upSampleFactor, FixedComplex32(0.0,0.0)),
     m_shouldOutput(false),
     m_outputIdx(0)
 {
