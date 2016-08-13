@@ -24,13 +24,13 @@ int main(int argc, char *argv[])
 	string tapsFile(argv[3]);
 
 	input = complexRead16Scaled(inFile);
-	if (!input.empty()) {
-		cout << "Could not read from " << inFile;
+	if (input.empty()) {
+		cout << "Could not read from " << inFile << endl;
 		return 1;
 	}
 
 	tap = complexRead16Scaled(tapsFile);
-	if (!tap.empty()) {
+	if (tap.empty()) {
 		cout << "Could not read from " << tapsFile;
 		return 1;
 	}
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
      }
 
     ofstream out(outFile);
-    if (!out.is_open()) {
+    if (out.is_open()) {
     	cout << "Could not write to " << outFile << endl;
     	return 1;
     }
