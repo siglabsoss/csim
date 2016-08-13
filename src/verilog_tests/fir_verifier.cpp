@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
      }
 
     ofstream out(outFile);
-    if (out.is_open()) {
+    if (!out.is_open()) {
     	cout << "Could not write to " << outFile << endl;
     	return 1;
     }

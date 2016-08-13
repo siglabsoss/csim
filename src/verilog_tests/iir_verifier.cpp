@@ -29,19 +29,19 @@ int main(int argc, char *argv[])
 	string taps2(argv[4]);
 
 	input = complexRead16Scaled(inFile);
-	if (!input.empty()) {
+	if (input.empty()) {
 		cout << "Could not read from " << inFile << endl;
 		return 1;
 	}
 
 	atap = complexRead16Scaled(taps);
-	if (!atap.empty()) {
+	if (atap.empty()) {
 		cout << "Could not read from " << taps << endl;
 		return 1;
 	}//Gets A taps
 
 	btap = complexRead16Scaled(taps2);
-	if (!btap.empty()) {
+	if (btap.empty()) {
 		cout << "Could not read from " << taps2 << endl;
 		return 1;
 	}//Gets A taps
@@ -55,6 +55,10 @@ int main(int argc, char *argv[])
 	}
 
 	ofstream out(outFile);
+    if (!out.is_open()) {
+    	cout << "Could not write to " << outFile << endl;
+    	return 1;
+    }
 	for (int k = 0; k < output.size(); k++) {
     	out << setw(6) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
     	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
