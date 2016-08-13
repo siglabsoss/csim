@@ -41,3 +41,11 @@ target_link_libraries(FIR ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} 
 ########################### IIR ###########################
 add_executable(IIR iir_verifier.cpp)
 target_link_libraries(IIR ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY}  sigfilters sigtypes sigmath sigutils sigcore ${SystemC_LIBRARIES} pthread)
+
+########################### CIC ###########################
+add_executable(CIC cic_verifier.cpp)
+target_link_libraries(CIC ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY}  sigfilters sigtypes sigmath sigutils sigcore ${SystemC_LIBRARIES} pthread)
+
+########################### FFT ###########################
+add_executable(OldFFT oldtestfft.cpp)
+target_link_libraries(OldFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigtypes sigfilters  sigmath sigutils sigcore)
