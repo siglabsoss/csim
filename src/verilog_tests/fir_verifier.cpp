@@ -6,7 +6,7 @@
 #include <iterator>     // ostream_operator
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <iomanip> //For setprecision
-
+#include <utils/utils.hpp>
 #include <filters/fixed_fir.hpp>
 
 using namespace boost;
@@ -15,76 +15,43 @@ using namespace std;
 int main(int argc, char *argv[])
 {
 
-    FixedComplex16 input[32768]; //Array to hold inputs
-    FixedComplex16 output[32768]; //Array to hold outputs
-    double realAnswers[32768];
-    double imagAnswers[32768];
+    vector<FixedComplex16> input; //Array to hold inputs
+    vector<FixedComplex16> output; //Array to hold outputs
     vector<FixedComplex16>  tap;
 
-
-    string infile(argv[1]);
-	string outfile(argv[2]);
+    string inFile(argv[1]);
+	string outFile(argv[2]);
 	string tapsFile(argv[3]);
 
-	cout << "program start" << endl;
-
-	ifstream in(infile.c_str());
-	if (!in.is_open()){
-		cout << "error reading input " << infile << endl;
+	input = complexRead16Scaled(inFile);
+	if (!input.empty()) {
+		cout << "Could not read from " << inFile;
 		return 1;
-	}//If cannot read from file, return 1;
+	}
 
-	ofstream out(outfile.c_str());
-	if (!out.is_open()){
-		cout << "error reading output " << outfile << endl;
+	tap = complexRead16Scaled(tapsFile);
+	if (!tap.empty()) {
+		cout << "Could not read from " << tapsFile;
 		return 1;
-	}//If cannot read from file, return 1;
-
-	ifstream taps(tapsFile.c_str());
-	if (!taps.is_open()){
-		cout << "error reading taps " << taps << endl;
-		return 1;
-	}//If cannot read from file, return 1;
-
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
-
-    vector<string> vec;
-    string line;
-    int i = 0;
-    while (getline(in, line)) {
-    	Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        double real = atof(vec[0].c_str());
-        double imag = atof(vec[1].c_str());
-        input[i].real(real/32768.0);
-        input[i].imag(imag/32768.0);
-        i++;
-    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
-    int j = 0; //number of taps
-
-    FixedComplex16 temp;
-    while (getline(taps, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        temp.real((atof(vec[0].c_str())/32768.0));
-        temp.imag(0);
-        tap.push_back(temp);
-        j++;
-    } //Reads in taps
+	}
 
     FixedFIR fir(tap); //Creates instance of fixed FIR filter given j taps.
-    for (int k = 0; k < i; k++) {
+    for (int k = 0; k < input.size(); k++) {
         filter_io_t data;
         data = input[k];
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output[k] = output_sample.fcn;
+        output.push_back(output_sample.fcn);
      }
 
-    for (int k = 0; k < i; k++) {
+    ofstream out(outFile);
+    if (!out.is_open()) {
+    	cout << "Could not write to " << outFile << endl;
+    	return 1;
+    }
+
+    for (int k = 0; k < output.size(); k++) {
     	out << setw(6) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
     	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
     } //Prints all outputs
