@@ -49,6 +49,7 @@ void fixediir::tick()
 }
 
 fixediir::fixediir(vector<FixedComplex16> aCoeffs, vector<FixedComplex16> bCoeffs) :
+                FilterChainElement("FixedIIR"),
                 m_numXRegisters(bCoeffs.size()),
                 m_numYRegisters(aCoeffs.size()),
                 m_a(m_numYRegisters),

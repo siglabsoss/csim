@@ -53,8 +53,11 @@ bool Modulator::input(const filter_io_t &data)
 }
 bool Modulator::output(filter_io_t &data)
 {
-    data = m_output;
-    return true;
+    if (m_tickCount == 1) {
+        data = m_output;
+        return true;
+    }
+    return false;
 }
 void Modulator::tick(void)
 {
@@ -116,6 +119,7 @@ constellation_map_t Modulator::get8PSKConstellations()
 }
 constellation_map_t Modulator::getQAM16Constellations()
 {
+    //https://upload.wikimedia.org/wikipedia/commons/9/90/QAM16_Demonstration.gif
     constellation_map_t constellations;
     //Top Right
     constellations[0b0000] = constellation_t( M_SQRT1_2/3,  M_SQRT1_2/3);
@@ -136,10 +140,10 @@ constellation_map_t Modulator::getQAM16Constellations()
     constellations[0b1011] = constellation_t(-M_SQRT1_2  ,  M_SQRT1_2  );
 
     //Bottom Left
-    constellations[0b1100] = constellation_t( M_SQRT1_2/3,  M_SQRT1_2/3);
-    constellations[0b1101] = constellation_t( M_SQRT1_2,    M_SQRT1_2/3);
-    constellations[0b1110] = constellation_t( M_SQRT1_2/3,  M_SQRT1_2  );
-    constellations[0b1111] = constellation_t( M_SQRT1_2  ,  M_SQRT1_2  );
+    constellations[0b1100] = constellation_t(-M_SQRT1_2/3, -M_SQRT1_2/3);
+    constellations[0b1101] = constellation_t(-M_SQRT1_2,   -M_SQRT1_2/3);
+    constellations[0b1110] = constellation_t(-M_SQRT1_2/3, -M_SQRT1_2  );
+    constellations[0b1111] = constellation_t(-M_SQRT1_2  , -M_SQRT1_2  );
 
     return constellations;
 }

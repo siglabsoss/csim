@@ -5,28 +5,10 @@ using namespace std;
 
 const long double pi = 3.141592653589793238L;
 
-
-
-bool fixedifftbase::input(const filter_io_t &data)
-{
-
-}
-
-bool fixedifftbase::output(filter_io_t &data)
-{
-
-
-}
-
-
-void fixedifftbase::tick()
-{
-
-}
-
 bool fixedifft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
+    newInput = true;
     assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
     FixedComplex32 sample = data.fcn32;
     inputandtick(sample);
@@ -44,15 +26,16 @@ bool fixedifft::output(filter_io_t &data)
         m_count = m_count - (N + 1); //Full cycle of outputs complete
     }
 
-    if (m_count >= N) {
-        data = printer.m_output.front();
-        printer.m_output.pop();
+    if (newInput == true) {
+        newInput = false;
+        if (m_count >= N) {
+            data = printer.m_output.front();
+            printer.m_output.pop();
 
-        return true;
-    }//Time to start outputs
-    else {
-        return false;
-    }//Not ready
+            return true;
+        }//Time to start outputs
+    }
+    return false;
 }
 
 void fixedifft::tick()
@@ -267,7 +250,9 @@ void fixedifftbuffer::inputandtick(FixedComplex32 x)
 }
 
 fixedifft::fixedifft(int Ninput, int tableSize) :
-        printer(Ninput)
+        FilterChainElement("FixedIFFT"),
+        printer(Ninput),
+        newInput(false)
 {
 	if (tableSize == 0) {
 		if (Ninput < 32) {

@@ -7,6 +7,7 @@ set(SIGCORE_SOURCES
 	logger.cpp
 	publisher.cpp
 	parameters.cpp
+	filter_probe.cpp
 )
 
 add_library(sigcore ${SIGCORE_SOURCES})

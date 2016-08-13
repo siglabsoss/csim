@@ -6,6 +6,7 @@
 #include <interfaces/abstract_radio.hpp>
 
 #include <core/filter_chain.hpp>
+#include <types/complexdouble.hpp>
 
 typedef uint32_t radio_id_t;
 
@@ -20,12 +21,12 @@ class RadioS : public AbstractRadio
 public:
 
     //Demodulation
-    bool         rxWave(const std::complex<double> &sample_in) override;
+    bool         rxWave(const ComplexDouble &sample_in) override;
     bool         rxByte(uint8_t &byte) override;
 
     //Modulation
     bool         txByte(const uint8_t &byte) override;
-    bool         txWave(std::complex<double> &sample_out) override;
+    bool         txWave(ComplexDouble &sample_out) override;
 
     //Other
     Vector2d     getPosition() const override;

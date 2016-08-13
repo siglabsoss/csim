@@ -26,13 +26,13 @@ double RadioPhysics::phaseRotationForDistance(double distance)
     return temp * 2 * M_PI;
 }
 
-void RadioPhysics::complexRotationForDistance(std::complex<double> &valOut, double distance)
+void RadioPhysics::complexRotationForDistance(ComplexDouble &valOut, double distance)
 {
     double theta = RadioPhysics::phaseRotationForDistance(distance);
     RadioPhysics::complexRotation(valOut, theta);
 }
 
-void RadioPhysics::complexRotation(std::complex<double> &valOut, double theta)
+void RadioPhysics::complexRotation(ComplexDouble &valOut, double theta)
 {
     //x' = xcos(theta) - ysin(theta)
     //y' = xsin(theta) + ycos(theta)

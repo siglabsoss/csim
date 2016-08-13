@@ -55,20 +55,20 @@ void RadioSet::init()
         //Now we have our max delay to radio 'cur', use it for our ringbuffer size
         int maxDelay = RadioPhysics::sampleDelayForDistance(maxDistance);
         log_debug("Radio %d is farthest away from radio %d with a distance of %f (%d samples)", maxRadioIdx, cur, maxDistance, maxDelay);
-        m_txBuffers[m_radios[cur].get()] = boost::circular_buffer<std::complex<double> >(static_cast<size_t>(maxDelay), std::complex<double>(0.0, 0.0));
+        m_txBuffers[m_radios[cur].get()] = CircularBuffer<ComplexDouble >(static_cast<size_t>(maxDelay), ComplexDouble(0.0, 0.0));
     }
     m_didInit = true;
 }
 
-void RadioSet::bufferSampleForRadio(const RadioSet::iterator &it, std::complex<double> &sample)
+void RadioSet::bufferSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
 {
     m_txBuffers[(*it).get()].push_front(sample);
 }
 
-void RadioSet::getSampleForRadio(const RadioSet::iterator &it, std::complex<double> &sample)
+void RadioSet::getSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
 {
     size_t numRadios = m_radios.size();
-    sample = std::complex<double>(0.0, 0.0);
+    sample = ComplexDouble(0.0, 0.0);
     size_t radioOfInterest = std::distance(begin(), it);
 
     for (size_t i = 0; i < numRadios; i++) {
@@ -79,7 +79,7 @@ void RadioSet::getSampleForRadio(const RadioSet::iterator &it, std::complex<doub
         double distance = m_distances(i, radioOfInterest);
         int delay = RadioPhysics::sampleDelayForDistance(distance);
         assert (delay <= m_txBuffers[otherRadio].capacity());
-        std::complex<double> remoteSample = m_txBuffers[otherRadio].at(delay-1);
+        ComplexDouble remoteSample = m_txBuffers[otherRadio].at(delay-1);
         RadioPhysics::complexRotationForDistance(remoteSample, distance);
         sample += remoteSample + (m_noise.getNext() * (1.0 / RadioPhysics::freeSpacePowerLoss(distance)));
     }

@@ -6,25 +6,10 @@ using namespace std;
 string outfile("../csim/data/fft/output/compareTwiddler.txt");
 ofstream out3(outfile.c_str());
 
-
-bool fixedfftbase::input(const filter_io_t &data)
-{
-    return false;
-}
-
-bool fixedfftbase::output(filter_io_t &data)
-{
-    return false;
-}
-
-void fixedfftbase::tick()
-{
-
-}
-
 bool fixedfft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
+    newInput = true;
     assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
     FixedComplex32 sample = data.fcn32;
     inputandtick(sample);
@@ -38,20 +23,23 @@ bool fixedfft::input(const filter_io_t &data)
 
 bool fixedfft::output(filter_io_t &data)
 {
+    static unsigned int count = 0;
     if (m_count > (2*N) - 1) {
         m_count = m_count - (N+1); //Full cycle of outputs complete
     }
 
-    if (m_count >= N) {
+    if (newInput == true) {
+        newInput = false;
+        if (m_count >= N) {
+            data = printer.m_output.front();
+            printer.m_output.pop();
+            //std::cout << count % 8 << ": "<< data << std::endl;
+            count++;
+            return true;
+        }//Time to start outputs
+    }
 
-        data = printer.m_output.front();
-        printer.m_output.pop();
-
-        return true;
-    }//Time to start outputs
-    else {
-        return false;
-    }//Not ready
+    return false;
 }
 
 void fixedfft::tick()
@@ -262,7 +250,9 @@ void fixedfftbuffer::inputandtick(FixedComplex32 x)
 }
 
 fixedfft::fixedfft(int Ninput, int tableSize) :
-        printer(Ninput)
+        FilterChainElement("FixedFFT"),
+        printer(Ninput),
+        newInput(false)
 {
 	if (tableSize == 0) {
 		if (Ninput < 32) {

@@ -75,8 +75,8 @@ private:
     static constexpr double FILTER_WEIGHT = 0.00001;
     static constexpr double GAIN_CONTROL_INCREMENT = 0.000001;
 
-    std::complex<double> m_input;
-    std::complex<double> m_output;
+    ComplexDouble        m_input;
+    ComplexDouble        m_output;
     double               m_gain;
     double               m_avgPower;
     bool                 m_initializing;

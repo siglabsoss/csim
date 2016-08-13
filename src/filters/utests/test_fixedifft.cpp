@@ -14,10 +14,35 @@
 #include <filters/fixedifft.hpp>
 #include <filters/fixedfft.hpp>
 
+#include <cfloat>
+
 using namespace std;
 
 
 CSIM_TEST_SUITE_BEGIN(FixedIFFT)
+
+CSIM_TEST_CASE(IFFT_CONSTANT_OUTPUT)
+{
+    constexpr size_t NUM_SAMPLES = 8;
+    fixedifft ifft(NUM_SAMPLES);
+    std::vector<filter_io_t> samples(NUM_SAMPLES);
+    samples[0] = FixedComplex32(1.0,1.0);
+    for (size_t i = 1; i < samples.size(); i++) {
+        samples[i] = FixedComplex32(0.0,0.0);
+    }
+
+    filter_io_t output;
+    for (size_t i = 0; i < 2; i++) {
+        for (size_t j = 0; j < samples.size(); j++) {
+            ifft.input(samples[j]);
+            ifft.tick();
+            if (ifft.output(output)) {
+                BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 1.0 / NUM_SAMPLES, DBL_EPSILON);
+                BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 1.0 / NUM_SAMPLES, DBL_EPSILON);
+            }
+        }
+    }
+}
 
 CSIM_TEST_CASE(IFFT_OCTAVE)
 {
@@ -368,7 +393,6 @@ CSIM_TEST_CASE(FFT_IFFT)
 		"I: " << i << " Output: " << temp[i].imag() << " Answer: " << originalInput[i].imag() << " Ratio: " << abs((temp[i].imag() - originalInput[i].imag())/(float)originalInput[i].imag()) );
 	}
 }//Used for Running FFT and then IFFT
-
 
 CSIM_TEST_SUITE_END()
 

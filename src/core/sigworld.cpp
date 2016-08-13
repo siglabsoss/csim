@@ -14,18 +14,21 @@ void SigWorld::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
 
 void SigWorld::init()
 {
+    std::srand(std::time(0));
     m_radioSet.init();
 }
 
 void SigWorld::tick()
 {
+    int random_variable = std::rand();
+    uint8_t byte = random_variable % 256;
     size_t count = 0;
     for (RadioSet::iterator it = m_radioSet.begin(); it != m_radioSet.end(); it++)
     {
         RadioS * const current = (*it).get();
         RFSample sample; //for publishing externally
-        std::complex<double> rxSample;
-        std::complex<double> txSample;
+        ComplexDouble rxSample;
+        ComplexDouble txSample;
 
         /* Step 1 - Feed the radio a waveform sample from the environment */
         m_radioSet.getSampleForRadio(it, rxSample);
@@ -36,6 +39,10 @@ void SigWorld::tick()
 
         /* Step 3 - Get the current radio's RF output */
         current->txWave(txSample);
+
+        //XXX temporary
+        current->txByte(byte);
+        //current->txByte(0xF0);
 
         /* Step 4 - Queue the sample in a buffer */
         m_radioSet.bufferSampleForRadio(it, txSample);

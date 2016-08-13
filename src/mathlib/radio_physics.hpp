@@ -3,12 +3,14 @@
 #include <complex>
 #include <cmath>
 
+#include <types/complexdouble.hpp>
+
 class RadioPhysics
 {
 public:
     static int sampleDelayForDistance(double distance);
     static double phaseRotationForDistance(double distance);
-    static void complexRotationForDistance(std::complex<double> &valOut, double distance);
-    static void complexRotation(std::complex<double> &valOut, double theta);
+    static void complexRotationForDistance(ComplexDouble &valOut, double distance);
+    static void complexRotation(ComplexDouble &valOut, double theta);
     static double freeSpacePowerLoss(double distance);
 };

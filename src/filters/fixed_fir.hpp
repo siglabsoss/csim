@@ -1,12 +1,12 @@
 #pragma once
 
-#include <stdio.h>
 #include <vector>
 #include <stdlib.h>
 #include <boost/circular_buffer.hpp>
 
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
+#include <types/circularbuffer.hpp>
 
 class FixedFIR : public FilterChainElement
 {
@@ -28,7 +28,7 @@ private: //methods
 
 private: //members
     std::vector< FixedComplex16 >   m_taps;
-    boost::circular_buffer< FixedComplex16 > m_bench;
+    CircularBuffer< FixedComplex16 > m_bench;
 
     FixedComplex16                  m_output;
 };

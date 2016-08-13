@@ -1,3 +1,3 @@
 ########################### Simulator ###########################
 add_executable(retrosim retrosim.cpp)
-target_link_libraries(retrosim ${Boost_LIBRARIES} sigcore sigfilters sigtypes sigmath sigutils jsoncpp ${SystemC_LIBRARIES} pthread rt zmq)
+target_link_libraries(retrosim ${Boost_LIBRARIES} sigcore sigfilters sigtypes sigmath sigutils sigprobes jsoncpp ${SystemC_LIBRARIES} pthread rt zmq)

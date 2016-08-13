@@ -15,19 +15,9 @@ enum FFFT_STATE
     FFFT_STATE_INITIAL, FFFT_STATE_READ, FFFT_STATE_OUTPUT
 };
 
-class fixedfftbase : public FilterChainElement
+class fixedfftbase
 {
 public:
-    int m_count;
-    bool input(const filter_io_t &data) override;
-
-        /**
-         * output - provide an output sample to the caller.
-         * @return false if no output sample is available.
-         */
-    bool output(filter_io_t &data) override;
-
-    void tick() override;
     virtual void inputandtick(FixedComplex32 x) = 0;
     virtual ~fixedfftbase();
     int ready;
@@ -80,7 +70,7 @@ public:
     void inputandtick(FixedComplex32 x);
 };
 
-class fixedfft: public fixedfftbase
+class fixedfft : public FilterChainElement
 {
 public:
     bool input(const filter_io_t &data) override;
@@ -94,7 +84,8 @@ public:
     void tick() override;
     int N;
     int stagecount;
-    //int* mainTable;
+    bool newInput;
+    int m_count;
     int* mainTable;
     fixedfftstage *stages;
     fixedfftprint printer;
