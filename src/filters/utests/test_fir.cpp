@@ -12,13 +12,13 @@ CSIM_TEST_CASE(REAL_FILTER)
     vector<FixedComplex16> input; //Vector to hold inputs
     vector<FixedComplex16> output; //Vector to hold outputs
     vector<FixedComplex16> answers;
+    vector<FixedComplex16> tap;
 
     string data("./data/fir/input/data1_in.csv"); //Input data file
     input = complexRead16Unscaled(data);
     BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << data); //Reads input file
 
     string taps("./data/fir/input/taps1.txt");
-    vector<FixedComplex16> tap;
     tap = complexRead16Unscaled(taps);//Reads in taps from file
     BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps); //Reads taps file
 

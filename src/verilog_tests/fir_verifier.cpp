@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     FixedComplex16 output[32768]; //Array to hold outputs
     double realAnswers[32768];
     double imagAnswers[32768];
-    vector<FixedComplex16>  tap(32768);
+    vector<FixedComplex16>  tap;
 
 
     string infile(argv[1]);
@@ -64,10 +64,13 @@ int main(int argc, char *argv[])
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
     int j = 0; //number of taps
 
+    FixedComplex16 temp;
     while (getline(taps, line)) {
         Tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        tap[j].real((atof(vec[0].c_str())/32768.0));
+        temp.real((atof(vec[0].c_str())/32768.0));
+        temp.imag(0);
+        tap.push_back(temp);
         j++;
     } //Reads in taps
 
