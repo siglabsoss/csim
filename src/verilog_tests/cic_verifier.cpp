@@ -17,7 +17,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-	cout << "hi" << endl;
 	vector<FixedComplex16> input; //Array to hold inputs
 	vector<FixedComplex16> output; //Array to hold outputs
 	int settings[3] = {0};//Settings for decimation factor, a regs, and b regs
