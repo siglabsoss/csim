@@ -8,6 +8,7 @@
 #include <string>
 unsigned int reverseBits(int N, unsigned int num);
 vector<FixedComplex16> complexRead16Scaled(string inFile);
+vector<FixedComplex32> complexRead32Scaled(string inFile);
 vector<FixedComplex16> complexRead16Unscaled(string inFile);
 double bound(double min, double max, double val);
 #endif

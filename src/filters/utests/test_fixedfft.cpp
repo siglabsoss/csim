@@ -52,269 +52,146 @@ CSIM_TEST_CASE(CONSTANT_INPUTS)
 
 CSIM_TEST_CASE(FFT_OCTAVE)
 {
-	string infile("./data/fft/input/data_file_complex1.csv");
-	string answersfile("./data/fft/answers/answers1.csv");
+	string inFile("./data/fft/input/data_file_complex1.csv");
+	string answersFile("./data/fft/answers/answers1.csv");
 
-	int i = 0;
-	std::vector<double> realInput(32769);
-	std::vector<double> imagInput(32769);
-	ifstream in(infile.c_str());
-	BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
-	ifstream ans(answersfile.c_str());
-	BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open " << answersfile);
+	vector<FixedComplex32> inputs;
+	vector<FixedComplex32> answers;
+	vector<FixedComplex32> outputs;
 
-	std::string token;
-	string line;
-	int inputs = 0;
-	while(getline(in,line)) {
+	inputs = complexRead32Scaled(inFile);
+	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+	answers = complexRead32Scaled(answersFile);
+	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
-		istringstream ss(line);
-		getline(ss, token, ',');
-		stringstream strValue;
-		strValue << token;
-		int intValue;
-		strValue >> intValue;
-		realInput[inputs] = intValue;
-		getline(ss, token, ',');
-		stringstream strValue2;
-		strValue2 << token;
-		strValue2 >> intValue;
-		imagInput[inputs++] = intValue;
-
-	}//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-	int numAnswers = 0;
-	std::vector<FixedComplex32> trueAnswers(32768);
-	while(getline(ans,line)) {
-
-		istringstream ss(line);
-		getline(ss, token, ',');
-		stringstream strValue;
-		strValue << token;
-		int intValue;
-		strValue >> intValue;
-		trueAnswers[numAnswers].real(intValue / 32768.0);
-		getline(ss, token, ',');
-		stringstream strValue2;
-		strValue2 << token;
-		strValue2 >> intValue;
-		trueAnswers[numAnswers++].imag(intValue / 32768.0);
-
-	}//Reads in answers from file. Parsing by commas. Format is: real,imag\n
-
-
-	std::vector<FixedComplex32> answers(32769);
-	int count = 0; //How many outputs have been collected
-
-	int points = inputs;
-	filter_io_t data;
+	int points = inputs.size();
 	fixedfft fft(points,2949120 ); //x point fft, y table size
-
+	filter_io_t data;
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
-
-			data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
+			data = inputs[j];
 			fft.input(data);
 			bool test = fft.output(data);
 			if (test) {
-				answers[count++] = data.fcn32;
+				outputs.push_back(data.fcn32);
 			}//If output is ready
 		}//Insert all input
 	}//Insert input again to get output
 
+	assert(answers.size() == outputs.size());
 
-	assert(count == inputs);
-	// If you want bits to be reversed
-
-	std::vector<FixedComplex32> temp(32769);
-	for (i = 0; i < inputs; i++) {
-		temp[reverseBits(inputs, i)] = answers[i];
+	vector<FixedComplex32> temp(outputs.size());
+	for (int i = 0; i < outputs.size(); i++) {
+		temp[reverseBits(inputs.size(), i)] = outputs[i];
 	}//Reformats data in correct order
 
 
-	for (i = 0; i < inputs; i++) {
-	    double ratioReal = abs((temp[i].real() - trueAnswers[i].real())/trueAnswers[i].real());
-	    double ratioImag = abs((trueAnswers[i].imag() - temp[i].imag() )/trueAnswers[i].imag());
-	    double realDiff = abs(temp[i].real() - trueAnswers[i].real());
-	    double imagDiff = abs(temp[i].imag() - trueAnswers[i].imag());
+	for (int i = 0; i < answers.size(); i++) {
+	    double ratioReal = abs((temp[i].real() - answers[i].real())/answers[i].real());
+	    double ratioImag = abs((answers[i].imag() - temp[i].imag() )/answers[i].imag());
+	    double realDiff = abs(temp[i].real() - answers[i].real());
+	    double imagDiff = abs(temp[i].imag() - answers[i].imag());
 		BOOST_CHECK_MESSAGE(ratioReal < .20 || realDiff < 5000 / 32768.0 ,
-		"I: " << i << " Output: " << temp[i].real() << " Answer: " << trueAnswers[i].real() << " Ratio: " << ratioReal );
+		"I: " << i << " Output: " << temp[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
 		BOOST_CHECK_MESSAGE(ratioImag < .20 || imagDiff < 5000 / 32768.0,
-		"I: " << i << " Output: " << temp[i].imag() << " Answer: " << trueAnswers[i].imag() << " Ratio: " << ratioImag );
-
+		"I: " << i << " Output: " << temp[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
 	}
 }
 
 
 CSIM_TEST_CASE(FFT_TWO_INPUTS)
 {
-    string infile("./data/fft/input/data_file_complex2.csv");
-    string infile2("./data/fft/input/data_file_complex3.csv");
-    string answersfile("./data/fft/answers/answers2.csv");
-    string answersfile2("./data/fft/answers/answers3.csv");
+    string inFile("./data/fft/input/data_file_complex2.csv");
+    string inFile2("./data/fft/input/data_file_complex3.csv");
+    string answersFile("./data/fft/answers/answers2.csv");
+    string answersFile2("./data/fft/answers/answers3.csv");
 
-    int i = 0;
-    int realInput[32769] = {0}; // default values
-    int imagInput[32769] = {0};
-    ifstream in(infile.c_str());
-    ifstream in2(infile2.c_str());
-    BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
-    BOOST_REQUIRE_MESSAGE(in2.is_open(), "Could not open " << infile2);
-    ifstream ans(answersfile.c_str());
-    BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open " << answersfile);
-    ifstream ans2(answersfile2.c_str());
-    BOOST_REQUIRE_MESSAGE(ans2.is_open(), "Could not open " << answersfile2);
+    vector<FixedComplex32> inputs;
+    vector<FixedComplex32> answers;
+    vector<FixedComplex32> outputs; //Array to store answers
 
-    std::string token;
-    string line;
-    int inputs = 0;
-    while(getline(in,line)) {
+    inputs = complexRead32Scaled(inFile);
+	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+	answers = complexRead32Scaled(answersFile);
+	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
-        istringstream ss(line);
-        getline(ss, token, ',');
-        stringstream strValue;
-        strValue << token;
-        int intValue;
-        strValue >> intValue;
-        realInput[inputs] = intValue;
-        getline(ss, token, ',');
-        stringstream strValue2;
-        strValue2 << token;
-        strValue2 >> intValue;
-        imagInput[inputs++] = intValue;
-
-    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-
-    int numAnswers = 0;
-    std::vector<FixedComplex32> trueAnswers(32768); //array to hold answers from file
-    while(getline(ans,line)) {
-
-        istringstream ss(line);
-        getline(ss, token, ',');
-        stringstream strValue;
-        strValue << token;
-        int intValue;
-        strValue >> intValue;
-        trueAnswers[numAnswers].real(intValue / 32768.0);
-        getline(ss, token, ',');
-        stringstream strValue2;
-        strValue2 << token;
-        strValue2 >> intValue;
-        trueAnswers[numAnswers++].imag(intValue / 32768.0);
-
-    }//Reads in inputs from answers file. Parsing by commas. Format is: real,imag\n
-
-
-    std::vector<FixedComplex32> output(32769); //Array to store answers
-    int count = 0; //How many outputs have been collected
-
-    int points = inputs;
+    int points = inputs.size();
     filter_io_t data;
-    fixedfft fft(points ); //x point fft, y table size
-
+    fixedfft fft(points); //x point fft, y table size
 
 	for (int j = 0; j < points; j++) {
 
-		data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
+		data = inputs[j];
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-		   output[count++] = data.fcn32;
+		   outputs.push_back(data.fcn32);
 		}//If output is ready
 	}//Insert first set of data
 
-    inputs = 0;
+    inputs.clear();
 
-
-    while(getline(in2,line)) {
-
-        istringstream ss(line);
-        getline(ss, token, ',');
-        stringstream strValue;
-        strValue << token;
-        int intValue;
-        strValue >> intValue;
-        realInput[inputs] = intValue;
-        getline(ss, token, ',');
-        stringstream strValue2;
-        strValue2 << token;
-        strValue2 >> intValue;
-        imagInput[inputs++] = intValue;
-    }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
+    inputs = complexRead32Scaled(inFile2);
+	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile2);
 
     for (int j = 0; j < points; j++) {
 
-        data = FixedComplex32(realInput[j] / 32768.0, imagInput[j] / 32768.0);
+        data = inputs[j];
         fft.input(data);
         bool test = fft.output(data);
         if (test) {
-        	output[count++] = data.fcn32;
+        	outputs.push_back(data.fcn32);
         }
     }//second set of data, gets first set of answers out
-
-    std::vector<FixedComplex32> temp(32769);
-    for (i = 0; i < inputs; i++) {
-        temp[reverseBits(inputs, i)] = output[i];
+    assert(answers.size() == outputs.size());
+    std::vector<FixedComplex32> temp(outputs.size());
+    for (int i = 0; i < outputs.size(); i++) {
+        temp[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
 
-    for (i = 0; i < inputs; i++) {
-        double realRatio = abs((temp[i].real() - trueAnswers[i].real())/trueAnswers[i].real());
-        double imagRatio = abs((trueAnswers[i].imag() - temp[i].imag() )/trueAnswers[i].imag());
-        double realDiff  = abs(temp[i].real() - trueAnswers[i].real());
-        double imagDiff  = abs(temp[i].imag() - trueAnswers[i].imag());
+    for (int i = 0; i < answers.size(); i++) {
+        double realRatio = abs((temp[i].real() - answers[i].real())/answers[i].real());
+        double imagRatio = abs((answers[i].imag() - temp[i].imag() )/answers[i].imag());
+        double realDiff  = abs(temp[i].real() - answers[i].real());
+        double imagDiff  = abs(temp[i].imag() - answers[i].imag());
         BOOST_CHECK_MESSAGE(realRatio < .03 || realDiff < 1 / 32768.0 ,
-                "I: " << i << " Output: " << temp[i].real() << " Answer: " << trueAnswers[i].real() << " Ratio: " << realRatio );
+                "I: " << i << " Output: " << temp[i].real() << " Answer: " << answers[i].real() << " Ratio: " << realRatio );
         BOOST_CHECK_MESSAGE(imagRatio < .03 || imagDiff < 1 / 32768.0,
-                "I: " << i << " Output: " << temp[i].imag() << " Answer: " << trueAnswers[i].imag() << " Ratio: " << imagRatio );
+                "I: " << i << " Output: " << temp[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << imagRatio );
 
-        }//Ensures output and answers are reasonably close for first set of data
+	}//Ensures output and answers are reasonably close for first set of data
 
-    numAnswers = 0;
+    answers.clear();
+	answers = complexRead32Scaled(answersFile2);
+	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile2);
+	outputs.clear();
 
-    count = 0; //How many outputs have been collected
     for (int j = 0; j < points; j++) {
 
 		data = FixedComplex32(0,0);
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-			output[count++] = data.fcn32;
+			outputs.push_back(data.fcn32);
 		}// if output is ready
 	}//Get 2nd set of data out
 
-
-    for (i = 0; i < inputs; i++) {
-        temp[reverseBits(inputs, i)] = output[i];
+    std::vector<FixedComplex32> temp2(outputs.size());
+    assert(answers.size() == outputs.size());
+    for (int i = 0; i < answers.size(); i++) {
+        temp2[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
-    while(getline(ans2,line)) {
-
-        istringstream ss(line);
-        getline(ss, token, ',');
-        stringstream strValue;
-        strValue << token;
-        int intValue;
-        strValue >> intValue;
-        trueAnswers[numAnswers].real(intValue / 32768.0);
-        getline(ss, token, ',');
-        stringstream strValue2;
-        strValue2 << token;
-        strValue2 >> intValue;
-        trueAnswers[numAnswers++].imag(intValue / 32768.0);
-
-    }//Reads in answers from file. Parsing by commas. Format is: real,imag\n
-
-
-    for (i = 0; i < inputs; i++) {
-        double realRatio = abs((temp[i].real() - trueAnswers[i].real())/trueAnswers[i].real());
-        double imagRatio = abs((trueAnswers[i].imag() - temp[i].imag() )/trueAnswers[i].imag());
-        double realDiff = abs(temp[i].real() - trueAnswers[i].real());
-        double imagDiff = abs(temp[i].imag() - trueAnswers[i].imag());
+    for (int i = 0; i < answers.size(); i++) {
+        double realRatio = abs((temp2[i].real() - answers[i].real())/answers[i].real());
+        double imagRatio = abs((answers[i].imag() - temp2[i].imag() )/answers[i].imag());
+        double realDiff = abs(temp2[i].real() - answers[i].real());
+        double imagDiff = abs(temp2[i].imag() - answers[i].imag());
         BOOST_CHECK_MESSAGE(realRatio < .01 || realDiff < 4 / 32768.0,
-           "I: " << i << " Output: " << temp[i].real() << " Answer: " << trueAnswers[i].real() << " Ratio: " << realDiff );
+           "I: " << i << " Output: " << temp2[i].real() << " Answer: " << answers[i].real() << " Ratio: " << realDiff );
         BOOST_CHECK_MESSAGE(imagRatio < .01 || imagDiff < 4 / 32768.0,
-           "I: " << i << " Output: " << temp[i].imag() << " Answer: " << trueAnswers[i].imag() << " Ratio: " << imagDiff );
-
+           "I: " << i << " Output: " << temp2[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << imagDiff );
     }
 }//Checks for two consecutive sets of inputs in the same FFT.
 

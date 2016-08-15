@@ -27,6 +27,31 @@ double bound(double min, double max, double val)
     return val;
 }
 
+vector<FixedComplex32> complexRead32Scaled(string inFile)
+{
+	ifstream in(inFile.c_str());
+	vector<FixedComplex32> input;
+	char ** ptr;
+	typedef tokenizer<escaped_list_separator<char> > Tokenizer;
+	vector<string> vec;
+	string line;
+	FixedComplex32 temp;
+	while (getline(in, line)) {
+		Tokenizer tok(line);
+		vec.assign(tok.begin(), tok.end());
+		temp.real(atof(vec[0].c_str())/32768.0);
+		if (vec.size() == 2) {
+		temp.imag(atof(vec[1].c_str())/32768.0);
+		}
+		else {
+			temp.imag(0);
+		}
+		input.push_back(temp);
+	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+
+	return input;
+}//For reading from complex file scaled by 32768. Returns a vector of FixedComplex32
+
 vector<FixedComplex16> complexRead16Scaled(string inFile)
 {
 	ifstream in(inFile.c_str());
@@ -50,7 +75,7 @@ vector<FixedComplex16> complexRead16Scaled(string inFile)
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
 	return input;
-}
+}//For reading from complex file scaled by 32768. Returns a vector of FixedComplex16
 
 vector<FixedComplex16> complexRead16Unscaled(string inFile)
 {
@@ -75,4 +100,4 @@ vector<FixedComplex16> complexRead16Unscaled(string inFile)
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
 	return input;
-}
+}//For reading from complex file with values between -1 and 1. Returns a vector of FixedComplex16
