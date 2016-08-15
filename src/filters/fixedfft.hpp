@@ -37,8 +37,7 @@ public:
     fixedfftbase        *next;
     int theta;
     int tableSize;
-    FixedPoint <32, 17> * mainTablePointer;
-//    vector<FixedComplex32>* mainTablePointer;
+    int * mainTablePointer;
     fixedfftstage(int Ninput);
     fixedfftstage();
     void init(int Ninput);
@@ -87,8 +86,7 @@ public:
     int stagecount;
     bool newInput;
     int m_count;
-    FixedPoint <32, 17> * mainTable;
-//    vector<FixedComplex32> mainTable;
+    int * mainTable;
     fixedfftstage *stages;
     fixedfftprint printer;
     fixedfft(int Ninput, int tableSize = 0);

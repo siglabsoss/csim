@@ -63,11 +63,10 @@ int main(int argc, char *argv[])
 
 	int points = inputs;
 	filter_io_t data;
-	fixedfft fft(points,23040 ); //x point fft, y table size
+	fixedfft fft(points,23040); //x point fft, y table size
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
-			cout << j << endl;
 			if (j == 0 )
 				j = 0;
 			data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
