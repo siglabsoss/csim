@@ -115,19 +115,19 @@ FixedComplex32 fixedfftstage::twiddler(int k)
 
 
     if (k > (N/4)) {
-        W.real(-b[(-N/4) + k ]/32768.0);
-        W.imag(-b[(N/2) - k]/32768.0);
+        W.real(-b[(-N/4) + k ] / 32768.0);
+        W.imag(-b[(N/2) - k] / 32768.0);
     }
     else {
-        if (N == 2) {
-            W.real(1.0);
-            W.imag(0.0);
-        }
-        else {
-            W.real(b[(N/4) - k]/32768.0);
-            W.imag(-b[k]/32768.0);
-        }
-    }
+		if (N == 2) {
+			W.real(1.0);
+			W.imag(0.0);
+		}
+		else {
+			W.real(b[(N/4) - k] / 32768.0);
+			W.imag(-b[k] / 32768.0);
+		}
+      }
 
     delete[] b;
     return W; // return lookup table value
