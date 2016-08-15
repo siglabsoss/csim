@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 	for (int j = 0; j < input.size(); j ++) {
 		data2 = input[j];
 		iir.input(data2); //Filters data
-		output[j] = iir.m_output;
+		output.push_back(iir.m_output);
 	}
 
 	ofstream out(outFile);
@@ -62,3 +62,6 @@ int main(int argc, char *argv[])
     	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
 	}
 }
+
+bool
+
