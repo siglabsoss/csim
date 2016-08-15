@@ -133,6 +133,8 @@ FixedComplex32 fixedfftstage::twiddler(int k)
             W.imag(-b[k]/32768.0);
         }
     }
+
+    delete[] b;
     return W; // return lookup table value
 
 }
