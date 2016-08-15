@@ -15,7 +15,6 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-
 	vector<FixedComplex16> input; //Array to hold inputs
 	vector<FixedComplex16> output; //Array to hold outputs
 	vector<FixedComplex16> atap; //Array for A taps
@@ -63,5 +62,4 @@ int main(int argc, char *argv[])
 	}
 }
 
-bool
 
