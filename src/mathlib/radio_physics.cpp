@@ -3,7 +3,7 @@
 #include <core/parameters.hpp>
 #include <utils/utils.hpp>
 
-int RadioPhysics::sampleDelayForDistance(double distance)
+uint32_t RadioPhysics::sampleDelayForDistance(double distance)
 {
     double LIGHTSPEED;
     int64_t SAMPLERATE;
@@ -11,7 +11,11 @@ int RadioPhysics::sampleDelayForDistance(double distance)
     param_get("RADIO_DIGITAL_SAMPLERATE", SAMPLERATE);
 
     double meters_per_tick = LIGHTSPEED / SAMPLERATE;
-    return static_cast<uint32_t>(distance / meters_per_tick);
+    uint32_t delay = static_cast<uint32_t>(distance / meters_per_tick);
+    if (delay == 0) {
+        delay = 1; //special case for close distances, having a minimum of 1 simplifies some logic
+    }
+    return delay;
 }
 
 double RadioPhysics::phaseRotationForDistance(double distance)

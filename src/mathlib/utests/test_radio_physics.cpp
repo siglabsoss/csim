@@ -18,7 +18,7 @@ CSIM_TEST_CASE(SAMPLE_DELAY_CALCULATION)
     std::vector<std::pair<double, int> > expectedResults;
 
     expectedResults.push_back(std::pair<double, int>(10.0,                  static_cast<int>(8.339102394)));
-    expectedResults.push_back(std::pair<double, int>(0.0,                   static_cast<int>(0.0)));
+    expectedResults.push_back(std::pair<double, int>(0.0,                   static_cast<int>(1.0))); //special case distance 0 = sample delay of 1
     expectedResults.push_back(std::pair<double, int>(1564798653.13352694,   static_cast<int>(1303998877.61)));
 
     for (auto it = expectedResults.begin(); it != expectedResults.end(); it++) {
