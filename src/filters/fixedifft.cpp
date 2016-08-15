@@ -106,13 +106,6 @@ FixedComplex32 fixedifftstage::twiddler(int k)
 		b[i] = mainTablePointer[i * increment1];
 	}
 
-	/*
-	int* a = new int[(N/4)];
-	for (int i = 0; i <= ((N/4)); i++) {
-		a[i] = lookupTable[i * increment];
-	}
-	*/
-
 	if (k > (N/4)) {
 		W.real(-b[(-N/4) + k ] / 32768.0);
 		W.imag(b[(N/2) - k] / 32768.0);
