@@ -63,17 +63,20 @@ int main(int argc, char *argv[])
 
 	int points = inputs;
 	filter_io_t data;
-	fixedfft fft(points,2949120 ); //x point fft, y table size
+	fixedfft fft(points,23040 ); //x point fft, y table size
 
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
-
+			cout << j << endl;
+			if (j == 0 )
+				j = 0;
 			data = FixedComplex32(realInput[j] / 32768.0 ,imagInput[j] / 32768.0);
 			fft.input(data);
 			bool test = fft.output(data);
 			if (test) {
 				answers[count++] = data.fcn32;
 			}//If output is ready
+			cout << j << endl;
 		}//Insert all input
 	}//Insert input again to get output
     cout << "Count is: " << count << endl << endl;
@@ -96,8 +99,8 @@ int main(int argc, char *argv[])
      string outfile3("../data/fft/output/out1BitReversed.txt");
      ofstream out3(outfile3.c_str());
      for (i = 0; i < count; i++) {
-              out2 << setw(11) << setfill(' ') <<  answers[i].real().range().to_int64()   << ",";
-              out2 << setw(11) << setfill(' ') <<  answers[i].imag().range().to_int64()   << endl;
+              out3 << setw(11) << setfill(' ') <<  answers[i].real().range().to_int64()   << ",";
+              out3 << setw(11) << setfill(' ') <<  answers[i].imag().range().to_int64()   << endl;
             //  cout << temp[i];
           }//Prints data out in bit reversed order
 

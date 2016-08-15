@@ -105,24 +105,23 @@ FixedComplex32 fixedfftstage::twiddler(int k)
 
     int increment1 = (360 * ((int)tableSize/90)) / (N);
 
-    int* b = new int[(N/4)];
+
 
     int increment = (360*256) / (N);
+//    vector<FixedComplex32> b;
+//    for (int i = 0; i <= ((N/4)); i++) {
+//        b.push_back((*mainTablePointer)[i * increment1]);
+//    }
 
+    FixedPoint <32, 17> * b = new FixedPoint<32,17>[(N/4) + 1];
     for (int i = 0; i <= ((N/4)); i++) {
-        b[i] = mainTablePointer[i * increment1];
-    }
+            b[i] = mainTablePointer[i * increment1];
+        }
 
-    /*
-	int* a = new int[(N/4)];
-    for (int i = 0; i <= ((N/4)); i++) {
-        a[i] = lookupTable[i * increment];
-    }
-    */
 
     if (k > (N/4)) {
-        W.real(-b[(-N/4) + k ] / 32768.0);
-        W.imag(-b[(N/2) - k] / 32760.0);
+        W.real(-b[(-N/4) + k ]/32768.0);
+        W.imag(-b[(N/2) - k]/32768.0);
     }
     else {
         if (N == 2) {
@@ -130,11 +129,10 @@ FixedComplex32 fixedfftstage::twiddler(int k)
             W.imag(0.0);
         }
         else {
-            W.real(b[(N/4) - k] / 32768.0);
-            W.imag(-b[k] / 32768.0);
+            W.real(b[(N/4) - k]/32768.0);
+            W.imag(-b[k]/32768.0);
         }
     }
-
     return W; // return lookup table value
 
 }
@@ -267,9 +265,10 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
     N = Ninput;
     stagecount = log2(N);
     int stagesize = 0;
-    mainTable = new int[tableSize + 1];// + 1 in case tableSize is a multiple of 180
+    mainTable = new FixedPoint <32, 17> [tableSize + 1];// + 1 in case tableSize is a multiple of 180
 	for (int i = 0; i < tableSize + 1; i++) {
-		mainTable[i] = round(sin(((M_PI/tableSize) * i)/2) * 32768); //Get values of main table.
+//		mainTable.push_back(FixedComplex32(round(sin(((M_PI/tableSize) * i)/2) * 32768) ,0)); //Get values of main table.
+		mainTable[i] = (round(sin(((M_PI/tableSize) * i)/2) * 32768)); //Get values of main table.
 	}
 
 
@@ -280,6 +279,7 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
         stages[i].init(stagesize);
         stages[i].tableSize = tableSize;
         stages[i].mainTablePointer = mainTable;
+//        stages[i].mainTablePointer = &mainTable;
         if (i > 0) {
             stages[i - 1].next = &stages[i];
         }
