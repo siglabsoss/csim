@@ -18,8 +18,6 @@ int main(int argc, char *argv[])
 
 	vector<FixedComplex16> input; //Array to hold inputs
 	vector<FixedComplex16> output; //Array to hold outputs
-	double realAnswers[1024]; //Array to hold answers
-	double imagAnswers[1024]; //Arrayto hodl answers
 	vector<FixedComplex16> atap; //Array for A taps
 	vector<FixedComplex16> btap;
 
@@ -63,5 +61,4 @@ int main(int argc, char *argv[])
     	out << setw(6) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
     	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
 	}
-
 }
