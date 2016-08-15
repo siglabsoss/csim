@@ -22,7 +22,7 @@ public: //types
         MOD_SCHEME_QAM16
     };
 public:
-    Modulator(mod_scheme_t scheme);
+    Modulator(unsigned int ticksPerSymbol, mod_scheme_t scheme);
 
     /**
      * Input is expected to be a digital bit stream (IO_TYPE_BYTE)
@@ -53,6 +53,6 @@ private:
     constellation_t         m_output;
 
     unsigned int            m_tickCount;
-    unsigned int            m_ticksPerSample;
+    unsigned int            m_ticksPerSymbol;
 
 };

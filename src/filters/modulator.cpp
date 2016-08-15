@@ -4,19 +4,15 @@
 
 #include <cassert>
 
-Modulator::Modulator(mod_scheme_t scheme = MOD_SCHEME_BPSK) :
+Modulator::Modulator(unsigned int ticksPerSymbol, mod_scheme_t scheme = MOD_SCHEME_BPSK) :
     FilterChainElement("Modulator"),
     m_constellations(),
     m_bitsPerSymbol(0),
     m_inputBuffer(),
     m_tickCount(0),
-    m_ticksPerSample(0)
+    m_ticksPerSymbol(ticksPerSymbol)
 {
-    int64_t mod_samplerate, digital_samplerate;
-    param_get("MOD_SAMPLERATE", mod_samplerate);
-    param_get("RADIO_DIGITAL_SAMPLERATE", digital_samplerate);
-    m_ticksPerSample = digital_samplerate / mod_samplerate;
-    m_tickCount = m_ticksPerSample; //set to trigger an output update on first iteration
+    m_tickCount = m_ticksPerSymbol; //set to trigger an output update on first iteration
     switch(scheme) {
         case MOD_SCHEME_BPSK:
             m_constellations = getBPSKConstellations();
@@ -61,7 +57,7 @@ bool Modulator::output(filter_io_t &data)
 }
 void Modulator::tick(void)
 {
-    if (m_tickCount >= m_ticksPerSample) {
+    if (m_tickCount >= m_ticksPerSymbol) {
         symbol_t symbol = NULL_SYMBOL;
         if (m_inputBuffer.size() >= m_bitsPerSymbol) { //we have real input to modulate
             symbol = getNextSymbol();
