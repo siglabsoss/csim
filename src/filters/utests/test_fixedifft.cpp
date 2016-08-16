@@ -3,23 +3,19 @@
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
-#include <iostream>     // cout, endl
-#include <vector> //For storing parsed data from file
-#include <iterator>     // ostream_operator
-#include <boost/tokenizer.hpp> //For parsing data from file
-#include <iomanip> //For setprecision
+#include <vector>
 #include <stdlib.h>
-
-#include <utils/utils.hpp> //reverseBits()
+#include <utils/utils.hpp>
 #include <filters/fixedifft.hpp>
 #include <filters/fixedfft.hpp>
-
 #include <cfloat>
 
 using namespace std;
 
 
 CSIM_TEST_SUITE_BEGIN(FixedIFFT)
+
+void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference);
 
 CSIM_TEST_CASE(IFFT_CONSTANT_OUTPUT)
 {
@@ -79,17 +75,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 		temp[reverseBits(inputs.size(), i)] = outputs[i];
 	}//Reformats data in correct order
 
-
-	for (int i = 0; i < answers.size(); i++) {
-	    double ratioReal = abs((temp[i].real() - answers[i].real())/answers[i].real());
-	    double ratioImag = abs((answers[i].imag() - temp[i].imag() )/answers[i].imag());
-	    double realDiff = abs(temp[i].real() - answers[i].real());
-	    double imagDiff = abs(temp[i].imag() - answers[i].imag());
-		BOOST_CHECK_MESSAGE(ratioReal < .01 || realDiff < 3 / 32768.0 ,
-		"I: " << i << " Output: " << temp[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
-		BOOST_CHECK_MESSAGE(ratioImag < .01 || imagDiff < 3 / 32768.0,
-		"I: " << i << " Output: " << temp[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
-	}
+	checkError(temp, answers, .01, 3);
 }
 
 
@@ -144,18 +130,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
         temp[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
-
-    for (int i = 0; i < answers.size(); i++) {
-        double realRatio = abs((temp[i].real() - answers[i].real())/answers[i].real());
-        double imagRatio = abs((answers[i].imag() - temp[i].imag() )/answers[i].imag());
-        double realDiff  = abs(temp[i].real() - answers[i].real());
-        double imagDiff  = abs(temp[i].imag() - answers[i].imag());
-        BOOST_CHECK_MESSAGE(realRatio < .03 || realDiff < 1 / 32768.0 ,
-                "I: " << i << " Output: " << temp[i].real() << " Answer: " << answers[i].real() << " Ratio: " << realRatio );
-        BOOST_CHECK_MESSAGE(imagRatio < .03 || imagDiff < 1 / 32768.0,
-                "I: " << i << " Output: " << temp[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << imagRatio );
-
-	}//Ensures output and answers are reasonably close for first set of data
+    checkError(temp, answers, .03, 5);
 
     answers.clear();
 	answers = complexRead32Scaled(answersFile2);
@@ -178,16 +153,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
         temp2[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
-    for (int i = 0; i < answers.size(); i++) {
-        double realRatio = abs((temp2[i].real() - answers[i].real())/answers[i].real());
-        double imagRatio = abs((answers[i].imag() - temp2[i].imag() )/answers[i].imag());
-        double realDiff = abs(temp2[i].real() - answers[i].real());
-        double imagDiff = abs(temp2[i].imag() - answers[i].imag());
-        BOOST_CHECK_MESSAGE(realRatio < .01 || realDiff < 4 / 32768.0,
-           "I: " << i << " Output: " << temp2[i].real() << " Answer: " << answers[i].real() << " Ratio: " << realDiff );
-        BOOST_CHECK_MESSAGE(imagRatio < .01 || imagDiff < 4 / 32768.0,
-           "I: " << i << " Output: " << temp2[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << imagDiff );
-    }
+    checkError(temp2, answers, .03, 5);
 }//Checks for two consecutive sets of inputs in the same IFFT.
 
 
@@ -243,17 +209,25 @@ CSIM_TEST_CASE(FFT_IFFT)
 	}//Reformats data from bit reversed format to the correct order
 
 	assert(inputs.size() == outputs.size());
-	for (i = 0; i < inputs.size(); i++) {
-        double realRatio = abs((temp[i].real() - inputs[i].real())/inputs[i].real());
-        double imagRatio = abs((inputs[i].imag() - temp[i].imag() )/inputs[i].imag());
-        double realDiff = abs(temp[i].real() - inputs[i].real());
-        double imagDiff = abs(temp[i].imag() - inputs[i].imag());
-		BOOST_CHECK_MESSAGE(realRatio <  .01 || realDiff < 5 / 32768.0,
-				inputs[i].real() << " Ratio: " << realRatio );
-		BOOST_CHECK_MESSAGE(imagRatio < .01 || imagDiff < 5 / 32768.0,
-		"I: " << i << " Output: " << temp[i].imag() << " Answer: " << inputs[i].imag() << " Ratio: " << abs((temp[i].imag() - inputs[i].imag())/(float)inputs[i].imag()) );
-	}//output of IFFT should be the same as original input
+	checkError(temp, inputs, .01, 5); //output of IFFT should be the same as original input
+
 }//Used for Running FFT and then IFFT
+
+
+void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference)
+{
+	for (int i = 0; i < answers.size(); i++) {
+		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
+		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
+		    double realDiff = abs(outputs[i].real() - answers[i].real());
+		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 ,
+			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0,
+			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
+		}
+}//Compares results of ifft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
+
 
 CSIM_TEST_SUITE_END()
 

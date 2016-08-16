@@ -18,6 +18,8 @@ using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(FixedFFT)
 
+void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference);
+
 CSIM_TEST_CASE(CONSTANT_INPUTS)
 {
     constexpr size_t NUM_SAMPLES = 8;
@@ -65,7 +67,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
 	int points = inputs.size();
-	fixedfft fft(points,2949120 ); //x point fft, y table size
+	fixedfft fft(points ); //x point fft, y table size
 	filter_io_t data;
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
@@ -85,19 +87,9 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 		temp[reverseBits(inputs.size(), i)] = outputs[i];
 	}//Reformats data in correct order
 
-
-	for (int i = 0; i < answers.size(); i++) {
-	    double ratioReal = abs((temp[i].real() - answers[i].real())/answers[i].real());
-	    double ratioImag = abs((answers[i].imag() - temp[i].imag() )/answers[i].imag());
-	    double realDiff = abs(temp[i].real() - answers[i].real());
-	    double imagDiff = abs(temp[i].imag() - answers[i].imag());
-		BOOST_CHECK_MESSAGE(ratioReal < .20 || realDiff < 5000 / 32768.0 ,
-		"I: " << i << " Output: " << temp[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
-		BOOST_CHECK_MESSAGE(ratioImag < .20 || imagDiff < 5000 / 32768.0,
-		"I: " << i << " Output: " << temp[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
-	}
+	assert(answers.size() == temp.size());
+	checkError(temp, answers, .20, 5000);
 }
-
 
 CSIM_TEST_CASE(FFT_TWO_INPUTS)
 {
@@ -120,7 +112,6 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
     fixedfft fft(points); //x point fft, y table size
 
 	for (int j = 0; j < points; j++) {
-
 		data = inputs[j];
 		fft.input(data);
 		bool test = fft.output(data);
@@ -129,7 +120,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 		}//If output is ready
 	}//Insert first set of data
 
-    inputs.clear();
+    inputs.clear();//Clear out inputs vector
 
     inputs = complexRead32Scaled(inFile2);
 	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile2);
@@ -149,18 +140,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         temp[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
-
-    for (int i = 0; i < answers.size(); i++) {
-        double realRatio = abs((temp[i].real() - answers[i].real())/answers[i].real());
-        double imagRatio = abs((answers[i].imag() - temp[i].imag() )/answers[i].imag());
-        double realDiff  = abs(temp[i].real() - answers[i].real());
-        double imagDiff  = abs(temp[i].imag() - answers[i].imag());
-        BOOST_CHECK_MESSAGE(realRatio < .03 || realDiff < 1 / 32768.0 ,
-                "I: " << i << " Output: " << temp[i].real() << " Answer: " << answers[i].real() << " Ratio: " << realRatio );
-        BOOST_CHECK_MESSAGE(imagRatio < .03 || imagDiff < 1 / 32768.0,
-                "I: " << i << " Output: " << temp[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << imagRatio );
-
-	}//Ensures output and answers are reasonably close for first set of data
+	checkError(temp, answers, .03, 1);
 
     answers.clear();
 	answers = complexRead32Scaled(answersFile2);
@@ -183,21 +163,12 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         temp2[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
-    for (int i = 0; i < answers.size(); i++) {
-        double realRatio = abs((temp2[i].real() - answers[i].real())/answers[i].real());
-        double imagRatio = abs((answers[i].imag() - temp2[i].imag() )/answers[i].imag());
-        double realDiff = abs(temp2[i].real() - answers[i].real());
-        double imagDiff = abs(temp2[i].imag() - answers[i].imag());
-        BOOST_CHECK_MESSAGE(realRatio < .01 || realDiff < 4 / 32768.0,
-           "I: " << i << " Output: " << temp2[i].real() << " Answer: " << answers[i].real() << " Ratio: " << realDiff );
-        BOOST_CHECK_MESSAGE(imagRatio < .01 || imagDiff < 4 / 32768.0,
-           "I: " << i << " Output: " << temp2[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << imagDiff );
-    }
+	checkError(temp2, answers, .01, 4);
 }//Checks for two consecutive sets of inputs in the same FFT.
 
-//
-//
-//CSIM_TEST_CASE(FFT_VERILOG)
+
+
+//CSIM_TEST_CASE(FFT_2_FILES)
 //{
 //       string infile("../csim/data/fft/output/out1BitReversed.txt");
 //       string answersfile("../csim/data/fft/output/answers32768BitReversed.csv");
@@ -270,6 +241,20 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 //
 //
 //}//Used for comparing percent error
+
+void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference)
+{
+	for (int i = 0; i < answers.size(); i++) {
+		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
+		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
+		    double realDiff = abs(outputs[i].real() - answers[i].real());
+		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 ,
+			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0,
+			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
+		}
+}//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
 CSIM_TEST_SUITE_END()
 
