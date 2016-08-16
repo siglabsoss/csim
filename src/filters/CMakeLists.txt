@@ -10,6 +10,7 @@ set(SIGFILTERS_SOURCES
     modulator.cpp
     zero_pad_interpolator.cpp
     mixer.cpp
+    decimator.cpp
     )
 
 add_library(sigfilters ${SIGFILTERS_SOURCES})
