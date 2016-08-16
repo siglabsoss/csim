@@ -106,6 +106,7 @@ vector<FixedComplex16> complexRead16Unscaled(string inFile)
 void print(FixedComplex32 x)
 {
 	cout << (x.real().range().to_int64()) << " " << (x.imag().range().to_int64()) << endl;
+	cout << flush;
 }//To print the value of a single FixedComplex32
 
 void print(vector<FixedComplex32> x, int begin, int end)
@@ -113,5 +114,6 @@ void print(vector<FixedComplex32> x, int begin, int end)
 	for (int i = begin; i < end; i++) {
 		cout << (x[i].real().range().to_int64()) << " " << (x[i].imag().range().to_int64()) << endl;
 	}
+	cout << flush;
 }// To print the values of a vector of FixedComplex32
 
