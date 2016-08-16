@@ -10,6 +10,7 @@ enum type_t {
     IO_TYPE_FIXED_COMPLEX_32,
     IO_TYPE_FIXED_COMPLEX_16_NEW,
     IO_TYPE_FIXED_COMPLEX_32_NEW,
+    IO_TYPE_FIXED_COMPLEX_64_NEW,
     IO_TYPE_BYTE
 };
 
@@ -21,6 +22,7 @@ struct filter_io_t
     FixedComplex<32> fc32;
     FixedComplex16 fcn;
     FixedComplex32 fcn32;
+    FixedComplex32 fcn64;
     union {
         ComplexDouble rf;
         uint8_t byte;
@@ -36,6 +38,7 @@ struct filter_io_t
     filter_io_t & operator=(const FixedComplex<32> &rhs);
     filter_io_t & operator=(const FixedComplex16 &rhs);
     filter_io_t & operator=(const FixedComplex32 &rhs);
+    filter_io_t & operator=(const FixedComplex64 &rhs);
     filter_io_t & operator=(const uint8_t &rhs);
 
     size_t serialize(uint8_t *data) const;

@@ -19,6 +19,9 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
         case IO_TYPE_FIXED_COMPLEX_32_NEW:
             os << obj.fcn32;
             break;
+        case IO_TYPE_FIXED_COMPLEX_64_NEW:
+            os << obj.fcn64;
+            break;
         case IO_TYPE_BYTE:
             os << "[0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(obj.byte) << "]";
             break;
@@ -53,6 +56,9 @@ filter_io_t::filter_io_t(const filter_io_t &other)
             case IO_TYPE_FIXED_COMPLEX_32_NEW:
                 this->fcn32 = other.fcn32;
                 break;
+            case IO_TYPE_FIXED_COMPLEX_64_NEW:
+				this->fcn64 = other.fcn64;
+				break;
             case IO_TYPE_BYTE:
                 this->byte = other.byte;
                 break;
@@ -81,6 +87,9 @@ filter_io_t & filter_io_t::operator=(const filter_io_t &rhs)
                 break;
             case IO_TYPE_FIXED_COMPLEX_32_NEW:
                 this->fcn32 = rhs.fcn32;
+                break;
+            case IO_TYPE_FIXED_COMPLEX_64_NEW:
+                this->fcn64 = rhs.fcn64;
                 break;
             case IO_TYPE_BYTE:
                 this->byte = rhs.byte;
@@ -127,6 +136,13 @@ filter_io_t & filter_io_t::operator=(const FixedComplex32 &rhs)
     return *this;
 }
 
+filter_io_t & filter_io_t::operator=(const FixedComplex64 &rhs)
+{
+    this->type = IO_TYPE_FIXED_COMPLEX_64_NEW;
+    this->fcn64 = rhs;
+    return *this;
+}
+
 filter_io_t & filter_io_t::operator=(const uint8_t &rhs)
 {
     this->type = IO_TYPE_BYTE;
@@ -160,6 +176,10 @@ ComplexDouble filter_io_t::toComplexDouble() const
             real = this->fcn32.real().to_double();
             imag = this->fcn32.imag().to_double();
             break;
+        case IO_TYPE_FIXED_COMPLEX_64_NEW:
+			real = this->fcn64.real().to_double();
+			imag = this->fcn64.imag().to_double();
+			break;
         case IO_TYPE_BYTE:
             break;
     }
@@ -231,6 +251,17 @@ size_t filter_io_t::serialize(uint8_t *data) const
             numBytes += sizeof(value);
             break;
         }
+        case IO_TYPE_FIXED_COMPLEX_64_NEW:
+		{
+			double value = fcn64.real().to_double();
+			memcpy(data + numBytes, &value, sizeof(value));
+			numBytes += sizeof(value);
+
+			value = fcn64.imag().to_double();
+			memcpy(data + numBytes, &value, sizeof(value));
+			numBytes += sizeof(value);
+			break;
+		}
        case IO_TYPE_BYTE:
        {
            memcpy(data + numBytes, &byte, sizeof(byte));

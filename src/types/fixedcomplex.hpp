@@ -17,7 +17,7 @@ using FixedComplex2 = std::complex <FixedPoint <N, M> >;
 
 typedef FixedComplex2<16, 1> FixedComplex16;
 typedef FixedComplex2<32, 17> FixedComplex32;
-typedef FixedComplex2<64, 2> FixedComplex64;
+typedef FixedComplex2<64, 49> FixedComplex64;
 
 using namespace std;
 #include <iostream>
