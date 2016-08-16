@@ -48,7 +48,7 @@ vector<FixedComplex32> complexRead32Scaled(string inFile)
 		}
 		input.push_back(temp);
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
+	in.close();
 	return input;
 }//For reading from complex file scaled by 32768. Returns a vector of FixedComplex32
 
@@ -72,8 +72,9 @@ vector<FixedComplex16> complexRead16Scaled(string inFile)
 			temp.imag(0);
 		}
 		input.push_back(temp);
-	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 
+	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+	in.close();
 	return input;
 }//For reading from complex file scaled by 32768. Returns a vector of FixedComplex16
 
@@ -98,6 +99,6 @@ vector<FixedComplex16> complexRead16Unscaled(string inFile)
 		}
 		input.push_back(temp);
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
+	in.close();
 	return input;
 }//For reading from complex file with values between -1 and 1. Returns a vector of FixedComplex16
