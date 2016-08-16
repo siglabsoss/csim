@@ -61,8 +61,10 @@ void Modulator::tick(void)
         symbol_t symbol = NULL_SYMBOL;
         if (m_inputBuffer.size() >= m_bitsPerSymbol) { //we have real input to modulate
             symbol = getNextSymbol();
+            m_output = m_constellations.at(symbol);
+        } else {
+            m_output = constellation_t(0.0, 0.0);
         }
-        m_output = m_constellations.at(symbol);
         m_tickCount = 0;
     }
     m_tickCount++;
