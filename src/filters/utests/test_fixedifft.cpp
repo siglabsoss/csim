@@ -44,6 +44,25 @@ CSIM_TEST_CASE(IFFT_CONSTANT_OUTPUT)
     }
 }
 
+/* XXX change implementation so that this test passes. should have one output per input after NUM_SAMPLES initial inputs
+CSIM_TEST_CASE(IFFT_IO_PARITY)
+{
+    constexpr size_t NUM_SAMPLES = 8;
+    fixedifft ifft(NUM_SAMPLES);
+    std::vector<filter_io_t> samples(NUM_SAMPLES*10);
+    for (size_t i = 0; i < samples.size(); i++) {
+        samples[i] = FixedComplex32(1.0,1.0);
+    }
+
+    filter_io_t output;
+    for (size_t j = 0; j < samples.size(); j++) {
+        BOOST_CHECK(ifft.input(samples[j]) == true);
+        ifft.tick();
+        BOOST_CHECK(ifft.output(output) == (j >= NUM_SAMPLES-1));
+    }
+}
+*/
+
 CSIM_TEST_CASE(IFFT_OCTAVE)
 {
 	string infile("./data/ifft/input/data_file_complex1.csv");
