@@ -7,13 +7,13 @@
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <string>
 unsigned int reverseBits(int N, unsigned int num);
-vector<FixedComplex16> complexRead16Scaled(string inFile);
-vector<FixedComplex16> complexRead16Unscaled(string inFile);
-vector<FixedComplex32> complexRead32Scaled(string inFile);
-vector<FixedComplex32> complexRead32Unscaled(string inFile);
-vector<FixedComplex64> complexRead64Scaled(string inFile);
-vector<FixedComplex64> complexRead64Unscaled(string inFile);
+std::vector<FixedComplex16> complexRead16Scaled(std::string inFile);
+std::vector<FixedComplex16> complexRead16Unscaled(std::string inFile);
+std::vector<FixedComplex32> complexRead32Scaled(std::string inFile);
+std::vector<FixedComplex32> complexRead32Unscaled(std::string inFile);
+std::vector<FixedComplex64> complexRead64Scaled(std::string inFile);
+std::vector<FixedComplex64> complexRead64Unscaled(std::string inFile);
 void print(FixedComplex32 x);
-void print(vector<FixedComplex32> x, int begin = 0, int end = 0);
+void print(std::vector<FixedComplex32> x, int begin = 0, int end = 0);
 double bound(double min, double max, double val);
 #endif

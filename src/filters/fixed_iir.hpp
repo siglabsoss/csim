@@ -30,8 +30,8 @@ public:
 
     void tick() override;
 
-    fixediir(vector<FixedComplex16> aCoeffs,
-    		vector<FixedComplex16> bCoeffs); //Constructor
+    fixediir(std::vector<FixedComplex16> aCoeffs,
+    		std::vector<FixedComplex16> bCoeffs); //Constructor
     void iir(FixedComplex16 &input); //Filtering input data
     void reset(); //resets registers
     FixedComplex16 calculate(FixedComplex16 current); // Calculate output based on input

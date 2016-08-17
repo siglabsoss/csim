@@ -1,5 +1,6 @@
 #include <filters/fixed_fir.hpp>
 
+using namespace std;
 
 FixedFIR::FixedFIR(vector<FixedComplex16> tap) :
 	FilterChainElement("FixedFIR"),

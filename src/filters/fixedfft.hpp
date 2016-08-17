@@ -21,7 +21,7 @@ public:
     virtual void inputandtick(FixedComplex32 x) = 0;
     virtual ~fixedfftbase();
     int ready;
-    queue<FixedComplex32 >   m_output;
+    std::queue<FixedComplex32 >   m_output;
 
 };
 

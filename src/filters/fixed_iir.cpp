@@ -11,6 +11,8 @@
  */
 #include <filters/fixed_iir.hpp>
 
+using namespace std;
+
 void fixediir::reset()
 {
     for (int i = 0; i < m_numXRegisters; i++) {
