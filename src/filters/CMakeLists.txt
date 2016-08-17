@@ -11,6 +11,7 @@ set(SIGFILTERS_SOURCES
     zero_pad_interpolator.cpp
     mixer.cpp
     decimator.cpp
+    hard_demod.cpp
     )
 
 add_library(sigfilters ${SIGFILTERS_SOURCES})
