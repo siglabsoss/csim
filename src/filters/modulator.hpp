@@ -47,7 +47,7 @@ private: //methods
     symbol_t    getNextSymbol();
 
 private:
-    constellation_map_t     m_constellations; //maping of symbol -> constellation vector
+    constellation_map_t     m_constellations; //mapping of symbol -> constellation vector
     size_t                  m_bitsPerSymbol;
     std::queue<bool>        m_inputBuffer;    //inefficient storage (8x inflated) but that's OK
     constellation_t         m_output;
