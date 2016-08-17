@@ -80,7 +80,7 @@ CSIM_TEST_CASE(Number_Of_Operations)
 
 }
 
-CSIM_TEST_CASE(Overflow)
+CSIM_TEST_CASE(Overflow_FixedPoint)
 {
 	FixedPoint <4, 4>  v(1);
 
@@ -118,5 +118,54 @@ CSIM_TEST_CASE(Overflow)
 
 //		cout << "Value: " << x.range().to_int64() << endl;
 //			cout << "Flag: " << x.overflow_flag() << endl << endl;
+
 }
+
+CSIM_TEST_CASE(Overflow_FixedComplex16)
+{
+	sc_dt::scfx_rep::clear();
+	FixedComplex16 fc16(.99,0);
+
+	for (int i = 0; i < 10; i++) {
+		fc16 = fc16 + fc16;
+	}
+
+	#ifdef FIXED_POINT_PROFILER_ENABLE
+		sc_dt::scfx_rep::printLog();
+		BOOST_CHECK(sc_dt::scfx_rep::overflows == 5);
+		sc_dt::scfx_rep::clear();
+		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	#endif
+
+	fc16.real(.99);
+	for (int i = 0; i < 10; i++) {
+		fc16 = fc16 * fc16;
+	}
+
+	#ifdef FIXED_POINT_PROFILER_ENABLE
+		sc_dt::scfx_rep::printLog();
+		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+		sc_dt::scfx_rep::clear();
+		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	#endif
+
+	fc16.real(.5);
+	fc16.imag(.5);
+
+
+	for (int i = 0; i < 10; i++) {
+		fc16 = fc16 - FixedComplex16(.5,.5);
+	}
+
+
+	#ifdef FIXED_POINT_PROFILER_ENABLE
+		sc_dt::scfx_rep::printLog();
+		BOOST_CHECK(sc_dt::scfx_rep::overflows == 4);
+		sc_dt::scfx_rep::clear();
+		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	#endif
+
+}
+
+
 CSIM_TEST_SUITE_END()
