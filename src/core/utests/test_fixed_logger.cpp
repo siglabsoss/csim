@@ -9,13 +9,30 @@ CSIM_TEST_SUITE_BEGIN(Fixed_Logger)
 
 CSIM_TEST_CASE(Number_Of_Operations)
 {
-	vector<FixedPoint <4, 1> > v(100);
-	for (int i = 0; i < 10; i++)
+	FixedPoint <4, 1>  v(0);
+	for (int i = 0; i < 1; i++)
 	{
-		v[i] + v[i];
+		v + v;
 	}
-//	sc_dt::additions = 5;
-	sc_dt::scfx_rep::printOperations();
+
+	for (int i = 0; i < 3; i++)
+	{
+		v - v;
+	}
+
+	for (int i = 0; i < 3; i++)
+	{
+		v * v;
+	}
+
+	for (int i = 0; i < 7; i++)
+	{
+		v / v;
+	}
+
+	#ifdef LOGGING
+		sc_dt::scfx_rep::printOperations();
+	#endif
 }
 
 CSIM_TEST_SUITE_END()
