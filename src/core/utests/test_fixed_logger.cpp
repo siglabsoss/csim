@@ -131,7 +131,7 @@ CSIM_TEST_CASE(Overflow_FixedComplex16)
 	}
 
 	#ifdef FIXED_POINT_PROFILER_ENABLE
-		sc_dt::scfx_rep::printLog();
+//		sc_dt::scfx_rep::printLog();
 		BOOST_CHECK(sc_dt::scfx_rep::overflows == 5);
 		sc_dt::scfx_rep::clear();
 		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
@@ -143,7 +143,7 @@ CSIM_TEST_CASE(Overflow_FixedComplex16)
 	}
 
 	#ifdef FIXED_POINT_PROFILER_ENABLE
-		sc_dt::scfx_rep::printLog();
+//		sc_dt::scfx_rep::printLog();
 		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
 		sc_dt::scfx_rep::clear();
 		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
@@ -159,13 +159,29 @@ CSIM_TEST_CASE(Overflow_FixedComplex16)
 
 
 	#ifdef FIXED_POINT_PROFILER_ENABLE
-		sc_dt::scfx_rep::printLog();
+//		sc_dt::scfx_rep::printLog();
 		BOOST_CHECK(sc_dt::scfx_rep::overflows == 4);
 		sc_dt::scfx_rep::clear();
 		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
 	#endif
-
 }
 
+CSIM_TEST_CASE(Precision_Loss_FixedPoint)
+{
+	sc_dt::scfx_rep::clear();
+	FixedPoint <5, 5>  v(5);
 
+	for (int i = 0; i < 10; i++) {
+		v = v / 2;// 2 1 0 0 0...
+
+
+	}
+
+	#ifdef FIXED_POINT_PROFILER_ENABLE
+		BOOST_CHECK(sc_dt::scfx_rep::quantizations == 2);// 1 * 1 = 0
+		sc_dt::scfx_rep::clear();
+	#endif
+//		cout << "Value: " << v.range().to_int64() << endl;
+//		cout << sc_dt::scfx_rep::quantizations << endl;
+}
 CSIM_TEST_SUITE_END()
