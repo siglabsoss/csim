@@ -34,6 +34,17 @@ radio_id_t RadioSet::addRadio(std::function< std::unique_ptr<RadioS>() > &radioF
     return newRadioPtr->getId();
 }
 
+RadioS * RadioSet::getRadioForId(radio_id_t id) const
+{
+    //XXX make this O(1) instead of O(N)
+    for (auto it = m_radios.begin(); it != m_radios.end(); it++) {
+        if ((**it).getId() == id) {
+            return it->get();
+        }
+    }
+    return nullptr;
+}
+
 
 void RadioSet::init()
 {
@@ -80,8 +91,9 @@ void RadioSet::getSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sa
         int delay = RadioPhysics::sampleDelayForDistance(distance);
         assert (delay <= m_txBuffers[otherRadio].capacity());
         ComplexDouble remoteSample = m_txBuffers[otherRadio].at(delay-1);
-        RadioPhysics::complexRotationForDistance(remoteSample, distance);
-        sample += remoteSample + (m_noise.getNext() * (1.0 / RadioPhysics::freeSpacePowerLoss(distance)));
+        //RadioPhysics::complexRotationForDistance(remoteSample, distance);
+        //sample += remoteSample + (m_noise.getNext() * (1.0 / RadioPhysics::freeSpacePowerLoss(distance)));
+        sample += remoteSample;
     }
 }
 

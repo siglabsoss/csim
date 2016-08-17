@@ -7,26 +7,16 @@ SigWorld::SigWorld() :
 
 }
 
-void SigWorld::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
-{
-    (void)m_radioSet.addRadio(radioFactory);
-}
-
 void SigWorld::init()
 {
-    std::srand(std::time(0));
     m_radioSet.init();
 }
 
 void SigWorld::tick()
 {
-    int random_variable = std::rand();
-    uint8_t byte = random_variable % 256;
-    size_t count = 0;
     for (RadioSet::iterator it = m_radioSet.begin(); it != m_radioSet.end(); it++)
     {
         RadioS * const current = (*it).get();
-        RFSample sample; //for publishing externally
         ComplexDouble rxSample;
         ComplexDouble txSample;
 
@@ -40,21 +30,42 @@ void SigWorld::tick()
         /* Step 3 - Get the current radio's RF output */
         current->txWave(txSample);
 
-        //XXX temporary
-        current->txByte(byte);
-        //current->txByte(0xF0);
-
         /* Step 4 - Queue the sample in a buffer */
         m_radioSet.bufferSampleForRadio(it, txSample);
 
-        /* Step 5 - Publish data */
-        sample.id     = (uint64_t)current->getId();
-        sample.rxReal = rxSample.real();
-        sample.rxImag = rxSample.imag();
-        sample.txReal = txSample.real();
-        sample.txImag = txSample.imag();
-        Publisher::get()->send("RF", (uint8_t *)(&sample), sizeof(sample));
+        /* Step 5 - Check for output bytes */
+        uint8_t outputByte;
+        if (current->rxByte(outputByte)) {
+            if (m_rxCallback) {
+                m_rxCallback(current->getId(), outputByte);
+            } else {
+                std::cout << "receive " << (int)outputByte << " with no callback to call" << std::endl;
+            }
+        }
 
-        count++;
+        /* Step 6 - Publish data */
+//        RFSample sample;
+//        sample.id     = (uint64_t)current->getId();
+//        sample.rxReal = rxSample.real();
+//        sample.rxImag = rxSample.imag();
+//        sample.txReal = txSample.real();
+//        sample.txImag = txSample.imag();
+//        Publisher::get()->send("RF", (uint8_t *)(&sample), sizeof(sample));
+
     }
+}
+
+void SigWorld::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
+{
+    (void)m_radioSet.addRadio(radioFactory);
+}
+
+bool SigWorld::sendByte(radio_id_t id, uint8_t byte)
+{
+    return m_radioSet.getRadioForId(id)->txByte(byte);
+}
+
+void SigWorld::didReceiveByte(std::function< void(radio_id_t, uint8_t) > callback)
+{
+    m_rxCallback = callback;
 }

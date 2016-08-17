@@ -25,6 +25,7 @@ public:
      * @return ID of radio
      */
     radio_id_t addRadio(std::function< std::unique_ptr<RadioS>() > &radioFactory);
+    RadioS *getRadioForId(radio_id_t id) const;
 
     void init();
 
@@ -36,7 +37,7 @@ public:
 
 private:
     std::vector<std::unique_ptr<RadioS> >                               m_radios;
-    std::map<RadioS *, CircularBuffer<ComplexDouble > >  m_txBuffers;
+    std::map<RadioS *, CircularBuffer<ComplexDouble > >                 m_txBuffers;
     MatrixXd                                                            m_distances;
     ComplexGaussianNoise                                                m_noise;
     bool                                                                m_didInit;
