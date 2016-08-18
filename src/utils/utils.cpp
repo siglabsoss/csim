@@ -1,4 +1,5 @@
 #include <cmath>
+#include <utils/utils.hpp>
 
 unsigned int reverseBits(int N, unsigned int num)
 {
@@ -21,4 +22,16 @@ double bound(double min, double max, double val)
         val = min;
     }
     return val;
+}
+
+unsigned int calculateHammingDistance(uint8_t a, uint8_t b)
+{
+    unsigned int count = 0;
+    uint8_t diff = a ^ b;
+    for (unsigned i = 0; i < 8; i++) {
+        if (diff & (1 << i)) {
+            count++;
+        }
+    }
+    return count;
 }
