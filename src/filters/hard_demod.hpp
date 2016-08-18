@@ -17,6 +17,7 @@ public:
 private:
     void    queueSymbol(symbol_t symbol);
     bool    dequeueByte(uint8_t &byte);
+    static double angleDiff(double a, double b);
 
     std::queue<bool>            m_bits;
     filter_io_t                 m_value;

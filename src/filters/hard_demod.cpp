@@ -54,18 +54,16 @@ void HardDemod::tick(void)
         return;
     }
     m_inputValid = false;
-    ComplexDouble value = m_value.toComplexDouble();
-    if (abs(value) < 0.01) { //XXX define threshold
+    constellation_t value = m_value.toComplexDouble();
+    if (abs(value) < 0.1) { //XXX define threshold
         return;
     }
-    double minDelta = 4*M_PI;
     symbol_t symbol;
-    double inputTheta = atan2(value.imag(), value.real());
+    double minDistance = 1e100;
     for (auto it = m_constellations.begin(); it != m_constellations.end(); it++) {
-        double constellationTheta = atan2(it->second.imag(), it->second.real());
-        double delta = abs(constellationTheta - inputTheta); //XXX deal with wrap around
-        if (delta < minDelta) {
-            minDelta = delta;
+        double distance = abs(it->second - value);
+        if (distance < minDistance) {
+            minDistance = distance;
             symbol = it->first;
         }
     }
@@ -92,4 +90,13 @@ bool HardDemod::dequeueByte(uint8_t &byte)
         byte |= (nextBit << i);
     }
     return true;
+}
+
+double HardDemod::angleDiff(double a, double b)
+{
+    double diff = abs(a - b);
+    if (diff > M_PI) {
+        diff = 2 * M_PI - diff;
+    }
+    return diff;
 }
