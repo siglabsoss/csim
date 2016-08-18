@@ -11,6 +11,9 @@
 #include <filters/mixer.hpp>
 #include <filters/zero_pad_interpolator.hpp>
 #include <filters/linear_gain_amplifier.hpp>
+#include <filters/decimator.hpp>
+#include <filters/hard_demod.hpp>
+
 #include <probes/sample_count_trigger.hpp>
 #include <probes/tick_count_trigger.hpp>
 #include <probes/level_trigger.hpp>
@@ -34,43 +37,49 @@ timespec timediff(timespec start, timespec end)
 }
 
 static constexpr size_t FFT_WINDOW_SIZE = 1024;
-static constexpr size_t UPSAMPLE_FACTOR = 2;
-static constexpr size_t MOD_TICKS_PER_SYMBOL = 2;
-static constexpr size_t MIXER_TICKS_PER_PERIOD = (MOD_TICKS_PER_SYMBOL / UPSAMPLE_FACTOR) * 10;
+static constexpr size_t UPSAMPLE_FACTOR = 1;
+static constexpr size_t MOD_TICKS_PER_SYMBOL = 1024;
+//ticks per symbol needs to be greater than upsample factor in order to not saturate
+static constexpr size_t MIXER_TICKS_PER_PERIOD = (MOD_TICKS_PER_SYMBOL / UPSAMPLE_FACTOR);
 
 void constructModulationChain(FilterChain &modChain, bool withTriggers)
 {
-    Modulator           *qam16    = new Modulator(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_QAM16);
+    Modulator           *qam16    = new Modulator(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
     fixedfft            *fft      = new fixedfft(FFT_WINDOW_SIZE, 0);
     ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE, UPSAMPLE_FACTOR);
     LinearGainAmplifier *lga      = new LinearGainAmplifier(UPSAMPLE_FACTOR);
     fixedifft           *ifft     = new fixedifft(FFT_WINDOW_SIZE*UPSAMPLE_FACTOR, 0);
-    Mixer *upmixer              = new Mixer(MIXER_TICKS_PER_PERIOD, true /* upmix */);
+    Mixer *upmixer                = new Mixer(MIXER_TICKS_PER_PERIOD, true /* upmix */);
 
-    //modulation_chain = *tp3 + *upmixer + *tp2 +  *ifft + *lga + *zpi + *lt1 +  *fft + *tp4 + *qam16;
     if (withTriggers) {
-        TickCountTrigger  *lt1      = new TickCountTrigger("FFT trigger", FFT_WINDOW_SIZE*10, 1, FFT_WINDOW_SIZE*4);
-        TickCountTrigger  *tp2      = new TickCountTrigger("IFFT trigger", FFT_WINDOW_SIZE*10, 1, FFT_WINDOW_SIZE*4);
-        TickCountTrigger  *tp3      = new TickCountTrigger("Mixer trigger", FFT_WINDOW_SIZE*10, 1, FFT_WINDOW_SIZE*4);
-        TickCountTrigger  *tp4      = new TickCountTrigger("QAM trigger", FFT_WINDOW_SIZE*10, 1, FFT_WINDOW_SIZE*4);
-        TickCountTrigger  *tp5      = new TickCountTrigger("ZPI trigger", FFT_WINDOW_SIZE*10, 1, FFT_WINDOW_SIZE*4);
-        TickCountTrigger  *tp6      = new TickCountTrigger("LGA trigger", FFT_WINDOW_SIZE*10, 1, FFT_WINDOW_SIZE*4);
-        modChain = *tp3 + *upmixer + *tp2 + *ifft + *tp6 + *lga + *tp5 + *zpi + *lt1 + *fft + *tp4 + *qam16;
+        SampleCountTrigger  *tp4      = new SampleCountTrigger("QAM trigger",   FFT_WINDOW_SIZE*1, 1,                       FFT_WINDOW_SIZE*0);
+        SampleCountTrigger  *lt1      = new SampleCountTrigger("FFT trigger",   FFT_WINDOW_SIZE*1, 1,                       FFT_WINDOW_SIZE*0);
+        SampleCountTrigger  *tp5      = new SampleCountTrigger("ZPI trigger",   FFT_WINDOW_SIZE*UPSAMPLE_FACTOR, 1,         FFT_WINDOW_SIZE*0);
+        SampleCountTrigger  *tp6      = new SampleCountTrigger("LGA trigger",   FFT_WINDOW_SIZE*UPSAMPLE_FACTOR, 1,         FFT_WINDOW_SIZE*0);
+        SampleCountTrigger  *tp2      = new SampleCountTrigger("IFFT trigger",  FFT_WINDOW_SIZE*UPSAMPLE_FACTOR, 1,         FFT_WINDOW_SIZE*0);
+        SampleCountTrigger  *tp3      = new SampleCountTrigger("Mixer trigger", FFT_WINDOW_SIZE*MIXER_TICKS_PER_PERIOD, 1,  FFT_WINDOW_SIZE*0);
+
+        //modChain = *tp3 + *upmixer + *tp2 + *ifft + *tp6 + *lga + *tp5 + *zpi + *lt1 + *fft + *tp4 + *qam16;
+        modChain = *tp3 + *upmixer + *tp4 + *qam16;
     } else {
-        modChain = *upmixer + *ifft + *lga + *zpi + *fft + *qam16;
+        //modChain = *upmixer + *ifft + *lga + *zpi + *fft + *qam16;
+        modChain = *upmixer + *qam16;
     }
 }
 
 void constructDemodulationChain(FilterChain &demodChain, bool withTriggers)
 {
-    Mixer *downmixer = new Mixer(10, false /* downmix */);
-    TickCountTrigger *lt2  = new TickCountTrigger("Downmix", FFT_WINDOW_SIZE*10, 1, FFT_WINDOW_SIZE*5);
-    downmixer->shouldPublish(true);
+    Mixer *downmixer = new Mixer(MIXER_TICKS_PER_PERIOD, false /* downmix */);
+    Decimator *decim = new Decimator(MIXER_TICKS_PER_PERIOD, 0);
+    HardDemod *demod = new HardDemod(Modulator::MOD_SCHEME_BPSK, 0.0);
 
     if (withTriggers) {
-        demodChain = *lt2 + *downmixer;
+        SampleCountTrigger *lt2  = new SampleCountTrigger("Downmix",    FFT_WINDOW_SIZE*MIXER_TICKS_PER_PERIOD, 1,     FFT_WINDOW_SIZE*0);
+        SampleCountTrigger *lt3  = new SampleCountTrigger("Decimation", FFT_WINDOW_SIZE*1, 1,                          FFT_WINDOW_SIZE*0);
+        //demodChain = *lt3 + *decim + *lt2 + *downmixer;
+        demodChain = *demod + *lt3 + *decim + *lt2 + *downmixer;
     } else {
-        demodChain = *downmixer;
+        demodChain = *demod + *decim + *downmixer;
     }
 }
 
@@ -84,7 +93,7 @@ void constructRadios(SigWorld &world)
                 };
 
                 FilterChain modulation_chain;
-                constructModulationChain(modulation_chain, false);
+                constructModulationChain(modulation_chain, true);
 
                 FilterChain demodulation_chain;
                 constructDemodulationChain(demodulation_chain, false);
@@ -94,7 +103,7 @@ void constructRadios(SigWorld &world)
     world.addRadio([]()
             {
                 radio_config_t config {
-                    .position = Vector2d(0.0, 10*11.996),
+                    .position = Vector2d(0.0, 119.96),
                     .id = static_cast<radio_id_t>(1)
                 };
 
@@ -102,8 +111,7 @@ void constructRadios(SigWorld &world)
                 constructModulationChain(modulation_chain, false);
 
                 FilterChain demodulation_chain;
-                constructDemodulationChain(demodulation_chain, false);
-
+                constructDemodulationChain(demodulation_chain, true);
 
                 return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
             });
@@ -115,16 +123,26 @@ int main(int argc, char *argv[])
     log_info("Starting RetroSim!");
 
     SigWorld world;
-
     constructRadios(world);
-
-    world.init();
+    world.init(false, false, false);
+    bool didReceive = true;
+    world.didReceiveByte([&didReceive](radio_id_t id, uint8_t byte)
+            {
+                std::cout << "radio #" << id << " received " << (int)byte << std::endl;
+                didReceive = true;
+            });
 
     size_t tickCount = 0;
     struct timespec tp1;
     struct timespec tp2;
-
+    std::srand(std::time(0));
     while(true) {
+        int random_variable = std::rand();
+        uint8_t byte = random_variable % 256;
+        if (didReceive && world.sendByte(0, byte)) {
+            std::cout << "radio #" << 0 << " sent     " << (int)byte << std::endl;
+            didReceive = false;
+        }
         if (tickCount == 0) {
             clock_gettime(CLOCK_REALTIME, &tp1);
         }
