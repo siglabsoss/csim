@@ -26,6 +26,7 @@ HardDemod::HardDemod(Modulator::mod_scheme_t scheme, double theta) :
             m_constellations = Modulator::getQAM16Constellations();
             m_bitsPerSymbol = 4;
             break;
+        case Modulator::MOD_SCHEME_NULL:
         default:
             break;
     }

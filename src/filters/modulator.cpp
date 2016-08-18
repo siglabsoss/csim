@@ -30,6 +30,7 @@ Modulator::Modulator(unsigned int ticksPerSymbol, mod_scheme_t scheme = MOD_SCHE
             m_constellations = getQAM16Constellations();
             m_bitsPerSymbol = 4;
             break;
+        case MOD_SCHEME_NULL:
         default:
             break;
     }

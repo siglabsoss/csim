@@ -16,7 +16,8 @@ private: //constants
     static constexpr symbol_t NULL_SYMBOL = 0;
 public: //types
     enum mod_scheme_t {
-        MOD_SCHEME_BPSK = 0,
+        MOD_SCHEME_NULL = 0,
+        MOD_SCHEME_BPSK,
         MOD_SCHEME_QPSK,
         MOD_SCHEME_8PSK,
         MOD_SCHEME_QAM16
