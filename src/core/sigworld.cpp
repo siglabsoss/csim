@@ -7,9 +7,14 @@ SigWorld::SigWorld() :
 
 }
 
-void SigWorld::init()
+void SigWorld::init(bool noNoise, bool noDelay, bool noPhaseRot)
 {
-    m_radioSet.init();
+    m_radioSet.init(noNoise, noDelay, noPhaseRot);
+}
+
+void SigWorld::reset()
+{
+    m_radioSet.clear();
 }
 
 void SigWorld::tick()

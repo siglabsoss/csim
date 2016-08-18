@@ -9,7 +9,10 @@ RadioSet::RadioSet() :
     m_txBuffers(),
     m_distances(),
     m_noise(3e-11),
-    m_didInit(false)
+    m_didInit(false),
+    m_noNoise(false),
+    m_noDelay(false),
+    m_noPhaseRot(false)
 {
 
 }
@@ -46,11 +49,17 @@ RadioS * RadioSet::getRadioForId(radio_id_t id) const
 }
 
 
-void RadioSet::init()
+void RadioSet::init(bool noNoise, bool noDelay, bool noPhaseRot)
 {
     assert(m_didInit == false);
+
+    m_noNoise = noNoise;
+    m_noDelay = noDelay;
+    m_noPhaseRot = noPhaseRot;
+
     size_t numRadios = m_radios.size();
     log_debug("Initializing radio set with %d radios", numRadios);
+    log_debug("noNoise = %d\tnoDelay = %d\tnoPhaseRot = %d", m_noNoise, m_noDelay, m_noPhaseRot);
     //For each radio, find the other radio with the largest sample delay.
     //This is O(N^2), but it's for init only.
     for (size_t cur = 0; cur < numRadios; cur++) {
@@ -64,11 +73,22 @@ void RadioSet::init()
             }
         }
         //Now we have our max delay to radio 'cur', use it for our ringbuffer size
-        int maxDelay = RadioPhysics::sampleDelayForDistance(maxDistance);
+        int maxDelay = 1;
+        if (!m_noDelay) {
+            maxDelay = RadioPhysics::sampleDelayForDistance(maxDistance);
+        }
         log_debug("Radio %d is farthest away from radio %d with a distance of %f (%d samples)", maxRadioIdx, cur, maxDistance, maxDelay);
         m_txBuffers[m_radios[cur].get()] = CircularBuffer<ComplexDouble >(static_cast<size_t>(maxDelay), ComplexDouble(0.0, 0.0));
     }
     m_didInit = true;
+}
+
+void RadioSet::clear()
+{
+    m_radios.clear();
+    m_txBuffers.clear();
+    m_distances.conservativeResize(0, 0);
+    m_didInit = false;
 }
 
 void RadioSet::bufferSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
@@ -88,12 +108,24 @@ void RadioSet::getSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sa
         }
         RadioS *otherRadio = m_radios[i].get();
         double distance = m_distances(i, radioOfInterest);
-        int delay = RadioPhysics::sampleDelayForDistance(distance);
+
+        int delay = 1;
+        if (!m_noDelay) {
+            delay = RadioPhysics::sampleDelayForDistance(distance);
+        }
+
         assert (delay <= m_txBuffers[otherRadio].capacity());
         ComplexDouble remoteSample = m_txBuffers[otherRadio].at(delay-1);
-        //RadioPhysics::complexRotationForDistance(remoteSample, distance);
-        //sample += remoteSample + (m_noise.getNext() * (1.0 / RadioPhysics::freeSpacePowerLoss(distance)));
-        sample += remoteSample;
+
+        if (!m_noPhaseRot) {
+            RadioPhysics::complexRotationForDistance(remoteSample, distance);
+        }
+
+        if (m_noNoise) {
+            sample += remoteSample;
+        } else {
+            sample += remoteSample + (m_noise.getNext() * (1.0 / RadioPhysics::freeSpacePowerLoss(distance)));
+        }
     }
 }
 

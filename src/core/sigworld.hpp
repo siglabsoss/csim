@@ -8,13 +8,14 @@ class SigWorld
 {
 public:
     SigWorld();
-    void init();
+    void init(bool noNoise, bool noDelay, bool noPhaseRot);
     void tick();
+    void reset();
 
     void addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory);
     bool sendByte(radio_id_t id, uint8_t byte);
     void didReceiveByte(std::function< void(radio_id_t, uint8_t) > callback);
 private:
-    RadioSet    m_radioSet;
-    std::function< void(radio_id_t, uint8_t) > m_rxCallback;
+    RadioSet                                    m_radioSet;
+    std::function< void(radio_id_t, uint8_t) >  m_rxCallback;
 };

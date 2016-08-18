@@ -24,6 +24,6 @@ FilterChainElement::FilterChainElement(std::string name) :
     m_name(name + std::to_string(instanceCount)),
     m_shouldPublish(false)
 {
-    log_info("New filter chain element with name = %s", m_name.c_str());
+    //log_info("New filter chain element with name = %s", m_name.c_str());
     instanceCount++;
 }

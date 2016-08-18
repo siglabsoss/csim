@@ -27,7 +27,8 @@ public:
     radio_id_t addRadio(std::function< std::unique_ptr<RadioS>() > &radioFactory);
     RadioS *getRadioForId(radio_id_t id) const;
 
-    void init();
+    void init(bool noNoise, bool noDelay, bool noPhaseRot);
+    void clear();
 
     void bufferSampleForRadio(const iterator &it, ComplexDouble &sample);
     void getSampleForRadio(const iterator &it, ComplexDouble &sample);
@@ -41,4 +42,9 @@ private:
     MatrixXd                                                            m_distances;
     ComplexGaussianNoise                                                m_noise;
     bool                                                                m_didInit;
+
+    //Configuration options
+    bool                                                                m_noNoise;
+    bool                                                                m_noDelay;
+    bool                                                                m_noPhaseRot;
 };
