@@ -11,9 +11,9 @@ CSIM_TEST_SUITE_BEGIN(Fixed_Logger)
 CSIM_TEST_CASE(Number_Of_Operations)
 {
 	FixedPoint <32, 1>  v(-(1/3.0));
-	FixedPoint <32, 1>  w(.5);
+	FixedPoint <13, 2>  w(.5);
 	for (int i = 0; i < 1; i++) {
-		(v+w);
+		v = (v+w);
 	}
 
 
@@ -42,10 +42,10 @@ CSIM_TEST_CASE(Number_Of_Operations)
 		BOOST_CHECK(sc_dt::scfx_rep::multiplications == 0);
 		BOOST_CHECK(sc_dt::scfx_rep::divisions == 0);
 
-
+		sc_dt::scfx_rep::clear();
 	#endif
 
-	sc_dt::scfx_rep::clear();
+
 	FixedComplex32 fc32(1);
 //	for (int i = 0; i < 1; i++) {
 //		fc32 = fc32 + fc32;
@@ -125,7 +125,9 @@ CSIM_TEST_CASE(Overflow_FixedPoint)
 
 CSIM_TEST_CASE(Overflow_FixedComplex16)
 {
-	sc_dt::scfx_rep::clear();
+	#ifdef FIXED_POINT_PROFILER_ENABLE
+		sc_dt::scfx_rep::clear();
+	#endif
 	FixedComplex16 fc16(.99,0);
 
 	for (int i = 0; i < 10; i++) {
@@ -170,7 +172,9 @@ CSIM_TEST_CASE(Overflow_FixedComplex16)
 
 CSIM_TEST_CASE(Precision_Loss_FixedPoint)
 {
-	sc_dt::scfx_rep::clear();
+	#ifdef FIXED_POINT_PROFILER_ENABLE
+		sc_dt::scfx_rep::clear();
+	#endif
 	FixedPoint <5, 5>  v(5);
 
 	for (int i = 0; i < 10; i++) {
@@ -187,9 +191,9 @@ CSIM_TEST_CASE(Precision_Loss_FixedPoint)
 
 CSIM_TEST_CASE(MinMax_Zeroes_FixedPoint)
 {
-#ifdef FIXED_POINT_PROFILER_ENABLE
-	sc_dt::scfx_rep::clear();
-#endif
+	#ifdef FIXED_POINT_PROFILER_ENABLE
+		sc_dt::scfx_rep::clear();
+	#endif
 	FixedPoint<5,5> v(4);
 	FixedPoint<5,5> w(4);
 
@@ -221,6 +225,7 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedPoint)
 	BOOST_CHECK(sc_dt::scfx_rep::zeroes->vals[5][1].getMin() == 1024);
 #endif
 
+	FixedPoint <32, 16>  y = v + w;
 }
 
 CSIM_TEST_CASE(MinMax_Zeroes_FixedComplex)
