@@ -10,26 +10,27 @@ CSIM_TEST_SUITE_BEGIN(Fixed_Logger)
 CSIM_TEST_CASE(Number_Of_Operations)
 {
 	sc_dt::scfx_rep::warningLevel = 0;
-	FixedPoint <4, 4>  v(-(1/3.0));
-	FixedPoint <4, 4>  w(.5);
-
+	FixedPoint <4, 4>  v(2);
+	FixedPoint <4, 4>  w(4);
+	FixedPoint <4, 4> z;
 	for (int i = 0; i < 1; i++) {
-		(v+w);
+		z = (v+w);
 	}
 
 	for (int i = 0; i < 3; i++) {
-		v - v;
+		z = v - w;
 	}
 
 	for (int i = 0; i < 3; i++) {
-		v * v;
+		z = v * v;
 	}
 
 	for (int i = 0; i < 7; i++) {
-		v / v;
+		z = v / v;
 	}
 
-//		sc_dt::scfx_rep::printLog();
+
+	sc_dt::scfx_rep::printLog();
 	BOOST_CHECK(sc_dt::scfx_rep::additions == 1);
 	BOOST_CHECK(sc_dt::scfx_rep::subtractions == 3);
 	BOOST_CHECK(sc_dt::scfx_rep::multiplications == 3);
@@ -40,7 +41,6 @@ CSIM_TEST_CASE(Number_Of_Operations)
 	BOOST_CHECK(sc_dt::scfx_rep::subtractions == 0);
 	BOOST_CHECK(sc_dt::scfx_rep::multiplications == 0);
 	BOOST_CHECK(sc_dt::scfx_rep::divisions == 0);
-
 	sc_dt::scfx_rep::clear();
 
 }
@@ -184,7 +184,8 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedComplex)
 
 CSIM_TEST_CASE(Addition_Warning)
 {
-    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+	std::cerr.setstate(std::ios_base::failbit);
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = throw on warning
     int exceptionNum = 0;
     FixedPoint <5, 5> z(0);
     try {
@@ -236,12 +237,13 @@ CSIM_TEST_CASE(Addition_Warning)
     }
 
     BOOST_CHECK(exceptionNum == 3);
-
+    std::cerr.clear();
 }
 
 CSIM_TEST_CASE(Subtraction_Warning)
 {
-    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+	std::cerr.setstate(std::ios_base::failbit);
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = throw on warning
     int exceptionNum = 0;
     FixedPoint <5, 5> z;
 
@@ -293,11 +295,13 @@ CSIM_TEST_CASE(Subtraction_Warning)
     BOOST_CHECK(exceptionNum == 3);
     exceptionNum = 0;
 
+    std::cerr.clear();
 }
 
 CSIM_TEST_CASE(Multiplication_Warning)
 {
-    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+	std::cerr.setstate(std::ios_base::failbit);
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = throw on warning
     int exceptionNum = 0;
     FixedPoint <8, 8> z;
 
@@ -348,11 +352,14 @@ CSIM_TEST_CASE(Multiplication_Warning)
 
     BOOST_CHECK(exceptionNum == 3);
     exceptionNum = 0;
+
+    std::cerr.clear();
 }
 
 CSIM_TEST_CASE(Division_Warning)
 {
-    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+	std::cerr.setstate(std::ios_base::failbit);
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = throw on warning
     int exceptionNum = 0;
 	FixedPoint <4, 4> z;
 
@@ -381,6 +388,8 @@ CSIM_TEST_CASE(Division_Warning)
 
     BOOST_CHECK(exceptionNum == 3);
     exceptionNum = 0;
+
+    std::cerr.clear();
 }
 
 #endif
