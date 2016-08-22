@@ -33,18 +33,18 @@ CSIM_TEST_CASE(Number_Of_Operations)
 	}
 
 //		sc_dt::scfx_rep::printLog();
-		BOOST_CHECK(sc_dt::scfx_rep::additions == 1);
-		BOOST_CHECK(sc_dt::scfx_rep::subtractions == 3);
-		BOOST_CHECK(sc_dt::scfx_rep::multiplications == 3);
-		BOOST_CHECK(sc_dt::scfx_rep::divisions == 7);
-		sc_dt::scfx_rep::clear(); //Resets all values to 0
+	BOOST_CHECK(sc_dt::scfx_rep::additions == 1);
+	BOOST_CHECK(sc_dt::scfx_rep::subtractions == 3);
+	BOOST_CHECK(sc_dt::scfx_rep::multiplications == 3);
+	BOOST_CHECK(sc_dt::scfx_rep::divisions == 7);
+	sc_dt::scfx_rep::clear(); //Resets all values to 0
 //		sc_dt::scfx_rep::printLog();
-		BOOST_CHECK(sc_dt::scfx_rep::additions == 0);
-		BOOST_CHECK(sc_dt::scfx_rep::subtractions == 0);
-		BOOST_CHECK(sc_dt::scfx_rep::multiplications == 0);
-		BOOST_CHECK(sc_dt::scfx_rep::divisions == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::additions == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::subtractions == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::multiplications == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::divisions == 0);
 
-		sc_dt::scfx_rep::clear();
+	sc_dt::scfx_rep::clear();
 
 }
 
@@ -76,7 +76,7 @@ CSIM_TEST_CASE(Overflow_FixedPoint)
 	}
 
 //		sc_dt::scfx_rep::printLog();
-		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
 //		cout << "Value: " << x.range().to_int64() << endl;
 //			cout << "Flag: " << x.overflow_flag() << endl << endl;
 
@@ -84,16 +84,16 @@ CSIM_TEST_CASE(Overflow_FixedPoint)
 
 CSIM_TEST_CASE(Overflow_FixedComplex16)
 {
-		sc_dt::scfx_rep::clear();
+	sc_dt::scfx_rep::clear();
 	FixedComplex16 fc16(.99,0);
 
 	for (int i = 0; i < 10; i++) {
 		fc16 = fc16 + fc16;
 	}
 
-		BOOST_CHECK(sc_dt::scfx_rep::overflows == 5);
-		sc_dt::scfx_rep::clear();
-		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::overflows == 5);
+	sc_dt::scfx_rep::clear();
+	BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
 
 	fc16.real(.99);
 	for (int i = 0; i < 10; i++) {
@@ -101,9 +101,9 @@ CSIM_TEST_CASE(Overflow_FixedComplex16)
 	}
 
 //		sc_dt::scfx_rep::printLog();
-		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
-		sc_dt::scfx_rep::clear();
-		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	sc_dt::scfx_rep::clear();
+	BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
 
 	fc16.real(.5);
 	fc16.imag(.5);
@@ -115,9 +115,9 @@ CSIM_TEST_CASE(Overflow_FixedComplex16)
 
 
 //		sc_dt::scfx_rep::printLog();
-		BOOST_CHECK(sc_dt::scfx_rep::overflows == 4);
-		sc_dt::scfx_rep::clear();
-		BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
+	BOOST_CHECK(sc_dt::scfx_rep::overflows == 4);
+	sc_dt::scfx_rep::clear();
+	BOOST_CHECK(sc_dt::scfx_rep::overflows == 0);
 }
 
 CSIM_TEST_CASE(Precision_Loss_FixedPoint)
