@@ -62,7 +62,7 @@ CSIM_TEST_CASE(FLOAT_FFT_TEST)
 ////        BOOST_CHECK_CLOSE(r1, r2, tolerance);
 ////        BOOST_CHECK_CLOSE(i1, i2, tolerance);
 ////    }
-
+    cout << "DONE WITH FLOATFFT" << endl;
 }
 
 CSIM_TEST_SUITE_END()

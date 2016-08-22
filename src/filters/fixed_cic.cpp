@@ -1,4 +1,4 @@
-#include <filters/cic.hpp>
+#include <filters/fixed_cic.hpp>
 
 using namespace std;
 

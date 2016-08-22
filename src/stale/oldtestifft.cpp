@@ -10,7 +10,7 @@
 #include <stdlib.h>
 
 #include <utils/utils.hpp> //reverseBits()
-#include <filters/fixedfft.hpp>
+#include <filters/fixedifft.hpp>
 
 using namespace std;
 
@@ -19,7 +19,6 @@ int main(int argc, char *argv[])
 {
     string infile(argv[1]);
     string outfile(argv[2]);
-
     cout << "program start" << endl;
     int i;
     int realInput[32769] = {0}; // default values
@@ -28,13 +27,13 @@ int main(int argc, char *argv[])
 
     if (!in.is_open()){
             cout << "error reading" << infile << endl;
-            assert(1 == 0);// "Could not open data/fft/input/input3.txt");
+            assert(1 == 0);// "Could not open data/ifft/input/input3.txt");
     }//If cannot read from file, return 1;
 
     ofstream out2(outfile.c_str());
     if (!out2.is_open()){
                cout << "error reading " << outfile << endl;
-               assert(1 == 0);// "Could not open data/fft/input/input3.txt");
+               assert(1 == 0);// "Could not open data/ifft/input/input3.txt");
        }//If cannot read from file, return 1;
 
     std::string token;
@@ -61,22 +60,16 @@ int main(int argc, char *argv[])
     int count = 0; //How many outputs have been collected
 
     int points = inputs;
-    cout << inputs << endl;
     filter_io_t data;
     data.type =  IO_TYPE_FIXED_COMPLEX_32;
-
-
-    fixedfft fft(points, 46080); //x point fft, y table size
-
-
-
+    fixedifft ifft(inputs, 23040); //8 point ifft
 
     for (int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
 
             data.fc32 = FixedComplex<32>(realInput[j],imagInput[j]);
-            fft.input(data);
-            bool test = fft.output(data);
+            ifft.input(data);
+            bool test = ifft.output(data);
             if (test) {
                 answers[count++] = data.fc32;
             }
@@ -84,29 +77,28 @@ int main(int argc, char *argv[])
     }
     cout << "Count is: " << count << endl << endl;
 
-    assert(count == inputs);
+    // If you want bits to be reversed
 //
 //     cout << "Hopefully correct:" << endl;
 //     FixedComplex<32> temp[32769];
-//    for (i = 0; i < inputs; i++) {
-//        temp[reverseBits(inputs, i)] = answers[i];
-//    }//Reformats data in correct order
+//     for (i = 0; i < inputs; i++) {
+//         temp[reverseBits(inputs, i)] = answers[i];
+//     }//Reformats data in correct order
 //
+//     assert(count == inputs);
 //     for (i = 0; i < count; i++) {
 //         out2 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
 //         out2 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
-//       //  cout << temp[i];
+////         cout << temp[i];
 //     }//Prints data out in correct order
 
+    for (i = 0; i < count; i++) {
+        out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int()<<"," ;
+        out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
+       // cout << answers[i];
+    }//Prints data
 
-     string outfile3("../data/fft/output/out1BitReversed.txt");
-     ofstream out3(outfile3.c_str());
-     for (i = 0; i < count; i++) {
-              out2 << setw(11) << setfill(' ') <<  answers[i].real.to_int() <<"," ;
-              out2 << setw(11) << setfill(' ') << answers[i].imag.to_int() << endl;
-            //  cout << temp[i];
-          }//Prints data out in bit reversed order
-
+//
 
     cout << "program end" << endl;
 

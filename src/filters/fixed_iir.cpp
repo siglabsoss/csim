@@ -9,7 +9,7 @@
  * NOTE: First a coefficient must be 1
  *
  */
-#include <filters/fixediir.hpp>
+#include <filters/fixed_iir.hpp>
 
 void fixediir::reset()
 {
@@ -48,23 +48,17 @@ void fixediir::tick()
 
 }
 
-fixediir::fixediir(int registerXSize, int registerYSize,
-        FixedComplex16* aCoeffs, FixedComplex16* bCoeffs) :
+fixediir::fixediir(vector<FixedComplex16> aCoeffs, vector<FixedComplex16> bCoeffs) :
                 FilterChainElement("FixedIIR"),
-                m_numXRegisters(registerXSize),
-                m_numYRegisters(registerYSize),
+                m_numXRegisters(bCoeffs.size()),
+                m_numYRegisters(aCoeffs.size()),
                 m_a(m_numYRegisters),
                 m_b(m_numXRegisters),
                 m_x(m_numXRegisters),
                 m_y(m_numYRegisters)
 {
-
-    for (int i = 0; i < m_numYRegisters; i++)
-        m_a[i] = aCoeffs[i]; //Gets coefficient data for right side
-
-    for (int i = 0; i < m_numXRegisters; i++)
-        m_b[i] = bCoeffs[i]; //Gets coefficient data for left side
-
+        m_a = aCoeffs; //Gets coefficient data for right side
+        m_b = bCoeffs; //Gets coefficient data for left side
 } //Constructs filter based on number of registers on each side and the values of those registers
 
 void fixediir::iir(FixedComplex16 &input)
@@ -75,12 +69,10 @@ void fixediir::iir(FixedComplex16 &input)
 
     for (int i = 1; i < m_numXRegisters; i++)
         centerTap = centerTap + (m_x[i] * m_b[i]); //Accumulate for each x register
-
     currenty = (centerTap); // Coefficient of a[0] = 1
     for (int i = 1; i < m_numYRegisters; i++) {
         currenty = (currenty) - (m_a[i] * m_y[i]); //Accumulate
     }
-
     for (int i = m_numXRegisters - 1; i > 1; i--)
         m_x[i] = m_x[i - 1]; //Moves everything up one register
 

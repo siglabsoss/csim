@@ -5,10 +5,28 @@ using namespace std;
 
 const long double pi = 3.141592653589793238L;
 
+
+
+bool fixedifftbase::input(const filter_io_t &data)
+{
+
+}
+
+bool fixedifftbase::output(filter_io_t &data)
+{
+
+
+}
+
+
+void fixedifftbase::tick()
+{
+
+}
+
 bool fixedifft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
-    newInput = true;
     assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
     FixedComplex32 sample = data.fcn32;
     inputandtick(sample);
@@ -26,16 +44,15 @@ bool fixedifft::output(filter_io_t &data)
         m_count = m_count - (N + 1); //Full cycle of outputs complete
     }
 
-    if (newInput == true) {
-        newInput = false;
-        if (m_count >= N) {
-            data = printer.m_output.front();
-            printer.m_output.pop();
+    if (m_count >= N) {
+        data = printer.m_output.front();
+        printer.m_output.pop();
 
-            return true;
-        }//Time to start outputs
-    }
-    return false;
+        return true;
+    }//Time to start outputs
+    else {
+        return false;
+    }//Not ready
 }
 
 void fixedifft::tick()
@@ -105,6 +122,13 @@ FixedComplex32 fixedifftstage::twiddler(int k)
 	for (int i = 0; i <= ((N/4)); i++) {
 		b[i] = mainTablePointer[i * increment1];
 	}
+
+	/*
+	int* a = new int[(N/4)];
+	for (int i = 0; i <= ((N/4)); i++) {
+		a[i] = lookupTable[i * increment];
+	}
+	*/
 
 	if (k > (N/4)) {
 		W.real(-b[(-N/4) + k ] / 32768.0);
@@ -243,9 +267,7 @@ void fixedifftbuffer::inputandtick(FixedComplex32 x)
 }
 
 fixedifft::fixedifft(int Ninput, int tableSize) :
-        FilterChainElement("FixedIFFT"),
-        printer(Ninput),
-        newInput(false)
+        printer(Ninput)
 {
 	if (tableSize == 0) {
 		if (Ninput < 32) {
@@ -291,3 +313,4 @@ void fixedifft::inputandtick(FixedComplex32 x)
     }
     stages[0].inputandtick(x);
 }
+

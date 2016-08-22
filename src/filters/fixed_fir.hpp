@@ -1,8 +1,8 @@
 #pragma once
 
 #include <vector>
-#include <iterator>     // ostream_operator
-#include <iomanip> //For setprecision
+#include <stdlib.h>
+#include <boost/circular_buffer.hpp>
 
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
@@ -11,7 +11,7 @@
 class FixedFIR : public FilterChainElement
 {
 public:
-    FixedFIR(int N, FixedComplex16* tap);
+    FixedFIR(vector<FixedComplex16> tap);
 
     bool input(const filter_io_t &data) override;
     /**

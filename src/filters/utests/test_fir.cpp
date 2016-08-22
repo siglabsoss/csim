@@ -1,17 +1,7 @@
 #include <test/unit_test.hpp>
-
-#include <iostream>
-#include<cstring>
-#include <stdio.h>
-#include <iostream>     // cout, endl
-#include <vector> //For storing parsed data from file
-#include <iterator>     // ostream_operator
-#include <boost/tokenizer.hpp> //For parsing data from file
-#include <iomanip> //For setprecision
-#include <stdlib.h>
-
 #include <filters/fixed_fir.hpp>
-
+#include <boost/tokenizer.hpp> //For parsing data from file
+#include <utils/utils.hpp>
 using namespace boost;
 using namespace std;
 
@@ -19,182 +9,82 @@ CSIM_TEST_SUITE_BEGIN(FIRFilter)
 
 CSIM_TEST_CASE(REAL_FILTER)
 {
-    FixedComplex16 input[1024]; //Array to hold inputs
-    FixedComplex16 output[1024]; //Array to hold outputs
-    FixedComplex16 answers[1024];
-    string data("./data/firdata/input/data1_in.csv"); //Input data file
+    vector<FixedComplex16> input; //Vector to hold inputs
+    vector<FixedComplex16> output; //Vector to hold outputs
+    vector<FixedComplex16> answers;
+    vector<FixedComplex16> tap;
 
-    ifstream in(data.c_str());
-    if (!in.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/data1_in.txt");
-    }
+    string data("./data/fir/input/data1_in.csv"); //Input data file
+    input = complexRead16Unscaled(data);
+    BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << data); //Reads input file
 
-    char ** ptr;
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
-    vector<string> vec;
-    string line;
-    int i = 0;
-    while (getline(in, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        double real = atof(vec[0].c_str());
-        double imag = atof(vec[1].c_str());
-        input[i].real(real);
-        input[i].imag(imag);
-        //std::cout << "input = " << input[i] << std::endl;
-        //std::cout << "raw = (" << real << ", " << imag << ")" << std::endl;
-        i++;
-    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+    string taps("./data/fir/input/taps1.txt");
+    tap = complexRead16Unscaled(taps);//Reads in taps from file
+    BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps); //Reads taps file
 
-    string taps("./data/firdata/input/taps1.txt");
-    FixedComplex16 tap[41];
+    string answersFile("./data/fir/answers/answers1.csv"); //Answers data file
+    answers = complexRead16Unscaled(answersFile);
+    BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << answersFile); //Reads answer file
 
-    ifstream in2(taps.c_str());
-    if (!in2.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "./data/firdata/input/taps1.txt");
-    }
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
-
-    vector<string> vec2;
-    string line2;
-    int j = 0;
-
-    while (getline(in2, line2)) {
-
-        Tokenizer tok(line2);
-        vec2.assign(tok.begin(), tok.end());
-        tap[j].real(atof(vec2[0].c_str()));
-
-        // cout<< setprecision(30)<< j+1 << ": Tap: " << tap[j].real.to_int() << " " << atof(vec2[0].c_str()) << " Is actually " << vec2[0].c_str() <<endl;
-        j++;
-    } //Reads in taps
-
-    string data3("./data/firdata/answers/answers1.csv"); //Answers data file
-
-    ifstream in3(data3.c_str());
-    if (!in3.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/answers/answers1.txt");
-    }
-    int l = 0;
-    while (getline(in3, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        answers[l].real(atof(vec[0].c_str()));
-        answers[l].imag(atof(vec[1].c_str()));
-        l++;
-    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
-    FixedFIR fir(j, tap); //Creates instance of fixed FIR filter given j taps.
-    for (int k = 0; k < i; k++)
+    FixedFIR fir(tap); //Creates instance of fixed FIR filter given j taps.
+    for (int k = 0; k < input.size(); k++)
     {
         filter_io_t data;
         data = input[k];
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output[k] = output_sample.fcn;
-    }
-    for (int k = 0; k < i; k++) {
+        output.push_back(output_sample.fcn);
+    }//Filters using FIR
+
+    for (int k = 0; k < answers.size(); k++) {
         BOOST_CHECK_MESSAGE(
                 abs(output[k].real() - answers[k].real())
                         < .001,
                 output[k].real() << " is not the same as " << answers[k].real());
-    } //Compares all outputs with solution to ensure they are .001 within each other.
 
+    }//Compares all outputs with solution to ensure they are .001 within each other.
 }
 
 CSIM_TEST_CASE(COMPLEX_FILTER)
 {
-    FixedComplex16 input[1024]; //Array to hold inputs
-    FixedComplex16 output[1024]; //Array to hold outputs
-    double realAnswers[1024];
-    double imagAnswers[1024];
-    FixedComplex16 tap[100];
+	vector<FixedComplex16> input; //Vector to hold inputs
+	vector<FixedComplex16> output; //Vector to hold outputs
+	vector<FixedComplex16> answers;
+	vector<FixedComplex16> tap;
 
-    string data("./data/firdata/input/data2_in.csv"); //Input data file
+	string data("./data/fir/input/data2_in.csv"); //Input data file
+	input = complexRead16Unscaled(data);
+	BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << data); //Reads input file
 
-    ifstream in(data.c_str());
-    if (!in.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/data2_in.csv");
-    }
-    char ** ptr;
+    string taps("./data/fir/input/taps2.txt");
+    tap = complexRead16Unscaled(taps);
+    BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps); //Reads taps file
 
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
+    string data3("./data/fir/answers/answers2.csv"); //Answers data file
+    answers = complexRead16Unscaled(data3);
+    BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << data3); //Reads answers file
 
-    vector<string> vec;
-    string line;
-    int i = 0;
-    while (getline(in, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        double real = atof(vec[0].c_str());
-        double imag = atof(vec[1].c_str());
-        input[i].real(real);
-        input[i].imag(imag);
-        //std::cout << "input = " << input[i] << std::endl;
-        //std::cout << "raw = (" << real << ", " << imag << ")" << std::endl;
-        i++;
-    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-    string taps("./data/firdata/input/taps.txt");
-
-    ifstream in2(taps.c_str());
-    if (!in2.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/input/taps2.txt");
-    }
-    typedef tokenizer<escaped_list_separator<char> > Tokenizer;
-
-    int j = 0; //number of taps
-
-    while (getline(in2, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        tap[j].real(atof(vec[0].c_str()));
-        j++;
-    } //Reads in taps
-
-    string data3("./data/firdata/answers/answers2.csv"); //Answers data file
-
-    ifstream in3(data3.c_str());
-    if (!in3.is_open()) {
-        cout << "error reading" << endl;
-        BOOST_REQUIRE_MESSAGE(0 == 1, "Could not read from ./data/firdata/answers/answers2.csv");
-    }
-
-    int l = 0;//Number of answers
-    while (getline(in3, line)) {
-        Tokenizer tok(line);
-        vec.assign(tok.begin(), tok.end());
-        realAnswers[l] = atof(vec[0].c_str());
-        imagAnswers[l] = atof(vec[1].c_str());
-        l++;
-    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-
-    FixedFIR fir(j, tap); //Creates instance of fixed FIR filter given j taps.
-    for (int k = 0; k < i; k++) {
+    FixedFIR fir(tap); //Creates instance of fixed FIR filter given j taps.
+    for (int k = 0; k < input.size(); k++) {
         filter_io_t data;
         data = input[k];
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output[k] = output_sample.fcn;
-     }
+        output.push_back(output_sample.fcn);
+     }//Filters data
 
-    for (int k = 0; k < i; k++) {
+    assert (output.size() == answers.size());//Checks number of outputs
+
+    for (int k = 0; k < answers.size(); k++) {
         BOOST_CHECK_MESSAGE(
-                abs(output[k].real() - realAnswers[k]) < .001,
-                input[k].real() << " is not the same as " << realAnswers[k]);
+                abs(output[k].real() - answers[k].real()) < .001,
+                input[k].real() << " is not the same as " << answers[k]);
         BOOST_CHECK_MESSAGE(
-                abs(output[k].imag() - imagAnswers[k]) < .001,
-                output[k].imag() << " is not the same as " << imagAnswers[k]);
-     //   cout << input[k].real / 32768.00 << " is the same as "
-      //          << realAnswers[k] << endl;
+                abs(output[k].imag() - answers[k].imag()) < .001,
+                output[k].imag() << " is not the same as " << answers[k]);
     } //Compares all outputs with solution to ensure they are .001 within each other.
-
 }
 
 CSIM_TEST_SUITE_END()

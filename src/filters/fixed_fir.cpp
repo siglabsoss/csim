@@ -1,13 +1,13 @@
 #include <filters/fixed_fir.hpp>
 
 
-FixedFIR::FixedFIR(int N, FixedComplex16* tap) :
-    FilterChainElement("FixedFIR"),
-    m_taps(N),
-    m_bench(N),
+FixedFIR::FixedFIR(vector<FixedComplex16> tap) :
+	FilterChainElement("FixedFIR"),
+    m_taps(tap.size()),
+    m_bench(tap.size()),
     m_output()
 {
-    for (int i = 0; i < N; i++) {
+    for (int i = 0; i < tap.size(); i++) {
         m_taps[i] = tap[i];
     }
 }
