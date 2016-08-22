@@ -1,8 +1,6 @@
 #include <filters/fixed_fir.hpp>
 
-using namespace std;
-
-FixedFIR::FixedFIR(vector<FixedComplex16> tap) :
+FixedFIR::FixedFIR(std::vector<FixedComplex16> tap) :
 	FilterChainElement("FixedFIR"),
     m_taps(tap.size()),
     m_bench(tap.size()),

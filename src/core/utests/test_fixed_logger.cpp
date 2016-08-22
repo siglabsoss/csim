@@ -1,11 +1,8 @@
 #include <test/unit_test.hpp>
 #include <types/fixedcomplex.hpp>
 
-#include <cfloat>
-#include <bitset>
-#include <string>
-
 using namespace std;
+
 CSIM_TEST_SUITE_BEGIN(Fixed_Logger)
 
 #ifdef FIXED_POINT_PROFILER_ENABLE
@@ -126,7 +123,7 @@ CSIM_TEST_CASE(Precision_Loss_FixedPoint)
 	FixedPoint <5, 5>  v(5);
 
 	for (int i = 0; i < 10; i++) {
-		  v = (v / 2);// 2 1 0 0 0...
+		  v = (v / 2);// 2.5->2, 1, .5->0, 0, 0...
 	}
 
 	BOOST_CHECK(sc_dt::scfx_rep::quantizations == 2);// 1 * 1 = 0
@@ -142,7 +139,6 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedPoint)
 	FixedPoint<5,5> w(4);
 
 	FixedPoint<10,8> z = v+w;
-	cout << (v+w).to_bin() << endl;;
 //	sc_dt::scfx_rep::printZeroes();
 	BOOST_CHECK(sc_dt::scfx_rep::zeroes->vals[5][5].getMax() == 1);
 	BOOST_CHECK(sc_dt::scfx_rep::zeroes->vals[5][5].getMin() == 0);
@@ -188,89 +184,203 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedComplex)
 
 CSIM_TEST_CASE(Addition_Warning)
 {
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+    int exceptionNum = 0;
+    FixedPoint <5, 5> z(0);
+    try {
 
-	sc_dt::scfx_rep::warningLevel = 0;//0 - disable, 1 = warning, 2 = exit on warning
-	FixedPoint <4, 4>  v(0);
-	FixedPoint <4, 4>  w(0);
-	FixedPoint <5, 5> z(0);
-	z = (v + w); //No warning
+        FixedPoint <4, 4>  v(0);
+        FixedPoint <4, 4>  w(0);
 
+        z = (v + w); //No warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
+    BOOST_CHECK(exceptionNum == 0);
+
+    try {
 	FixedPoint <6, 3>  v2(0);
 	FixedPoint <4, 4>  w2(0);
 	z = (v2 + w2);//Precision warning
+    }
+    catch (int e){
+        exceptionNum = e;
+    }
 
-	FixedPoint <5, 5>  v3(0);
-	FixedPoint <4, 4>  w3(0);
-	z = (v3 + w3);//Range warning
 
-	FixedPoint <6, 1>  v4(0);
-	FixedPoint <6, 1>  w4(0);
-	z = (v3 + w3);//Precision and range warning
+    BOOST_CHECK(exceptionNum == 1);
+    exceptionNum = 0;
 
+    try {
+        FixedPoint <5, 5>  v3(0);
+        FixedPoint <4, 4>  w3(0);
+        z = (v3 + w3);//Range warning
+    }
+
+    catch (int e) {
+        exceptionNum = e;
+    }
+
+    BOOST_CHECK(exceptionNum == 2);
+    exceptionNum = 0;
+
+
+    try {
+        FixedPoint <6, 5>  v4(0);
+        FixedPoint <6, 5>  w4(0);
+        z = (v4 + w4);//Precision and range warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
+
+    BOOST_CHECK(exceptionNum == 3);
 
 }
 
 CSIM_TEST_CASE(Subtraction_Warning)
 {
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+    int exceptionNum = 0;
+    FixedPoint <5, 5> z;
 
-	sc_dt::scfx_rep::warningLevel = 0;//0 - disable, 1 = warning, 2 = exit on warning
-	FixedPoint <4, 4>  v(0);
-	FixedPoint <4, 4>  w(0);
-	FixedPoint <5, 5> z;
-	z = (v - w); //No warning
+    try {
+        FixedPoint <4, 4>  v(0);
+        FixedPoint <4, 4>  w(0);
+        z = (v - w); //No warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
 
-	FixedPoint <6, 3>  v2(0);
-	FixedPoint <4, 4>  w2(0);
-	z = (v2 - w2);//Precision warning
+    BOOST_CHECK(exceptionNum == 0);
+    exceptionNum = 0;
 
-	FixedPoint <5, 5>  v3(0);
-	FixedPoint <4, 4>  w3(0);
-	z = (v3 - w3);//Range warning
+    try {
+        FixedPoint <6, 3>  v2(0);
+        FixedPoint <4, 4>  w2(0);
+        z = (v2 - w2);//Precision warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
 
-	FixedPoint <6, 1>  v4(0);
-	FixedPoint <6, 1>  w4(0);
-	z = (v4 - w4);//Precision and range warning
+    BOOST_CHECK(exceptionNum == 1);
+    exceptionNum = 0;
+
+    try {
+        FixedPoint <5, 5>  v3(0);
+        FixedPoint <4, 4>  w3(0);
+        z = (v3 - w3);//Range warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
+
+    BOOST_CHECK(exceptionNum == 2);
+    exceptionNum = 0;
+
+    try {
+        FixedPoint <6, 5>  v4(0);
+        FixedPoint <6, 5>  w4(0);
+        z = (v4 - w4);//Precision and range warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
+
+    BOOST_CHECK(exceptionNum == 3);
+    exceptionNum = 0;
 
 }
 
 CSIM_TEST_CASE(Multiplication_Warning)
 {
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+    int exceptionNum = 0;
+    FixedPoint <8, 8> z;
 
-	sc_dt::scfx_rep::warningLevel = 0;//0 - disable, 1 = warning, 2 = exit on warning
-	FixedPoint <4, 4>  v(0);
-	FixedPoint <4, 4>  w(0);
-	FixedPoint <8, 8> z;
-	z = (v * w); //No warning
+	try {
+	    FixedPoint <4, 4>  v(0);
+	    FixedPoint <4, 4>  w(0);
+	    z = (v * w); //No warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
 
-	FixedPoint <4, 3>  v2(0);
-	FixedPoint <4, 4>  w2(0);
-	z = (v2 * w2);//Precision warning
+    BOOST_CHECK(exceptionNum == 0);
+    exceptionNum = 0;
 
-	FixedPoint <5, 5>  v3(0);
-	FixedPoint <4, 4>  w3(0);
-	z = (v3 * w3);//Range warning
+    try {
+        FixedPoint <4, 3>  v2(0);
+        FixedPoint <4, 4>  w2(0);
+        z = (v2 * w2);//Precision warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
 
-	FixedPoint <5, 5>  v4(0);
-	FixedPoint <5, 4>  w4(0);
+    BOOST_CHECK(exceptionNum == 1);
+    exceptionNum = 0;
 
-	z = (v4 * w4);//Precision and range warning
+    try {
+        FixedPoint <5, 5>  v3(0);
+        FixedPoint <4, 4>  w3(0);
+        z = (v3 * w3);//Range warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
 
+    BOOST_CHECK(exceptionNum == 2);
+    exceptionNum = 0;
+
+    try {
+        FixedPoint <5, 5>  v4(0);
+        FixedPoint <5, 4>  w4(0);
+        z = (v4 * w4);//Precision and range warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
+
+    BOOST_CHECK(exceptionNum == 3);
+    exceptionNum = 0;
 }
 
 CSIM_TEST_CASE(Division_Warning)
 {
-
-	sc_dt::scfx_rep::warningLevel = 0;//0 - disable, 1 = warning, 2 = exit on warning
+    sc_dt::scfx_rep::warningLevel = 2;//0 - disable, 1 = warning, 2 = exit on warning
+    int exceptionNum = 0;
 	FixedPoint <4, 4> z;
 
-	FixedPoint <4, 4>  v2(1);
-	FixedPoint <4, 4>  w2(1);
-	z = (v2 / w2);//Precision warning
+    try {
 
-	FixedPoint <5, 5>  v4(1);
-	FixedPoint <4, 4>  w4(1);
-	z = (v4 / w4);//Precision and range warning
+        FixedPoint <4, 4>  v2(1);
+        FixedPoint <4, 4>  w2(1);
+        z = (v2 / w2);//Precision warning
 
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
+
+    BOOST_CHECK(exceptionNum == 1);
+    exceptionNum = 0;
+
+    try {
+        FixedPoint <5, 5>  v4(1);
+        FixedPoint <4, 4>  w4(1);
+        z = (v4 / w4);//Precision and range warning
+    }
+    catch (int e) {
+        exceptionNum = e;
+    }
+
+    BOOST_CHECK(exceptionNum == 3);
+    exceptionNum = 0;
 }
 
 #endif
