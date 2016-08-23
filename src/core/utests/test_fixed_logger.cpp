@@ -1,9 +1,12 @@
 #include <test/unit_test.hpp>
 #include <types/fixedcomplex.hpp>
 
-using namespace std;
-
 CSIM_TEST_SUITE_BEGIN(Fixed_Logger)
+
+
+CSIM_TEST_CASE(Empty)
+{
+}
 
 #ifdef FIXED_POINT_PROFILER_ENABLE
 
@@ -126,10 +129,11 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedPoint)
 	FixedPoint<5,5> w(5);
 	FixedPoint<10,8> z = v+w;
 
-	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,5));
+	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,5));//Access minMax zeroes for <5,5>
 	BOOST_CHECK(it->second.getMin() == 0);
 	BOOST_CHECK(it->second.getMax() == 1);
-	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(10,8));
+
+	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(10,8)); //Access minMax zeroes for <10,8>
 	BOOST_CHECK(it->second.getMin() == 3);
 	BOOST_CHECK(it->second.getMax() == 3);
 
@@ -139,10 +143,10 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedPoint)
 
 	FixedPoint<5,2> z2 = v2 + w2;
 
-	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,1));
+	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,1)); //Access minMax zeroes for <5,1>
 	BOOST_CHECK(it->second.getMin() == -1);
 	BOOST_CHECK(it->second.getMax() == 0);
-	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,2));
+	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,2)); //Access minMax zeroes for <5,2>
 	BOOST_CHECK(it->second.getMin() == 0);
 	BOOST_CHECK(it->second.getMax() == 0);
 	sc_dt::scfx_rep::clear();
@@ -158,7 +162,7 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedComplex)
 	FixedComplex16 w(.75,.5);
 	FixedComplex16 z = v + w;
 
-	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1));
+	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
 	BOOST_CHECK(it->second.getMin() == 0);
 	BOOST_CHECK(it->second.getMax() == 2);
 	sc_dt::scfx_rep::clear();
@@ -373,7 +377,7 @@ CSIM_TEST_CASE(Division_Warning)
     BOOST_CHECK(exceptionNum == 3);
     exceptionNum = 0;
 
-    std::cerr.clear();
+    std::cerr.clear(); //Reactivate cerr
 }
 
 CSIM_TEST_CASE(minMax)
@@ -388,8 +392,19 @@ CSIM_TEST_CASE(minMax)
 	BOOST_CHECK(it->second.getMax() == 5);
 
 	it=sc_dt::scfx_rep::values.find(sc_dt::key(10,8));
-	BOOST_CHECK(it->second.getMin() == 36);//9 * 2 * 2
+	BOOST_CHECK(it->second.getMin() == 36); //9 * 2 * 2
 	BOOST_CHECK(it->second.getMax() == 36);
+	sc_dt::scfx_rep::clear();
+
+	FixedPoint<6,3> v2(.25);
+	FixedPoint<6,3> w2(.5);
+	FixedPoint<10,5> z2 = v2+w2;
+	it=sc_dt::scfx_rep::values.find(sc_dt::key(6,3));
+	BOOST_CHECK(it->second.getMin() == 2); //.25 * 2 * 2 * 2
+	BOOST_CHECK(it->second.getMax() == 4); //.5 * 2 ^ 3
+	it=sc_dt::scfx_rep::values.find(sc_dt::key(10,5));
+	BOOST_CHECK(it->second.getMin() == 24); // .75 * 2^5
+	BOOST_CHECK(it->second.getMax() == 24);
 }
 
 #endif
