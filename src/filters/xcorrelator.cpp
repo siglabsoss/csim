@@ -7,16 +7,14 @@
 
 #include <filters/xcorrelator.hpp>
 
-using namespace std;
-
 XCorrelator::XCorrelator(int N) :
 		m_n(N)
 {}
 
-vector<FixedComplex32 > XCorrelator::xCorrelate(vector<FixedComplex32 > x, vector<FixedComplex32 > y)
+std::vector<FixedComplex32 > XCorrelator::xCorrelate(std::vector<FixedComplex32 > x, std::vector<FixedComplex32 > y)
 {
-    vector<FixedComplex32 > p1 = fft(x);//output is FFT(x)
-    vector<FixedComplex32 > p2 = fft(y);//output is FFT(y)
+    std::vector<FixedComplex32 > p1 = fft(x);//output is FFT(x)
+    std::vector<FixedComplex32 > p2 = fft(y);//output is FFT(y)
     assert(p1.size() == m_n); //Same number of outputs into FFT as inputs
     assert(p2.size() == m_n); //Same number of outputs into FFT as inputs
 
@@ -32,11 +30,11 @@ vector<FixedComplex32 > XCorrelator::xCorrelate(vector<FixedComplex32 > x, vecto
     return fftshift(p1);
 }
 
-vector<FixedComplex32 > XCorrelator::fft(vector<FixedComplex32 > vals)
+std::vector<FixedComplex32 > XCorrelator::fft(std::vector<FixedComplex32 > vals)
 {
     fixedfft fft(m_n);
-    vector<FixedComplex32 > outputs;
-    vector<FixedComplex32 > outputsBitReversed;
+    std::vector<FixedComplex32 > outputs;
+    std::vector<FixedComplex32 > outputsBitReversed;
 
     filter_io_t data;
     	for (int i = 0; i < 2; i++) {
@@ -57,11 +55,11 @@ vector<FixedComplex32 > XCorrelator::fft(vector<FixedComplex32 > vals)
     return outputs;
 }
 
-vector<FixedComplex32 > XCorrelator::ifft(vector<FixedComplex32> vals)
+std::vector<FixedComplex32 > XCorrelator::ifft(std::vector<FixedComplex32> vals)
 {
 	fixedifft ifft(m_n);
-	vector<FixedComplex32 > outputs;
-	vector<FixedComplex32 > outputsBitReversed;
+	std::vector<FixedComplex32 > outputs;
+	std::vector<FixedComplex32 > outputsBitReversed;
 
 	filter_io_t data;
 	for (int i = 0; i < 2; i++) {
@@ -83,7 +81,7 @@ vector<FixedComplex32 > XCorrelator::ifft(vector<FixedComplex32> vals)
 }
 
 
-vector<FixedComplex32 > XCorrelator::fftshift(vector<FixedComplex32 > vals)
+std::vector<FixedComplex32 > XCorrelator::fftshift(std::vector<FixedComplex32 > vals)
 {
     int size = vals.size() >> 1; //size/2
     if (vals.size() % 2 == 1) {
@@ -96,10 +94,10 @@ vector<FixedComplex32 > XCorrelator::fftshift(vector<FixedComplex32 > vals)
         temp = vals[i];
         vals[i] = vals[size+i];
         vals[size+i] = temp;
-    }//Swaps front half and back half of vector
+    }//Swaps front half and back half of std::vector
     vals.erase(vals.begin());//Erase first value to match octave output
     return vals;
-}//Swaps front half and back half of vector.
+}//Swaps front half and back half of std::vector.
 
 
 

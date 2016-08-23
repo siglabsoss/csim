@@ -7,8 +7,6 @@
 
 #include <filters/stitcher.hpp>
 
-using namespace std;
-
 Stitcher::Stitcher(int* waveNums, int* sampless, int numsSections)
 {
     val = new int[numsSections]; //Which wave is at which time
@@ -31,8 +29,8 @@ Stitcher::Stitcher(int* waveNums, int* sampless, int numsSections)
 
 }
 
-vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate,
-        int frequency, vector<FixedComplex<32> > data)
+std::vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate,
+        int frequency, std::vector<FixedComplex<32> > data)
 {
     sc_int<32> totalTime = 0; //numSamples/sampleRate; // time in milliseconds?
     bool scaled = false;

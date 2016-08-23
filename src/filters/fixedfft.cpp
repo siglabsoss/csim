@@ -1,10 +1,7 @@
 #include <iostream>
 #include <cmath>
-using namespace std;
 #include <filters/fixedfft.hpp>
 
-string outfile("../csim/data/fft/output/compareTwiddler.txt");
-ofstream out3(outfile.c_str());
 
 bool fixedfft::input(const filter_io_t &data)
 {
