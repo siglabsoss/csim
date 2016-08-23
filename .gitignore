@@ -1,16 +1,6 @@
 
 # Created by https://www.gitignore.io/api/cmake
 
-### CMake ###
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Makefile
-cmake_install.cmake
-install_manifest.txt
-CTestTestfile.cmake
-
-
 ### C++ ###
 # Compiled Object files
 *.slo
@@ -45,9 +35,9 @@ CTestTestfile.cmake
 *.out
 *.app
 
+# Build tree
 /build
 /build_utest
-/bin
 
 # Vimdiff conflict resolution original backups
 *.orig
