@@ -18,6 +18,9 @@ CTestTestfile.cmake
 *.o
 *.obj
 
+# Compiled Octave Interfaces
+*.oct
+
 # Precompiled Headers
 *.gch
 *.pch
