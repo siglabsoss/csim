@@ -127,6 +127,8 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedPoint)
 	sc_dt::scfx_rep::clear();
 	FixedPoint<5,5> v(4);
 	FixedPoint<5,5> w(5);
+	v+w;
+
 	FixedPoint<10,8> z = v+w;
 
 	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,5));//Access minMax zeroes for <5,5>
@@ -158,15 +160,27 @@ CSIM_TEST_CASE(MinMax_Zeroes_FixedComplex)
 
 	sc_dt::scfx_rep::clear();
 
-	FixedComplex16 v(.125,.25);
-	FixedComplex16 w(.75,.5);
-	FixedComplex16 z = v + w;
+//	FixedComplex16 v(25,0);
+//	FixedComplex16 w(0,0);
+//
+	FixedPoint<16,1> x(.25);
+	FixedPoint<16,1> y(.25);
 
 	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
-	BOOST_CHECK(it->second.getMin() == 0);
-	BOOST_CHECK(it->second.getMax() == 2);
+	BOOST_CHECK(it->second.getMin() == 1);// 0 01000000...
+	BOOST_CHECK(it->second.getMax() == 1);// 0 01000000...
+	x + y;
+	 it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
+	BOOST_CHECK(it->second.getMin() == 0);// 0 100000...
+	BOOST_CHECK(it->second.getMax() == 1);// 0 010000...
+
 	sc_dt::scfx_rep::clear();
 
+	FixedPoint<16,1> z = x + y;
+
+	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
+	BOOST_CHECK(it->second.getMin() == 0);// 0 100000...
+	BOOST_CHECK(it->second.getMax() == 0);// 0 100000...
 
 
 }
