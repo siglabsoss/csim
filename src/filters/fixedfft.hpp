@@ -40,13 +40,15 @@ public:
     std::vector<int> *mainTablePointer;
 
     fixedfftstage();
-    void init(int Ninput);
+    void init(int Ninput, bool m_inverse);
     void dump(void);
     void inputandtick(FixedComplex32 x);
     void output(FixedComplex32 x);
     void butterfly(FixedComplex32 array[2], FixedComplex32 x,
             FixedComplex32 y);
     FixedComplex32 twiddler(int k);
+private:
+    bool m_inverse;
 
 
 };
@@ -55,8 +57,11 @@ class fixedfftprint: public fixedfftbase
 public:
     int N;
     int count;
-    fixedfftprint(int Ninput);
+
+    fixedfftprint(int Ninput, bool inverse);
     void inputandtick(FixedComplex32 x);
+private:
+    bool m_inverse;
 };
 
 class fixedfft : public FilterChainElement
@@ -80,7 +85,10 @@ public:
 
     std::vector<fixedfftstage> stages;
     fixedfftprint printer;
-    fixedfft(int Ninput, int tableSize = 0);
+    fixedfft(int Ninput, int tableSize = 0, bool inverse = 0);
+private:
+    bool m_inverse;
+
 };
 
 #endif

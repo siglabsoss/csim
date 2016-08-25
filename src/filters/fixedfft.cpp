@@ -43,7 +43,7 @@ bool fixedfft::output(filter_io_t &data)
     return false;
 }
 
-fixedfft::fixedfft(int Ninput, int tableSize) :
+fixedfft::fixedfft(int Ninput, int tableSize, bool inverse) :
         FilterChainElement("FixedFFT"),
         N(Ninput),
         stagecount(log2(N)),
@@ -51,8 +51,11 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
         m_count(0),
         mainTable(),
         stages(Ninput),
-        printer(Ninput)
+        printer(Ninput, inverse),
+        m_inverse(inverse)
 {
+
+
     if (tableSize == 0) {
         if (Ninput < 32) {
             tableSize = 180 * 32;
@@ -69,7 +72,7 @@ fixedfft::fixedfft(int Ninput, int tableSize) :
     int stagesize = 0;
     for (int i = 0; i < stagecount; i++) {
         stagesize = pow(2, (stagecount - i));
-        stages[i].init(stagesize);
+        stages[i].init(stagesize, inverse);
         stages[i].tableSize = tableSize;
         stages[i].mainTablePointer = &mainTable; //XXX do this differently
         if (i > 0) {
@@ -88,8 +91,9 @@ void fixedfft::tick()
 
 //////////////////////////////////////////////////////////////////////////
 
-void fixedfftstage::init(int Ninput)
+void fixedfftstage::init(int Ninput, bool inverse)
 {
+	m_inverse = inverse;
     N = Ninput;
     memory = std::vector<FixedComplex32>(N / 2);
     state = FFFT_STATE_INITIAL;
@@ -154,6 +158,11 @@ FixedComplex32 fixedfftstage::twiddler(int k)
 			W.imag(-b[k] / 32768.0);
 		}
       }
+
+    if (m_inverse)
+    {
+    	W.imag( W.imag() * -1);
+    }
 
     delete[] b;
     return W; // return lookup table value
@@ -245,8 +254,10 @@ void fixedfftstage::inputandtick(FixedComplex32 x)
 
 //////////////////////////////////////////////////////////////////////////
 
-fixedfftprint::fixedfftprint(int Ninput)
+fixedfftprint::fixedfftprint(int Ninput, bool inverse) :
+		m_inverse(inverse)
 {
+
     N = Ninput;
     count = 0;
     ready = 1;
@@ -254,6 +265,11 @@ fixedfftprint::fixedfftprint(int Ninput)
 
 void fixedfftprint::inputandtick(FixedComplex32 x)
 {
-    m_output.push(x);//adds this output to the queue of outputs
+	if (m_inverse == false) {
+		m_output.push(x);//adds this output to the queue of outputs
+	}//FFT
+	else {
+		m_output.push(FixedComplex32(x.real()/N, x.imag()/N));//adds this output to the queue of outputs
+	}//IFFT
     count++;
 }

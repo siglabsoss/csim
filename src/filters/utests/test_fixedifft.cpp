@@ -6,7 +6,6 @@
 #include <vector>
 #include <stdlib.h>
 #include <utils/utils.hpp>
-#include <filters/fixedifft.hpp>
 #include <filters/fixedfft.hpp>
 #include <cfloat>
 
@@ -20,7 +19,7 @@ void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, 
 CSIM_TEST_CASE(IFFT_CONSTANT_OUTPUT)
 {
     constexpr size_t NUM_SAMPLES = 8;
-    fixedifft ifft(NUM_SAMPLES);
+    fixedfft ifft(NUM_SAMPLES, 0,true);
     std::vector<filter_io_t> samples(NUM_SAMPLES);
     samples[0] = FixedComplex32(1.0,1.0);
     for (size_t i = 1; i < samples.size(); i++) {
@@ -40,6 +39,24 @@ CSIM_TEST_CASE(IFFT_CONSTANT_OUTPUT)
     }
 }
 
+
+CSIM_TEST_CASE(IFFT_IO_PARITY)
+{
+    constexpr size_t NUM_SAMPLES = 8;
+    fixedfft ifft(NUM_SAMPLES, 0, true);
+    std::vector<filter_io_t> samples(NUM_SAMPLES*10);
+    for (size_t i = 0; i < samples.size(); i++) {
+        samples[i] = FixedComplex32(1.0,1.0);
+    }
+
+    filter_io_t output;
+    for (size_t j = 0; j < samples.size(); j++) {
+        BOOST_CHECK(ifft.input(samples[j]) == true);
+        ifft.tick();
+        BOOST_CHECK(ifft.output(output) == (j >= NUM_SAMPLES));
+    }
+}
+
 CSIM_TEST_CASE(IFFT_OCTAVE)
 {
 	string inFile("./data/ifft/input/data_file_complex1.csv");
@@ -55,7 +72,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
 	int points = inputs.size();
-	fixedifft ifft(points,2949120 ); //x point fft, y table size
+	fixedfft ifft(points,2949120, true ); //x point fft, y table size
 	filter_io_t data;
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
@@ -98,7 +115,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
 
     int points = inputs.size();
     filter_io_t data;
-    fixedifft ifft(points); //x point fft, y table size
+    fixedfft ifft(points,0,true); //x point fft, y table size
 
 	for (int j = 0; j < points; j++) {
 
@@ -190,7 +207,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 
 	points = outputs.size();
 
-	fixedifft ifft(points);
+	fixedfft ifft(points, 0, true);
 	outputs.clear();
 	for (int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
@@ -230,4 +247,3 @@ void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, 
 
 
 CSIM_TEST_SUITE_END()
-
