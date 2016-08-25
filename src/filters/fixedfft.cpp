@@ -133,7 +133,6 @@ FixedComplex32 fixedfftstage::twiddler(int k)
 void fixedfftstage::output(FixedComplex32 x)
 {
     while (!next->ready) {
-       // cout << N << "X" << endl;
         next->inputandtick(FixedComplex32(0, 0));
     }
     next->inputandtick(x);

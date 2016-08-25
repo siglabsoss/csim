@@ -1,9 +1,8 @@
 set(SIGFILTERS_SOURCES
-    fixed_cic.cpp
     fixed_fir.cpp
     fixed_iir.cpp
-    fixedfft.cpp
-    floatfft.cpp
+    fixed_cic.cpp
+    fixedfft.cpp  
     #stitcher.cpp
     xcorrelator.cpp
     modulator.cpp
