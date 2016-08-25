@@ -17,7 +17,7 @@ RadioSet::RadioSet() :
 
 }
 
-radio_id_t RadioSet::addRadio(std::function< std::unique_ptr<RadioS>() > &radioFactory)
+radio_id_t RadioSet::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
 {
     assert(m_didInit == false); //can't add radios after init (for now)
     std::unique_ptr<RadioS> newRadio = radioFactory();
@@ -93,21 +93,53 @@ void RadioSet::clear()
 
 void RadioSet::bufferSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
 {
-    m_txBuffers[(*it).get()].push_front(sample);
+    RadioS *radio = (*it).get();
+    bufferSampleForRadio(radio, sample);
+}
+
+void RadioSet::bufferSampleForRadio(radio_id_t id, ComplexDouble &sample)
+{
+    RadioS *radio = getRadioForId(id);
+    assert(radio != nullptr);
+    bufferSampleForRadio(radio, sample);
+}
+
+void RadioSet::bufferSampleForRadio(const RadioS *radio, ComplexDouble &sample)
+{
+    m_txBuffers[radio].push_front(sample);
 }
 
 void RadioSet::getSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
 {
+    getSampleForRadio((*it).get(), sample);
+}
+
+void RadioSet::getSampleForRadio(radio_id_t id, ComplexDouble &sample)
+{
+    RadioS *radio = getRadioForId(id);
+    assert(radio != nullptr);
+    getSampleForRadio(radio, sample);
+}
+
+void RadioSet::getSampleForRadio(const RadioS *radio, ComplexDouble &sample)
+{
     size_t numRadios = m_radios.size();
     sample = ComplexDouble(0.0, 0.0);
-    size_t radioOfInterest = std::distance(begin(), it);
+    ssize_t radioOffset = -1;
+    for (size_t i = 0; i < numRadios; i++) {
+        if (m_radios[i].get() == radio) {
+            radioOffset = static_cast<ssize_t>(i);
+        }
+    }
+
+    assert(radioOffset != -1);
 
     for (size_t i = 0; i < numRadios; i++) {
-        if (radioOfInterest == i) { //skip ourself
+        RadioS *otherRadio = m_radios[i].get();
+        if (otherRadio == radio) {
             continue;
         }
-        RadioS *otherRadio = m_radios[i].get();
-        double distance = m_distances(i, radioOfInterest);
+        double distance = m_distances(i, radioOffset);
 
         int delay = 1;
         if (!m_noDelay) {

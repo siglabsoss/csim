@@ -24,21 +24,28 @@ public:
      * @param config The new radios configuration.
      * @return ID of radio
      */
-    radio_id_t addRadio(std::function< std::unique_ptr<RadioS>() > &radioFactory);
+    radio_id_t addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory);
     RadioS *getRadioForId(radio_id_t id) const;
 
     void init(bool noNoise, bool noDelay, bool noPhaseRot);
     void clear();
 
     void bufferSampleForRadio(const iterator &it, ComplexDouble &sample);
+    void bufferSampleForRadio(radio_id_t id, ComplexDouble &sample);
+
     void getSampleForRadio(const iterator &it, ComplexDouble &sample);
+    void getSampleForRadio(radio_id_t id, ComplexDouble &sample);
 
     iterator begin();
     iterator end();
 
 private:
+    void bufferSampleForRadio(const RadioS *radio, ComplexDouble &sample);
+    void getSampleForRadio(const RadioS *radio, ComplexDouble &sample);
+
+private:
     std::vector<std::unique_ptr<RadioS> >                               m_radios;
-    std::map<RadioS *, CircularBuffer<ComplexDouble > >                 m_txBuffers;
+    std::map<const RadioS *, CircularBuffer<ComplexDouble > >           m_txBuffers;
     MatrixXd                                                            m_distances;
     ComplexGaussianNoise                                                m_noise;
     bool                                                                m_didInit;
