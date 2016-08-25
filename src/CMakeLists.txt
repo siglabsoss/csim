@@ -8,6 +8,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR TRUE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set(C_SIM_SOURCE_ROOT ${CMAKE_SOURCE_DIR})
+set(MATLAB_INCLUDE_PATH "/usr/local/MATLAB/R2016a/extern/include/")
 
 find_package(Boost)
 
@@ -54,6 +55,7 @@ add_definitions(-DSC_INCLUDE_DYNAMIC_PROCESSES)
 include_directories(
 	${Boost_INCLUDE_DIRS}
 	${C_SIM_SOURCE_ROOT}
+        ${MATLAB_INCLUDE_PATH}
 )
 
 link_directories(
@@ -69,6 +71,7 @@ add_subdirectory(probes)
 add_subdirectory(types)
 add_subdirectory(utils)
 add_subdirectory(3rd)
+add_subdirectory(mex)
 
 if (BUILD_UTESTS)
     add_subdirectory(core/utests)
