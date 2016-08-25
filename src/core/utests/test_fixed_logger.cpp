@@ -432,8 +432,9 @@ CSIM_TEST_CASE(Division_Warning)
     std::cerr.clear(); //Reactivate cerr
 }
 
-CSIM_TEST_CASE(minMax)
+CSIM_TEST_CASE(minMax_FixedPoint)
 {
+	  sc_dt::scfx_rep::warningLevel = 0;//0 - disable, 1 = warning, 2 = throw on warning
 	sc_dt::scfx_rep::clear();
 	FixedPoint<5,5> v(4);
 	FixedPoint<5,5> w(5);
@@ -457,6 +458,23 @@ CSIM_TEST_CASE(minMax)
 	it=sc_dt::scfx_rep::values.find(sc_dt::key(10,5));
 	BOOST_CHECK(it->second.getMin() == 24); // .75 * 2^5
 	BOOST_CHECK(it->second.getMax() == 24);
+}
+
+CSIM_TEST_CASE(minMax_FixedComplex)
+{
+	sc_dt::scfx_rep::clear();
+	FixedComplex16 v(.4,.3);
+	FixedComplex16 w(.5,.2);
+	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::values.find(sc_dt::key(16,1));
+	BOOST_CHECK(it->second.getMin() == (6553));// floor(.2 * 2 ^ 15)
+	BOOST_CHECK(it->second.getMax() == (16384));// 2 * 2 ^ 15
+
+	FixedComplex16 z(0);
+	z = v+w;
+	it=sc_dt::scfx_rep::values.find(sc_dt::key(16,1));
+	BOOST_CHECK(it->second.getMin() == (0));// floor(.2 * 2 ^ 15)
+	BOOST_CHECK(it->second.getMax() == (29491));// 2 * 2 ^ 15
+
 }
 
 #endif
