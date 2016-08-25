@@ -3,7 +3,6 @@ set(SIGFILTERS_SOURCES
     fixed_fir.cpp
     fixed_iir.cpp
     fixedfft.cpp
-    fixedifft.cpp
     floatfft.cpp
     #stitcher.cpp
     xcorrelator.cpp

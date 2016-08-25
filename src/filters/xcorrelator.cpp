@@ -57,7 +57,7 @@ std::vector<FixedComplex32 > XCorrelator::fft(std::vector<FixedComplex32 > vals)
 
 std::vector<FixedComplex32 > XCorrelator::ifft(std::vector<FixedComplex32> vals)
 {
-	fixedifft ifft(m_n);
+	fixedfft ifft(m_n, 0, true);
 	std::vector<FixedComplex32 > outputs;
 	std::vector<FixedComplex32 > outputsBitReversed;
 
