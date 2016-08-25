@@ -10,4 +10,5 @@ set(SIGCORE_SOURCES
 	filter_probe.cpp
 )
 
-add_library(sigcore ${SIGCORE_SOURCES})
+add_library(sigcoreobj OBJECT ${SIGCORE_SOURCES})
+add_library(sigcore $<TARGET_OBJECTS:sigcoreobj>)

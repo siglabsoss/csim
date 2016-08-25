@@ -4,4 +4,5 @@ set(SIGMATH_SOURCES
     complex_gaussian_noise.cpp
     )
 
-add_library(sigmath ${SIGMATH_SOURCES})
+add_library(sigmathobj OBJECT ${SIGMATH_SOURCES})
+add_library(sigmath $<TARGET_OBJECTS:sigmathobj>)

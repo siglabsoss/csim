@@ -14,5 +14,6 @@ set(SIGFILTERS_SOURCES
     hard_demod.cpp
     )
 
-add_library(sigfilters ${SIGFILTERS_SOURCES})
+add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
+add_library(sigfilters $<TARGET_OBJECTS:sigfiltersobj>)
 
