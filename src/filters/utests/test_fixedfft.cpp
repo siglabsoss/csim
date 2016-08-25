@@ -49,7 +49,7 @@ CSIM_TEST_CASE(CONSTANT_INPUTS)
         }
     }
     //std::cout << "No outputs for " << noOutputCount << " counts" << std::endl;
-    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLE_SETS*NUM_SAMPLES - (NUM_SAMPLES));
+    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLES * (NUM_SAMPLE_SETS - 1) );
 }
 
 CSIM_TEST_CASE(FFT_IO_PARITY)
@@ -78,44 +78,44 @@ CSIM_TEST_CASE(FFT_IO_PARITY)
     assert(count == samples.size() - NUM_SAMPLES);
 }
 
-//CSIM_TEST_CASE(FFT_OCTAVE)
-//{
-//	string inFile("./data/fft/input/data_file_complex1.csv");
-//	string answersFile("./data/fft/answers/answers1.csv");
-//
-//	vector<FixedComplex32> inputs;
-//	vector<FixedComplex32> answers;
-//	vector<FixedComplex32> outputs;
-//
-//	inputs = complexRead32Scaled(inFile);
-//	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-//	answers = complexRead32Scaled(answersFile);
-//	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
-//
-//	int points = inputs.size();
-//	fixedfft fft(points ); //x point fft, y table size
-//	filter_io_t data;
-//	for (int i = 0; i < 2; i++) {
-//		for (int j = 0; j < points; j++) {
-//			data = inputs[j];
-//			fft.input(data);
-//			bool test = fft.output(data);
-//			if (test) {
-//				outputs.push_back(data.fcn32);
-//			}//If output is ready
-//		}//Insert all input
-//	}//Insert input again to get output
-//
-//	assert(answers.size() == outputs.size());
-//
-//	vector<FixedComplex32> temp(outputs.size());
-//	for (int i = 0; i < outputs.size(); i++) {
-//		temp[reverseBits(inputs.size(), i)] = outputs[i];
-//	}//Reformats data in correct order
-//
-//	assert(answers.size() == temp.size());
-//	checkError(temp, answers, .20, 5000);
-//}
+CSIM_TEST_CASE(FFT_OCTAVE)
+{
+	string inFile("./data/fft/input/data_file_complex1.csv");
+	string answersFile("./data/fft/answers/answers1.csv");
+
+	vector<FixedComplex32> inputs;
+	vector<FixedComplex32> answers;
+	vector<FixedComplex32> outputs;
+
+	inputs = complexRead32Scaled(inFile);
+	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+	answers = complexRead32Scaled(answersFile);
+	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
+
+	int points = inputs.size();
+	fixedfft fft(points ); //x point fft, y table size
+	filter_io_t data;
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < points; j++) {
+			data = inputs[j];
+			fft.input(data);
+			bool test = fft.output(data);
+			if (test) {
+				outputs.push_back(data.fcn32);
+			}//If output is ready
+		}//Insert all input
+	}//Insert input again to get output
+
+	assert(answers.size() == outputs.size());
+
+	vector<FixedComplex32> temp(outputs.size());
+	for (int i = 0; i < outputs.size(); i++) {
+		temp[reverseBits(inputs.size(), i)] = outputs[i];
+	}//Reformats data in correct order
+
+	assert(answers.size() == temp.size());
+	checkError(temp, answers, .20, 5000);
+}
 
 CSIM_TEST_CASE(FFT_TWO_INPUTS)
 {
