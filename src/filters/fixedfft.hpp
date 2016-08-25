@@ -19,7 +19,7 @@ class fixedfftbase
 {
 public:
     virtual void inputandtick(FixedComplex32 x) = 0;
-    virtual ~fixedfftbase();
+    virtual ~fixedfftbase() {}
     int ready;
     std::queue<FixedComplex32 >   m_output;
 
@@ -29,7 +29,7 @@ class fixedfftstage: public fixedfftbase
 {
 public:
     int                  N;
-    FixedComplex32    *memory;
+    std::vector<FixedComplex32>    memory;
     FFFT_STATE          state;
     int                 read_pointer;
     int                 write_pointer;
@@ -37,8 +37,8 @@ public:
     fixedfftbase        *next;
     int theta;
     int tableSize;
-    int * mainTablePointer;
-    fixedfftstage(int Ninput);
+    std::vector<int> *mainTablePointer;
+
     fixedfftstage();
     void init(int Ninput);
     void dump(void);
@@ -59,17 +59,6 @@ public:
     void inputandtick(FixedComplex32 x);
 };
 
-// saves all output forever
-class fixedfftbuffer: public fixedfftbase
-{
-public:
-    int N;
-    int count;
-    std::vector<FixedComplex32 > buf;
-    fixedfftbuffer(int Ninput);
-    void inputandtick(FixedComplex32 x);
-};
-
 class fixedfft : public FilterChainElement
 {
 public:
@@ -82,15 +71,16 @@ public:
     bool output(filter_io_t &data) override;
 
     void tick() override;
+
     int N;
     int stagecount;
     bool newInput;
     int m_count;
-    int * mainTable;
-    fixedfftstage *stages;
+    std::vector<int> mainTable;
+
+    std::vector<fixedfftstage> stages;
     fixedfftprint printer;
     fixedfft(int Ninput, int tableSize = 0);
-    void inputandtick(FixedComplex32 x);
 };
 
 #endif

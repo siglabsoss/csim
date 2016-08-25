@@ -49,47 +49,73 @@ CSIM_TEST_CASE(CONSTANT_INPUTS)
         }
     }
     //std::cout << "No outputs for " << noOutputCount << " counts" << std::endl;
-    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLE_SETS*NUM_SAMPLES - (2*NUM_SAMPLES - 1));
+    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLE_SETS*NUM_SAMPLES - (NUM_SAMPLES));
 }
 
-CSIM_TEST_CASE(FFT_OCTAVE)
+CSIM_TEST_CASE(FFT_IO_PARITY)
 {
-	string inFile("./data/fft/input/data_file_complex1.csv");
-	string answersFile("./data/fft/answers/answers1.csv");
+    constexpr size_t NUM_SAMPLES = 2;
+    fixedfft fft(NUM_SAMPLES);
+    std::vector<filter_io_t> samples(NUM_SAMPLES*4);
+    for (size_t i = 0; i < samples.size(); i++) {
+        samples[i] = FixedComplex32(1.0,1.0);
+    }
 
-	vector<FixedComplex32> inputs;
-	vector<FixedComplex32> answers;
-	vector<FixedComplex32> outputs;
+    filter_io_t output;
+    bool isOutput = false;
+    int count = 0;
+    for (size_t j = 0; j < samples.size(); j++) {
+        BOOST_CHECK(fft.input(samples[j]) == true);
+        fft.tick();
+        if (fft.output(output)) {
+        	count++;
+        	isOutput = true;
+        }
+        BOOST_CHECK(isOutput == ((j >= NUM_SAMPLES)));
+        isOutput = false;
+    }
 
-	inputs = complexRead32Scaled(inFile);
-	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-	answers = complexRead32Scaled(answersFile);
-	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
-
-	int points = inputs.size();
-	fixedfft fft(points ); //x point fft, y table size
-	filter_io_t data;
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < points; j++) {
-			data = inputs[j];
-			fft.input(data);
-			bool test = fft.output(data);
-			if (test) {
-				outputs.push_back(data.fcn32);
-			}//If output is ready
-		}//Insert all input
-	}//Insert input again to get output
-
-	assert(answers.size() == outputs.size());
-
-	vector<FixedComplex32> temp(outputs.size());
-	for (int i = 0; i < outputs.size(); i++) {
-		temp[reverseBits(inputs.size(), i)] = outputs[i];
-	}//Reformats data in correct order
-
-	assert(answers.size() == temp.size());
-	checkError(temp, answers, .20, 5000);
+    assert(count == samples.size() - NUM_SAMPLES);
 }
+
+//CSIM_TEST_CASE(FFT_OCTAVE)
+//{
+//	string inFile("./data/fft/input/data_file_complex1.csv");
+//	string answersFile("./data/fft/answers/answers1.csv");
+//
+//	vector<FixedComplex32> inputs;
+//	vector<FixedComplex32> answers;
+//	vector<FixedComplex32> outputs;
+//
+//	inputs = complexRead32Scaled(inFile);
+//	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+//	answers = complexRead32Scaled(answersFile);
+//	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
+//
+//	int points = inputs.size();
+//	fixedfft fft(points ); //x point fft, y table size
+//	filter_io_t data;
+//	for (int i = 0; i < 2; i++) {
+//		for (int j = 0; j < points; j++) {
+//			data = inputs[j];
+//			fft.input(data);
+//			bool test = fft.output(data);
+//			if (test) {
+//				outputs.push_back(data.fcn32);
+//			}//If output is ready
+//		}//Insert all input
+//	}//Insert input again to get output
+//
+//	assert(answers.size() == outputs.size());
+//
+//	vector<FixedComplex32> temp(outputs.size());
+//	for (int i = 0; i < outputs.size(); i++) {
+//		temp[reverseBits(inputs.size(), i)] = outputs[i];
+//	}//Reformats data in correct order
+//
+//	assert(answers.size() == temp.size());
+//	checkError(temp, answers, .20, 5000);
+//}
 
 CSIM_TEST_CASE(FFT_TWO_INPUTS)
 {
@@ -135,6 +161,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         }
     }//second set of data, gets first set of answers out
     assert(answers.size() == outputs.size());
+    assert(inputs.size() == outputs.size());
     std::vector<FixedComplex32> temp(outputs.size());
     for (int i = 0; i < outputs.size(); i++) {
         temp[reverseBits(outputs.size(), i)] = outputs[i];
@@ -167,7 +194,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 }//Checks for two consecutive sets of inputs in the same FFT.
 
 
-
+//
 //CSIM_TEST_CASE(FFT_2_FILES)
 //{
 //       string infile("../csim/data/fft/output/out1BitReversed.txt");
