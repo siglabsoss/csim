@@ -57,30 +57,31 @@ std::vector<double> readFromFile(std::string inFile)
 
 CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
-//    int waves[2] = { 1, 0 };
-//    int samples[2] = { 200, 200 };
-//    int num_sections = sizeof(samples) / sizeof(samples[0]);
-//    vector<FixedComplex<32> > datas;
-//    int m = 32768;
-//	for (int i = 0; i < 400; i++) {
-//
-//		FixedComplex<32> j(m, m);
-//		datas.push_back(j);
-//		m*=-1;
-//	}
-//
-//    Stitcher stitch(waves, samples, num_sections); //Creates stitcher
-//    vector<FixedComplex<32> > outdatas; //Vector for output data
-//    outdatas = stitch.stitch(400, 1000, 100, datas); //(int numsamples, int sampleRate, int frequency) stitches data with clockup and clockdown waves
-//
-//    writeToFile(outdatas); //to view later
-//
-//    vector<double> answers = readFromFile("data/stitcher/answers/answers1.txt");
-//
-//    for (int i = 0; i < 400; i++) {
-//        BOOST_CHECK_MESSAGE(abs(outdatas[i].real / 32768.0 - answers[i]) < .005,
-//                i << ": " << outdatas[i].real/32768.0 << " is not equal to " << answers[i]);
-//    } //Checks output data and answers to verify they are within .005 of each other
+
+    int waves[2] = { 1, 0 };
+    int samples[2] = { 200, 200 };
+    int num_sections = sizeof(samples) / sizeof(samples[0]);
+    vector<FixedComplex<32> > datas;
+    int m = 32768;
+	for (int i = 0; i < 400; i++) {
+
+		FixedComplex<32> j(m, m);
+		datas.push_back(j);
+		m*=-1;
+	}
+
+    Stitcher stitch(waves, samples, num_sections); //Creates stitcher
+    vector<FixedComplex<32> > outdatas; //Vector for output data
+    outdatas = stitch.stitch(400, 1000, 100, datas); //(int numsamples, int sampleRate, int frequency) stitches data with clockup and clockdown waves
+
+    writeToFile(outdatas); //to view later
+
+    vector<double> answers = readFromFile("data/stitcher/answers/answers1.txt");
+
+    for (int i = 0; i < 400; i++) {
+        BOOST_CHECK_MESSAGE(abs(outdatas[i].real / 32768.0 - answers[i]) < .005,
+                i << ": " << outdatas[i].real/32768.0 << " is not equal to " << answers[i]);
+    } //Checks output data and answers to verify they are within .005 of each other
 
 } //Compares python data with stitcher output data.
 

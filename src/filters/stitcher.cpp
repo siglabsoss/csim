@@ -31,41 +31,46 @@ Stitcher::Stitcher(int* waveNums, int* sampless, int numsSections)
 
 }
 
+void Stitcher::shiftTheta()
+{
+	if (currentTheta > 205887) //2pi * 32768
+	{
+		endTheta -= 205887;
+		currentTheta -= 205887;
+	} //Shift currentTheta and endTheta down by 2pi if currentTheta is above 2pi
+
+}
 
 void Stitcher::doStuff(int val2, int i, vector<FixedComplex<32> > data)
 {
 
 	if (val2 == 0) {
-		if (currentTheta > 205887) //2pi * 32768
-			{
-				endTheta -= 205887;
-				currentTheta -= 205887;
-			} //Shift currentTheta and endTheta down by 2pi if currentTheta is above 2pi
-
+		shiftTheta();
 		for (int j = 0; j < samples[i]; j++) {
-			 currentTheta = currentTheta + delta;
 			output.push_back(data[counter++]);
+			currentTheta = currentTheta + delta;
 		} //prints out actual data
 	} //For wave data
 
 	else {
 		for (int j = 0; j < samples[i]; j++) {
-			if (currentTheta > 205887) //2pi * 32768
-			{
-				endTheta -= 205887;
-				currentTheta -= 205887;
-			} //Shift currentTheta and endTheta down by 2pi if currentTheta is above 2pi
+			shiftTheta();
+			cordic_theta_t theta2(currentTheta/32768.0);
 
-			c.calculate(currentTheta, a1, b1, &sinup, &sindown, &cosup,&cosdown); //Use cordic to calculate clock up
+			cordic_complex_t sine;
+			cordic_complex_t cosine;
+			c.calculate(theta2, sine, cosine); //Use cordic to calculate clock up
 			FixedComplex<32> result;
+			sc_fixed<32, 32> temp = cosine.imag();
 			if (val2 == 1) {
-				result.real = cosup;
-				result.imag = sinup;
+				result.real = 32768 * (sine.imag().range().to_int64()/134217728.0);//cosup;
+				result.imag = 32768 * (sine.real().range().to_int64()/134217728.0);//sinup;
 			}//Creates FixedComplex value to add to vector. CLOCKUP
 			else {
-				result.real = cosdown;
-				result.imag = sindown;
+				result.real = 32768 * (cosine.real().range().to_int64()/134217728.0);//cosdown;
+				result.imag = 32768 * (cosine.imag().range().to_int64()/134217728.0);//sindown;
 			}//Creates FixedComplex value to add to vector. CLOCKDOWN
+
 			output.push_back(result); //Adds result to vector
 			currentTheta = currentTheta + delta;
 		}
@@ -89,11 +94,6 @@ vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate,
         scaled = true;
     }
 
-    a1.real = 1;
-    a1.imag = 0;
-    b1.real = 0;
-    b1.imag = 1;
-
     for (int i = 0; i < numSections; i++) {
 
         t = (totalTime * samples[i]) / sample_total; //total time of wave
@@ -104,7 +104,7 @@ vector<FixedComplex<32> > Stitcher::stitch(int numSamples, int sampleRate,
 
         delta = 2 * 102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
         endTheta = startingTheta + theta; //new ending point is starting point + how many radians to use current wave
-        doStuff(val[i], i ,  data);// Performs calulcations
+        doStuff(val[i], i ,  data);// Performs calculations
 
         startingTheta = currentTheta; //Sets starting point for next wave. Add whatever is left over
     }
