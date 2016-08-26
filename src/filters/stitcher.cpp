@@ -7,9 +7,7 @@
 
 #include <filters/stitcher.hpp>
 
-using namespace std;
-
-Stitcher::Stitcher(vector<int> waveNums, std::vector<int> samples)
+Stitcher::Stitcher(std::vector<int> waveNums, std::vector<int> samples)
 {
 	m_val = waveNums; //copies values
 	m_samples = samples;
@@ -27,7 +25,6 @@ void Stitcher::reset()
 	m_currentTheta = 0; //Resets
 	totalTime = 0; //numSamples/sampleRate; // time in milliseconds?
 	m_output.clear();
-
 }
 
 void Stitcher::shiftTheta()
@@ -39,26 +36,16 @@ void Stitcher::shiftTheta()
 	} //Shift m_currentTheta and m_endTheta down by 2pi if m_currentTheta is above 2pi
 }
 
-vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
-        int frequency, vector<FixedComplex32 > data)
+std::vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
+        int frequency, std::vector<FixedComplex32 > data)
 {
 	reset();//Resets necessary values
 	m_inputData = data;
-    bool scaled = false;
-    if (numSamples > sampleRate) {
-        totalTime = numSamples / sampleRate;
-    } else {
-        totalTime = numSamples * 32768 / (sampleRate);
-        scaled = true;
-    }
+	totalTime = numSamples / sampleRate;
 
     for (int i = 0; i < m_numSections; i++) {
         m_t = (totalTime * m_samples[i]) / m_sample_total; //total time of wave
         m_theta = 2 * 102943 * m_t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
-        if (scaled) {
-            m_theta = m_theta / 32768;
-        }
-
         m_delta = 2 * 102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
         m_endTheta = m_currentTheta + m_theta; //new ending point is starting point + how many radians to use current wave
         doStuff(i);// Performs calculations
@@ -90,18 +77,18 @@ void Stitcher::doStuff(int i)
 			if (waves[waveNum] == CLOCKUP) {
 				result.real(sine.imag().range().to_int64()/134217728.0);//cosup;
 				result.imag(sine.real().range().to_int64()/134217728.0);//sinup;
-			}//Creates FixedComplex value to add to vector. CLOCKUP
+			}//Creates FixedComplex value to add to std::vector. CLOCKUP
 			else if (waves[waveNum] == CLOCKDOWN) {
 				result.real(cosine.real().range().to_int64()/(134217728.0));//cosdown;
 				result.imag(cosine.imag().range().to_int64()/(134217728.0));//sindown;
-			}//Creates FixedComplex value to add to vector. CLOCKDOWN
+			}//Creates FixedComplex value to add to std::vector. CLOCKDOWN
 
 			else {
-				cout << "Unrecognized wave number: " << waves[waveNum] << endl;
+				std::cout << "Unrecognized wave number: " << waves[waveNum] << std::endl;
 				throw "Unrecognized wave number";
 			}// !(0|1|2)
 
-			m_output.push_back(result); //Adds result to vector
+			m_output.push_back(result); //Adds result to std::vector
 			m_currentTheta = m_currentTheta + m_delta;
 		}
 	}//For clockup or clockdown
