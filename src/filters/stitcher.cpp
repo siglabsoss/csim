@@ -17,8 +17,17 @@ Stitcher::Stitcher(vector<int> waveNums, std::vector<int> samples)
 	for (int i = 0; i < samples.size(); i++) {
     	m_sample_total += samples[i];//Gets total number of samples to be stitched
     }
-
     m_numSections = samples.size(); //Number of vals
+}
+
+void Stitcher::reset()
+{
+	m_inputData.clear();
+	m_counter = 0; //Resets m_counter for which part of the data the stitcher is on
+	m_currentTheta = 0; //Resets
+	totalTime = 0; //numSamples/sampleRate; // time in milliseconds?
+	m_output.clear();
+
 }
 
 void Stitcher::shiftTheta()
@@ -30,13 +39,41 @@ void Stitcher::shiftTheta()
 	} //Shift m_currentTheta and m_endTheta down by 2pi if m_currentTheta is above 2pi
 }
 
-void Stitcher::doStuff(int waveNum, int i, vector<FixedComplex32 > data)
+vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
+        int frequency, vector<FixedComplex32 > data)
 {
+	reset();//Resets necessary values
+	m_inputData = data;
+    bool scaled = false;
+    if (numSamples > sampleRate) {
+        totalTime = numSamples / sampleRate;
+    } else {
+        totalTime = numSamples * 32768 / (sampleRate);
+        scaled = true;
+    }
 
+    for (int i = 0; i < m_numSections; i++) {
+        m_t = (totalTime * m_samples[i]) / m_sample_total; //total time of wave
+        m_theta = 2 * 102943 * m_t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
+        if (scaled) {
+            m_theta = m_theta / 32768;
+        }
+
+        m_delta = 2 * 102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
+        m_endTheta = m_currentTheta + m_theta; //new ending point is starting point + how many radians to use current wave
+        doStuff(i);// Performs calculations
+    }
+
+    return m_output;
+}
+
+void Stitcher::doStuff(int i)
+{
+	int waveNum = m_val[i];
 	if (waves[waveNum] == DATA) {
 		shiftTheta();
 		for (int j = 0; j < m_samples[i]; j++) {
-			m_output.push_back(data[m_counter++]);
+			m_output.push_back(m_inputData[m_counter++]);
 			m_currentTheta = m_currentTheta + m_delta;
 		} //prints out actual data
 	} //For wave data
@@ -60,50 +97,14 @@ void Stitcher::doStuff(int waveNum, int i, vector<FixedComplex32 > data)
 			}//Creates FixedComplex value to add to vector. CLOCKDOWN
 
 			else {
-				cout << "Unrecognized wave number" << endl;
+				cout << "Unrecognized wave number: " << waves[waveNum] << endl;
 				throw "Unrecognized wave number";
-			}
+			}// !(0|1|2)
+
 			m_output.push_back(result); //Adds result to vector
 			m_currentTheta = m_currentTheta + m_delta;
 		}
-	}//For clockup or clock down
+	}//For clockup or clockdown
 }
 
 
-vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
-        int frequency, vector<FixedComplex32 > data)
-{
-	reset();//Resets necessary values
-
-    bool scaled = false;
-    if (numSamples > sampleRate) {
-        totalTime = numSamples / sampleRate;
-    } else {
-        totalTime = numSamples * 32768 / (sampleRate);
-        scaled = true;
-    }
-
-    for (int i = 0; i < m_numSections; i++) {
-
-        m_t = (totalTime * m_samples[i]) / m_sample_total; //total time of wave
-        m_theta = 2 * 102943 * m_t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
-        if (scaled) {
-            m_theta = m_theta / 32768;
-        }
-
-        m_delta = 2 * 102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
-        m_endTheta = m_currentTheta + m_theta; //new ending point is starting point + how many radians to use current wave
-        doStuff(m_val[i], i ,  data);// Performs calculations
-    }
-
-    return m_output;
-}
-
-void Stitcher::reset()
-{
-	m_counter = 0; //Resets m_counter for which part of the data the stitcher is on
-	m_currentTheta = 0; //Resets
-	totalTime = 0; //numSamples/sampleRate; // time in milliseconds?
-	m_output.clear();
-
-}
