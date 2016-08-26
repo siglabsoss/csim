@@ -58,8 +58,8 @@ void Stitcher::doStuff(int i)
 {
 	int waveNum = m_val[i];
 	if (waves[waveNum] == DATA) {
-		shiftTheta();
 		for (int j = 0; j < m_samples[i]; j++) {
+			shiftTheta();
 			m_output.push_back(m_inputData[m_counter++]);
 			m_currentTheta = m_currentTheta + m_delta;
 		} //prints out actual data
