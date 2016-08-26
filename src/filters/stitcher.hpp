@@ -31,12 +31,14 @@ public:
     std::vector<FixedComplex32 > stitch(int numSamples, int sampleRate,
             int frequency, std::vector<FixedComplex32 > data); //stitches data based on inputs given. Returns as a vector of fixedcomplex
 
-    int* val; //which waves to use at which section
-    int numSections; //number of sections of output
-    int* samples; //array that shows how many samples of the final output will be that wave
-    int sample_total;
-    std::vector<FixedComplex32 > output; //data outs
+    FixedPoint<32,32> totalTime;
+    int* m_val; //which waves to use at which section
+    int m_numSections; //number of sections of output
+    int* m_samples; //array that shows how many samples of the final output will be that wave
+    int m_sample_total;
+    std::vector<FixedComplex32 > m_output; //data outs
     void doStuff(int val, int i, std::vector<FixedComplex32 > data);
+    void reset();
 };
 
 #endif /* STITCHER_H_ */
