@@ -84,7 +84,11 @@ void cordic::calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_comp
             x = x - m_vals[i];
         }
 
-        cordic_scalar_t factor(direction * m_vals[i]);
+        cordic_scalar_t factor(direction/(pow(2,i)));
+//        if (factor == 0)
+//        {
+//        	std::cout <<"PROBLEMS" << endl;
+//        }
         c1 = y[0]; //a
         c2 = y[1] * factor; //-b/2^n
         c3 = y[0] * factor; //a/2^n
