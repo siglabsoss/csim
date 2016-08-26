@@ -16,8 +16,8 @@ target_link_libraries(test_iir ${Boost_LIBRARIES} pthread sigfilters sigcore sig
 add_executable(test_modulator ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_modulator.cpp)
 target_link_libraries(test_modulator ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
 
-add_executable(test_stitch ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_stitch.cpp)
-target_link_libraries(test_stitch ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
+add_executable(test_stitcher ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_stitcher.cpp)
+target_link_libraries(test_stitcher ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
 
 add_executable(test_xcorrelator ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_xcorrelator.cpp)
 target_link_libraries(test_xcorrelator ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)

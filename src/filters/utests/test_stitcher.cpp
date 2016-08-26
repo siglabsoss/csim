@@ -21,7 +21,9 @@ void writeToFile(vector<FixedComplex<32> > outdatas);
 
 CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
-
+	FixedPoint<32,4> x = (3);
+	FixedPoint<25,1> y = (.25);
+	FixedPoint<50,48> z = x + y;
     vector<int> waves;
     waves.push_back(1);
     waves.push_back(0);
@@ -47,10 +49,9 @@ CSIM_TEST_CASE(PYTHON_COMPARISON)
     vector<double> answers = readFromFile("data/stitcher/answers/answers1.txt");
     assert(outdatas.size() == answers.size());
     for (int i = 0; i < 400; i++) {
-        BOOST_CHECK_MESSAGE(abs(outdatas[i].real().range().to_int64()/32768.0  - answers[i]) < .205,
+        BOOST_CHECK_MESSAGE(abs(outdatas[i].real().range().to_int64()/32768.0  - answers[i]) < .005,
                 i << ": " << outdatas[i].real().range().to_int64()/32768.0 << " is not equal to " << answers[i]);
     } //Checks output data and answers to verify they are within .005 of each other
-
 } //Compares python data with stitcher output data.
 
 CSIM_TEST_CASE(CONCATENATION)
