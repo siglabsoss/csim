@@ -8,8 +8,8 @@ CSIM_TEST_SUITE_BEGIN(CordicSuite)
 
 CSIM_TEST_CASE(CordicFunctionality)
 {
-    static constexpr double AVG_ERR_THRESHOLD = 0.10;
-    static constexpr double MAX_ERR_THRESHOLD = 0.16;
+    static constexpr double AVG_ERR_THRESHOLD = 0.000007;
+    static constexpr double MAX_ERR_THRESHOLD = 0.000012;
     cordic c;
     cordic_complex_t cosine;
     cordic_complex_t sine;
