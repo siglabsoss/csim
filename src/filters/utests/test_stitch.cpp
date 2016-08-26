@@ -23,24 +23,27 @@ CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
 
     int waves[2] = { 1, 0 };
-    int samples[2] = { 200, 200 };
-    int num_sections = sizeof(samples) / sizeof(samples[0]);
+
+    vector<int> samples;
+    samples.push_back(200);
+    samples.push_back(200);
+
     vector<FixedComplex32 > datas;
     int m = 32768;
 	for (int i = 0; i < 400; i++) {
-
 		FixedComplex32 j(m/32768.0, m/32768.0);
 		datas.push_back(j);
 		m*=-1;
 	}
 
-    Stitcher stitch(waves, samples, num_sections); //Creates stitcher
+    Stitcher stitch(waves, samples); //Creates stitcher
     vector<FixedComplex32 > outdatas; //Vector for output data
     outdatas = stitch.stitch(400, 1000, 100, datas); //(int numsamples, int sampleRate, int frequency) stitches data with clockup and clockdown waves
 
 //    writeToFile(outdatas); //to view later
 
     vector<double> answers = readFromFile("data/stitcher/answers/answers1.txt");
+    assert(outdatas.size() == answers.size());
     for (int i = 0; i < 400; i++) {
         BOOST_CHECK_MESSAGE(abs(outdatas[i].real().range().to_int64()/32768.0  - answers[i]) < .205,
                 i << ": " << outdatas[i].real().range().to_int64()/32768.0 << " is not equal to " << answers[i]);
@@ -52,28 +55,29 @@ CSIM_TEST_CASE(CONCATENATION)
 {
 
     int waves[2] = { 1, 1 };
-    int samples[2] = { 200, 200 };
-    int num_sections = sizeof(samples) / sizeof(samples[0]);
+    vector<int> samples;
+    samples.push_back(200);
+    samples.push_back(200);
     vector<FixedComplex32 > datas;
 
 	FixedComplex32 j(0, 0);
 	datas.push_back(j);
 
-    Stitcher stitch(waves, samples, num_sections); //Creates stitcher
+    Stitcher stitch(waves, samples); //Creates stitcher
     vector<FixedComplex32 > outdatas; //Vector for output data
     outdatas = stitch.stitch(400, 1000, 100, datas); //Two separate waves
 
     int waves2[1] = { 1 };
-    int samples2[1] = { 400 };
-    int num_sections2 = sizeof(samples) / sizeof(samples[0]);
+    vector<int> samples2;
+    samples2.push_back(400);
 
-    Stitcher stitch2(waves2, samples2, num_sections2); //Creates stitcher
+    Stitcher stitch2(waves2, samples2); //Creates stitcher
     vector<FixedComplex32 > outdatas2; //Vector for output data
     outdatas2 = stitch2.stitch(400, 1000, 100, datas); //One long wave
 
-    int size = outdatas.size();
+    assert(outdatas.size() == outdatas2.size());
 
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < outdatas.size(); i++) {
         BOOST_CHECK_MESSAGE( outdatas[i].real() == outdatas2[i].real(), i << ": " << outdatas[i].real() <<
         		" is not equal to " << outdatas2[i].real());
     } //Ensures 2 waves of the same type concatenated is the same as one long wave of the same type

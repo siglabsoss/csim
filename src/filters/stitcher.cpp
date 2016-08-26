@@ -9,35 +9,35 @@
 
 using namespace std;
 
-Stitcher::Stitcher(int* waveNums, int* sampless, int numsSections)
+Stitcher::Stitcher(int* waveNums, std::vector<int> sampless)
 {
-    val = new int[numsSections]; //Which wave is at which time
+    val = new int[sampless.size()]; //Which wave is at which time
 
-    for (int i = 0; i < numsSections; i++) {
+    for (int i = 0; i < sampless.size(); i++) {
         val[i] = waveNums[i]; //copies values
     }
 
-    samples = new int[numsSections]; //What percent of time that wave is used
+    samples = new int[sampless.size()]; //What percent of time that wave is used
     sample_total = 0;
     int percent_total = 0;
-    for (int i = 0; i < numsSections; i++) {
+    for (int i = 0; i < sampless.size(); i++) {
         sample_total += sampless[i];
         samples[i] = sampless[i];
     }
 
     //assert(percent_total==100);
 
-    numSections = numsSections; //Number of percents/vals
+    numSections = sampless.size(); //Number of percents/vals
 
 }
 
 void Stitcher::shiftTheta()
 {
-	if (currentTheta > 205887) //2pi * 32768
+	if (m_currentTheta > 205887) //2pi * 32768
 	{
-		endTheta -= 205887;
-		currentTheta -= 205887;
-	} //Shift currentTheta and endTheta down by 2pi if currentTheta is above 2pi
+		m_endTheta -= 205887;
+		m_currentTheta -= 205887;
+	} //Shift m_currentTheta and m_endTheta down by 2pi if m_currentTheta is above 2pi
 
 }
 
@@ -47,15 +47,15 @@ void Stitcher::doStuff(int val2, int i, vector<FixedComplex32 > data)
 	if (val2 == 0) {
 		shiftTheta();
 		for (int j = 0; j < samples[i]; j++) {
-			output.push_back(data[counter++]);
-			currentTheta = currentTheta + delta;
+			output.push_back(data[m_counter++]);
+			m_currentTheta = m_currentTheta + m_delta;
 		} //prints out actual data
 	} //For wave data
 
 	else {
 		for (int j = 0; j < samples[i]; j++) {
 			shiftTheta();
-			cordic_theta_t theta2(currentTheta/32768.0);
+			cordic_theta_t theta2(m_currentTheta/32768.0);
 
 			cordic_complex_t sine;
 			cordic_complex_t cosine;
@@ -71,7 +71,7 @@ void Stitcher::doStuff(int val2, int i, vector<FixedComplex32 > data)
 			}//Creates FixedComplex value to add to vector. CLOCKDOWN
 
 			output.push_back(result); //Adds result to vector
-			currentTheta = currentTheta + delta;
+			m_currentTheta = m_currentTheta + m_delta;
 		}
 	}//For clockup or clock down
 }
@@ -81,8 +81,8 @@ vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
         int frequency, vector<FixedComplex32 > data)
 {
 
-	counter = 0; //Resets counter for which part of the data the stitcher is on
-	currentTheta = 0; //Resets
+	m_counter = 0; //Resets m_counter for which part of the data the stitcher is on
+	m_currentTheta = 0; //Resets
     sc_int<32> totalTime = 0; //numSamples/sampleRate; // time in milliseconds?
     bool scaled = false;
     if (numSamples > sampleRate) {
@@ -94,14 +94,14 @@ vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
 
     for (int i = 0; i < numSections; i++) {
 
-        t = (totalTime * samples[i]) / sample_total; //total time of wave
-        theta = 2 * 102943 * t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
+        m_t = (totalTime * samples[i]) / sample_total; //total time of wave
+        m_theta = 2 * 102943 * m_t * frequency; // theta must be between 0 and 2pi Equivalent to 2pi *  / t  pi * 32768 = 102943
         if (scaled) {
-            theta = theta / 32768;
+            m_theta = m_theta / 32768;
         }
 
-        delta = 2 * 102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
-        endTheta = currentTheta + theta; //new ending point is starting point + how many radians to use current wave
+        m_delta = 2 * 102943 * frequency / sampleRate; //increment of angles between samples. 2pi * number of waves per second / number of samples per second  pi * 32768 = 102943
+        m_endTheta = m_currentTheta + m_theta; //new ending point is starting point + how many radians to use current wave
         doStuff(val[i], i ,  data);// Performs calculations
 
     }
