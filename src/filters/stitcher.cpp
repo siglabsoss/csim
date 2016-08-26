@@ -11,15 +11,11 @@ using namespace std;
 
 Stitcher::Stitcher(vector<int> waveNums, std::vector<int> samples)
 {
-
 	m_val = waveNums; //copies values
-
-    m_samples = new int[samples.size()]; //What percent of time that wave is used
-    m_sample_total = 0;
-    int percent_total = 0;
-    for (int i = 0; i < samples.size(); i++) {
-    	m_sample_total += samples[i];
-    	m_samples[i] = samples[i];
+	m_samples = samples;
+	m_sample_total = 0;
+	for (int i = 0; i < samples.size(); i++) {
+    	m_sample_total += samples[i];//Gets total number of samples to be stitched
     }
 
     m_numSections = samples.size(); //Number of vals
@@ -34,10 +30,10 @@ void Stitcher::shiftTheta()
 	} //Shift m_currentTheta and m_endTheta down by 2pi if m_currentTheta is above 2pi
 }
 
-void Stitcher::doStuff(int val2, int i, vector<FixedComplex32 > data)
+void Stitcher::doStuff(int waveNum, int i, vector<FixedComplex32 > data)
 {
 
-	if (val2 == 0) {
+	if (waves[waveNum] == DATA) {
 		shiftTheta();
 		for (int j = 0; j < m_samples[i]; j++) {
 			m_output.push_back(data[m_counter++]);
@@ -54,15 +50,19 @@ void Stitcher::doStuff(int val2, int i, vector<FixedComplex32 > data)
 			c.calculate(theta2, sine, cosine); //Use cordic to calculate clock up
 			FixedComplex32 result;
 
-			if (val2 == 1) {
+			if (waves[waveNum] == CLOCKUP) {
 				result.real(sine.imag().range().to_int64()/134217728.0);//cosup;
 				result.imag(sine.real().range().to_int64()/134217728.0);//sinup;
 			}//Creates FixedComplex value to add to vector. CLOCKUP
-			else {
+			else if (waves[waveNum] == CLOCKDOWN) {
 				result.real(cosine.real().range().to_int64()/(134217728.0));//cosdown;
 				result.imag(cosine.imag().range().to_int64()/(134217728.0));//sindown;
 			}//Creates FixedComplex value to add to vector. CLOCKDOWN
 
+			else {
+				cout << "Unrecognized wave number" << endl;
+				throw "Unrecognized wave number";
+			}
 			m_output.push_back(result); //Adds result to vector
 			m_currentTheta = m_currentTheta + m_delta;
 		}
