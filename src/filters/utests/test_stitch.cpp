@@ -22,7 +22,9 @@ void writeToFile(vector<FixedComplex<32> > outdatas);
 CSIM_TEST_CASE(PYTHON_COMPARISON)
 {
 
-    int waves[2] = { 1, 0 };
+    vector<int> waves;
+    waves.push_back(1);
+    waves.push_back(0);
 
     vector<int> samples;
     samples.push_back(200);
@@ -54,7 +56,9 @@ CSIM_TEST_CASE(PYTHON_COMPARISON)
 CSIM_TEST_CASE(CONCATENATION)
 {
 
-    int waves[2] = { 1, 1 };
+    vector<int> waves;
+    waves.push_back(1);
+    waves.push_back(1);
     vector<int> samples;
     samples.push_back(200);
     samples.push_back(200);
@@ -67,7 +71,8 @@ CSIM_TEST_CASE(CONCATENATION)
     vector<FixedComplex32 > outdatas; //Vector for output data
     outdatas = stitch.stitch(400, 1000, 100, datas); //Two separate waves
 
-    int waves2[1] = { 1 };
+    vector<int> waves2;
+    waves2.push_back(1);
     vector<int> samples2;
     samples2.push_back(400);
 

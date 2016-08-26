@@ -9,26 +9,20 @@
 
 using namespace std;
 
-Stitcher::Stitcher(int* waveNums, std::vector<int> sampless)
+Stitcher::Stitcher(vector<int> waveNums, std::vector<int> samples)
 {
-    m_val = new int[sampless.size()]; //Which wave is at which time
 
-    for (int i = 0; i < sampless.size(); i++) {
-    	m_val[i] = waveNums[i]; //copies values
-    }
+	m_val = waveNums; //copies values
 
-    m_samples = new int[sampless.size()]; //What percent of time that wave is used
+    m_samples = new int[samples.size()]; //What percent of time that wave is used
     m_sample_total = 0;
     int percent_total = 0;
-    for (int i = 0; i < sampless.size(); i++) {
-    	m_sample_total += sampless[i];
-    	m_samples[i] = sampless[i];
+    for (int i = 0; i < samples.size(); i++) {
+    	m_sample_total += samples[i];
+    	m_samples[i] = samples[i];
     }
 
-    //assert(percent_total==100);
-
-    m_numSections = sampless.size(); //Number of percents/vals
-
+    m_numSections = samples.size(); //Number of vals
 }
 
 void Stitcher::shiftTheta()
@@ -38,7 +32,6 @@ void Stitcher::shiftTheta()
 		m_endTheta -= 205887;
 		m_currentTheta -= 205887;
 	} //Shift m_currentTheta and m_endTheta down by 2pi if m_currentTheta is above 2pi
-
 }
 
 void Stitcher::doStuff(int val2, int i, vector<FixedComplex32 > data)
@@ -56,11 +49,11 @@ void Stitcher::doStuff(int val2, int i, vector<FixedComplex32 > data)
 		for (int j = 0; j < m_samples[i]; j++) {
 			shiftTheta();
 			cordic_theta_t theta2(m_currentTheta/32768.0);
-
 			cordic_complex_t sine;
 			cordic_complex_t cosine;
 			c.calculate(theta2, sine, cosine); //Use cordic to calculate clock up
 			FixedComplex32 result;
+
 			if (val2 == 1) {
 				result.real(sine.imag().range().to_int64()/134217728.0);//cosup;
 				result.imag(sine.real().range().to_int64()/134217728.0);//sinup;
@@ -102,8 +95,8 @@ vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
         m_endTheta = m_currentTheta + m_theta; //new ending point is starting point + how many radians to use current wave
         doStuff(m_val[i], i ,  data);// Performs calculations
     }
-    return m_output;
 
+    return m_output;
 }
 
 void Stitcher::reset()
