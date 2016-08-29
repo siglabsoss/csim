@@ -7,7 +7,6 @@
 #include <filters/sine_wave.hpp>
 #include <filters/automatic_gain.hpp>
 #include <filters/fixedfft.hpp>
-#include <filters/fixedifft.hpp>
 #include <filters/mixer.hpp>
 #include <filters/zero_pad_interpolator.hpp>
 #include <filters/linear_gain_amplifier.hpp>
@@ -49,7 +48,7 @@ void constructRadios(SigWorld &world)
                     fixedfft            *fft      = new fixedfft(FFT_WINDOW_SIZE, 0);
                     ZeroPadInterpolator *zpi      = new ZeroPadInterpolator(FFT_WINDOW_SIZE);
                     LinearGainAmplifier *lga      = new LinearGainAmplifier(2);
-                    fixedifft           *ifft     = new fixedifft(FFT_WINDOW_SIZE*2, 0);
+                    fixedfft           *ifft     = new fixedfft(FFT_WINDOW_SIZE*2, 0, true);
                     //SampleCountTrigger  *tp1      = new SampleCountTrigger("FFT trigger", 1000, 1, 10000);
                     LevelTrigger        *lt1      = new LevelTrigger("FFT Level", 1000, 10);
                     SampleCountTrigger  *tp2      = new SampleCountTrigger("IFFT trigger", 1000, 1, 10000);
