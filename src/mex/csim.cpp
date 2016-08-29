@@ -68,6 +68,30 @@ void csim_init_radios(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]
 
 void csim_get_rx_bytes(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
+    bool invalArgs = false;
+    if(!check_for_scalars(1, nrhs, prhs)) {
+        invalArgs = true;
+    }
+
+    if (!invalArgs) {
+        radio_id_t id = static_cast<radio_id_t>(mxGetScalar(prhs[0]));
+
+        if (id >= g_context.radio_count) {
+            invalArgs = true;
+        } else {
+            size_t offset = static_cast<size_t>(id);
+            if (!g_context.rx_bytes[offset].empty()) {
+                uint8_t byte = g_context.rx_bytes[offset].front();
+                g_context.rx_bytes[offset].pop();
+                plhs[0] = mxCreateDoubleScalar(byte);
+            }
+        }
+    }
+
+    if (invalArgs == true) {
+        mexErrMsgIdAndTxt("csim:set_tx_byte:InvalidArgs", "Expecting exactly two arguments: radio_id ([0-numRadios-1]), byte ([0-255])");
+        return;
+    }
 }
 
 void csim_set_tx_byte(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
