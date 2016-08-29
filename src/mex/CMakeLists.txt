@@ -6,6 +6,7 @@ set(LIBCSIM_SOURCES
     $<TARGET_OBJECTS:sigtypesobj>
     $<TARGET_OBJECTS:sigutilsobj>
     $<TARGET_OBJECTS:jsoncppobj>
+    mex_utils.c
     csim.cpp
    )
 

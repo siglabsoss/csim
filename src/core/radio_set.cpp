@@ -91,37 +91,37 @@ void RadioSet::clear()
     m_didInit = false;
 }
 
-void RadioSet::bufferSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
+void RadioSet::bufferTxSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
 {
     RadioS *radio = (*it).get();
-    bufferSampleForRadio(radio, sample);
+    bufferTxSampleForRadio(radio, sample);
 }
 
-void RadioSet::bufferSampleForRadio(radio_id_t id, ComplexDouble &sample)
+void RadioSet::bufferTxSampleForRadio(radio_id_t id, ComplexDouble &sample)
 {
     RadioS *radio = getRadioForId(id);
     assert(radio != nullptr);
-    bufferSampleForRadio(radio, sample);
+    bufferTxSampleForRadio(radio, sample);
 }
 
-void RadioSet::bufferSampleForRadio(const RadioS *radio, ComplexDouble &sample)
+void RadioSet::bufferTxSampleForRadio(const RadioS *radio, ComplexDouble &sample)
 {
     m_txBuffers[radio].push_front(sample);
 }
 
-void RadioSet::getSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
+void RadioSet::calculateRxSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sample)
 {
-    getSampleForRadio((*it).get(), sample);
+    calculateRxSampleForRadio((*it).get(), sample);
 }
 
-void RadioSet::getSampleForRadio(radio_id_t id, ComplexDouble &sample)
+void RadioSet::calculateRxSampleForRadio(radio_id_t id, ComplexDouble &sample)
 {
     RadioS *radio = getRadioForId(id);
     assert(radio != nullptr);
-    getSampleForRadio(radio, sample);
+    calculateRxSampleForRadio(radio, sample);
 }
 
-void RadioSet::getSampleForRadio(const RadioS *radio, ComplexDouble &sample)
+void RadioSet::calculateRxSampleForRadio(const RadioS *radio, ComplexDouble &sample)
 {
     size_t numRadios = m_radios.size();
     sample = ComplexDouble(0.0, 0.0);

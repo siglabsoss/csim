@@ -30,18 +30,18 @@ public:
     void init(bool noNoise, bool noDelay, bool noPhaseRot);
     void clear();
 
-    void bufferSampleForRadio(const iterator &it, ComplexDouble &sample);
-    void bufferSampleForRadio(radio_id_t id, ComplexDouble &sample);
+    void bufferTxSampleForRadio(const iterator &it, ComplexDouble &sample);
+    void bufferTxSampleForRadio(radio_id_t id, ComplexDouble &sample);
 
-    void getSampleForRadio(const iterator &it, ComplexDouble &sample);
-    void getSampleForRadio(radio_id_t id, ComplexDouble &sample);
+    void calculateRxSampleForRadio(const iterator &it, ComplexDouble &sample);
+    void calculateRxSampleForRadio(radio_id_t id, ComplexDouble &sample);
 
     iterator begin();
     iterator end();
 
 private:
-    void bufferSampleForRadio(const RadioS *radio, ComplexDouble &sample);
-    void getSampleForRadio(const RadioS *radio, ComplexDouble &sample);
+    void bufferTxSampleForRadio(const RadioS *radio, ComplexDouble &sample);
+    void calculateRxSampleForRadio(const RadioS *radio, ComplexDouble &sample);
 
 private:
     std::vector<std::unique_ptr<RadioS> >                               m_radios;

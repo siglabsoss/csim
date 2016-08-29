@@ -1,5 +1,6 @@
 set(SIGUTILS_SOURCES
     plotter.cpp
+    radio_utils.cpp
     utils.cpp)
 
 add_library(sigutilsobj OBJECT ${SIGUTILS_SOURCES})

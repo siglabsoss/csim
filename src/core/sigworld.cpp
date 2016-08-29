@@ -2,31 +2,43 @@
 #include <messages/rf_sample.hpp>
 
 SigWorld::SigWorld() :
-    m_radioSet()
+    m_radioSet(nullptr),
+    m_rxCallback(),
+    m_externalSampleSource(),
+    m_externalSampleDestination()
 {
 
 }
 
-void SigWorld::init(bool noNoise, bool noDelay, bool noPhaseRot)
+void SigWorld::init(RadioSet *rs)
 {
-    m_radioSet.init(noNoise, noDelay, noPhaseRot);
+    m_radioSet = rs;
 }
 
 void SigWorld::reset()
 {
-    m_radioSet.clear();
+    if (m_radioSet != nullptr) {
+        m_radioSet->clear();
+    }
 }
 
 void SigWorld::tick()
 {
-    for (RadioSet::iterator it = m_radioSet.begin(); it != m_radioSet.end(); it++)
+    assert(m_radioSet != nullptr);
+
+    for (RadioSet::iterator it = m_radioSet->begin(); it != m_radioSet->end(); it++)
     {
         RadioS * const current = (*it).get();
         ComplexDouble rxSample;
         ComplexDouble txSample;
 
         /* Step 1 - Feed the radio a waveform sample from the environment */
-        m_radioSet.getSampleForRadio(it, rxSample);
+        if (m_externalSampleSource) {
+            m_externalSampleSource(current, rxSample);
+        }else {
+            m_radioSet->calculateRxSampleForRadio(it, rxSample);
+        }
+
         current->rxWave(rxSample);
 
         /* Step 2 - trigger the radio's internal processing */
@@ -36,7 +48,12 @@ void SigWorld::tick()
         current->txWave(txSample);
 
         /* Step 4 - Queue the sample in a buffer */
-        m_radioSet.bufferSampleForRadio(it, txSample);
+        if (m_externalSampleDestination) {
+            m_externalSampleDestination(current, txSample);
+        } else {
+            m_radioSet->bufferTxSampleForRadio(it, txSample);
+        }
+
 
         /* Step 5 - Check for output bytes */
         uint8_t outputByte;
@@ -60,17 +77,22 @@ void SigWorld::tick()
     }
 }
 
-void SigWorld::addRadio(std::function< std::unique_ptr<RadioS>() > radioFactory)
-{
-    (void)m_radioSet.addRadio(radioFactory);
-}
-
 bool SigWorld::sendByte(radio_id_t id, uint8_t byte)
 {
-    return m_radioSet.getRadioForId(id)->txByte(byte);
+    return m_radioSet->getRadioForId(id)->txByte(byte);
 }
 
 void SigWorld::didReceiveByte(std::function< void(radio_id_t, uint8_t) > callback)
 {
     m_rxCallback = callback;
+}
+
+void SigWorld::setExternalDataSource(std::function< void(const RadioS *current, ComplexDouble &data) > source)
+{
+    m_externalSampleSource = source;
+}
+
+void SigWorld::setExternalDataDestination(std::function< void(const RadioS *current, const ComplexDouble &data) > destination)
+{
+    m_externalSampleDestination = destination;
 }
