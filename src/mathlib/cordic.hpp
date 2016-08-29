@@ -48,8 +48,8 @@ private: //members
     std::vector <cordic_scalar_t > m_vals;
 
 private: //constants
-    static constexpr size_t NUM_HARDWIRED_VALUES = 32;
-    static constexpr double k = .685985744494; // k is a scaling factor that's a function of the number of hardwired values, this particular value was found emperically
+    static constexpr size_t NUM_HARDWIRED_VALUES = 40;
+    static constexpr double k = .607252935; // k is a scaling factor that's a function of the number of hardwired values, this particular value was found emperically
 };
 
 #endif /* CORDIC_H_ */

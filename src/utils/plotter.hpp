@@ -92,8 +92,7 @@ public:
 
     void conv_real_int(const CircularBuffer<filter_io_t > &obj, Json::Value& t1) const
     {
-        for (int i = 0; i < obj.size(); i++) {
-
+        for (unsigned int i = 0; i < obj.size(); i++) {
             ComplexDouble val = obj[i].toComplexDouble();
             //std::cout << "(" << real << "," << imag << ")" << std::endl;
             t1["arg0"]["r"][i] = val.real();
@@ -123,7 +122,7 @@ public:
 
     void conv_real_int(const CircularBuffer<complex<double> > &obj, Json::Value& t1)
     {
-        for (int i = 0; i < obj.size(); i++) {
+        for (unsigned int i = 0; i < obj.size(); i++) {
             t1["arg0"]["r"][i] = std::real(obj[i]);
             t1["arg0"]["i"][i] = std::imag(obj[i]);//obj[i].imag.to_int();
         }    		//Adds each element in CircularBuffer to dictionary arg0

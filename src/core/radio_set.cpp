@@ -141,7 +141,7 @@ void RadioSet::calculateRxSampleForRadio(const RadioS *radio, ComplexDouble &sam
         }
         double distance = m_distances(i, radioOffset);
 
-        int delay = 1;
+        unsigned int delay = 1;
         if (!m_noDelay) {
             delay = RadioPhysics::sampleDelayForDistance(distance);
         }

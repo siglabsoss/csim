@@ -4,7 +4,6 @@
 
 #ifndef __FLOATFFT_H__
 #define __FLOATFFT_H__
-using namespace std;
 enum FFT_STATE
 {
     FFT_STATE_INITIAL, FFT_STATE_READ, FFT_STATE_OUTPUT
@@ -13,7 +12,7 @@ enum FFT_STATE
 class floatfftbase
 {
 public:
-    virtual void inputandtick(complex<float> x) {};
+    virtual void inputandtick(std::complex<float> x) {};
     int ready;
 };
 
@@ -21,7 +20,7 @@ class floatfftstage: public floatfftbase
 {
 public:
     int N;
-    complex<float> *memory;
+    std::complex<float> *memory;
     FFT_STATE state;
 
     int read_pointer;
@@ -34,10 +33,10 @@ public:
     floatfftstage();
     void init(int Ninput);
     void dump(void);
-    void inputandtick(complex<float> x);
-    void output(complex<float> x);
-    void butterfly(complex<float> array[2], complex<float> x, complex<float> y);
-    complex<float> twiddler(int k);
+    void inputandtick(std::complex<float> x);
+    void output(std::complex<float> x);
+    void butterfly(std::complex<float> array[2], std::complex<float> x, std::complex<float> y);
+    std::complex<float> twiddler(int k);
 };
 
 class floatfftprint: public floatfftbase
@@ -46,8 +45,8 @@ public:
     int N;
     int count;
     floatfftprint(int Ninput);
-    void inputandtick(complex<float> x);
-    queue<complex<float> > answers;
+    void inputandtick(std::complex<float> x);
+    std::queue<std::complex<float> > answers;
 };
 
 // saves all output forever
@@ -56,9 +55,9 @@ class floatfftbuffer: public floatfftbase
 public:
     int N;
     int count;
-    std::vector<complex<float> > buf;
+    std::vector<std::complex<float> > buf;
     floatfftbuffer(int Ninput);
-    void inputandtick(complex<float> x);
+    void inputandtick(std::complex<float> x);
 };
 
 class floatfft: public floatfftbase
@@ -69,7 +68,7 @@ public:
     floatfftstage *stages;
     floatfftprint printer;
     floatfft(int Ninput);
-    void inputandtick(complex<float> x);
+    void inputandtick(std::complex<float> x);
 };
 
 #endif

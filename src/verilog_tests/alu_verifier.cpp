@@ -24,7 +24,6 @@ int main(int argc, char *argv[])
         cout << "error reading" << data <<  endl;
         return 1;
     }
-    char ** ptr;
 
     typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 

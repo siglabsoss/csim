@@ -3,7 +3,7 @@
 #include <core/parameters.hpp>
 #include <utils/utils.hpp>
 
-uint32_t RadioPhysics::sampleDelayForDistance(double distance)
+unsigned int RadioPhysics::sampleDelayForDistance(double distance)
 {
     double LIGHTSPEED;
     int64_t SAMPLERATE;

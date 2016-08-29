@@ -8,8 +8,8 @@ CSIM_TEST_SUITE_BEGIN(CordicSuite)
 
 CSIM_TEST_CASE(CordicFunctionality)
 {
-    static constexpr double AVG_ERR_THRESHOLD = 0.10;
-    static constexpr double MAX_ERR_THRESHOLD = 0.16;
+    static constexpr double AVG_ERR_THRESHOLD = 0.000007;
+    static constexpr double MAX_ERR_THRESHOLD = 0.000012;
     cordic c;
     cordic_complex_t cosine;
     cordic_complex_t sine;
@@ -52,7 +52,7 @@ CSIM_TEST_CASE(CordicFunctionality)
     double avg_cos_err = cos_accum / iterations;
 
     std::cout << "Average Error = " << avg_sin_err << ", " << avg_cos_err << std::endl;
-    std::cout << "Max Error = " << max_err << std::endl;
+    std::cout << "Max Error = " << max_err << " at angle " << theta_at_max << std::endl;
 
     BOOST_CHECK(avg_sin_err < AVG_ERR_THRESHOLD);
     BOOST_CHECK(avg_cos_err < AVG_ERR_THRESHOLD);

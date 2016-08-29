@@ -1,0 +1,4 @@
+[submodule "src/3rd/systemc"]
+	path = src/3rd/systemc
+	url = git@github.com:siglabs/systemc.git
+	branch = davey

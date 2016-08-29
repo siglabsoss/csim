@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
 	fixediir iir(atap, btap);
 	filter_io_t data2;
-	for (int j = 0; j < input.size(); j ++) {
+	for (unsigned int j = 0; j < input.size(); j ++) {
 		data2 = input[j];
 		iir.input(data2); //Filters data
 		output.push_back(iir.m_output);
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     	cout << "Could not write to " << outFile << endl;
     	return 1;
     }
-	for (int k = 0; k < output.size(); k++) {
+	for (unsigned int k = 0; k < output.size(); k++) {
     	out << setw(6) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
     	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
 	}

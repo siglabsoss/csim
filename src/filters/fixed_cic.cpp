@@ -1,7 +1,5 @@
 #include <filters/fixed_cic.hpp>
 
-using namespace std;
-
 fixedcic::fixedcic(int R, int aregs, int bregs) :
     FilterChainElement("FixedCIC"),
     m_r(R),

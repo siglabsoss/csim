@@ -19,7 +19,7 @@ typedef FixedComplex2<16, 1> FixedComplex16;
 typedef FixedComplex2<64, 49> FixedComplex32;
 typedef FixedComplex2<64, 48> FixedComplex64;
 
-using namespace std;
+
 #include <iostream>
 template<int B> //How many bits the number will have
 class FixedComplex
@@ -47,11 +47,11 @@ public:
     FixedComplex<16> to_16();
     FixedComplex<32> to_32();
     FixedComplex<64> to_64();
-    string to_string();
+    std::string to_string();
     friend ostream& operator<<(ostream& os, const FixedComplex& c)
     {
         os << "Real: " << c.real.to_int() << " Imaginary: " << c.imag.to_int()
-                << endl;
+                << std::endl;
         return os;
     }
     ;

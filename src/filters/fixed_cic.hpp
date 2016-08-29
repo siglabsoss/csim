@@ -37,9 +37,9 @@ public:
     void reset();
 
     bool goodOutput;
+    int                         m_r; //Decimation factor
     int                         m_numBRegisters; //number of b registers
     int                         m_numARegisters; //number of a registers
-    int                         m_r; //Decimation factor
     int                         m_samples; //How many samples have been processed
     std::vector<FixedComplex16 >   m_a; //a registers
     std::vector<FixedComplex16 >   m_b; //b registers

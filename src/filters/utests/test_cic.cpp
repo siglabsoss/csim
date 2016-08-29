@@ -26,8 +26,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only adds and 
 	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << answersFile); //Reads input file
 
     fixedcic cic(2, 2, 2);
-    int m = 0;
-    for (int k = 0; k < input.size(); k++)
+    for (unsigned int k = 0; k < input.size(); k++)
 	{
     	filter_io_t data;
 		data = input[k];
@@ -39,7 +38,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only adds and 
 	}
 
     assert(output.size() == answers.size());
-    for (int k = 0; k < answers.size(); k++) {
+    for (unsigned int k = 0; k < answers.size(); k++) {
         BOOST_CHECK_MESSAGE(abs(output[k].real() - answers[k].real()) < 1,
                 output[k].real() << " is not the same as " << answers[k].real() << " ");
     } //Compares all outputs with solution to ensure they are .001 within each other.

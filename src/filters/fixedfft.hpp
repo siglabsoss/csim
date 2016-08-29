@@ -1,12 +1,10 @@
 #include <complex>
 #include <vector>
-#include <mathlib/cordic.hpp>
-#include <core/filter_chain_element.hpp>
-#include <types/fixedcomplex.hpp>
 #include <queue>
 #include <cmath>
-#include <iomanip>
-#include <core/logger.hpp>
+#include <core/filter_chain_element.hpp>
+#include <types/fixedcomplex.hpp>
+
 #ifndef __FIXEDFFT_H__
 #define __FIXEDFFT_H__
 
@@ -21,66 +19,64 @@ public:
     virtual void inputandtick(FixedComplex32 x) = 0;
     virtual ~fixedfftbase() {}
     int ready;
-    queue<FixedComplex32 >   m_output;
-
 };
 
 class fixedfftstage: public fixedfftbase
 {
 public:
-    int                  N;
-    std::vector<FixedComplex32>    memory;
-    FFFT_STATE          state;
-    int                 read_pointer;
-    int                 write_pointer;
-    int                 clock;
-    fixedfftbase        *next;
-    int theta;
-    int tableSize;
-    std::vector<int> *mainTablePointer;
+    int 							N;
+    std::vector<FixedComplex32>    	memory;
+    FFFT_STATE         				state;
+    int                 			read_pointer;
+    int                 			write_pointer;
+    int                 			clock;
+    fixedfftbase        			*next;
+    std::vector<int> 				*mainTablePointer;
 
     fixedfftstage();
-    void init(int Ninput);
-    void dump(void);
+    void init(int Ninput, bool m_inverse);
     void inputandtick(FixedComplex32 x);
     void output(FixedComplex32 x);
-    void butterfly(FixedComplex32 array[2], FixedComplex32 x,
-            FixedComplex32 y);
+    void butterfly(FixedComplex32 array[2], FixedComplex32 x, FixedComplex32 y);
     FixedComplex32 twiddler(int k);
+
+private:
+    bool m_inverse;
 
 
 };
 class fixedfftprint: public fixedfftbase
 {
 public:
-    int N;
-    int count;
-    fixedfftprint(int Ninput);
-    void inputandtick(FixedComplex32 x);
+    int								N; //N point fft
+    std::queue<FixedComplex32>		m_output; //Stores outputs
+
+    fixedfftprint(int Ninput, bool inverse);
+    void inputandtick(FixedComplex32 x); //Adds output to queue
+
+private:
+    bool m_inverse; //If this filter is an fft or ifft
 };
 
 class fixedfft : public FilterChainElement
 {
 public:
+	unsigned int 				N;
+    int 						stagecount;
+    unsigned int 				m_count;
+    bool 						newInput;
+    std::vector<int> 			mainTable;
+    std::vector<fixedfftstage> 	stages;
+    fixedfftprint 				printer;
+    
+	void tick() override;
+    fixedfft(int Ninput, int tableSize = 0, bool inverse = 0);
     bool input(const filter_io_t &data) override;
-
-        /**
-         * output - provide an output sample to the caller.
-         * @return false if no output sample is available.
-         */
     bool output(filter_io_t &data) override;
 
-    void tick() override;
+private:
+    bool m_inverse;
 
-    int N;
-    int stagecount;
-    bool newInput;
-    int m_count;
-    std::vector<int> mainTable;
-
-    std::vector<fixedfftstage> stages;
-    fixedfftprint printer;
-    fixedfft(int Ninput, int tableSize = 0);
 };
 
 #endif

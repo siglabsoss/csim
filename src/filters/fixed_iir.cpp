@@ -48,7 +48,7 @@ void fixediir::tick()
 
 }
 
-fixediir::fixediir(vector<FixedComplex16> aCoeffs, vector<FixedComplex16> bCoeffs) :
+fixediir::fixediir(std::vector<FixedComplex16> aCoeffs, std::vector<FixedComplex16> bCoeffs) :
                 FilterChainElement("FixedIIR"),
                 m_numXRegisters(bCoeffs.size()),
                 m_numYRegisters(aCoeffs.size()),

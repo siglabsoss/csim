@@ -11,7 +11,7 @@ cordic::cordic() :
         m_vals(NUM_HARDWIRED_VALUES)
 {
     //See Hard-wiring the machine: http://www.qc.cuny.edu/Academics/Degrees/DMNS/Faculty%20Documents/Sultan1.pdf
-    for (int i = 0; i < NUM_HARDWIRED_VALUES; i++) {
+    for (unsigned int i = 0; i < NUM_HARDWIRED_VALUES; i++) {
 
         if (i == 0) {
             m_vals[i] = 0.7853981634;
@@ -75,7 +75,7 @@ void cordic::calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_comp
     cordic_complex_t c1, c2, c3, c4;
     cordic_theta_t x = 0.0;
     int direction = 0;
-    for (int i = 0; i < NUM_HARDWIRED_VALUES; i++) {
+    for (unsigned int i = 0; i < NUM_HARDWIRED_VALUES; i++) {
         if (x <= theta) {
             direction = 1; //rotate ccw
             x = x + m_vals[i];
@@ -84,7 +84,11 @@ void cordic::calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_comp
             x = x - m_vals[i];
         }
 
-        cordic_scalar_t factor(direction * m_vals[i]);
+        cordic_scalar_t factor(direction/(pow(2,i)));
+//        if (factor == 0)
+//        {
+//        	std::cout <<"PROBLEMS" << endl;
+//        }
         c1 = y[0]; //a
         c2 = y[1] * factor; //-b/2^n
         c3 = y[0] * factor; //a/2^n

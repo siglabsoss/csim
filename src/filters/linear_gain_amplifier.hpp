@@ -46,6 +46,10 @@ public:
                 data.fcn32.real(m_sample.fcn32.real() * m_gain);
                 data.fcn32.imag(m_sample.fcn32.imag() * m_gain);
                 break;
+            case IO_TYPE_FIXED_COMPLEX_64_NEW:
+				data.fcn64.real(m_sample.fcn64.real() * m_gain);
+				data.fcn64.imag(m_sample.fcn64.imag() * m_gain);
+                          break;
             case IO_TYPE_BYTE:
                 break;
         }

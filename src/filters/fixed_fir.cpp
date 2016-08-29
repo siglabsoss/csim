@@ -1,13 +1,12 @@
 #include <filters/fixed_fir.hpp>
 
-
-FixedFIR::FixedFIR(vector<FixedComplex16> tap) :
+FixedFIR::FixedFIR(std::vector<FixedComplex16> tap) :
 	FilterChainElement("FixedFIR"),
     m_taps(tap.size()),
     m_bench(tap.size()),
     m_output()
 {
-    for (int i = 0; i < tap.size(); i++) {
+    for (unsigned int i = 0; i < tap.size(); i++) {
         m_taps[i] = tap[i];
     }
 }
@@ -35,7 +34,7 @@ void FixedFIR::tick()
 
 void FixedFIR::reset()
 {
-    for (int i = 0; i < m_bench.size(); i++) {
+    for (unsigned int i = 0; i < m_bench.size(); i++) {
         m_bench[i].real(0);
         m_bench[i].imag(0);
     }
@@ -48,7 +47,7 @@ FixedComplex16 FixedFIR::filter(FixedComplex16 &input)
 
     m_bench.push_front(input);
 
-    for (int j = 0; (j < m_bench.size()); j++) {
+    for (unsigned int j = 0; (j < m_bench.size()); j++) {
         sum = sum + (m_bench[j] * m_taps[j]);
     } //Accumulate
 
