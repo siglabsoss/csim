@@ -5,13 +5,9 @@
 
 #include <core/filter_chain_element.hpp>
 
-
-
 class SineWave : public FilterChainElement
 {
 public:
-
-
     virtual ~SineWave() {}
     SineWave(double ticksPerPeriod) :
         FilterChainElement(std::string("SineWave")),
