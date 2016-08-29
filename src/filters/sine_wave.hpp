@@ -5,9 +5,13 @@
 
 #include <core/filter_chain_element.hpp>
 
+
+
 class SineWave : public FilterChainElement
 {
 public:
+
+
     virtual ~SineWave() {}
     SineWave(double ticksPerPeriod) :
         FilterChainElement(std::string("SineWave")),
@@ -30,10 +34,11 @@ public:
 
     void tick(void) override
     {
-        //using 10 for 10V, which is the peak voltage for a 1W / 30dBm sine wave
-        double amplitude = 10.0;
+    	//using 10 for 10V, which is the peak voltage for a 1W / 30dBm sine wave
+    	constexpr double amplitude = 10.0;
+
         double theta = (((2 * M_PI) / m_ticksPerPeriod) * m_count);
-        m_output.rf = ComplexDouble(10.0 * cos(theta), 10.0 * sin(theta));
+        m_output.rf = ComplexDouble(amplitude * cos(theta), amplitude * sin(theta));
         m_count++;
         if (m_count > m_ticksPerPeriod) {
             m_count -= m_ticksPerPeriod;

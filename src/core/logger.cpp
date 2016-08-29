@@ -22,7 +22,12 @@ void Logger::debug(const char *fmt, ...)
     int priority = LOG_USER | LOG_DEBUG;
     va_list ap;
     va_start(ap, fmt);
-    int size = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+    int retval = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+    if (retval < 0) {
+      return;
+    }
+    size_t size= static_cast<size_t>(retval);
+
     if (size < LOGGER_BUF_SIZE - 1) {
         logBuf[size]     = '\n';
         logBuf[size + 1] = '\0';
@@ -44,7 +49,12 @@ void Logger::info(const char *fmt, ...)
     int priority = LOG_USER | LOG_INFO;
     va_list ap;
     va_start(ap, fmt);
-    int size = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+    int retval = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+	if (retval < 0) {
+		return;
+	}
+	size_t size= static_cast<size_t>(retval);
+
     if (size < LOGGER_BUF_SIZE - 1) {
         logBuf[size]     = '\n';
         logBuf[size + 1] = '\0';
@@ -66,7 +76,12 @@ void Logger::warn(const char *fmt, ...)
     int priority = LOG_USER | LOG_WARNING;
     va_list ap;
     va_start(ap, fmt);
-    int size = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+    int retval = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+	if (retval < 0) {
+		return;
+	}
+	size_t size= static_cast<size_t>(retval);
+
     if (size < LOGGER_BUF_SIZE - 1) {
         logBuf[size]     = '\n';
         logBuf[size + 1] = '\0';
@@ -88,7 +103,12 @@ void Logger::error(const char *fmt, ...)
     int priority = LOG_USER | LOG_ERR;
     va_list ap;
     va_start(ap, fmt);
-    int size = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+    int retval = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+	if (retval < 0) {
+		return;
+	}
+	size_t size= static_cast<size_t>(retval);
+
     if (size < LOGGER_BUF_SIZE - 1) {
         logBuf[size]     = '\n';
         logBuf[size + 1] = '\0';
@@ -110,7 +130,12 @@ void Logger::crit(const char *fmt, ...)
     int priority = LOG_USER | LOG_CRIT;
     va_list ap;
     va_start(ap, fmt);
-    int size = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+    int retval = vsnprintf(logBuf, LOGGER_BUF_SIZE, fmt, ap);
+	if (retval < 0) {
+		return;
+	}
+	size_t size= static_cast<size_t>(retval);
+
     if (size < LOGGER_BUF_SIZE - 1) {
         logBuf[size]     = '\n';
         logBuf[size + 1] = '\0';

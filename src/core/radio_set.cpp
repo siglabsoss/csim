@@ -77,7 +77,7 @@ void RadioSet::getSampleForRadio(const RadioSet::iterator &it, ComplexDouble &sa
         }
         RadioS *otherRadio = m_radios[i].get();
         double distance = m_distances(i, radioOfInterest);
-        int delay = RadioPhysics::sampleDelayForDistance(distance);
+        unsigned int delay = RadioPhysics::sampleDelayForDistance(distance);
         assert (delay <= m_txBuffers[otherRadio].capacity());
         ComplexDouble remoteSample = m_txBuffers[otherRadio].at(delay-1);
         RadioPhysics::complexRotationForDistance(remoteSample, distance);
