@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
 	fixedcic cic(settings[0], settings[1], settings[2]); //Constructor takes in decimation factor and number of regs on each side.
     int m = 0;
-    for (int k = 0; k < input.size(); k++)
+    for (unsigned int k = 0; k < input.size(); k++)
 	{
     	filter_io_t data;
 		data = input[k];

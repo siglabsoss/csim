@@ -25,13 +25,13 @@ class fixedfftstage: public fixedfftbase
 {
 public:
     int 							N;
-    int                 			clock;
+    std::vector<FixedComplex32>    	memory;
+    FFFT_STATE         				state;
     int                 			read_pointer;
     int                 			write_pointer;
-    std::vector<int> 				*mainTablePointer;
-    std::vector<FixedComplex32>    	memory;
+    int                 			clock;
     fixedfftbase        			*next;
-    FFFT_STATE         				state;
+    std::vector<int> 				*mainTablePointer;
 
     fixedfftstage();
     void init(int Ninput, bool m_inverse);
@@ -61,7 +61,7 @@ private:
 class fixedfft : public FilterChainElement
 {
 public:
-    int 						N;
+	unsigned int 				N;
     int 						stagecount;
     unsigned int 				m_count;
     bool 						newInput;

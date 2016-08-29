@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 			   assert(1 == 0);// "Could not open data/fft/input/input3.txt");
    }//If cannot read from file, return 1;
 
-     for (int i = 0; i < outputs.size(); i++) {
+     for (unsigned int i = 0; i < outputs.size(); i++) {
               out2 << setw(11) << setfill(' ') <<  outputs[i].real().range().to_int64()   << ",";
               out2 << setw(11) << setfill(' ') <<  outputs[i].imag().range().to_int64()   << endl;
             //  cout << temp[i];

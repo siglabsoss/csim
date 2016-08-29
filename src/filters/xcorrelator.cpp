@@ -18,10 +18,10 @@ std::vector<FixedComplex32 > XCorrelator::xCorrelate(std::vector<FixedComplex32 
     assert(p1.size() == m_n); //Same number of outputs into FFT as inputs
     assert(p2.size() == m_n); //Same number of outputs into FFT as inputs
 
-    for (int i = 0; i < p2.size(); i++) {
+    for (unsigned int i = 0; i < p2.size(); i++) {
         p2[i].imag(p2[i].imag() * -1);
     }//conj(FFT(Y)))
-    for (int i = 0; i < p1.size(); i++) {
+    for (unsigned int i = 0; i < p1.size(); i++) {
         p1[i] = p1[i] * p2[i];
     }//FFT(x) * conj(FFT(Y))
 
@@ -38,7 +38,7 @@ std::vector<FixedComplex32 > XCorrelator::fft(std::vector<FixedComplex32 > vals)
 
     filter_io_t data;
     	for (int i = 0; i < 2; i++) {
-    		for (int j = 0; j < m_n; j++) {
+    		for (unsigned int j = 0; j < m_n; j++) {
     			data = vals[j];
     			fft.input(data);
     			bool test = fft.output(data);
@@ -48,7 +48,7 @@ std::vector<FixedComplex32 > XCorrelator::fft(std::vector<FixedComplex32 > vals)
     		}//Insert all input
     	}//Insert input again to get output
 
-    for (int i = 0; i < m_n; i++) {
+    for (unsigned int i = 0; i < m_n; i++) {
              outputs.push_back(outputsBitReversed[reverseBits(m_n, i)]);
      }//Reformats data in correct order
 
@@ -63,7 +63,7 @@ std::vector<FixedComplex32 > XCorrelator::ifft(std::vector<FixedComplex32> vals)
 
 	filter_io_t data;
 	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < m_n; j++) {
+		for (unsigned int j = 0; j < m_n; j++) {
 			data = vals[j];
 			ifft.input(data);
 			bool test = ifft.output(data);
@@ -73,7 +73,7 @@ std::vector<FixedComplex32 > XCorrelator::ifft(std::vector<FixedComplex32> vals)
 		}//Insert all input
 	}//Insert input again to get output
 
-	for (int i = 0; i < m_n; i++) {
+	for (unsigned int i = 0; i < m_n; i++) {
 		outputs.push_back(outputsBitReversed[reverseBits(m_n, i)]);
 	}//Reformats data in correct order
 

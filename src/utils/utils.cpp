@@ -6,7 +6,7 @@ unsigned int reverseBits(int N, unsigned int num)
 //    unsigned int  NO_OF_BITS = sizeof(num) * 8;
     unsigned int NO_OF_BITS = log2(N);
     unsigned int reverse_num = 0;
-    int i;
+    unsigned int i;
     for (i = 0; i < NO_OF_BITS; i++) {
         if ((num & (1 << i)))
             reverse_num |= 1 << ((NO_OF_BITS - 1) - i);
@@ -29,7 +29,6 @@ std::vector<FixedComplex16> complexRead16Scaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
 	std::vector<FixedComplex16> input;
-	char ** ptr;
 	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
 	std::vector<std::string> vec;
 	std::string line;
@@ -55,7 +54,6 @@ std::vector<FixedComplex16> complexRead16Unscaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
 	std::vector<FixedComplex16> input;
-	char ** ptr;
 	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
 	std::vector<std::string> vec;
 	std::string line;
@@ -98,7 +96,6 @@ std::vector<FixedComplex32> complexRead32Scaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
 	std::vector<FixedComplex32> input;
-	char ** ptr;
 	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
 	std::vector<std::string> vec;
 	std::string line;
@@ -124,7 +121,6 @@ std::vector<FixedComplex32> complexRead32Unscaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
 	std::vector<FixedComplex32> input;
-	char ** ptr;
 	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
 	std::vector<std::string> vec;
 	std::string line;
@@ -150,7 +146,6 @@ std::vector<FixedComplex64> complexRead64Scaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
 	std::vector<FixedComplex64> input;
-	char ** ptr;
 	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
 	std::vector<std::string> vec;
 	std::string line;
@@ -176,7 +171,6 @@ std::vector<FixedComplex64> complexRead64Unscaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
 	std::vector<FixedComplex64> input;
-	char ** ptr;
 	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
 	std::vector<std::string> vec;
 	std::string line;

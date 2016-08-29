@@ -70,7 +70,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     fixediir iir(atap, btap);
     filter_io_t data;
-    for (int j = 0; j < input.size(); j ++) {
+    for (unsigned int j = 0; j < input.size(); j ++) {
         data = input[j];
         iir.input(data); //Filters data
         output.push_back(iir.m_output);
@@ -78,7 +78,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     assert(output.size() == answers.size());//Length of inputs is length of answers/outputs.
 
-    for (int k = 0; k < output.size(); k++) {
+    for (unsigned int k = 0; k < output.size(); k++) {
         BOOST_CHECK_MESSAGE(
                 abs(output[k].real() - answers[k].real()) < .001,
                 output[k].real() << " is not the same as " << answers[k].real());

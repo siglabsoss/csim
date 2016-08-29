@@ -20,7 +20,7 @@ public:
     std::vector<FixedComplex32 > ifft(std::vector<FixedComplex32 > vals);//computes ifft
     std::vector<FixedComplex32 > fftshift(std::vector<FixedComplex32 > vals);//fftshifts the results
 
-    int m_n;// n point fft and ifft
+    unsigned int m_n;// n point fft and ifft
 
 };
 

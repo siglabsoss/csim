@@ -32,8 +32,8 @@ fixedfft::fixedfft(int Ninput, int tableSize, bool inverse) :
         FilterChainElement("FixedFFT"),
         N(Ninput),
         stagecount(log2(N)),
-        newInput(false),
         m_count(0),
+        newInput(false),
         mainTable(),
         stages(Ninput),
         printer(Ninput, inverse),
@@ -142,8 +142,6 @@ void fixedfftstage::inputandtick(FixedComplex32 x)
 {
     FixedComplex32 butterflyresult[2];
     FixedComplex32 outputtemp;
-    int i;
-    int as;
     switch (state) {
         case FFFT_STATE_INITIAL:
 

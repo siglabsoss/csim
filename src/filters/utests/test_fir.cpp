@@ -27,7 +27,7 @@ CSIM_TEST_CASE(REAL_FILTER)
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << answersFile); //Reads answer file
 
     FixedFIR fir(tap); //Creates instance of fixed FIR filter given j taps.
-    for (int k = 0; k < input.size(); k++)
+    for (unsigned int k = 0; k < input.size(); k++)
     {
         filter_io_t data;
         data = input[k];
@@ -37,7 +37,7 @@ CSIM_TEST_CASE(REAL_FILTER)
         output.push_back(output_sample.fcn);
     }//Filters using FIR
 
-    for (int k = 0; k < answers.size(); k++) {
+    for (unsigned int k = 0; k < answers.size(); k++) {
         BOOST_CHECK_MESSAGE(
                 abs(output[k].real() - answers[k].real())
                         < .001,
@@ -66,7 +66,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << data3); //Reads answers file
 
     FixedFIR fir(tap); //Creates instance of fixed FIR filter given j taps.
-    for (int k = 0; k < input.size(); k++) {
+    for (unsigned int k = 0; k < input.size(); k++) {
         filter_io_t data;
         data = input[k];
         fir.input(data); //Filters data
@@ -77,7 +77,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     assert (output.size() == answers.size());//Checks number of outputs
 
-    for (int k = 0; k < answers.size(); k++) {
+    for (unsigned int k = 0; k < answers.size(); k++) {
         BOOST_CHECK_MESSAGE(
                 abs(output[k].real() - answers[k].real()) < .001,
                 input[k].real() << " is not the same as " << answers[k]);

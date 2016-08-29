@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	}
 
     FixedFIR fir(tap); //Creates instance of fixed FIR filter given j taps.
-    for (int k = 0; k < input.size(); k++) {
+    for (unsigned int k = 0; k < input.size(); k++) {
         filter_io_t data;
         data = input[k];
         fir.input(data); //Filters data
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     	return 1;
     }
 
-    for (int k = 0; k < output.size(); k++) {
+    for (unsigned int k = 0; k < output.size(); k++) {
     	out << setw(6) << setfill(' ') <<  output[k].real().range().to_int64() << ",";
     	out << setw(6) << setfill(' ') <<  output[k].imag().range().to_int64() << endl;
     } //Prints all outputs

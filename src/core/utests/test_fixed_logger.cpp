@@ -5,8 +5,7 @@ CSIM_TEST_SUITE_BEGIN(Fixed_Logger)
 
 
 CSIM_TEST_CASE(Empty)
-{
-}
+{}
 
 #ifdef FIXED_POINT_PROFILER_ENABLE
 

@@ -74,7 +74,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 	int points = inputs.size();
 	fixedfft ifft(points,2949120, true ); //x point fft, y table size
 	filter_io_t data;
-	for (int i = 0; i < 2; i++) {
+	for (unsigned int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
 			data = inputs[j];
 			ifft.input(data);
@@ -88,7 +88,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 	assert(answers.size() == outputs.size());
 
 	vector<FixedComplex32> temp(outputs.size());
-	for (int i = 0; i < outputs.size(); i++) {
+	for (unsigned int i = 0; i < outputs.size(); i++) {
 		temp[reverseBits(inputs.size(), i)] = outputs[i];
 	}//Reformats data in correct order
 
@@ -143,7 +143,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
     }//second set of data, gets first set of answers out
     assert(answers.size() == outputs.size());
     std::vector<FixedComplex32> temp(outputs.size());
-    for (int i = 0; i < outputs.size(); i++) {
+    for (unsigned int i = 0; i < outputs.size(); i++) {
         temp[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
@@ -166,7 +166,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
 
     std::vector<FixedComplex32> temp2(outputs.size());
     assert(answers.size() == outputs.size());
-    for (int i = 0; i < answers.size(); i++) {
+    for (unsigned int i = 0; i < answers.size(); i++) {
         temp2[reverseBits(outputs.size(), i)] = outputs[i];
     }//Reformats data in correct order
 
@@ -179,7 +179,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 	string inFile("../data/fft/input/data_file_complex1.csv");
 	vector<FixedComplex32> inputs;
 	vector<FixedComplex32> outputs;
-	int i = 0;
+	unsigned int i = 0;
 	inputs = complexRead32Scaled(inFile);
 	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
 
@@ -189,7 +189,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 	filter_io_t data;
 	fixedfft fft(points);
 
-	for (int i = 0; i < 2; i++) {
+	for (unsigned int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
 			data = inputs[j];
 			fft.input(data);
@@ -209,7 +209,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 
 	fixedfft ifft(points, 0, true);
 	outputs.clear();
-	for (int i = 0; i < 2; i++) {
+	for (unsigned int i = 0; i < 2; i++) {
 		for (int j = 0; j < points; j++) {
 
 			data = temp[j];
@@ -233,7 +233,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 
 void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference)
 {
-	for (int i = 0; i < answers.size(); i++) {
+	for (unsigned int i = 0; i < answers.size(); i++) {
 		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
 		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
 		    double realDiff = abs(outputs[i].real() - answers[i].real());

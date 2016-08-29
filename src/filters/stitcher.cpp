@@ -13,7 +13,7 @@ Stitcher::Stitcher(std::vector<int> waveNums, std::vector<int> samples)
 	m_val = waveNums; //copies values of the order of the waves
 	m_samples = samples; //How many sample to play for each segment of wave
 	m_sample_total = 0; //Total number of samples
-	for (int i = 0; i < samples.size(); i++) {
+	for (unsigned int i = 0; i < samples.size(); i++) {
     	m_sample_total += samples[i]; //Gets total number of samples to be stitched
     }
     m_numSections = samples.size(); //Number of sections to be stitched

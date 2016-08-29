@@ -73,7 +73,7 @@ CSIM_TEST_CASE(CONCATENATION)
     outdatas2 = stitch2.stitch(400, 1000, 100, datas); //One long wave
 
     assert(outdatas.size() == outdatas2.size());
-    for (int i = 0; i < outdatas.size(); i++) {
+    for (unsigned int i = 0; i < outdatas.size(); i++) {
         BOOST_CHECK_MESSAGE( outdatas[i].real() == outdatas2[i].real(), i << ": " << outdatas[i].real() <<
         		" is not equal to " << outdatas2[i].real());
     } //Ensures 2 waves of the same type concatenated is the same as one long wave of the same type
@@ -81,7 +81,6 @@ CSIM_TEST_CASE(CONCATENATION)
 
 std::vector<double> readFromFile(std::string inFile)
 {
-	char ** ptr;
 	typedef tokenizer<escaped_list_separator<char> > Tokenizer;
 
 	vector<string> vec;
