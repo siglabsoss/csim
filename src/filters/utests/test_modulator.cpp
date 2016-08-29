@@ -32,7 +32,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
 
     BOOST_CHECK_EQUAL(mod.input(data), true);
     size_t expectedTicksPerOutput = 2; //derived from parameters at top of file
-    for (int i = 0; i < sizeof(byte) * expectedTicksPerOutput; i++) {
+    for (unsigned int i = 0; i < sizeof(byte) * expectedTicksPerOutput; i++) {
         mod.tick();
         mod.output(output);
         int bit_idx = i / expectedTicksPerOutput;
@@ -60,7 +60,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
             0b11111110
     };
     filter_io_t data, output;
-    for (int i = 0; i < sizeof(testData); i++) {
+    for (unsigned int i = 0; i < sizeof(testData); i++) {
         data = testData[i];
         BOOST_CHECK_EQUAL(mod.input(data), true);
     }
@@ -69,7 +69,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
 
     size_t expectedTicksPerOutput = 2; //derived from parameters at top of file
     size_t symbolsPerByte = 2;
-    for (int i = 0; i < sizeof(testData) * symbolsPerByte * expectedTicksPerOutput; i++) {
+    for (unsigned int i = 0; i < sizeof(testData) * symbolsPerByte * expectedTicksPerOutput; i++) {
         mod.tick();
         mod.output(output);
         int symbol_idx = i / expectedTicksPerOutput;

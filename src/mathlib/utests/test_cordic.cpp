@@ -52,7 +52,7 @@ CSIM_TEST_CASE(CordicFunctionality)
     double avg_cos_err = cos_accum / iterations;
 
     std::cout << "Average Error = " << avg_sin_err << ", " << avg_cos_err << std::endl;
-    std::cout << "Max Error = " << max_err << std::endl;
+    std::cout << "Max Error = " << max_err << " at angle " << theta_at_max << std::endl;
 
     BOOST_CHECK(avg_sin_err < AVG_ERR_THRESHOLD);
     BOOST_CHECK(avg_cos_err < AVG_ERR_THRESHOLD);

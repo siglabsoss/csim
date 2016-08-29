@@ -170,7 +170,6 @@ CSIM_TEST_CASE(FRACTIONAL_VS_INTEGER)
 
 
     for (auto it = tests.begin(); it != tests.end(); it++) {
-        int64_t result = sc_fixed<8, 1>(it->first).range().to_uint64();
         int64_t a = it->first.range().to_uint64();
         int64_t b = it->second.range().to_uint64();
         BOOST_CHECK_EQUAL(a, b);
