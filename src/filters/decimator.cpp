@@ -2,6 +2,7 @@
 #include <cassert>
 
 Decimator::Decimator(size_t N, size_t O) :
+    FilterChainElement("Decimator"),
     m_N(N),
     m_O(O),
     m_inputCount(0),
