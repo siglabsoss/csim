@@ -10,8 +10,17 @@ CSIM_TEST_CASE(Empty)
 
 #ifdef FIXED_POINT_PROFILER_ENABLE
 
+
+CSIM_TEST_CASE(Large_Bit_Sizes)
+{
+	FixedPoint <128, 1>  v(2);
+	FixedPoint <128, 1>  w(2);
+	FixedPoint <128, 2> z = v + w;
+
+}
 CSIM_TEST_CASE(Number_Of_Operations)
 {
+	sc_dt::scfx_rep::clear();
 	sc_dt::scfx_rep::warningLevel = 0;
 	FixedPoint <4, 4>  v(2);
 	FixedPoint <4, 4>  w(4);
@@ -474,6 +483,26 @@ CSIM_TEST_CASE(minMax_FixedComplex)
 	it=sc_dt::scfx_rep::values.find(sc_dt::key(16,1));
 	BOOST_CHECK(it->second.getMin() == (0));// floor(.2 * 2 ^ 15)
 	BOOST_CHECK(it->second.getMax() == (29491));// 2 * 2 ^ 15
+
+}
+
+CSIM_TEST_CASE(Top_Level_Value)
+{
+	FixedPoint<5,5> x(3);
+	FixedPoint<5,4> y(2);
+	FixedPoint<10,5> z = x + y;
+
+	BOOST_CHECK(x.int64Val == 3);// 3 * 2^0
+	BOOST_CHECK(x.binaryVal == "00011");
+	BOOST_CHECK(y.int64Val == 4);// 2 * (2^(5-4))
+	BOOST_CHECK(y.binaryVal == "00100");
+	BOOST_CHECK(z.int64Val == 160); // (3 + 2) * 2 ^(10-5)
+	BOOST_CHECK(z.binaryVal == "0010100000");
+
+	z = 0;
+	BOOST_CHECK(z.int64Val == 0); // (0) * 2 ^(10-5)
+	BOOST_CHECK(z.binaryVal == "0000000000");
+
 
 }
 
