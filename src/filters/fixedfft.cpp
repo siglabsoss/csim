@@ -6,8 +6,8 @@ bool fixedfft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
     newInput = true; //Input has been received so an output may be taken
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
-    FixedComplex32 sample = data.fcn32;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    FixedComplex32 sample = data.fc;
     while (!stages[0].ready) {
         stages[0].inputandtick(FixedComplex32(0, 0));
     }

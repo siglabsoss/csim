@@ -38,22 +38,22 @@ CSIM_TEST_CASE(PROPERLY_ZERO_PADDED)
 
     for (size_t i = 0; i < leftSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 1.0, DBL_EPSILON);
-        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.real().to_double(), 1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.imag().to_double(), 1.0, DBL_EPSILON);
         interp.tick();
     }
 
     for (size_t i = middleSectionBegin; i < middleSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
-        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.real().to_double(), 0.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.imag().to_double(), 0.0, DBL_EPSILON);
         interp.tick();
     }
 
     for (size_t i = rightSectionBegin; i < rightSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), -1.0, DBL_EPSILON);
-        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), -1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.real().to_double(), -1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.imag().to_double(), -1.0, DBL_EPSILON);
         interp.tick();
     }
 
@@ -78,22 +78,22 @@ CSIM_TEST_CASE(PROPERLY_ZERO_PADDED)
 
     for (size_t i = 0; i < leftSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 1.0, DBL_EPSILON);
-        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.real().to_double(), 1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.imag().to_double(), 1.0, DBL_EPSILON);
         interp.tick();
     }
 
     for (size_t i = middleSectionBegin; i < middleSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), 0.0, DBL_EPSILON);
-        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), 0.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.real().to_double(), 0.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.imag().to_double(), 0.0, DBL_EPSILON);
         interp.tick();
     }
 
     for (size_t i = rightSectionBegin; i < rightSectionEnd; i++) {
         BOOST_CHECK(interp.output(output) == true);
-        BOOST_REQUIRE_CLOSE(output.fcn32.real().to_double(), -1.0, DBL_EPSILON);
-        BOOST_REQUIRE_CLOSE(output.fcn32.imag().to_double(), -1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.real().to_double(), -1.0, DBL_EPSILON);
+        BOOST_REQUIRE_CLOSE(output.fc.imag().to_double(), -1.0, DBL_EPSILON);
         interp.tick();
     }
 

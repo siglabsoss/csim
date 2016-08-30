@@ -15,8 +15,8 @@ fixedcic::fixedcic(int R, int aregs, int bregs) :
 
 bool fixedcic::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
-    FixedComplex16 sample = data.fcn;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    FixedComplex16 sample = data.fc;
     cic(sample);
     return true;
 }

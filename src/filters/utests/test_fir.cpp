@@ -34,7 +34,7 @@ CSIM_TEST_CASE(REAL_FILTER)
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output.push_back(output_sample.fcn);
+        output.push_back(output_sample.fc);
     }//Filters using FIR
 
     for (unsigned int k = 0; k < answers.size(); k++) {
@@ -72,7 +72,7 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output.push_back(output_sample.fcn);
+        output.push_back(output_sample.fc);
      }//Filters data
 
     assert (output.size() == answers.size());//Checks number of outputs

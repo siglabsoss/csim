@@ -30,18 +30,10 @@ public:
                 data.rf.real(m_sample.rf.real() * m_gain);
                 data.rf.imag(m_sample.rf.imag() * m_gain);
                 break;
-            case IO_TYPE_FIXED_COMPLEX_16_NEW:
-                data.fcn.real(m_sample.fcn.real() * m_gain);
-                data.fcn.imag(m_sample.fcn.imag() * m_gain);
+            case IO_TYPE_FIXED_COMPLEX:
+                data.fc.real(m_sample.fc.real() * m_gain);
+                data.fc.imag(m_sample.fc.imag() * m_gain);
                 break;
-            case IO_TYPE_FIXED_COMPLEX_32_NEW:
-                data.fcn32.real(m_sample.fcn32.real() * m_gain);
-                data.fcn32.imag(m_sample.fcn32.imag() * m_gain);
-                break;
-            case IO_TYPE_FIXED_COMPLEX_64_NEW:
-				data.fcn64.real(m_sample.fcn64.real() * m_gain);
-				data.fcn64.imag(m_sample.fcn64.imag() * m_gain);
-                          break;
             case IO_TYPE_BYTE:
                 break;
         }

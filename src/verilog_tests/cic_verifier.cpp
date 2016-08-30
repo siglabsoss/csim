@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 		cic.input(data); //Filters data
 		bool test = cic.output(data);
 		if (test) {
-			output.push_back(data.fcn);
+			output.push_back(data.fc);
 		}//If output is available, add it to output vector
 	}//For all inputs
 

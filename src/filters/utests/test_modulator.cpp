@@ -15,8 +15,8 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_NULL_SYMBOL)
     for (int i = 0; i < 100; i++) {
         mod.tick();
         mod.output(output);
-        BOOST_CHECK_CLOSE(output.fcn32.real().to_double(),  0.0, DBL_EPSILON);
-        BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(),  0.0, DBL_EPSILON);
+        BOOST_CHECK_CLOSE(output.fc.real().to_double(),  0.0, DBL_EPSILON);
+        BOOST_CHECK_CLOSE(output.fc.imag().to_double(),  0.0, DBL_EPSILON);
     }
 }
 
@@ -34,11 +34,11 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
         mod.output(output);
         int bit_idx = i / MOD_TICKS_PER_SYMBOL;
         if (byte & (1 << bit_idx)) {
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(),  1.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(),  0.0, DBL_EPSILON);
+            BOOST_CHECK_CLOSE(output.fc.real().to_double(),  1.0, DBL_EPSILON);
+            BOOST_CHECK_CLOSE(output.fc.imag().to_double(),  0.0, DBL_EPSILON);
         } else {
-            BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), -1.0, DBL_EPSILON);
-            BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(),  0.0, DBL_EPSILON);
+            BOOST_CHECK_CLOSE(output.fc.real().to_double(), -1.0, DBL_EPSILON);
+            BOOST_CHECK_CLOSE(output.fc.imag().to_double(),  0.0, DBL_EPSILON);
         }
     }
 }
@@ -70,8 +70,8 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
         mod.output(output);
         int symbol_idx = i / MOD_TICKS_PER_SYMBOL;
         constellation_t current = expectedConstellations[symbol_idx];
-        BOOST_CHECK_CLOSE(output.fcn32.real().to_double(),  current.real().to_double(), DBL_EPSILON);
-        BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(),  current.imag().to_double(), DBL_EPSILON);
+        BOOST_CHECK_CLOSE(output.fc.real().to_double(),  current.real().to_double(), DBL_EPSILON);
+        BOOST_CHECK_CLOSE(output.fc.imag().to_double(),  current.imag().to_double(), DBL_EPSILON);
     }
 }
 

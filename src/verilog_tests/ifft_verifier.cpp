@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
     			ifft.input(data);
     			bool test = ifft.output(data);
     			if (test) {
-    				outputs.push_back(data.fcn32);
+    				outputs.push_back(data.fc);
     			}//If output is ready
     		}//Insert all input
     	}//Insert input again to get output
