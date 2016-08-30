@@ -16,6 +16,7 @@ CSIM_TEST_CASE(Number_Of_Operations)
 	FixedPoint <4, 4>  v(2);
 	FixedPoint <4, 4>  w(4);
 	FixedPoint <4, 4> z;
+
 	for (int i = 0; i < 1; i++) {
 		z = (v+w);
 	}
@@ -485,14 +486,18 @@ CSIM_TEST_CASE(Top_Level_Value)
 
 	BOOST_CHECK(x.int64Val == 3);// 3 * 2^0
 	BOOST_CHECK(x.binaryVal == "00011.");
+	BOOST_CHECK(x.doubleVal == 3);
 	BOOST_CHECK(y.int64Val == 4);// 2 * (2^(5-4))
 	BOOST_CHECK(y.binaryVal == "0010.0");
+	BOOST_CHECK(y.doubleVal == 2);
 	BOOST_CHECK(z.int64Val == 160); // (3 + 2) * 2 ^(10-5)
 	BOOST_CHECK(z.binaryVal == "00101.00000");
+	BOOST_CHECK(z.doubleVal == 5); //3 + 2
 
 	z = 0;
 	BOOST_CHECK(z.int64Val == 0); // (0) * 2 ^(10-5)
 	BOOST_CHECK(z.binaryVal == "00000.00000");
+	BOOST_CHECK(z.doubleVal == 0);
 
 
 }
@@ -504,8 +509,10 @@ CSIM_TEST_CASE(Conversion)
 
 	BOOST_CHECK(x.int64Val == 32768 );// 3 * 2^0
 	BOOST_CHECK(x.binaryVal == "00000000000000001.000000000000000");
+	BOOST_CHECK(x.doubleVal == 1);
 	BOOST_CHECK(y.int64Val == 32768);// 2 * (2^(5-4))
 	BOOST_CHECK(y.binaryVal == "0000000000000000000000000000000000000000000000001.000000000000000");
+	BOOST_CHECK(y.doubleVal == 1);
 
 }
 #endif
