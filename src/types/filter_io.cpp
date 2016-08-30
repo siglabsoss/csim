@@ -7,12 +7,6 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
         case IO_TYPE_COMPLEX_DOUBLE:
             os << obj.rf;
             break;
-        case IO_TYPE_FIXED_COMPLEX_16:
-            os << obj.fc;
-            break;
-        case IO_TYPE_FIXED_COMPLEX_32:
-            os << obj.fc32;
-            break;
         case IO_TYPE_FIXED_COMPLEX_16_NEW:
             os << obj.fcn;
             break;
@@ -44,12 +38,6 @@ filter_io_t::filter_io_t(const filter_io_t &other)
             case IO_TYPE_COMPLEX_DOUBLE:
                 this->rf = other.rf;
                 break;
-            case IO_TYPE_FIXED_COMPLEX_16:
-                this->fc = other.fc;
-                break;
-            case IO_TYPE_FIXED_COMPLEX_32:
-                this->fc32 = other.fc32;
-                break;
             case IO_TYPE_FIXED_COMPLEX_16_NEW:
                 this->fcn = other.fcn;
                 break;
@@ -76,12 +64,6 @@ filter_io_t & filter_io_t::operator=(const filter_io_t &rhs)
             case IO_TYPE_COMPLEX_DOUBLE:
                 this->rf = rhs.rf;
                 break;
-            case IO_TYPE_FIXED_COMPLEX_16:
-                this->fc = rhs.fc;
-                break;
-            case IO_TYPE_FIXED_COMPLEX_32:
-                this->fc32 = rhs.fc32;
-                break;
             case IO_TYPE_FIXED_COMPLEX_16_NEW:
                 this->fcn = rhs.fcn;
                 break;
@@ -105,20 +87,6 @@ filter_io_t & filter_io_t::operator=(const ComplexDouble &rhs)
 {
     this->type = IO_TYPE_COMPLEX_DOUBLE;
     this->rf = rhs;
-    return *this;
-}
-
-filter_io_t & filter_io_t::operator=(const FixedComplex<16> &rhs)
-{
-    this->type = IO_TYPE_FIXED_COMPLEX_16;
-    this->fc = rhs;
-    return *this;
-}
-
-filter_io_t & filter_io_t::operator=(const FixedComplex<32> &rhs)
-{
-    this->type = IO_TYPE_FIXED_COMPLEX_32;
-    this->fc32 = rhs;
     return *this;
 }
 
@@ -160,14 +128,6 @@ ComplexDouble filter_io_t::toComplexDouble() const
             real = this->rf.real();
             imag = this->rf.imag();
             break;
-        case IO_TYPE_FIXED_COMPLEX_16:
-            real = this->fc.real / 32768.0;
-            imag = this->fc.imag / 32768.0;
-            break;
-        case IO_TYPE_FIXED_COMPLEX_32:
-            real = this->fc32.real / 32768.0;
-            imag = this->fc32.imag / 32768.0;
-            break;
         case IO_TYPE_FIXED_COMPLEX_16_NEW:
             real = this->fcn.real().to_double();
             imag = this->fcn.imag().to_double();
@@ -207,28 +167,6 @@ size_t filter_io_t::serialize(uint8_t *data) const
             numBytes += sizeof(value);
             break;
         }
-        case IO_TYPE_FIXED_COMPLEX_16:
-        {
-            int value = fc.real.to_int();
-            memcpy(data + numBytes, &value, sizeof(value));
-            numBytes += sizeof(value);
-
-            value = fc.imag.to_int();
-            memcpy(data + numBytes, &value, sizeof(value));
-            numBytes += sizeof(value);
-            break;
-        }
-        case IO_TYPE_FIXED_COMPLEX_32:
-        {
-            int value = fc32.real.to_int();
-            memcpy(data + numBytes, &value, sizeof(value));
-            numBytes += sizeof(value);
-
-            value = fc32.imag.to_int();
-            memcpy(data + numBytes, &value, sizeof(value));
-            numBytes += sizeof(value);
-            break;
-       }
         case IO_TYPE_FIXED_COMPLEX_16_NEW:
         {
             double value = fcn.real().to_double();

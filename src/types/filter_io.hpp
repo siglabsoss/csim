@@ -6,8 +6,6 @@
 enum type_t {
     IO_TYPE_NULL = 0,
     IO_TYPE_COMPLEX_DOUBLE,
-    IO_TYPE_FIXED_COMPLEX_16,
-    IO_TYPE_FIXED_COMPLEX_32,
     IO_TYPE_FIXED_COMPLEX_16_NEW,
     IO_TYPE_FIXED_COMPLEX_32_NEW,
     IO_TYPE_FIXED_COMPLEX_64_NEW,
@@ -18,8 +16,6 @@ struct filter_io_t
 {
     //Data members
     type_t type;
-    FixedComplex<16> fc;
-    FixedComplex<32> fc32;
     FixedComplex16 fcn;
     FixedComplex32 fcn32;
     FixedComplex32 fcn64;
@@ -34,8 +30,6 @@ struct filter_io_t
 
     filter_io_t & operator=(const filter_io_t &rhs);
     filter_io_t & operator=(const ComplexDouble &rhs);
-    filter_io_t & operator=(const FixedComplex<16> &rhs);
-    filter_io_t & operator=(const FixedComplex<32> &rhs);
     filter_io_t & operator=(const FixedComplex16 &rhs);
     filter_io_t & operator=(const FixedComplex32 &rhs);
     filter_io_t & operator=(const FixedComplex64 &rhs);
