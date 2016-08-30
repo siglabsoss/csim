@@ -22,7 +22,7 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
 
 filter_io_t::filter_io_t() :
     type(IO_TYPE_NULL),
-    fc(sc_fix(64, 17, SC_RND, SC_WRAP), sc_fix(64, 17, SC_RND, SC_WRAP))
+    fc(sc_fix(64, 49, SC_RND, SC_WRAP), sc_fix(64, 49, SC_RND, SC_WRAP))
 {}
 
 filter_io_t::filter_io_t(const filter_io_t &other)
@@ -35,6 +35,11 @@ filter_io_t::filter_io_t(const filter_io_t &other)
                 break;
             case IO_TYPE_FIXED_COMPLEX:
                 this->fc = other.fc;
+                break;
+            case IO_TYPE_BYTE:
+                this->byte = other.byte;
+                break;
+            case IO_TYPE_NULL:
                 break;
         }
     }
