@@ -21,7 +21,8 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
 }
 
 filter_io_t::filter_io_t() :
-    type(IO_TYPE_NULL)
+    type(IO_TYPE_NULL),
+    fc(sc_fix(64, 17, SC_RND, SC_WRAP), sc_fix(64, 17, SC_RND, SC_WRAP))
 {}
 
 filter_io_t::filter_io_t(const filter_io_t &other)
@@ -70,13 +71,7 @@ filter_io_t & filter_io_t::operator=(const ComplexDouble &rhs)
 filter_io_t & filter_io_t::operator=(const FixedComplex &rhs)
 {
     this->type = IO_TYPE_FIXED_COMPLEX;
-    //this->fc = FixedComplex(rhs.real().type_params(), rhs.imag().type_params());
-    sc_fix real(rhs.real().type_params());
-    real = rhs.real();
-    sc_fix imag(rhs.imag().type_params());
-    imag = rhs.imag();
-    this->fc = FixedComplex(real, imag);
-    //this->fc = rhs;
+    this->fc = rhs;
     return *this;
 }
 
