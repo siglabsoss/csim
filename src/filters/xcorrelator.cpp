@@ -11,10 +11,10 @@ XCorrelator::XCorrelator(int N) :
 		m_n(N)
 {}
 
-std::vector<FixedComplex32 > XCorrelator::xCorrelate(std::vector<FixedComplex32 > x, std::vector<FixedComplex32 > y)
+std::vector<FixedComplex64 > XCorrelator::xCorrelate(std::vector<FixedComplex64 > x, std::vector<FixedComplex64 > y)
 {
-    std::vector<FixedComplex32 > p1 = fft(x);//output is FFT(x)
-    std::vector<FixedComplex32 > p2 = fft(y);//output is FFT(y)
+    std::vector<FixedComplex64 > p1 = fft(x);//output is FFT(x)
+    std::vector<FixedComplex64 > p2 = fft(y);//output is FFT(y)
     assert(p1.size() == m_n); //Same number of outputs into FFT as inputs
     assert(p2.size() == m_n); //Same number of outputs into FFT as inputs
 
@@ -30,11 +30,11 @@ std::vector<FixedComplex32 > XCorrelator::xCorrelate(std::vector<FixedComplex32 
     return fftshift(p1);
 }
 
-std::vector<FixedComplex32 > XCorrelator::fft(std::vector<FixedComplex32 > vals)
+std::vector<FixedComplex64 > XCorrelator::fft(std::vector<FixedComplex64 > vals)
 {
     fixedfft fft(m_n);
-    std::vector<FixedComplex32 > outputs;
-    std::vector<FixedComplex32 > outputsBitReversed;
+    std::vector<FixedComplex64 > outputs;
+    std::vector<FixedComplex64 > outputsBitReversed;
 
     filter_io_t data;
     	for (int i = 0; i < 2; i++) {
@@ -55,11 +55,11 @@ std::vector<FixedComplex32 > XCorrelator::fft(std::vector<FixedComplex32 > vals)
     return outputs;
 }
 
-std::vector<FixedComplex32 > XCorrelator::ifft(std::vector<FixedComplex32> vals)
+std::vector<FixedComplex64 > XCorrelator::ifft(std::vector<FixedComplex64> vals)
 {
 	fixedfft ifft(m_n, 0, true);
-	std::vector<FixedComplex32 > outputs;
-	std::vector<FixedComplex32 > outputsBitReversed;
+	std::vector<FixedComplex64 > outputs;
+	std::vector<FixedComplex64 > outputsBitReversed;
 
 	filter_io_t data;
 	for (int i = 0; i < 2; i++) {
@@ -81,14 +81,14 @@ std::vector<FixedComplex32 > XCorrelator::ifft(std::vector<FixedComplex32> vals)
 }
 
 
-std::vector<FixedComplex32 > XCorrelator::fftshift(std::vector<FixedComplex32 > vals)
+std::vector<FixedComplex64 > XCorrelator::fftshift(std::vector<FixedComplex64 > vals)
 {
     int size = vals.size() >> 1; //size/2
     if (vals.size() % 2 == 1) {
         size++; //Take ceiling
     }
 
-    FixedComplex32 temp;//to hold swap
+    FixedComplex64 temp;//to hold swap
 
     for (int i = 0; i < size; i++) {
         temp = vals[i];
