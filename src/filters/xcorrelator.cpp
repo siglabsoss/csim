@@ -43,7 +43,7 @@ std::vector<FixedComplex32 > XCorrelator::fft(std::vector<FixedComplex32 > vals)
     			fft.input(data);
     			bool test = fft.output(data);
     			if (test) {
-    				outputsBitReversed.push_back(data.fcn32);
+    				outputsBitReversed.push_back(data.fc);
     			}//If output is ready
     		}//Insert all input
     	}//Insert input again to get output
@@ -68,7 +68,7 @@ std::vector<FixedComplex32 > XCorrelator::ifft(std::vector<FixedComplex32> vals)
 			ifft.input(data);
 			bool test = ifft.output(data);
 			if (test) {
-				outputsBitReversed.push_back(data.fcn32);
+				outputsBitReversed.push_back(data.fc);
 			}//If output is ready
 		}//Insert all input
 	}//Insert input again to get output

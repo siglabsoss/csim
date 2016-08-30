@@ -13,8 +13,8 @@ FixedFIR::FixedFIR(std::vector<FixedComplex16> tap) :
 
 bool FixedFIR::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
-    FixedComplex16 sample = data.fcn;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    FixedComplex16 sample = data.fc;
 
 
     m_output = filter(sample);

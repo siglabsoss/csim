@@ -32,8 +32,8 @@ CSIM_TEST_CASE(IFFT_CONSTANT_OUTPUT)
             ifft.input(samples[j]);
             ifft.tick();
             if (ifft.output(output)) {
-                BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 1.0 / NUM_SAMPLES, DBL_EPSILON);
-                BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 1.0 / NUM_SAMPLES, DBL_EPSILON);
+                BOOST_CHECK_CLOSE(output.fc.real().to_double(), 1.0 / NUM_SAMPLES, DBL_EPSILON);
+                BOOST_CHECK_CLOSE(output.fc.imag().to_double(), 1.0 / NUM_SAMPLES, DBL_EPSILON);
             }
         }
     }
@@ -80,7 +80,7 @@ CSIM_TEST_CASE(IFFT_OCTAVE)
 			ifft.input(data);
 			bool test = ifft.output(data);
 			if (test) {
-				outputs.push_back(data.fcn32);
+				outputs.push_back(data.fc);
 			}//If output is ready
 		}//Insert all input
 	}//Insert input again to get output
@@ -123,7 +123,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
 		ifft.input(data);
 		bool test = ifft.output(data);
 		if (test) {
-		   outputs.push_back(data.fcn32);
+		   outputs.push_back(data.fc);
 		}//If output is ready
 	}//Insert first set of data
 
@@ -138,7 +138,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
         ifft.input(data);
         bool test = ifft.output(data);
         if (test) {
-        	outputs.push_back(data.fcn32);
+        	outputs.push_back(data.fc);
         }
     }//second set of data, gets first set of answers out
     assert(answers.size() == outputs.size());
@@ -160,7 +160,7 @@ CSIM_TEST_CASE(IFFT_TWO_INPUTS)
 		ifft.input(data);
 		bool test = ifft.output(data);
 		if (test) {
-			outputs.push_back(data.fcn32);
+			outputs.push_back(data.fc);
 		}// if output is ready
 	}//Get 2nd set of data out
 
@@ -195,7 +195,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 			fft.input(data);
 			bool test = fft.output(data);
 			if (test) {
-				outputs.push_back(data.fcn32);
+				outputs.push_back(data.fc);
 			}
 		}
 	}//Take fft of data
@@ -216,7 +216,7 @@ CSIM_TEST_CASE(FFT_IFFT)
 			ifft.input(data);
 			bool test = ifft.output(data);
 			if (test) {
-				outputs.push_back(data.fcn32);
+				outputs.push_back(data.fc);
 			}
 		}
 	}//Take ifft of output from fft

@@ -13,7 +13,7 @@ Mixer::Mixer(uint32_t samplesPerPeriod) :
 
 bool Mixer::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
     m_inputValid = true;
     m_input = data.toComplexDouble();
     return true;

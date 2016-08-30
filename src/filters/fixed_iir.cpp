@@ -28,8 +28,8 @@ void fixediir::reset()
 bool fixediir::input(const filter_io_t &data)
 {
 
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
-    FixedComplex16 sample = data.fcn;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    FixedComplex16 sample = data.fc;
     iir(sample);
     return true;
 }

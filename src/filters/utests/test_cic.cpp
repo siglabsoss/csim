@@ -33,7 +33,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only adds and 
 		cic.input(data); //Filters data
 		bool test = cic.output(data);
 		if (test) {
-			output.push_back(data.fcn);
+			output.push_back(data.fc);
 		}
 	}
 

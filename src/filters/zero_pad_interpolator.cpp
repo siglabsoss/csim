@@ -13,9 +13,9 @@ ZeroPadInterpolator::ZeroPadInterpolator(size_t chunkSize) :
 
 bool ZeroPadInterpolator::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
     if (m_inputBuffer.size() < m_inputBuffer.capacity()) {
-        m_inputBuffer.push_back(data.fcn32);
+        m_inputBuffer.push_back(data.fc);
         return true;
     }
     return false; //overrun of input buffer!
@@ -25,8 +25,8 @@ bool ZeroPadInterpolator::output(filter_io_t &data)
 {
     if (m_shouldOutput == true) {
         //XXX find out why data = m_outputBuffer[m_outputIdx++]; was considered ambiguous
-        data.type = IO_TYPE_FIXED_COMPLEX_32_NEW;
-        data.fcn32 = m_outputBuffer[m_outputIdx++];
+        data.type = IO_TYPE_FIXED_COMPLEX;
+        data.fc = m_outputBuffer[m_outputIdx++];
     }
 
     bool didOutput = m_shouldOutput;

@@ -35,11 +35,11 @@ CSIM_TEST_CASE(CONSTANT_INPUTS)
             fft.tick();
             if (fft.output(output)) {
                 if (outputCount % NUM_SAMPLES == 0) {
-                    BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
-                    BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.real().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.imag().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
                 } else {
-                    BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 0.0, 0.1);
-                    BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 0.0, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.real().to_double(), 0.0, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.imag().to_double(), 0.0, 0.1);
                 }
                 outputCount++;
                 //std::cout << outputCount << ": " << output << std::endl;
@@ -101,7 +101,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 			fft.input(data);
 			bool test = fft.output(data);
 			if (test) {
-				outputs.push_back(data.fcn32);
+				outputs.push_back(data.fc);
 			}//If output is ready
 		}//Insert all input
 	}//Insert input again to get output
@@ -142,7 +142,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-		   outputs.push_back(data.fcn32);
+		   outputs.push_back(data.fc);
 		}//If output is ready
 	}//Insert first set of data
 
@@ -157,7 +157,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         fft.input(data);
         bool test = fft.output(data);
         if (test) {
-        	outputs.push_back(data.fcn32);
+        	outputs.push_back(data.fc);
         }
     }//second set of data, gets first set of answers out
     assert(answers.size() == outputs.size());
@@ -180,7 +180,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-			outputs.push_back(data.fcn32);
+			outputs.push_back(data.fc);
 		}// if output is ready
 	}//Get 2nd set of data out
 
