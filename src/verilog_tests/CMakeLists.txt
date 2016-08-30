@@ -26,14 +26,6 @@ target_link_libraries(LowResourceIFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZERO
 add_executable(IFFT ifft_verifier.cpp)
 target_link_libraries(IFFT ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} sigfilters sigtypes sigmath sigutils sigcore ${SystemC_LIBRARIES} pthread)
 
-########################### ALU ###########################
-add_executable(ALU alu_verifier.cpp)
-target_link_libraries(ALU ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils)
-
-########################### ALU ###########################
-add_executable(ALU2 alu_verifier.cpp)
-target_link_libraries(ALU2 ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY} ${SystemC_LIBRARIES} pthread sigfilters sigtypes sigmath sigutils )
-
 ########################### FIR ###########################
 add_executable(FIR fir_verifier.cpp)
 target_link_libraries(FIR ${Boost_LIBRARIES} ${ITK_LIBRARIES} ${ZEROMQ_LIBRARY}  sigfilters sigtypes sigmath sigutils sigcore ${SystemC_LIBRARIES} pthread)

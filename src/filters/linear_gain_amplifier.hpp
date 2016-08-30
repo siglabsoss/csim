@@ -30,14 +30,6 @@ public:
                 data.rf.real(m_sample.rf.real() * m_gain);
                 data.rf.imag(m_sample.rf.imag() * m_gain);
                 break;
-            case IO_TYPE_FIXED_COMPLEX_16:
-                data.fc.real = (m_sample.fc.real * m_gain);
-                data.fc.imag = (m_sample.fc.imag * m_gain);
-                break;
-            case IO_TYPE_FIXED_COMPLEX_32:
-                data.fc32.real = (m_sample.fc32.real * m_gain);
-                data.fc32.imag = (m_sample.fc32.imag * m_gain);
-                break;
             case IO_TYPE_FIXED_COMPLEX_16_NEW:
                 data.fcn.real(m_sample.fcn.real() * m_gain);
                 data.fcn.imag(m_sample.fcn.imag() * m_gain);

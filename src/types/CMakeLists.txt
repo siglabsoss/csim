@@ -1,5 +1,4 @@
 set(SIGTYPES_SOURCES
-    fixedcomplex.cpp
     filter_io.cpp
     )
 

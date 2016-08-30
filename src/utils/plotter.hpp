@@ -108,17 +108,6 @@ public:
     }
     ;
 
-    template<int B> void conv_real_int(const CircularBuffer<FixedComplex<B> > &obj,
-            Json::Value& t1)
-    {
-        for (int i = 0; i < obj.size(); i++) {
-            //	t1["arg0"][i] = obj[i].real.to_int();
-            //cout << obj[i].real.to_int() << endl;
-            t1["arg0"]["r"][i] = obj[i].real.to_int();
-            t1["arg0"]["i"][i] = obj[i].imag.to_int();
-        }    		//Adds each element in CircularBuffer to dictionary arg0
-    }
-    ;
 
     void conv_real_int(const CircularBuffer<complex<double> > &obj, Json::Value& t1)
     {
