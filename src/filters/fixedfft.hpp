@@ -16,7 +16,7 @@ enum FFFT_STATE
 class fixedfftbase
 {
 public:
-    virtual void inputandtick(FixedComplex32 x) = 0;
+    virtual void inputandtick(FixedComplex64 x) = 0;
     virtual ~fixedfftbase() {}
     int ready;
 };
@@ -25,7 +25,7 @@ class fixedfftstage: public fixedfftbase
 {
 public:
     int 							N;
-    std::vector<FixedComplex32>    	memory;
+    std::vector<FixedComplex64>    	memory;
     FFFT_STATE         				state;
     int                 			read_pointer;
     int                 			write_pointer;
@@ -35,10 +35,10 @@ public:
 
     fixedfftstage();
     void init(int Ninput, bool m_inverse);
-    void inputandtick(FixedComplex32 x);
-    void output(FixedComplex32 x);
-    void butterfly(FixedComplex32 array[2], FixedComplex32 x, FixedComplex32 y);
-    FixedComplex32 twiddler(int k);
+    void inputandtick(FixedComplex64 x);
+    void output(FixedComplex64 x);
+    void butterfly(FixedComplex64 array[2], FixedComplex64 x, FixedComplex64 y);
+    FixedComplex64 twiddler(int k);
 
 private:
     bool m_inverse;
@@ -49,10 +49,10 @@ class fixedfftprint: public fixedfftbase
 {
 public:
     int								N; //N point fft
-    std::queue<FixedComplex32>		m_output; //Stores outputs
+    std::queue<FixedComplex64>		m_output; //Stores outputs
 
     fixedfftprint(int Ninput, bool inverse);
-    void inputandtick(FixedComplex32 x); //Adds output to queue
+    void inputandtick(FixedComplex64 x); //Adds output to queue
 
 private:
     bool m_inverse; //If this filter is an fft or ifft
