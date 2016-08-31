@@ -2,6 +2,23 @@
 #include <cmath>
 #include <filters/fixedfft.hpp>
 
+void fixedfft::reset()
+{
+	int stagesize = 0;
+	for (int i = 0; i < stagecount; i++) {
+		stagesize = pow(2, (stagecount - i));
+		stages[i].init(stagesize, m_inverse);
+	}//Re initializes stages
+
+	m_count = 0;//Resets number of inputs so far
+
+	while (!printer.m_output.empty()) {
+		printer.m_output.pop();
+	}//Clears output queue
+
+	newInput = false;
+}
+
 bool fixedfft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
