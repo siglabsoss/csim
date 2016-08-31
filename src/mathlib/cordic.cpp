@@ -85,10 +85,6 @@ void cordic::calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_comp
         }
 
         cordic_scalar_t factor(direction/(pow(2,i)));
-//        if (factor == 0)
-//        {
-//        	std::cout <<"PROBLEMS" << endl;
-//        }
         c1 = y[0]; //a
         c2 = y[1] * factor; //-b/2^n
         c3 = y[0] * factor; //a/2^n
@@ -109,9 +105,8 @@ void cordic::calculate(cordic_theta_t theta, cordic_complex_t &sine, cordic_comp
 
     clipResults(y);
 
-    //XXX is this right?
-    cosine  = y[0];
-    sine    = y[1];
+    cosine  = y[0]; // cosdown / cos = y[0].real, sindown = y[0].imag
+    sine    = y[1]; // sinup / sin = y[1].real, cosup = y[1].imag;
 }
 
 void cordic::clipResults(cordic_complex_t y[2])

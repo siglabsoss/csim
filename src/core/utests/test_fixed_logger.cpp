@@ -435,7 +435,7 @@ CSIM_TEST_CASE(Division_Warning)
 
 CSIM_TEST_CASE(minMax_FixedPoint)
 {
-	  sc_dt::scfx_rep::warningLevel = 0;//0 - disable, 1 = warning, 2 = throw on warning
+	sc_dt::scfx_rep::warningLevel = 0;//0 - disable, 1 = warning, 2 = throw on warning
 	sc_dt::scfx_rep::clear();
 	FixedPoint<5,5> v(4);
 	FixedPoint<5,5> w(5);
@@ -498,8 +498,6 @@ CSIM_TEST_CASE(Top_Level_Value)
 	BOOST_CHECK(z.int64Val == 0); // (0) * 2 ^(10-5)
 	BOOST_CHECK(z.binaryVal == "00000.00000");
 	BOOST_CHECK(z.doubleVal == 0);
-
-
 }
 
 CSIM_TEST_CASE(Conversion)

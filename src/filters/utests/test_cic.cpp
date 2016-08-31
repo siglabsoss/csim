@@ -1,11 +1,8 @@
 #include <test/unit_test.hpp>
-#include <iostream>
-#include <iostream>     // cout, endl
 #include <vector> //For storing parsed data from file
 #include <utils/utils.hpp>
 #include <filters/fixed_cic.hpp>
 
-using namespace boost;
 using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(CICFilter)
@@ -25,7 +22,7 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only adds and 
     answers = complexRead16Scaled(answersFile);
 	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << answersFile); //Reads input file
 
-    fixedcic cic(2, 2, 2);
+    fixedcic cic(2, 2, 2); // decimate by 2, 2 registers before decimation, 2 registers after decimation
     for (unsigned int k = 0; k < input.size(); k++)
 	{
     	filter_io_t data;

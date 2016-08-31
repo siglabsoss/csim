@@ -75,7 +75,7 @@ public:
     bool output(filter_io_t &data) override;
 
 private:
-    bool m_inverse;
+    bool m_inverse; //indicates if this is an fft or ifft
 
 };
 

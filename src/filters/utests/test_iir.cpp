@@ -1,9 +1,7 @@
 #include <test/unit_test.hpp>
-#include <iostream>
 #include <filters/fixed_iir.hpp>
 #include <utils/utils.hpp>
 
-using namespace boost;
 using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(IIRFilter)
