@@ -184,21 +184,37 @@ CSIM_TEST_CASE(MinMax_Zeroes_Addition_FixedComplex)
 	FixedComplex16 w(.125,.5);
 
 	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
-	BOOST_CHECK(it->second.getMin() == 0);// 0 01000000...
-	BOOST_CHECK(it->second.getMax() == 2);// 0 01000000...
+	BOOST_CHECK(it->second.getMin() == 0);// 0 10000000...
+	BOOST_CHECK(it->second.getMax() == 2);// 0 00100000...
 	w + v;
 	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
-	BOOST_CHECK(it->second.getMin() == -1);// 0 100000...
+	BOOST_CHECK(it->second.getMin() == -1);// 1 000000...
 	BOOST_CHECK(it->second.getMax() == 2);// 0 010000...
 
 	sc_dt::scfx_rep::clear();
 	FixedComplex16 u = w + v;
 
 	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
-	BOOST_CHECK(it->second.getMin() == -1);// 0 100000...
-	BOOST_CHECK(it->second.getMax() == 2);// 0 100000...
+	BOOST_CHECK(it->second.getMin() == -1);// 1 000000...
+	BOOST_CHECK(it->second.getMax() == 2);// 0 0010000...
+	sc_dt::scfx_rep::clear();
+}
 
+CSIM_TEST_CASE(MinMax_Zeroes_Negative_Addition_FixedComplex)
+{
+	sc_dt::scfx_rep::clear();
 
+	FixedComplex16 q(-.125,-.5);
+	FixedComplex16 p(-.125,-.5);
+	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
+	BOOST_CHECK(it->second.getMin() == 1);// 1 100000...
+	BOOST_CHECK(it->second.getMax() == 3);// 1 111000... ?
+	sc_dt::scfx_rep::clear();
+	FixedComplex16 o(-.25,-1);
+	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(16,1)); //Access minMax zeroes for <16,1>
+	BOOST_CHECK(it->second.getMin() == 0);// 1 000000...
+	BOOST_CHECK(it->second.getMax() == 2);// 1 110000...
+	sc_dt::scfx_rep::clear();
 }
 
 CSIM_TEST_CASE(MinMax_Zeroes_Subtraction_FixedComplex)
@@ -446,8 +462,8 @@ CSIM_TEST_CASE(minMax_FixedPoint)
 	BOOST_CHECK(it->second.getMax() == 5);
 
 	it=sc_dt::scfx_rep::values.find(sc_dt::key(10,8));
-	BOOST_CHECK(it->second.getMin() == 36); //9 * 2 * 2
-	BOOST_CHECK(it->second.getMax() == 36);
+	BOOST_CHECK(it->second.getMin() == 9);
+	BOOST_CHECK(it->second.getMax() == 9);
 	sc_dt::scfx_rep::clear();
 
 	FixedPoint<6,3> v2(.25);
@@ -478,24 +494,45 @@ CSIM_TEST_CASE(minMax_FixedComplex)
 
 }
 
-CSIM_TEST_CASE(Top_Level_Value)
+CSIM_TEST_CASE(Negative_minMax_FixedComplex)
+{
+	sc_dt::scfx_rep::clear();
+	FixedComplex16 v(-.4,-.3);
+	FixedComplex16 w(-.5,-.2);
+	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::values.find(sc_dt::key(16,1));
+	BOOST_CHECK(it->second.getMax() == (-6554));// floor(.2 * 2 ^ 15)
+	BOOST_CHECK(it->second.getMin() == (-16384));// 2 * 2 ^ 15
+
+	FixedComplex16 z(0);
+	z = v+w;
+	it=sc_dt::scfx_rep::values.find(sc_dt::key(16,1));
+	BOOST_CHECK(it->second.getMax() == (0));// floor(.2 * 2 ^ 15)
+	BOOST_CHECK(it->second.getMin() == (-29492));// 2 * 2 ^ 15
+
+}
+
+CSIM_TEST_CASE(Top_Level_Values)
 {
 	FixedPoint<5,5> x(3);
 	FixedPoint<5,4> y(2);
 	FixedPoint<10,5> z = x + y;
 
 	BOOST_CHECK(x.int64Val == 3);// 3 * 2^0
+	BOOST_CHECK(x.int64Val == x.range().to_int64());
 	BOOST_CHECK(x.binaryVal == "00011.");
 	BOOST_CHECK(x.doubleVal == 3);
 	BOOST_CHECK(y.int64Val == 4);// 2 * (2^(5-4))
+	BOOST_CHECK(y.int64Val == y.range().to_int64());
 	BOOST_CHECK(y.binaryVal == "0010.0");
 	BOOST_CHECK(y.doubleVal == 2);
 	BOOST_CHECK(z.int64Val == 160); // (3 + 2) * 2 ^(10-5)
+	BOOST_CHECK(z.int64Val == z.range().to_int64());
 	BOOST_CHECK(z.binaryVal == "00101.00000");
 	BOOST_CHECK(z.doubleVal == 5); //3 + 2
 
 	z = 0;
 	BOOST_CHECK(z.int64Val == 0); // (0) * 2 ^(10-5)
+	BOOST_CHECK(z.int64Val == z.range().to_int64());
 	BOOST_CHECK(z.binaryVal == "00000.00000");
 	BOOST_CHECK(z.doubleVal == 0);
 }
@@ -511,8 +548,7 @@ CSIM_TEST_CASE(Conversion)
 	BOOST_CHECK(y.int64Val == 32768);// 2 * (2^(5-4))
 	BOOST_CHECK(y.binaryVal == "0000000000000000000000000000000000000000000000001.000000000000000");
 	BOOST_CHECK(y.doubleVal == 1);
-
-}
+}//Ensures conversion doesn't change the value
 #endif
 
 CSIM_TEST_SUITE_END()
