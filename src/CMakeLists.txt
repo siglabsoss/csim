@@ -72,7 +72,6 @@ add_subdirectory(probes)
 add_subdirectory(types)
 add_subdirectory(utils)
 add_subdirectory(3rd)
-add_subdirectory(mex)
 
 if (BUILD_UTESTS)
     add_subdirectory(core/utests)
