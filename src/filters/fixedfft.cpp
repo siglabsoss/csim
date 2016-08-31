@@ -17,7 +17,7 @@ void fixedfft::reset()
 	}//Clears output queue
 
 	newInput = false;
-}
+}//Reset the fft
 
 bool fixedfft::input(const filter_io_t &data)
 {
