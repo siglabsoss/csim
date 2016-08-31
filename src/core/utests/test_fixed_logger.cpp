@@ -126,15 +126,14 @@ CSIM_TEST_CASE(Precision_Loss_FixedPoint)
 CSIM_TEST_CASE(MinMax_Zeroes_FixedPoint)
 {
 	sc_dt::scfx_rep::clear();
-	FixedPoint<5,5> v(4);
-	FixedPoint<5,5> w(5);
-	v+w;
+	FixedPoint<5,5> v(5);
+	FixedPoint<5,5> w(4);
 
 	FixedPoint<10,8> z = v+w;
 
 	std::map<sc_dt::key,sc_dt::minMax>::iterator it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(5,5));//Access minMax zeroes for <5,5>
-	BOOST_CHECK(it->second.getMin() == 0);
-	BOOST_CHECK(it->second.getMax() == 1);
+	BOOST_CHECK(it->second.getMin() == 0); // 0
+	BOOST_CHECK(it->second.getMax() == 1); // 0 0100
 
 	it=sc_dt::scfx_rep::zeroes.find(sc_dt::key(10,8)); //Access minMax zeroes for <10,8>
 	BOOST_CHECK(it->second.getMin() == 3);
@@ -462,8 +461,8 @@ CSIM_TEST_CASE(minMax_FixedPoint)
 	BOOST_CHECK(it->second.getMax() == 5);
 
 	it=sc_dt::scfx_rep::values.find(sc_dt::key(10,8));
-	BOOST_CHECK(it->second.getMin() == 9);
-	BOOST_CHECK(it->second.getMax() == 9);
+	BOOST_CHECK(it->second.getMin() == 36);// (4+5) * 2^(10-8)
+	BOOST_CHECK(it->second.getMax() == 36);
 	sc_dt::scfx_rep::clear();
 
 	FixedPoint<6,3> v2(.25);
@@ -521,20 +520,31 @@ CSIM_TEST_CASE(Top_Level_Values)
 	BOOST_CHECK(x.int64Val == x.range().to_int64());
 	BOOST_CHECK(x.binaryVal == "00011.");
 	BOOST_CHECK(x.doubleVal == 3);
+	BOOST_CHECK(x.doubleVal == x.to_double());
+	x.binaryVal.pop_back();//Removes decimal point
+	BOOST_CHECK((x.binaryVal.insert(0,"0b")) == x.to_bin());
+
 	BOOST_CHECK(y.int64Val == 4);// 2 * (2^(5-4))
 	BOOST_CHECK(y.int64Val == y.range().to_int64());
 	BOOST_CHECK(y.binaryVal == "0010.0");
+	BOOST_CHECK(y.binaryVal.insert(0,"0b") == y.to_bin());
 	BOOST_CHECK(y.doubleVal == 2);
+	BOOST_CHECK(y.doubleVal == y.to_double());
+
 	BOOST_CHECK(z.int64Val == 160); // (3 + 2) * 2 ^(10-5)
 	BOOST_CHECK(z.int64Val == z.range().to_int64());
 	BOOST_CHECK(z.binaryVal == "00101.00000");
+	BOOST_CHECK(z.binaryVal.insert(0,"0b") == z.to_bin());
 	BOOST_CHECK(z.doubleVal == 5); //3 + 2
+	BOOST_CHECK(z.doubleVal == z.to_double());
 
 	z = 0;
 	BOOST_CHECK(z.int64Val == 0); // (0) * 2 ^(10-5)
 	BOOST_CHECK(z.int64Val == z.range().to_int64());
 	BOOST_CHECK(z.binaryVal == "00000.00000");
+	BOOST_CHECK(z.binaryVal.insert(0,"0b") == z.to_bin());
 	BOOST_CHECK(z.doubleVal == 0);
+	BOOST_CHECK(z.doubleVal == z.to_double());
 }
 
 CSIM_TEST_CASE(Conversion)
