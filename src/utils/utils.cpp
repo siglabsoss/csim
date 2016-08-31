@@ -202,3 +202,43 @@ std::vector<FixedComplex64> complexRead64Unscaled(std::string inFile)
 	return input;
 }//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
 
+//XXX wrap entire file in namespace
+namespace utils
+{
+
+std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, size_t &shiftBits)
+{
+    shiftBits = getShiftAmount(val);
+    size_t intBits = getIntegerBits(val);
+    assert(intBits <= bitWidth);
+    if (shiftBits > 0) {
+        val *= (1 << shiftBits);
+    }
+    return std::unique_ptr<sc_fix>(new sc_fix(val, bitWidth, intBits, SC_RND, SC_WRAP));
+}
+
+unsigned getShiftAmount(double coeff)
+{
+    int n = 0;
+    if (coeff < 1) {
+        unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 1;
+        while (ratio) {
+            n++;
+            ratio >>= 1;
+        }
+    }
+    return n;
+}
+
+unsigned getIntegerBits(double coeff)
+{
+    unsigned int_coeff = abs(static_cast<int>(coeff));
+    unsigned n = 1; //one sign bit at a minimum
+    while (int_coeff) {
+        n++;
+        int_coeff >>= 1;
+    }
+    return n;
+}
+
+};
