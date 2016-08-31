@@ -64,6 +64,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
 
     constellation_map_t expectedConstellations =  Modulator::getQAM16Constellations();
 
+    size_t expectedTicksPerOutput = 2; //derived from parameters at top of file
     size_t symbolsPerByte = 2;
     for (unsigned int i = 0; i < sizeof(testData) * symbolsPerByte * expectedTicksPerOutput; i++) {
         mod.tick();
