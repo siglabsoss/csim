@@ -25,6 +25,7 @@ namespace utils
 std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, size_t &shiftBits);
 unsigned getShiftAmount(double coeff);
 unsigned getIntegerBits(double coeff);
+bool addition32DoesOverflow(int32_t a, int32_t b);
 };
 
 #endif

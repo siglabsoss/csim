@@ -220,6 +220,7 @@ std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, siz
 unsigned getShiftAmount(double coeff)
 {
     int n = 0;
+    coeff = abs(coeff); //we want same result for + and -
     if (coeff < 1) {
         unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 1;
         while (ratio) {
@@ -229,7 +230,6 @@ unsigned getShiftAmount(double coeff)
     }
     return n;
 }
-
 unsigned getIntegerBits(double coeff)
 {
     unsigned int_coeff = abs(static_cast<int>(coeff));
@@ -239,6 +239,26 @@ unsigned getIntegerBits(double coeff)
         int_coeff >>= 1;
     }
     return n;
+}
+
+bool addition32DoesOverflow(int32_t a, int32_t b)
+{
+    //Consider overflow if signs were the same and then sign of result changed
+    bool sameSign = (a >= 0 && b >= 0) || (a < 0 && b < 0);
+    if (sameSign) {
+        int32_t sum = a + b;
+        if (a >= 0) {
+            if (sum < 0) {
+                return true;
+            }
+        } else {
+            if (sum >= 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
 }
 
 };
