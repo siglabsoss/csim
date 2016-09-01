@@ -20,6 +20,8 @@ void Biquad::init(double b0,
         double a1,
         double a2)
 {
+    log_debug("Initializing biquad filter structure...");
+
     constexpr size_t BIT_WIDTH = 16;
     size_t bitShift = 0;
     m_b[0].first = utils::createDynamicFixedPoint(b0, BIT_WIDTH, bitShift);
@@ -45,6 +47,61 @@ void Biquad::init(double b0,
     for (size_t i = 0; i < m_a.size(); i++) {
         log_debug("a%d (Q%d.%d)  = %f (%f when scaled by 2^%d and quantized)", i, m_a[i].first->iwl(), m_a[i].first->wl() - m_a[i].first->iwl(), a[i], m_a[i].first->to_double(), m_a[i].second);
     }
+
+    /**
+     * Construct intermediate fixed point values to store the result of the five multiplication operations. Each intermediate result
+     * will have the same total bit width, but may be scaled differently (i.e. number of integer bits will be different). This is determined
+     * by analyzing the scaling of each coefficient because the input scaling is fixed.
+     */
+
+    size_t coeffWordWidth = 0;
+    size_t coeffIntWidth  = 0;
+    size_t resultWidth = 0;
+    size_t resultIntWidth = 0;
+
+    //input widths will be the same, so grab just from the first
+    size_t inputWordWidth = m_x[0].real().wl();
+    size_t inputIntWidth  = m_x[0].real().iwl();
+
+    coeffWordWidth  = m_b[0].first->wl();
+    coeffIntWidth   = m_b[0].first->iwl();
+    resultWidth     = inputWordWidth + coeffWordWidth;
+    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
+    m_bx0 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    log_debug("bx0 (Q%d.%d)", m_bx0->real().iwl(), m_bx0->real().wl() - m_bx0->real().iwl());
+    //std::cout << "bx0 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[0].second << std::endl;
+
+    coeffWordWidth  = m_b[1].first->wl();
+    coeffIntWidth   = m_b[1].first->iwl();
+    resultWidth     = inputWordWidth + coeffWordWidth;
+    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
+    m_bx1 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    log_debug("bx1 (Q%d.%d)", m_bx1->real().iwl(), m_bx1->real().wl() - m_bx1->real().iwl());
+    //std::cout << "bx1 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[1].second << std::endl;
+
+    coeffWordWidth  = m_b[2].first->wl();
+    coeffIntWidth   = m_b[2].first->iwl();
+    resultWidth     = inputWordWidth + coeffWordWidth;
+    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
+    m_bx2 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    log_debug("bx2 (Q%d.%d)", m_bx2->real().iwl(), m_bx2->real().wl() - m_bx2->real().iwl());
+    //std::cout << "bx2 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[2].second << std::endl;
+
+    coeffWordWidth  = m_a[0].first->wl();
+    coeffIntWidth   = m_a[0].first->iwl();
+    resultWidth     = inputWordWidth + coeffWordWidth;
+    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
+    m_ay1 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    log_debug("ay1 (Q%d.%d)", m_ay1->real().iwl(), m_ay1->real().wl() - m_ay1->real().iwl());
+    //std::cout << "ay1 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_a[0].second << std::endl;
+
+    coeffWordWidth  = m_a[1].first->wl();
+    coeffIntWidth   = m_a[1].first->iwl();
+    resultWidth     = inputWordWidth + coeffWordWidth;
+    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
+    m_ay2 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    log_debug("ay2 (Q%d.%d)", m_ay2->real().iwl(), m_ay2->real().wl() - m_ay2->real().iwl());
+    //std::cout << "ay2 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_a[1].second << std::endl;
 }
 
 bool Biquad::input(const filter_io_t &data)
@@ -83,68 +140,16 @@ void Biquad::tick(void)
     }
 
     /**
-     * PHASE 1 - Intermediate value (XXX this can be done on initialization)
-     * Construct intermediate fixed point values to store the result of the five multiplication operations. Each intermediate result
-     * will have the same total bit width, but may be scaled differently (i.e. fixed point position may be different). This is determined
-     * by analyzing the scaling of each coefficient
-     */
-
-
-    size_t coeffWordWidth = 0;
-    size_t coeffIntWidth  = 0;
-    size_t resultWidth = 0;
-    size_t resultIntWidth = 0;
-
-    //input widths will be the same, so grab just from the first
-    size_t inputWordWidth = m_x[0].real().wl();
-    size_t inputIntWidth  = m_x[0].real().iwl();
-
-    coeffWordWidth  = m_b[0].first->wl();
-    coeffIntWidth   = m_b[0].first->iwl();
-    resultWidth     = inputWordWidth + coeffWordWidth;
-    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
-    std::complex<sc_fix> bx0(sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP));
-    //std::cout << "bx0 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[0].second << std::endl;
-
-    coeffWordWidth  = m_b[1].first->wl();
-    coeffIntWidth   = m_b[1].first->iwl();
-    resultWidth     = inputWordWidth + coeffWordWidth;
-    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
-    std::complex<sc_fix> bx1(sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP));
-    //std::cout << "bx1 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[1].second << std::endl;
-
-    coeffWordWidth  = m_b[2].first->wl();
-    coeffIntWidth   = m_b[2].first->iwl();
-    resultWidth     = inputWordWidth + coeffWordWidth;
-    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
-    std::complex<sc_fix> bx2(sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP));
-    //std::cout << "bx2 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[2].second << std::endl;
-
-    coeffWordWidth  = m_a[0].first->wl();
-    coeffIntWidth   = m_a[0].first->iwl();
-    resultWidth     = inputWordWidth + coeffWordWidth;
-    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
-    std::complex<sc_fix> ay1(sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP));
-    //std::cout << "ay1 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_a[0].second << std::endl;
-
-    coeffWordWidth  = m_a[1].first->wl();
-    coeffIntWidth   = m_a[1].first->iwl();
-    resultWidth     = inputWordWidth + coeffWordWidth;
-    resultIntWidth  = inputIntWidth + coeffIntWidth - 1;
-    std::complex<sc_fix> ay2(sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_WRAP));
-    //std::cout << "ay2 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_a[1].second << std::endl;
-
-    /**
-     * PHASE 2 - Multiplication
-     * Perform the 3 feedback (b coeff) multiplications and the 2 feedforward (a coeff) and store
+     * PHASE 1 - Multiplication
+     * Perform the 3 feedforward (b coeff) multiplications and the 2 feedback (a coeff) and store
      * the results in the 5 intermediate values.
      */
 
-    std::complex<sc_fix> x0(sc_fix(16, 1, SC_RND, SC_WRAP), sc_fix(16, 1, SC_RND, SC_WRAP));
-    std::complex<sc_fix> x1(sc_fix(16, 1, SC_RND, SC_WRAP), sc_fix(16, 1, SC_RND, SC_WRAP));
-    std::complex<sc_fix> x2(sc_fix(16, 1, SC_RND, SC_WRAP), sc_fix(16, 1, SC_RND, SC_WRAP));
-    std::complex<sc_fix> y1(sc_fix(16, 1, SC_RND, SC_WRAP), sc_fix(16, 1, SC_RND, SC_WRAP));
-    std::complex<sc_fix> y2(sc_fix(16, 1, SC_RND, SC_WRAP), sc_fix(16, 1, SC_RND, SC_WRAP));
+    std::complex<sc_fix> x0(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    std::complex<sc_fix> x1(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    std::complex<sc_fix> x2(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    std::complex<sc_fix> y1(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    std::complex<sc_fix> y2(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
 
     x0 = m_x[0];
     x1 = m_x[1];
@@ -153,45 +158,56 @@ void Biquad::tick(void)
     y2 = m_x[2];
 
     //bx0 = (*(m_b[0].first) * x0);
-    std::cout << "bx0 (Q" << bx0.real().iwl() << "." << bx0.real().wl() - bx0.real().iwl() << ") = " << bx0 << " (" << *(m_b[0].first) << " * " << x0 << ")" << std::endl;
-    complexScalarMultiply(bx0, x0, *(m_b[0].first));
-    shiftRightFixedComplex(bx0, m_b[0].second);
-    std::cout << "bx0 (Q" << bx0.real().iwl() << "." << bx0.real().wl() - bx0.real().iwl() << ") = " << bx0 << " (" << *(m_b[0].first) << " * " << x0 << ")" << std::endl;
+    complexScalarMultiply(*m_bx0, x0, *(m_b[0].first));
+    shiftRightFixedComplex(*m_bx0, m_b[0].second);
+    //std::cout << "bx0 (Q" << m_bx0->real().iwl() << "." << m_bx0->real().wl() - m_bx0->real().iwl() << ") = " << *m_bx0 << " (" << *(m_b[0].first) << " * " << x0 << ")" << std::endl;
 
-    bx1 = (*(m_b[1].first) * x1);
-    shiftRightFixedComplex(bx1, m_b[1].second);
-    std::cout << "bx1 = " << bx1 << std::endl;
+    complexScalarMultiply(*m_bx1, x1, *(m_b[1].first));
+    shiftRightFixedComplex(*m_bx1, m_b[1].second);
+    //std::cout << "bx1 (Q" << m_bx1->real().iwl() << "." << m_bx1->real().wl() - m_bx1->real().iwl() << ") = " << *m_bx1 << " (" << *(m_b[1].first) << " * " << x1 << ")" << std::endl;
 
-    bx2 = (*(m_b[2].first) * x2);
-    shiftRightFixedComplex(bx2, m_b[2].second);
-    std::cout << "bx2 = " << bx2 << std::endl;
+    complexScalarMultiply(*m_bx2, x2, *(m_b[2].first));
+    shiftRightFixedComplex(*m_bx2, m_b[2].second);
+    //std::cout << "bx2 (Q" << m_bx2->real().iwl() << "." << m_bx2->real().wl() - m_bx2->real().iwl() << ") = " << *m_bx2 << " (" << *(m_b[2].first) << " * " << x2 << ")" << std::endl;
 
-    ay1 = (*(m_a[0].first) * y1);
-    shiftRightFixedComplex(ay1, m_a[0].second);
-    std::cout << "ay1 = " << ay1 << std::endl;
+    complexScalarMultiply(*m_ay1, y1, *(m_a[0].first));
+    shiftRightFixedComplex(*m_ay1, m_a[0].second);
+    //std::cout << "ay1 (Q" << m_ay1->real().iwl() << "." << m_ay1->real().wl() - m_ay1->real().iwl() << ") = " << *m_ay1 << " (" << *(m_a[0].first) << " * " << y1 << ")" << std::endl;
 
-    ay2 = (*(m_a[1].first) * y2);
-    shiftRightFixedComplex(ay2, m_a[1].second);
-    std::cout << "ay2 = " << ay2 << std::endl;
+    complexScalarMultiply(*m_ay2, y2, *(m_a[1].first));
+    shiftRightFixedComplex(*m_ay2, m_a[1].second);
+    //std::cout << "ay2 (Q" << m_ay2->real().iwl() << "." << m_ay2->real().wl() - m_ay2->real().iwl() << ") = " << *m_ay2 << " (" << *(m_a[1].first) << " * " << y2 << ")" << std::endl;
 
     /**
-     * PHASE 3 - Addition
-     * Add up the 5 intermediate values, which are all double width and store them
-     * in the single width result (this can/will cause loss of precision, but what about overflow?)
+     * PHASE 2 - Addition
+     * Add up the 5 intermediate values, which are all double-width and store them
+     * in the single width-result. This chained addition matches the ideal fixed point addition. There
+     * is no loss of range or precision until the final assignment to m_y[0].
+     *
+     * If this must be changed away from the ideal case, the addition should be done as follows:
+     * 1) Add the values starting with the ones that have the most precision (least integer bits).
+     * 2) For each addition, the precision of the least precise operand must be used (if not equal) meaning the
+     *    other operand must lose some precision before the addition.
+     * 3) Determine if the addition is to cause overflow. If not, skip step #4.
+     * 4) If yes to above, shift the values and scaling factor to get more range at the expense of precision
+     * 5) You have your intermediate result, which can then be added to the next operand
      */
-    m_y[0] = bx0 + bx1 + bx2 + ay1 + ay2;
+
+    m_y[0].real(m_bx0->real() + m_bx1->real() + m_bx2->real() + m_ay1->real() + m_ay2->real());
+    m_y[0].imag(m_bx0->imag() + m_bx1->imag() + m_bx2->imag() + m_ay1->imag() + m_ay2->imag());
+
 }
 
-void Biquad::complexScalarMultiply(std::complex<sc_fix> &result, std::complex<sc_fix> &complex, sc_fix &scalar)
+void Biquad::complexScalarMultiply(std::complex<sc_fix> &result, const std::complex<sc_fix> &complex, const sc_fix &scalar)
 {
+    //For some reason not yet known, when dealing with complex<sc_fix> we must store the calculation in
+    //intermediate results instead of acting on the complex variable directly. This does not seem to be necessary
+    //when dealing with sc_fixed<N,M>.
     sc_fix tempResultReal(result.real().wl(), result.real().iwl());
     sc_fix tempResultImag(result.imag().wl(), result.imag().iwl());
 
     tempResultReal = complex.real() * scalar;
     tempResultImag = complex.imag() * scalar;
-
-    std::cout << "tempResultReal " << tempResultReal << std::endl;
-    std::cout << "tempResultImag " << tempResultReal << std::endl;
 
     result.real(tempResultReal);
     result.imag(tempResultImag);
@@ -202,14 +218,14 @@ void Biquad::shiftRightFixedComplex(std::complex<sc_fix> &val, size_t shiftBits)
     if (shiftBits == 0) {
         return;
     }
-    //std::cout << "val (Q" << val.real().iwl() << "." << val.real().wl() - val.real().iwl() << ") = " << val.real() << " (" << val.real().range().to_int64() << ")" << std::endl;
-    //std::cout << "temp (Q" << temp.iwl() << "." << temp.wl() - temp.iwl() << ") = " << temp << " (" << temp.range().to_int64() << ")" << std::endl;
+
     //Found that we must use an intermediate value here in order for the shifting to work properly. Unsure as of why exactly.
     sc_fix temp(val.real().wl(), val.real().iwl());
+
     temp = val.real();
     temp >>= shiftBits;
     val.real(temp);
-    //std::cout << "val (Q" << val.real().iwl() << "." << val.real().wl() - val.real().iwl() << ") = " << val.real() << " (" << val.real().range().to_int64() << ")" << std::endl;
+
     temp = val.imag();
     temp >>= shiftBits;
     val.imag(temp);
