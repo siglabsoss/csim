@@ -11,9 +11,9 @@
 #include <iostream>
 #include <types/fixedcomplex.hpp>
 
-typedef sc_fixed<32, 5> cordic_theta_t;
+typedef sc_fixed<32, 5, SC_RND, SC_SAT> cordic_theta_t;
 typedef FixedComplex2<32, 5> cordic_complex_t;
-typedef sc_fixed<32, 5> cordic_scalar_t;
+typedef sc_fixed<32, 5, SC_RND, SC_SAT> cordic_scalar_t;
 
 //These typedefs can be used to enable floating point
 //typedef float cordic_theta_t;
