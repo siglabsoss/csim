@@ -78,10 +78,10 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     for (unsigned int k = 0; k < answers.size(); k++) {
         BOOST_CHECK_MESSAGE(
 			abs(output[k].real() - answers[k].real()) < .001,
-			input[k].real() << " is not the same as " << answers[k]);
+			output[k].real() << " is not the same as " << answers[k].real());
         BOOST_CHECK_MESSAGE(
 			abs(output[k].imag() - answers[k].imag()) < .001,
-			output[k].imag() << " is not the same as " << answers[k]);
+			output[k].imag() << " is not the same as " << answers[k].imag());
     } //Compares all outputs with solution to ensure they are .001 within each other.
 }//Test using complex numbers
 
