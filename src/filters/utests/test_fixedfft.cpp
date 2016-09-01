@@ -232,9 +232,9 @@ void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, 
 		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
 		    double realDiff = abs(outputs[i].real() - answers[i].real());
 		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
-			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 || difference == 0,
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 || realDiff == 0,
 			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
-			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0 || difference == 0,
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0 || imagDiff == 0,
 			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
 		}
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int

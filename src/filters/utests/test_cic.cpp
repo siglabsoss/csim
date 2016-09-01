@@ -7,6 +7,8 @@ using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(CICFilter)
 
+void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, int difference);
+
 CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only adds and subtracts
 {
 
@@ -35,10 +37,24 @@ CSIM_TEST_CASE(REAL_FILTER) //Same as imaginary because there are only adds and 
 	}
 
     assert(output.size() == answers.size());
-    for (unsigned int k = 0; k < answers.size(); k++) {
-        BOOST_CHECK_MESSAGE(abs(output[k].real() - answers[k].real()) < 1,
-                output[k].real() << " is not the same as " << answers[k].real() << " ");
-    } //Compares all outputs with solution to ensure they are .001 within each other.
+
+    checkError(output, answers, -10, -10);
 }
+
+
+void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, int difference)
+{
+	for (unsigned int i = 0; i < answers.size(); i++) {
+		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
+		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
+		    double realDiff = abs(outputs[i].real() - answers[i].real());
+		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 || realDiff == 0,
+			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0 || imagDiff == 0,
+			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
+		}
+}//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
+
 
 CSIM_TEST_SUITE_END()
