@@ -22,12 +22,12 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
 
 filter_io_t::filter_io_t() :
     type(IO_TYPE_NULL),
-    fc(sc_fix(0.0, 64, 49, SC_RND, SC_WRAP), sc_fix(0.0, 128, 64, SC_RND, SC_WRAP))
+    fc(sc_fix(0.0, 128, 64, SC_RND, SC_SAT), sc_fix(0.0, 128, 64, SC_RND, SC_SAT))
 {}
 
 filter_io_t::filter_io_t(const filter_io_t &other) :
         type(other.type),
-        fc(sc_fix(0.0, 64, 49, SC_RND, SC_WRAP), sc_fix(0.0, 128, 64, SC_RND, SC_WRAP))
+        fc(sc_fix(0.0, 128, 64, SC_RND, SC_SAT), sc_fix(0.0, 128, 64, SC_RND, SC_SAT))
 {
     if (this != &other) {
         switch (other.type) {
