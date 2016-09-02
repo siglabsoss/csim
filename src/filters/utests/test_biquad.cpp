@@ -8,10 +8,10 @@
 
 CSIM_TEST_SUITE_BEGIN(BiquadVerification)
 
-static void runFilter(const std::string &inputFile, const std::string &outputFile, double avgErrThreshold)
+static void runFilter(const std::string &inputFile, const std::string &outputFile, double avgErrThreshold, double b0, double b1, double b2, double a1, double a2)
 {
     Biquad bi;
-    bi.init(1, 0.3, 0.4, -0.1, -0.2);
+    bi.init(b0, b1, b2, a1, a2);
     std::vector<FixedComplexNorm16> inputs = complexRead16Unscaled(inputFile);
     std::vector<FixedComplexNorm16> outputs = complexRead16Unscaled(outputFile);
 
@@ -76,14 +76,19 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
 
 CSIM_TEST_CASE(FIXED_POINT_SINE_WAVE_INPUT)
 {
-    runFilter("./data/biquad/input/biquad_input1.csv", "./data/biquad/output/biquad_output1.csv", 0.0001);
+    runFilter("./data/biquad/input/biquad_input1.csv", "./data/biquad/output/biquad_output1.csv", 0.0001, 1, 0.3, 0.4, -0.1, -0.2);
 }
 
 
 CSIM_TEST_CASE(FLOATING_POINT_CHIRP_INPUT)
 {
-    runFilter("./data/biquad/input/biquad_input2.csv", "./data/biquad/output/biquad_output2.csv", 0.0002);
+    runFilter("./data/biquad/input/biquad_input2.csv", "./data/biquad/output/biquad_output2.csv", 0.0002, 1, 0.3, 0.4, -0.1, -0.2);
 }
-
+/*
+CSIM_TEST_CASE(FLOATING_POINT_CHIRP_LOWPASS_COEFFS)
+{
+    runFilter("./data/biquad/input/biquad_input3.csv", "./data/biquad/output/biquad_output3.csv", 0.00002, 0.01069769807630125, 0.0213953961526025, 0.01069769807630125, -0.8314990838150726, -0.12571012387972225);
+}
+*/
 
 CSIM_TEST_SUITE_END()
