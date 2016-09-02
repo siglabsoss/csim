@@ -45,6 +45,7 @@ public:
 
     void send(const Json::Value &jsn) const;
 
+    // Normal 2D plot, may plot imag() only if data is complex
     template<typename T> void nplot(const CircularBuffer<T> &obj, const string &title) const
     {
         Json::Value jsn;
@@ -52,7 +53,7 @@ public:
         conv_real_int(obj, jsn); //Converts CircularBuffer into json
         jsn["arg1"] = title; //title of graph
         send(jsn);
-    } //Plots data normally. nplot(rt)
+    }
 
     template<typename T> void nplot(const CircularBuffer<complex<T> > obj, const string &title) const
     {
@@ -63,6 +64,7 @@ public:
     	send(jsn);
     }
 
+    // Plots the FFT of the data.  the FFT is performed by Python's using numpy's floating point FFT
     template<typename T> void nplotfft(const CircularBuffer<T> &obj, const string &title) const
     {
         Json::Value jsn;
@@ -71,8 +73,8 @@ public:
         jsn["arg1"] = title; //title of graph
         send(jsn);
     }
-    ; //Plots fft of data. plt.plot(abs(fftshift(fft(rf))))
 
+    // Constellation plot with transparent blobs (good for QAM)
     template<typename T> void nplotqam(const CircularBuffer<T> &obj, string title) const
     {
         Json::Value jsn;
@@ -81,14 +83,14 @@ public:
         jsn["arg1"] = title; //title of graph
         send(jsn);
     }
-    ; //Plots nplotqam of data. plt.plot(r, i, '.b', alpha=0.6)
 
     template<typename T> void conv_real_int(const CircularBuffer<T> &obj, Json::Value& t1)
     {
-        for (int i = 0; i < obj.size(); i++)
+        for (unsigned i = 0; i < obj.size(); i++)
+        {
             t1["arg0"]["r"][i] = obj[i]; //Adds each element in CircularBuffer to dictionary arg0
+        }
     }
-    ;
 
     void conv_real_int(const CircularBuffer<filter_io_t > &obj, Json::Value& t1) const
     {
@@ -100,23 +102,27 @@ public:
         }
     }
 
-    template<int B> void conv_real_int(const CircularBuffer<sc_int<B> > &obj, Json::Value& t1)
+    void conv_real_int(const CircularBuffer<int> &obj, Json::Value& t1) const
     {
-        for (int i = 0; i < obj.size(); i++) {
+        for (unsigned i = 0; i < obj.size(); i++) {
+            t1["arg0"]["r"][i] = obj[i];
+        } //Adds each element in CircularBuffer to dictionary arg0
+    }
+
+    template<int B> void conv_real_int(const CircularBuffer<sc_int<B> > &obj, Json::Value& t1) const
+    {
+        for (unsigned i = 0; i < obj.size(); i++) {
             t1["arg0"]["r"][i] = obj[i].to_int();
         } //Adds each element in CircularBuffer to dictionary arg0
     }
-    ;
 
-
-    void conv_real_int(const CircularBuffer<complex<double> > &obj, Json::Value& t1)
+    void conv_real_int(const CircularBuffer<complex<double> > &obj, Json::Value& t1) const
     {
         for (unsigned int i = 0; i < obj.size(); i++) {
             t1["arg0"]["r"][i] = std::real(obj[i]);
-            t1["arg0"]["i"][i] = std::imag(obj[i]);//obj[i].imag.to_int();
+            t1["arg0"]["i"][i] = std::imag(obj[i]);
         }    		//Adds each element in CircularBuffer to dictionary arg0
     }
-    ;
 
 };
 
