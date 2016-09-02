@@ -11,15 +11,32 @@ CSIM_TEST_CASE(BASIC)
 
     const plotter &plot = plotter::get();
 
-    CircularBuffer<int> ivector(100);
+    vector<int> ivector;
+    vector<complex<double> > cdv;
+    CircularBuffer<complex<double> > cd(100);
+    CircularBuffer<int> ci(100);
+
+
     for (int i = 0; i < 100; i++)
     {
         ivector.push_back(i);
+        cdv.push_back(complex<double>(i,i*2));
+        cd.push_back(complex<double>(i,i*2));
+        ci.push_back(i);
+
     }
 
-//    cout << ivector << endl;
+
+
+
+
+
 
     plot.nplot(ivector, "ramp");
+    plot.nplot(cdv, "complexdouble vector");
+    plot.nplot(cd, "complexfloat");
+    plot.nplot(ci, "cb int");
+
 
 
 }

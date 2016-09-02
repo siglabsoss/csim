@@ -45,23 +45,29 @@ public:
 
     void send(const Json::Value &jsn) const;
 
+
+
+//    static CircularBuffer<int> cb(const vector<int> &ivector)
+//    {
+//
+//        CircularBuffer<int> conv(ivector.size());
+//        for(unsigned i = 0; i < ivector.size(); i++)
+//        {
+//            conv.push_back(ivector[i]);
+//        }
+//
+//        return conv;
+//    }
+
+
     // Normal 2D plot, may plot imag() only if data is complex
-    template<typename T> void nplot(const CircularBuffer<T> &obj, const string &title) const
+    template<typename T> void nplot(const T &obj, const string &title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplot";
         conv_real_int(obj, jsn); //Converts CircularBuffer into json
         jsn["arg1"] = title; //title of graph
         send(jsn);
-    }
-
-    template<typename T> void nplot(const CircularBuffer<complex<T> > obj, const string &title) const
-    {
-    	Json::Value jsn;
-    	jsn["method"] = "nplot";
-    	conv_real_int(obj, jsn); //Converts CircularBuffer into json
-    	jsn["arg1"] = title; //title of graph
-    	send(jsn);
     }
 
     // Plots the FFT of the data.  the FFT is performed by Python's using numpy's floating point FFT
@@ -84,7 +90,15 @@ public:
         send(jsn);
     }
 
-    template<typename T> void conv_real_int(const CircularBuffer<T> &obj, Json::Value& t1)
+    template<typename T> void conv_real_int(const CircularBuffer<T> &obj, Json::Value& t1) const
+    {
+        for (unsigned i = 0; i < obj.size(); i++)
+        {
+            t1["arg0"]["r"][i] = obj[i]; //Adds each element in CircularBuffer to dictionary arg0
+        }
+    }
+
+    template<typename T> void conv_real_int(const vector<T> &obj, Json::Value& t1) const
     {
         for (unsigned i = 0; i < obj.size(); i++)
         {
@@ -122,6 +136,14 @@ public:
             t1["arg0"]["r"][i] = std::real(obj[i]);
             t1["arg0"]["i"][i] = std::imag(obj[i]);
         }    		//Adds each element in CircularBuffer to dictionary arg0
+    }
+
+    void conv_real_int(const vector<complex<double> > &obj, Json::Value& t1) const
+    {
+        for (unsigned int i = 0; i < obj.size(); i++) {
+            t1["arg0"]["r"][i] = std::real(obj[i]);
+            t1["arg0"]["i"][i] = std::imag(obj[i]);
+        }           //Adds each element in CircularBuffer to dictionary arg0
     }
 
 };
