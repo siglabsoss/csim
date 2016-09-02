@@ -222,7 +222,7 @@ unsigned getShiftAmount(double coeff)
     int n = 0;
     coeff = abs(coeff); //we want same result for + and -
     if (coeff < 1) {
-        unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 1;
+        unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 2;
         while (ratio) {
             n++;
             ratio >>= 1;
