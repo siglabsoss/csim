@@ -44,9 +44,10 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
         realErrAccum += realErrorAbs;
         imagErrAccum += imagErrorAbs;
 
-        BOOST_CHECK_MESSAGE(realErrorAbs < 0.00004, "Sample #" << i << " filter output (real) = " << actualReal << " Expected output (real) = " << expectedReal << " (error = " << realErrorAbs << ")");
+        double absErrorThreshold = 3.0517578125e-05; //for Q1.15 one bit is (1 / 2^15) thus staying under this threshold means that our error is from quantization only (unavoidable)
+        BOOST_CHECK_MESSAGE(realErrorAbs <= absErrorThreshold, "Sample #" << i << " filter output (real) = " << actualReal << " Expected output (real) = " << expectedReal << " (error = " << realErrorAbs << ")");
 
-        BOOST_CHECK_MESSAGE(imagErrorAbs < 0.00004, "Sample #" << i << " filter output (imag) = " << actualImag << " Expected output (imag) = " << expectedImag << " (error = " << imagErrorAbs << ")");
+        BOOST_CHECK_MESSAGE(imagErrorAbs <= absErrorThreshold, "Sample #" << i << " filter output (imag) = " << actualImag << " Expected output (imag) = " << expectedImag << " (error = " << imagErrorAbs << ")");
 
     }
 
