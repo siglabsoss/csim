@@ -6,7 +6,7 @@
 
 
 static constexpr size_t UPSAMPLE_FACTOR = 1;
-static constexpr size_t MOD_TICKS_PER_SYMBOL = 1024;
+static constexpr size_t MOD_TICKS_PER_SYMBOL = 3;
 //ticks per symbol needs to be greater than upsample factor in order to not saturate
 static constexpr size_t MIXER_TICKS_PER_PERIOD = (MOD_TICKS_PER_SYMBOL / UPSAMPLE_FACTOR) * 1;
 
@@ -47,5 +47,5 @@ void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, doub
                 });
         count++;
     }
-    rs.init(true, true, true);
+    rs.init(false, true, true);
 }

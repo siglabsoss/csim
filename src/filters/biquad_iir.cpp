@@ -1,9 +1,10 @@
+#include <core/logger.hpp>
 #include <filters/biquad_iir.hpp>
 #include <cassert>
 
 BiquadIIR::BiquadIIR(size_t numStages) :
     FilterChainElement("BiquadIIR"),
-    m_stages(numStages),
+    m_stages(numStages, Biquad(32)),
     m_outputReady(false)
 {
 
@@ -36,4 +37,13 @@ void BiquadIIR::tick(void)
         previousStageDidOutput = m_stages[i].output(m_sample);
     }
     m_outputReady = previousStageDidOutput; //did the last stage output?
+}
+
+void BiquadIIR::init(const std::vector<Biquad::SOSCoeffs> &coeffs)
+{
+    assert(coeffs.size() == m_stages.size());
+    for (size_t i = 0; i < m_stages.size(); i++) {
+        m_stages[i].init(coeffs[i]);
+    }
+    log_debug("Initialized %d second-order sections for IIR filter", m_stages.size());
 }

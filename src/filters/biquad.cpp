@@ -3,40 +3,56 @@
 #include <utils/utils.hpp>
 #include <cassert>
 
-Biquad::Biquad() :
+Biquad::Biquad(size_t coeffBitWidth) :
     FilterChainElement("Biquad"),
     m_x(3, FixedComplexNorm16(0.0, 0.0)),
     m_y(3, FixedComplexNorm16(0.0, 0.0)),
     m_b(3),
     m_a(2),
-    m_newInput(false)
+    m_newInput(false),
+    m_coeffWidth(coeffBitWidth)
 {
 
 }
 
-void Biquad::init(double b0,
-        double b1,
-        double b2,
-        double a1,
-        double a2)
+Biquad::Biquad(const Biquad &other) :
+        FilterChainElement("Biquad"),
+        m_x(3, FixedComplexNorm16(0.0, 0.0)),
+        m_y(3, FixedComplexNorm16(0.0, 0.0)),
+        m_b(3),
+        m_a(2),
+        m_newInput(false),
+        m_coeffWidth(other.m_coeffWidth)
 {
+    //We don't actually care for the notion of "copying"
+    //Biquads, so we just start with a clean slate. Default
+    //copy constructor is not generated due to unique ptr members
+}
+
+void Biquad::init(const SOSCoeffs &coeffs)
+{
+    double b0 = coeffs.b0;
+    double b1 = coeffs.b1;
+    double b2 = coeffs.b2;
+    double a1 = coeffs.a1;
+    double a2 = coeffs.a2;
+
     log_debug("Initializing biquad filter structure...");
 
-    constexpr size_t BIT_WIDTH = 16;
     size_t bitShift = 0;
-    m_b[0].first = utils::createDynamicFixedPoint(b0, BIT_WIDTH, bitShift);
+    m_b[0].first = utils::createDynamicFixedPoint(b0, m_coeffWidth, bitShift);
     m_b[0].second = bitShift;
 
-    m_b[1].first = utils::createDynamicFixedPoint(b1, BIT_WIDTH, bitShift);
+    m_b[1].first = utils::createDynamicFixedPoint(b1, m_coeffWidth, bitShift);
     m_b[1].second = bitShift;
 
-    m_b[2].first = utils::createDynamicFixedPoint(b2, BIT_WIDTH, bitShift);
+    m_b[2].first = utils::createDynamicFixedPoint(b2, m_coeffWidth, bitShift);
     m_b[2].second = bitShift;
 
-    m_a[0].first = utils::createDynamicFixedPoint(a1, BIT_WIDTH, bitShift);
+    m_a[0].first = utils::createDynamicFixedPoint(a1, m_coeffWidth, bitShift);
     m_a[0].second = bitShift;
 
-    m_a[1].first = utils::createDynamicFixedPoint(a2, BIT_WIDTH, bitShift);
+    m_a[1].first = utils::createDynamicFixedPoint(a2, m_coeffWidth, bitShift);
     m_a[1].second = bitShift;
 
     double b[3] = {b0, b1, b2};

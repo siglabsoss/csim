@@ -11,6 +11,7 @@ set(SIGFILTERS_SOURCES
     decimator.cpp
     hard_demod.cpp
     biquad.cpp
+    biquad_iir.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})

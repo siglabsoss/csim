@@ -6,13 +6,17 @@
 class Biquad : public FilterChainElement
 {
 public:
-    Biquad();
+    struct SOSCoeffs {
+        double b0;
+        double b1;
+        double b2;
+        double a1;
+        double a2;
+    };
+    Biquad(size_t coeffBitWidth);
+    Biquad(const Biquad &other);
 
-    void init(double b0,
-            double b1,
-            double b2,
-            double a1,
-            double a2);
+    void init(const SOSCoeffs &coeffs);
 
     bool input(const filter_io_t &data) override;
 
@@ -40,4 +44,5 @@ private:
     std::unique_ptr< std::complex<sc_fix> > m_ay2;
 
     bool                        m_newInput;
+    size_t                      m_coeffWidth;
 };

@@ -14,6 +14,8 @@ public:
 
     void tick(void) override;
 
+    void init(const std::vector<Biquad::SOSCoeffs> &coeffs);
+
 private:
     std::vector<Biquad>         m_stages;
     bool                        m_outputReady;
