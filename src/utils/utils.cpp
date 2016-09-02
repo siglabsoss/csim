@@ -85,24 +85,6 @@ std::vector<FixedComplex16> complexRead16Unscaled(std::string inFile)
 	return input;
 }//For reading from complex file with values between -1 and 1. Returns a std::vector of FixedComplex16
 
-void print(FixedComplex32 x)
-{
-	cout << (x.real().range().to_int64()) << " " << (x.imag().range().to_int64()) << endl;
-	cout << flush;
-}//To print the value of a single FixedComplex32
-
-void print(std::vector<FixedComplex32> x, int begin, int end)
-{
-	if (end == 0) {
-		end = x.size();
-	}
-	for (int i = begin; i < end; i++) {
-		cout << (x[i].real().range().to_int64()) << " " << (x[i].imag().range().to_int64()) << endl;
-	}
-	cout << flush;
-}// To print the values of a std::vector of FixedComplex32
-
-
 std::vector<FixedComplex32> complexRead32Scaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
@@ -150,7 +132,7 @@ std::vector<FixedComplex32> complexRead32Unscaled(std::string inFile)
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 	in.close();
 	return input;
-}//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
+}//For reading from complex file scaled within -32768 and 32767. Returns a std::vector of FixedComplex32
 
 
 std::vector<FixedComplex64> complexRead64Scaled(std::string inFile)

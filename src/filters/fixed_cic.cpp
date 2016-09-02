@@ -1,5 +1,11 @@
 #include <filters/fixed_cic.hpp>
 
+/*
+ *
+ * Using diagram
+ * https://westcoastdsp.files.wordpress.com/2015/09/cic_block_diagram.jpg
+ *
+ */
 fixedcic::fixedcic(int R, int aregs, int bregs) :
     FilterChainElement("FixedCIC"),
     m_r(R),
@@ -20,15 +26,12 @@ bool fixedcic::input(const filter_io_t &data)
     cic(sample);
     return true;
 }
-/**
- * output - provide an output sample to the caller.
- * @return false if no output sample is available.
- */
+
 bool fixedcic::output(filter_io_t &data)
 {
     if (goodOutput == true) {
         data = m_output;
-        //XXX should goodOutput be reset here?
+        goodOutput = false;
         return true;
     }//Valid data
     else {
@@ -37,9 +40,7 @@ bool fixedcic::output(filter_io_t &data)
 }
 
 void fixedcic::tick()
-{
-
-}
+{}
 
 void fixedcic::cic(FixedComplex16 &input)
 {

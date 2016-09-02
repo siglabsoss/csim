@@ -36,13 +36,13 @@ public:
     bool downsample(); //returns false when the sample should be passed
     void reset();
 
-    bool goodOutput;
+    bool 						goodOutput; //indicates when output is ready
     int                         m_r; //Decimation factor
     int                         m_numBRegisters; //number of b registers
     int                         m_numARegisters; //number of a registers
     int                         m_samples; //How many samples have been processed
-    std::vector<FixedComplex16 >   m_a; //a registers
-    std::vector<FixedComplex16 >   m_b; //b registers
+    std::vector<FixedComplex16>   m_a; //a registers
+    std::vector<FixedComplex16>   m_b; //b registers
     FixedComplex16            m_output;
 };
 

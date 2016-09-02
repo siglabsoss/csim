@@ -90,7 +90,7 @@ void Stitcher::outputWave(int i)
 			}// !(0|1|2)
 
 			m_output.push_back(result); //Adds result to std::vector
-			m_currentTheta = m_currentTheta + m_delta;
+			m_currentTheta = m_currentTheta + m_delta; //Move forwards by delta radians
 		}
 	}//For clockup or clockdown
 }

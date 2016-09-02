@@ -11,7 +11,7 @@ XCorrelator::XCorrelator(int N) :
 		m_n(N)
 {}
 
-std::vector<FixedComplex64 > XCorrelator::xCorrelate(std::vector<FixedComplex64 > x, std::vector<FixedComplex64 > y)
+std::vector<FixedComplex64> XCorrelator::xCorrelate(std::vector<FixedComplex64> x, std::vector<FixedComplex64> y)
 {
     std::vector<FixedComplex64 > p1 = fft(x);//output is FFT(x)
     std::vector<FixedComplex64 > p2 = fft(y);//output is FFT(y)
@@ -27,10 +27,10 @@ std::vector<FixedComplex64 > XCorrelator::xCorrelate(std::vector<FixedComplex64 
 
     p1 = ifft(p1);// IFFT(FFT(x) * conj(FFT(y)))
 
-    return fftshift(p1);
+    return fftshift(p1); //Swaps front half and back half of vector. Gets rid of new first element.
 }
 
-std::vector<FixedComplex64 > XCorrelator::fft(std::vector<FixedComplex64 > vals)
+std::vector<FixedComplex64 > XCorrelator::fft(std::vector<FixedComplex64> vals)
 {
     fixedfft fft(m_n);
     std::vector<FixedComplex64 > outputs;
@@ -81,7 +81,7 @@ std::vector<FixedComplex64 > XCorrelator::ifft(std::vector<FixedComplex64> vals)
 }
 
 
-std::vector<FixedComplex64 > XCorrelator::fftshift(std::vector<FixedComplex64 > vals)
+std::vector<FixedComplex64 > XCorrelator::fftshift(std::vector<FixedComplex64> vals)
 {
     int size = vals.size() >> 1; //size/2
     if (vals.size() % 2 == 1) {
