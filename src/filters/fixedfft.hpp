@@ -69,6 +69,7 @@ public:
     std::vector<fixedfftstage> 	stages;
     fixedfftprint 				printer;
     
+    void reset();
 	void tick() override;
     fixedfft(int Ninput, int tableSize = 0, bool inverse = 0);
     bool input(const filter_io_t &data) override;

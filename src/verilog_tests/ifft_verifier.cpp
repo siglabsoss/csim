@@ -54,11 +54,5 @@ int main(int argc, char *argv[])
         out2 << setw(11) << setfill(' ') <<  outputs[k].imag().range().to_int64()   << endl;
        // cout << answers[i];
     }//Prints data
-
-//
-
-    cout << "program end" << endl;
-
-
 }
 

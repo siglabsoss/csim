@@ -6,6 +6,9 @@ using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(FIRFilter)
 
+
+void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, float difference);
+
 CSIM_TEST_CASE(REAL_FILTER)
 {
     vector<FixedComplex16> input; //Vector to hold inputs
@@ -36,12 +39,7 @@ CSIM_TEST_CASE(REAL_FILTER)
         output.push_back(output_sample.fc);
     }//Filters using FIR
 
-    for (unsigned int k = 0; k < answers.size(); k++) {
-        BOOST_CHECK_MESSAGE(
-			abs(output[k].real() - answers[k].real())
-					< .001,
-			output[k].real() << " is not the same as " << answers[k].real());
-    }//Compares all outputs with solution to ensure they are .001 within each other.
+    checkError(output,answers, .001, 0);
 }//Test using only read numbers
 
 CSIM_TEST_CASE(COMPLEX_FILTER)
@@ -74,16 +72,24 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
      }//Filters data
 
     assert (output.size() == answers.size());//Checks number of outputs
+    checkError(output,answers, .001, .001);
 
-    for (unsigned int k = 0; k < answers.size(); k++) {
-        BOOST_CHECK_MESSAGE(
-			abs(output[k].real() - answers[k].real()) < .001,
-			input[k].real() << " is not the same as " << answers[k]);
-        BOOST_CHECK_MESSAGE(
-			abs(output[k].imag() - answers[k].imag()) < .001,
-			output[k].imag() << " is not the same as " << answers[k]);
-    } //Compares all outputs with solution to ensure they are .001 within each other.
 }//Test using complex numbers
+
+
+void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, float difference)
+{
+	for (unsigned int i = 0; i < answers.size(); i++) {
+		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
+		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
+		    double realDiff = abs(outputs[i].real() - answers[i].real());
+		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference  || realDiff == 0,
+			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference || imagDiff == 0,
+			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
+		}
+}//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
 CSIM_TEST_SUITE_END()
 

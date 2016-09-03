@@ -108,6 +108,47 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 	checkError(temp, answers, .20, 5000);
 }
 
+
+CSIM_TEST_CASE(FFT_RESET)
+{
+	string inFile("./data/fft/input/data_file_complex2.csv");
+	vector<FixedComplex32> inputs;
+	vector<FixedComplex32> outputs1; //Array to store answers
+	vector<FixedComplex32> outputs2; //Array to store answers
+	inputs = complexRead32Scaled(inFile);
+	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+
+	int points = inputs.size();
+	filter_io_t data;
+	fixedfft fft(points); //x point fft, y table size
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < points; j++) {
+			data = inputs[j];
+			fft.input(data);
+			bool test = fft.output(data);
+			if (test) {
+			   outputs1.push_back(data.fc);
+			}//If output is ready
+		}
+	}//Twice to get all outputs
+
+	fft.reset();
+
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < points; j++) {
+			data = inputs[j];
+			fft.input(data);
+			bool test = fft.output(data);
+			if (test) {
+			   outputs2.push_back(data.fc);
+			}//If output is ready
+		}
+	}//Twice to get all outputs
+
+	BOOST_REQUIRE(outputs1.size() == outputs2.size());
+	checkError(outputs1, outputs2, 0, 0); //Should be the same
+}
+
 CSIM_TEST_CASE(FFT_TWO_INPUTS)
 {
     string inFile("./data/fft/input/data_file_complex2.csv");
@@ -191,9 +232,9 @@ void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, 
 		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
 		    double realDiff = abs(outputs[i].real() - answers[i].real());
 		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
-			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 ,
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 || realDiff == 0,
 			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
-			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0,
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0 || imagDiff == 0,
 			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
 		}
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int

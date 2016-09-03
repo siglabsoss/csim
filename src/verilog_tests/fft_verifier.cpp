@@ -55,21 +55,5 @@ int main(int argc, char *argv[])
               out2 << setw(11) << setfill(' ') <<  outputs[i].imag().range().to_int64()   << endl;
             //  cout << temp[i];
           }//Prints data out in bit reversed order
-
-     cout << "Completed" << endl;
-//
-//     string outfile3("../data/fft/output/out1NotBitReversed.txt");
-//         ofstream out3(outfile3.c_str());
-//     cout << "Hopefully correct:" << endl;
-//     FixedComplex<32> temp[32769];
-//    for (i = 0; i < inputs; i++) {
-//        temp[reverseBits(inputs, i)] = answers[i];
-//    }//Reformats data in correct order
-//
-//     for (i = 0; i < count; i++) {
-//         out3 << setw(11) << setfill(' ') <<  temp[i].real.to_int() <<"," ;
-//         out3 << setw(11) << setfill(' ') << temp[i].imag.to_int() << endl;
-//       //  cout << temp[i];
-//     }//Prints data out in correct order
 }
 

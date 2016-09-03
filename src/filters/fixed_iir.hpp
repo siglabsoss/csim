@@ -36,13 +36,13 @@ public:
     void reset(); //resets registers
     FixedComplex16 calculate(FixedComplex16 current); // Calculate output based on input
 
-    int                         m_numXRegisters;
-    int                         m_numYRegisters;
-    std::vector<FixedComplex16 >   m_a; //a coefficients
-    std::vector<FixedComplex16 >   m_b; //b coefficients
-    std::vector<FixedComplex16 >   m_x; //x registers
-    std::vector<FixedComplex16 >   m_y; //y registers
-    FixedComplex16            m_output;
+    int       						m_numXRegisters;
+    int 							m_numYRegisters;
+    std::vector<FixedComplex16> 	m_a; //a coefficients
+    std::vector<FixedComplex16>   	m_b; //b coefficients
+    std::vector<FixedComplex16> 	m_x; //x registers
+    std::vector<FixedComplex16>  	m_y; //y registers
+    FixedComplex16          		m_output;
 
 };
 
