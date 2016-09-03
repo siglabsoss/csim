@@ -28,9 +28,6 @@ void plotter::send(const Json::Value &jsn) const
     memcpy(request.data(), (message.c_str()), (message.size())); //Copies data into request
     socket->send(request); //Sends off data
 
-
-    usleep(1000000.0 / 10.0); // sleep to fix race condition in python for now
-
 } //Sends data off to server
 
 const plotter &plotter::get()
