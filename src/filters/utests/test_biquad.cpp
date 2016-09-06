@@ -8,7 +8,7 @@
 
 CSIM_TEST_SUITE_BEGIN(BiquadVerification)
 
-static void runFilter(const std::string &inputFile, const std::string &outputFile, size_t coeffBitWidth, double avgErrThreshold, const std::vector<Biquad::SOSCoeffs> &coeffs)
+static void runFilter(const std::string &inputFile, const std::string &outputFile, size_t coeffBitWidth, double avgErrThreshold, const std::vector<Biquad::SOSCoeffs> &coeffs, double absErrorThreshold)
 {
     BiquadIIR bi(coeffs.size());
     //Biquad bi(coeffBitWidth);
@@ -44,7 +44,6 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
         realErrAccum += realErrorAbs;
         imagErrAccum += imagErrorAbs;
 
-        double absErrorThreshold = 3.0517578125e-05; //for Q1.15 one bit is (1 / 2^15) thus staying under this threshold means that our error is from quantization only (unavoidable)
         BOOST_CHECK_MESSAGE(realErrorAbs <= absErrorThreshold, "Sample #" << i << " filter output (real) = " << actualReal << " Expected output (real) = " << expectedReal << " (error = " << realErrorAbs << ")");
 
         BOOST_CHECK_MESSAGE(imagErrorAbs <= absErrorThreshold, "Sample #" << i << " filter output (imag) = " << actualImag << " Expected output (imag) = " << expectedImag << " (error = " << imagErrorAbs << ")");
@@ -59,6 +58,7 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
     std::cout << "Average Error (imag) = " << avgImagErr << std::endl;
 }
 
+static constexpr double ONE_BIT_ERROR = 3.0517578125e-05; //for Q1.15 one bit is (1 / 2^15) thus staying under this threshold means that our error is from quantization only (unavoidable)
 
 CSIM_TEST_CASE(FIXED_POINT_SINE_WAVE_INPUT)
 {
@@ -71,7 +71,7 @@ CSIM_TEST_CASE(FIXED_POINT_SINE_WAVE_INPUT)
     };
     std::vector<Biquad::SOSCoeffs> coeffList(1);
     coeffList[0] = coeffs;
-    runFilter("./data/biquad/input/biquad_input1.csv", "./data/biquad/output/biquad_output1.csv", 16, 0.0001, coeffList);
+    runFilter("./data/biquad/input/biquad_input1.csv", "./data/biquad/output/biquad_output1.csv", 16, 0.0001, coeffList, ONE_BIT_ERROR);
 }
 
 
@@ -86,7 +86,7 @@ CSIM_TEST_CASE(FLOATING_POINT_CHIRP_INPUT)
     };
     std::vector<Biquad::SOSCoeffs> coeffList(1);
     coeffList[0] = coeffs;
-    runFilter("./data/biquad/input/biquad_input2.csv", "./data/biquad/output/biquad_output2.csv", 16, 0.0002, coeffList);
+    runFilter("./data/biquad/input/biquad_input2.csv", "./data/biquad/output/biquad_output2.csv", 16, 0.0002, coeffList, ONE_BIT_ERROR);
 }
 
 CSIM_TEST_CASE(FLOATING_POINT_CHIRP_LOWPASS_COEFFS)
@@ -100,7 +100,7 @@ CSIM_TEST_CASE(FLOATING_POINT_CHIRP_LOWPASS_COEFFS)
     };
     std::vector<Biquad::SOSCoeffs> coeffList(1);
     coeffList[0] = coeffs;
-    runFilter("./data/biquad/input/biquad_input3.csv", "./data/biquad/output/biquad_output3.csv", 16, 0.00002, coeffList);
+    runFilter("./data/biquad/input/biquad_input3.csv", "./data/biquad/output/biquad_output3.csv", 16, 0.00002, coeffList, ONE_BIT_ERROR);
 }
 
 
@@ -115,7 +115,7 @@ CSIM_TEST_CASE(FLOATING_POINT_CHIRP_BANDPASS)
     };
     std::vector<Biquad::SOSCoeffs> coeffList(1);
     coeffList[0] = coeffs;
-    runFilter("./data/biquad/input/biquad_input4.csv", "./data/biquad/output/biquad_output4.csv", 32, 0.0001, coeffList);
+    runFilter("./data/biquad/input/biquad_input4.csv", "./data/biquad/output/biquad_output4.csv", 32, 0.0001, coeffList, ONE_BIT_ERROR);
 }
 
 CSIM_TEST_CASE(FLOATING_POINT_4TH_ORDER)
@@ -138,11 +138,10 @@ CSIM_TEST_CASE(FLOATING_POINT_4TH_ORDER)
     std::vector<Biquad::SOSCoeffs> coeffList;
     coeffList.push_back(coeffs1);
     coeffList.push_back(coeffs2);
-    runFilter("./data/biquad/input/biquad_input5.csv", "./data/biquad/output/biquad_output5.csv", 32, 0.0001, coeffList);
+    runFilter("./data/biquad/input/biquad_input5.csv", "./data/biquad/output/biquad_output5.csv", 32, 0.0001, coeffList, ONE_BIT_ERROR);
 }
 
-/*
-CSIM_TEST_CASE(FLOATING_POINT_CHIRP_BANDPASS_10ORDER)
+CSIM_TEST_CASE(FLOATING_POINT_6TH_ORDER)
 {
     Biquad::SOSCoeffs coeffs1 = {
             .b0 = 0.311873880942884,
@@ -168,30 +167,57 @@ CSIM_TEST_CASE(FLOATING_POINT_CHIRP_BANDPASS_10ORDER)
             .a2 = -0.274597155242264
     };
 
-    Biquad::SOSCoeffs coeffs4 = {
-            .b0 = 0.343493885932781,
-            .b1 = -0.636113898907368,
-            .b2 = 0.343493885932781,
-            .a1 = -0.163819663175370,
-            .a2 = -0.271593896486612
+    std::vector<Biquad::SOSCoeffs> coeffList;
+    coeffList.push_back(coeffs1);
+    coeffList.push_back(coeffs2);
+    coeffList.push_back(coeffs3);
+#ifdef FIXED_POINT_PROFILER_ENABLE
+    sc_dt::scfx_rep::overflows = 0;
+#endif
+    runFilter("./data/biquad/input/biquad_input6.csv", "./data/biquad/output/biquad_output6.csv", 32, 0.0001, coeffList, ONE_BIT_ERROR);
+#ifdef FIXED_POINT_PROFILER_ENABLE
+    BOOST_CHECK_EQUAL(sc_dt::scfx_rep::overflows, 0);
+#endif
+}
+
+
+CSIM_TEST_CASE(FLOATING_POINT_6TH_ORDER_WITH_15DB_SNR)
+{
+    Biquad::SOSCoeffs coeffs1 = {
+            .b0 = 0.248689357525212,
+            .b1 = 0.493770971010344,
+            .b2 = 0.248689357525212,
+            .a1 = -0.121516502242888,
+            .a2 = -0.818874854398861
     };
 
-    Biquad::SOSCoeffs coeffs5 = {
-            .b0 = 0.471140259283514,
+    Biquad::SOSCoeffs coeffs2 = {
+            .b0 = 0.248689357525212,
+            .b1 = -0.496478961693856,
+            .b2 = 0.248689357525212,
+            .a1 = 1.193949491088584,
+            .a2 = -0.857928180545387
+    };
+
+    Biquad::SOSCoeffs coeffs3 = {
+            .b0 = 0.343799391407267,
             .b1 = 0,
-            .b2 = -0.471140259283514,
-            .a1 = 0.057862803243331,
-            .a2 = -0.336395040444710
+            .b2 = -0.343799391407267,
+            .a1 = 0.555236237660032,
+            .a2 = -0.660010306942082
     };
 
     std::vector<Biquad::SOSCoeffs> coeffList;
     coeffList.push_back(coeffs1);
     coeffList.push_back(coeffs2);
     coeffList.push_back(coeffs3);
-    coeffList.push_back(coeffs4);
-    coeffList.push_back(coeffs5);
-    runFilter("./data/biquad/input/XXX", "./data/biquad/output/XXX", 32, 0.0001, coeffList);
+#ifdef FIXED_POINT_PROFILER_ENABLE
+    sc_dt::scfx_rep::overflows = 0;
+#endif
+    runFilter("./data/biquad/input/biquad_input7.csv", "./data/biquad/output/biquad_output7.csv", 32, 0.0001, coeffList, 3*ONE_BIT_ERROR);
+#ifdef FIXED_POINT_PROFILER_ENABLE
+    BOOST_CHECK_EQUAL(sc_dt::scfx_rep::overflows, 0);
+#endif
 }
-*/
 
 CSIM_TEST_SUITE_END()
