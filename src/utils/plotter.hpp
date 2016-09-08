@@ -9,6 +9,7 @@
 #include <complex>
 #include <iostream>
 #include <mutex>
+#include <cassert>
 
 #include <3rd/json/json.h>
 #include <types/fixedcomplex.hpp>
@@ -58,6 +59,37 @@ public:
 //
 //        return conv;
 //    }
+
+
+    void nplotber(const std::vector<std::vector<double> > &bers, const std::vector<std::vector<double> > &ebnos, const std::vector<string> &titles, const std::string title = std::string("")) const
+    {
+        Json::Value jsn;
+        jsn["method"] = "nplotber";
+
+        assert(bers.size() == ebnos.size());
+        assert(bers.size() == titles.size());
+
+        unsigned sz = bers.size();
+
+        for(unsigned i = 0; i < sz; i++)
+        {
+
+            assert(bers[i].size() == ebnos[i].size());
+            unsigned sz2 = bers[i].size();
+
+            for(unsigned j = 0; j < sz2; j++)
+            {
+                jsn["arg0"][i][j] = bers[i][j];
+                jsn["arg1"][i][j] = ebnos[i][j];
+            }
+            jsn["arg2"][i] = titles[i];
+
+        }
+
+        jsn["arg3"] = title;
+
+        send(jsn);
+    }
 
 
     // Normal 2D plot, may plot imag() only if data is complex
