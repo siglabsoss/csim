@@ -12,6 +12,7 @@ set(SIGFILTERS_SOURCES
     hard_demod.cpp
     biquad.cpp
     biquad_iir.cpp
+    bfp_fft.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
