@@ -69,16 +69,11 @@ void BFPFFT::dit(size_t baseT, size_t N, size_t stage)
     }
     N >>= 1;
     size_t baseB = baseT + N;
-    //std::cout << "stage = " << stage << " with N = " << N << " and baseT = " << baseT << " baseB = " << baseB << std::endl;
     for (size_t n = 0; n < N; n++) {
-//        if (stage == 2 && n == 0) {
-//            std::cout << "baseB = " << baseB << " baseT = " << baseT << std::endl;
-//        }
         ComplexDouble twiddle = getTwiddleFactor(stage, n + baseT/2);
-        //std::cout << "stage = " << stage << " n = " << baseB + n << std::endl;
         ComplexDouble top = m_inputs[baseT + n];
         ComplexDouble bot = m_inputs[baseB + n] * twiddle;
-//        std::cout << "stage " << stage << " x(" << baseT + n << + ") & x(" << baseB + n << ")" << std::endl;
+//        std::cout << "stage " << stage << " x(" << top << + ") & x(" << bot << ")" << std::endl;
 //        std::cout << "top = " << m_inputs[baseT + n] << " bottom = " << m_inputs[baseB + n] << " twiddle = " << twiddle << std::endl;
         m_inputs[baseT + n] = top + bot;
         if (baseT + n == 0) {
@@ -102,10 +97,5 @@ ComplexDouble BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
     size_t A1 = (stageSize * n) / N;
     int temp = static_cast<int>(log2(N)) - 1;
     A1 = reverseBits(1 << temp, A1);
-//    if (stage == 2 && n == 3) {
-//        std::cout << "A1 = " << A1 << " stage = " << stage << " n = " << n << std::endl;
-//    }
-//    size_t A2 = A1 + N/2;
     return m_twiddleFactors[A1];
-    //std::cout << "a1 = " << a1 << " a2 = " << a2 << std::endl;
 }
