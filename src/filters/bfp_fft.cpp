@@ -1,3 +1,12 @@
+/**
+ * A fixed-point FFT implementation using decimation-in-time (DIT)
+ * and the block floating point technique to maximize precision.
+ *
+ * This implementation was inspired by the recursive method outlined here: http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
+ *
+ * The "block floating point" technique was inspired by the work outlined here: http://ijcttjournal.org/Volume5/number-4/IJCTT-V5N4P134.pdf
+ */
+
 #include <filters/bfp_fft.hpp>
 #include <utils/utils.hpp>
 
@@ -16,17 +25,17 @@ BFPFFT::BFPFFT(size_t N) :
 
     for (size_t i = 0; i < N; i++) {
         double theta = (-2 * M_PI * i) / N;
-        m_twiddleFactors[i] = ComplexDouble(cos(theta), sin(theta));
+        m_twiddleFactors[i] = FixedComplex32(cos(theta), sin(theta));
     }
 }
 
 bool BFPFFT::input(const filter_io_t &data)
 {
-    //assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
     size_t N = m_inputs.capacity();
     //using a bit-reversed index to decimate in time
     size_t reverseIdx = reverseBits(N, m_inputIdx++);
-    m_inputs[reverseIdx] = data.toComplexDouble(); //XXX just for testing
+    m_inputs[reverseIdx] = data.fc;
     return true;
 }
 
@@ -66,13 +75,13 @@ void BFPFFT::dit(size_t baseT, size_t N, size_t stage)
     N >>= 1;
     size_t baseB = baseT + N;
     for (size_t n = 0; n < N; n++) {
-        ComplexDouble twiddle = getTwiddleFactor(stage, n + baseT/2);
+        FixedComplex32 twiddle = getTwiddleFactor(stage, n + baseT/2);
         size_t topIdx = reverseBits(m_inputs.size(), baseT + n);
         size_t botIdx = reverseBits(m_inputs.size(), baseB + n);
 
-        ComplexDouble top = m_inputs[topIdx];
-        ComplexDouble bot = m_inputs[botIdx] * twiddle;
-        //std::cout << "stage " << stage << " x(" << topIdx << + ") & x(" << botIdx << ")" << std::endl;
+        FixedComplex32 top = m_inputs[topIdx];
+        FixedComplex32 bot = m_inputs[botIdx] * twiddle;
+
         m_inputs[topIdx] = top + bot;
         m_inputs[botIdx] = top - bot;
     }
@@ -80,7 +89,7 @@ void BFPFFT::dit(size_t baseT, size_t N, size_t stage)
     dit(baseB, N, stage+1);
 }
 
-ComplexDouble BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
+FixedComplexNorm16 BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
 {
     size_t N = m_inputs.size();
     size_t stageSize = (1 << stage);

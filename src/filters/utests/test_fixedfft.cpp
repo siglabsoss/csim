@@ -14,26 +14,44 @@ void checkError(const vector<T> &outputs, const vector<T> &answers, double diffe
 
 CSIM_TEST_CASE(CONSTANT_INPUTS)
 {
-    constexpr size_t NUM_SAMPLES = 1024;
+    constexpr size_t NUM_SAMPLES = 8;
     constexpr size_t NUM_SAMPLE_SETS = 10;
     filter_io_t data, output;
     data = FixedComplex32(M_SQRT1_2/3,  M_SQRT1_2/3); //QAM16 0000 symbol
     BFPFFT fft(NUM_SAMPLES);
     size_t outputCount = 0;
     size_t noOutputCount = 0;
+
+
+
     for (unsigned int i = 0; i < NUM_SAMPLE_SETS; i++) {
         for (unsigned int j = 0; j < NUM_SAMPLES; j++) {
             fft.input(data);
             fft.tick();
             if (fft.output(output)) {
-                //std::cout << outputCount << ": " << output << " " << output.toComplexDouble() << std::endl;
+                double outputReal = output.toComplexDouble().real();
+                double outputImag = output.toComplexDouble().imag();
+
+                double realDiff = 1.0;
+                double imagDiff = 1.0;
+                double answersReal = 0.0;
+                double answersImag = 0.0;
+
                 if (outputCount % NUM_SAMPLES == 0) {
-                    BOOST_CHECK_CLOSE(output.toComplexDouble().real(), NUM_SAMPLES * M_SQRT1_2 / 3, 0.1);
-                    BOOST_CHECK_CLOSE(output.toComplexDouble().imag(), NUM_SAMPLES * M_SQRT1_2 / 3, 0.1);
+                    answersReal = NUM_SAMPLES * M_SQRT1_2 / 3;
+                    answersImag = NUM_SAMPLES * M_SQRT1_2 / 3;
+                    realDiff = abs(outputReal - answersReal);
+                    imagDiff = abs(outputImag - answersImag);
                 } else {
-                    BOOST_CHECK_CLOSE(output.toComplexDouble().real(), 0.0, 0.1);
-                    BOOST_CHECK_CLOSE(output.toComplexDouble().imag(), 0.0, 0.1);
+                    realDiff = abs(outputReal - answersReal);
+                    imagDiff = abs(outputImag - answersImag);
                 }
+                double difference = 0.001;
+                BOOST_CHECK_MESSAGE(realDiff < difference,
+                "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+                BOOST_CHECK_MESSAGE(imagDiff < difference,
+                "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
+                //std::cout << outputCount << ": " << output << " " << output.toComplexDouble() << std::endl;
                 outputCount++;
             } else {
                noOutputCount++;
@@ -75,13 +93,13 @@ CSIM_TEST_CASE(FFT_MATLAB)
   string inFile("./data/fft/input/fft_input1.csv");
   string answersFile("./data/fft/answers/fft_output1.csv");
 
-  std::vector<ComplexDouble> inputs;
-  std::vector<ComplexDouble> answers;
-  std::vector<ComplexDouble> outputs;
+  std::vector<FixedComplex32> inputs;
+  std::vector<FixedComplex32> answers;
+  std::vector<FixedComplex32> outputs;
 
-  inputs = complexReadUnscaled<ComplexDouble >(inFile);
+  inputs = readComplexFromCSV<FixedComplex32 >(inFile);
   BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-  answers = complexReadUnscaled<ComplexDouble >(answersFile);
+  answers = readComplexFromCSV<FixedComplex32 >(answersFile);
   BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
   int points = inputs.size();
@@ -96,24 +114,27 @@ CSIM_TEST_CASE(FFT_MATLAB)
           bool test = fft.output(data);
           bool lastInput = (i == 1 && j == points - 1);
           if (test && !lastInput) {
-              outputs.push_back(data.rf);
+              outputs.push_back(data.fc);
           }//If output is ready
       }//Insert all input
   }//Insert input again to get output
-
-  checkError<ComplexDouble>(outputs, answers, 0.0000001);
+  checkError<FixedComplex32>(outputs, answers, 0.01);
 }
 
 template <typename T>
 void checkError(const vector<T> &outputs, const vector<T> &answers, double difference)
 {
 	for (unsigned int i = 0; i < answers.size(); i++) {
-		    double realDiff = abs(outputs[i].real() - answers[i].real());
-		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
-			BOOST_CHECK_MESSAGE(realDiff < difference,
-			"I: " << i << " Real Output: " << outputs[i].real() << " Real Answer: " << answers[i].real() << " Real Diff: " << realDiff );
-			BOOST_CHECK_MESSAGE(imagDiff < difference,
-			"I: " << i << " Imag Output: " << outputs[i].imag() << " Imag Answer: " << answers[i].imag() << " Imag Ratio: " << imagDiff );
+            double outputReal = outputs[i].real().to_double();
+            double outputImag = outputs[i].imag().to_double();
+            double answersReal = answers[i].real().to_double();
+            double answersImag = answers[i].imag().to_double();
+            double realDiff = abs(outputReal - answersReal);
+            double imagDiff = abs(outputImag - answersImag);
+            BOOST_CHECK_MESSAGE(realDiff < difference,
+            "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+            BOOST_CHECK_MESSAGE(imagDiff < difference,
+            "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
 		}
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 

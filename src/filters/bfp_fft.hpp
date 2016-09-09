@@ -16,13 +16,13 @@ public:
     bool output(filter_io_t &data) override;
     void tick(void) override;
 private:
-    ComplexDouble getTwiddleFactor(size_t stage, size_t n) const;
+    FixedComplexNorm16 getTwiddleFactor(size_t stage, size_t n) const;
     void dit(size_t baseT, size_t N, size_t stage);
 
-    std::vector<ComplexDouble> m_inputs;
-    std::vector<ComplexDouble> m_outputs;
-    std::vector<ComplexDouble> m_twiddleFactors;
-    bool                            m_outputValid;
-    size_t                          m_outputIdx;
-    size_t                          m_inputIdx;
+    std::vector<FixedComplex32>      m_inputs;
+    std::vector<FixedComplex32>      m_outputs;
+    std::vector<FixedComplexNorm16>  m_twiddleFactors;
+    bool                             m_outputValid;
+    size_t                           m_outputIdx;
+    size_t                           m_inputIdx;
 };
