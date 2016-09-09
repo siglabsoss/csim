@@ -1,5 +1,6 @@
 #include <cmath>
 #include <utils/utils.hpp>
+#include <types/complexdouble.hpp>
 
 unsigned int reverseBits(int N, unsigned int num)
 {
@@ -183,6 +184,32 @@ std::vector<FixedComplex64> complexRead64Unscaled(std::string inFile)
 	in.close();
 	return input;
 }//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
+
+template <typename T>
+std::vector<T> complexReadUnscaled(const std::string &inFile)
+{
+    ifstream in(inFile.c_str());
+    std::vector<T> input;
+    typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
+    std::vector<std::string> vec;
+    std::string line;
+    T temp;
+    while (getline(in, line)) {
+        tokenizer tok(line);
+        vec.assign(tok.begin(), tok.end());
+        temp.real(atof(vec[0].c_str()));
+        if (vec.size() == 2) {
+        temp.imag(atof(vec[1].c_str()));
+        }
+        else {
+            temp.imag(0);
+        }
+        input.push_back(temp);
+    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+    in.close();
+    return input;
+}
+template std::vector<ComplexDouble> complexReadUnscaled(const std::string &inFile);
 
 //XXX wrap entire file in namespace
 namespace utils

@@ -8,6 +8,9 @@
 #include <string>
 #include <stdint.h>
 
+template <typename T>
+std::vector<T> complexReadUnscaled(const std::string &inFile);
+
 unsigned int reverseBits(int N, unsigned int num);
 std::vector<FixedComplex16> complexRead16Scaled(std::string inFile);//Reads file and divides values by 32768. Returns vector of FixedComplex16
 std::vector<FixedComplex16> complexRead16Unscaled(std::string inFile); //Reads file and returns vector of FixedComplex16
