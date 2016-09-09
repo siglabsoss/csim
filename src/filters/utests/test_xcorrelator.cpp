@@ -23,14 +23,14 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_64)
     string inFile("data/xcorrelator/input/data_file_complex1.csv");
     string answersFile("data/xcorrelator/answers/answers1.csv");
 
-    vector<FixedComplex64> input = complexRead64Unscaled(inFile);
+    vector<FixedComplex64> input = readComplexFromCSV<FixedComplex64>(inFile);
     BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << inFile);
 
     vector<FixedComplex64 > output;
     XCorrelator x(input.size());
     output = x.xCorrelate(input,input);
 
-    vector<FixedComplex64> answers = complexRead64Unscaled(answersFile);
+    vector<FixedComplex64> answers = readComplexFromCSV<FixedComplex64>(answersFile);
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << inFile);
 
     BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
@@ -44,14 +44,14 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_128)
     string inFile("data/xcorrelator/input/data_file_complex2.csv");
     string answersFile("data/xcorrelator/answers/answers2.csv");
 
-    vector<FixedComplex64> input = complexRead64Unscaled(inFile);
+    vector<FixedComplex64> input = readComplexFromCSV<FixedComplex64>(inFile);
     BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << inFile);
 
     vector<FixedComplex64 > output;
     XCorrelator x(input.size());
     output = x.xCorrelate(input,input);
 
-    vector<FixedComplex64> answers = complexRead64Unscaled(answersFile);
+    vector<FixedComplex64> answers = readComplexFromCSV<FixedComplex64>(answersFile);
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << inFile);
 
     BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
@@ -65,14 +65,14 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_256)
 	string inFile("data/xcorrelator/input/data_file_complex3.csv");
 	string answersFile("data/xcorrelator/answers/answers3.csv");
 
-	vector<FixedComplex64> input = complexRead64Unscaled(inFile);
+	vector<FixedComplex64> input = readComplexFromCSV<FixedComplex64>(inFile);
 	BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << inFile);
 
 	vector<FixedComplex64 > output;
 	XCorrelator x(input.size());
 	output = x.xCorrelate(input,input);
 
-	vector<FixedComplex64> answers = complexRead64Unscaled(answersFile);
+	vector<FixedComplex64> answers = readComplexFromCSV<FixedComplex64>(answersFile);
 	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << inFile);
 
 	BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
@@ -85,14 +85,14 @@ CSIM_TEST_CASE(AUTO_CROSS_CORRELATOR_OCTAVE_COMPARISON_512)
 	string inFile("data/xcorrelator/input/data_file_complex4.csv");
 	string answersFile("data/xcorrelator/answers/answers4.csv");
 
-	vector<FixedComplex64> input = complexRead64Unscaled(inFile);
+	vector<FixedComplex64> input = readComplexFromCSV<FixedComplex64>(inFile);
 	BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << inFile);
 
 	vector<FixedComplex64 > output;
 	XCorrelator x(input.size());
 	output = x.xCorrelate(input,input);
 
-	vector<FixedComplex64> answers = complexRead64Unscaled(answersFile);
+	vector<FixedComplex64> answers = readComplexFromCSV<FixedComplex64>(answersFile);
 	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << inFile);
 
 	BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );
@@ -107,18 +107,18 @@ CSIM_TEST_CASE(COMPLEX_CROSS_CORRELATOR_OCTAVE_COMPARISON_32)
 	string inFile2("data/xcorrelator/input/data_file_complex6.csv");
 	string answersFile("data/xcorrelator/answers/answers5.csv");
 
-	vector<FixedComplex64> x = complexRead64Unscaled(inFile);
+	vector<FixedComplex64> x = readComplexFromCSV<FixedComplex64>(inFile);
 	BOOST_REQUIRE_MESSAGE(!x.empty(), "Could not read from " << inFile);
 
 
-	vector<FixedComplex64> y = complexRead64Unscaled(inFile2);
+	vector<FixedComplex64> y = readComplexFromCSV<FixedComplex64>(inFile2);
 	BOOST_REQUIRE_MESSAGE(!y.empty(), "Could not read from " << inFile2);
 
 	vector<FixedComplex64 > output;
 	XCorrelator xc(x.size());
 	output = xc.xCorrelate(x, y);
 
-	vector<FixedComplex64> answers = complexRead64Unscaled(answersFile);
+	vector<FixedComplex64> answers = readComplexFromCSV<FixedComplex64>(answersFile);
 	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << inFile);
 
 	BOOST_REQUIRE_MESSAGE(answers.size() == output.size(), "There are " << output.size() << " outputs but there are " << answers.size() << " answers." );

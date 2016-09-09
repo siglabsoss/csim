@@ -13,8 +13,8 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
     BiquadIIR bi(coeffs.size());
     //Biquad bi(coeffBitWidth);
     bi.init(coeffs);
-    std::vector<FixedComplexNorm16> inputs = complexRead16Unscaled(inputFile);
-    std::vector<FixedComplexNorm16> outputs = complexRead16Unscaled(outputFile);
+    std::vector<FixedComplexNorm16> inputs = readComplexFromCSV<FixedComplexNorm16>(inputFile);
+    std::vector<FixedComplexNorm16> outputs = readComplexFromCSV<FixedComplexNorm16>(outputFile);
 
     BOOST_CHECK_EQUAL(inputs.size(), outputs.size());
     BOOST_CHECK(inputs.size() > 0);

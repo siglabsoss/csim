@@ -17,15 +17,15 @@ CSIM_TEST_CASE(REAL_FILTER)
     vector<FixedComplex16> tap; //Vector to hold taps
 
     string data("./data/fir/input/data1_in.csv"); //Input data file
-    input = complexRead16Unscaled(data); //Reads input file
+    input = readComplexFromCSV<FixedComplex16>(data); //Reads input file
     BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << data);
 
     string taps("./data/fir/input/taps1.txt");
-    tap = complexRead16Unscaled(taps);//Reads in taps from file
+    tap = readComplexFromCSV<FixedComplex16>(taps);//Reads in taps from file
     BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps);
 
     string answersFile("./data/fir/answers/answers1.csv"); //Answers data file
-    answers = complexRead16Unscaled(answersFile); //Reads answer file
+    answers = readComplexFromCSV<FixedComplex16>(answersFile); //Reads answer file
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << answersFile);
 
     FixedFIR fir(tap); //Creates instance of fixed FIR filter given a vector of taps.
@@ -50,15 +50,15 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 	vector<FixedComplex16> tap;
 
 	string data("./data/fir/input/data2_in.csv"); //Input data file
-	input = complexRead16Unscaled(data); //Reads input file
+	input = readComplexFromCSV<FixedComplex16>(data); //Reads input file
 	BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << data);
 
     string taps("./data/fir/input/taps2.txt");
-    tap = complexRead16Unscaled(taps); //Reads taps file
+    tap = readComplexFromCSV<FixedComplex16>(taps); //Reads taps file
     BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps);
 
     string data3("./data/fir/answers/answers2.csv"); //Answers data file
-    answers = complexRead16Unscaled(data3); //Reads answers file
+    answers = readComplexFromCSV<FixedComplex16>(data3); //Reads answers file
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << data3);
 
     FixedFIR fir(tap); //Creates instance of fixed FIR filter given vector of taps.

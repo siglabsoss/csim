@@ -25,19 +25,19 @@ int main(int argc, char *argv[])
 	string taps(argv[3]);
 	string taps2(argv[4]);
 
-	input = complexRead16Scaled(inFile);
+	input = readComplexFromCSV<FixedComplex16>(inFile, 32768.0);
 	if (input.empty()) {
 		cout << "Could not read from " << inFile << endl;
 		return 1;
 	}
 
-	atap = complexRead16Scaled(taps);
+	atap = readComplexFromCSV<FixedComplex16>(taps, 32768.0);
 	if (atap.empty()) {
 		cout << "Could not read from " << taps << endl;
 		return 1;
 	}//Gets A taps
 
-	btap = complexRead16Scaled(taps2);
+	btap = readComplexFromCSV<FixedComplex16>(taps2, 32768.0);
 	if (btap.empty()) {
 		cout << "Could not read from " << taps2 << endl;
 		return 1;
