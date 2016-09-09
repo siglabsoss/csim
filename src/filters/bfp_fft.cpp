@@ -17,16 +17,16 @@ BFPFFT::BFPFFT(size_t N) :
     for (size_t i = 0; i < N; i++) {
         double theta = (-2 * M_PI * i) / N;
         m_twiddleFactors[i] = ComplexDouble(cos(theta), sin(theta));
-        //std::cout << "twiddle " << i << " = " << m_twiddleFactors[i] << std::endl;
     }
 }
 
 bool BFPFFT::input(const filter_io_t &data)
 {
     //assert(data.type == IO_TYPE_FIXED_COMPLEX);
-//    size_t N = m_inputs.capacity();
-//    size_t reverseIdx = reverseBits(N, m_inputIdx++);
-    m_inputs[m_inputIdx++] = data.toComplexDouble(); //XXX just for testing
+    size_t N = m_inputs.capacity();
+    //using a bit-reversed index to decimate in time
+    size_t reverseIdx = reverseBits(N, m_inputIdx++);
+    m_inputs[reverseIdx] = data.toComplexDouble(); //XXX just for testing
     return true;
 }
 
@@ -44,7 +44,6 @@ bool BFPFFT::output(filter_io_t &data)
 
 void BFPFFT::tick(void)
 {
-    //std::cout << "m_inputIdx " << m_inputIdx << " capacity = " << m_inputs.capacity() << std::endl;
     if (m_inputIdx != m_inputs.capacity()) {
         return;
     }
@@ -52,11 +51,8 @@ void BFPFFT::tick(void)
     dit(0, m_inputs.size(), 1);
     m_inputIdx = 0;
 
-    //Double-buffer to accept more inputs as outputs are pushed out (and to rearrange outputs in order)
-    for (size_t i = 0; i < m_outputs.size(); i++) {
-        size_t reverseIdx = reverseBits(m_outputs.size(), i);
-        m_outputs[i] = m_inputs[reverseIdx];
-    }
+    //Double-buffer to accept more inputs as outputs are pushed out
+    m_outputs = m_inputs;
 
     m_outputValid = true;
     assert(m_outputIdx == 0);
@@ -71,21 +67,15 @@ void BFPFFT::dit(size_t baseT, size_t N, size_t stage)
     size_t baseB = baseT + N;
     for (size_t n = 0; n < N; n++) {
         ComplexDouble twiddle = getTwiddleFactor(stage, n + baseT/2);
-        ComplexDouble top = m_inputs[baseT + n];
-        ComplexDouble bot = m_inputs[baseB + n] * twiddle;
-//        std::cout << "stage " << stage << " x(" << top << + ") & x(" << bot << ")" << std::endl;
-//        std::cout << "top = " << m_inputs[baseT + n] << " bottom = " << m_inputs[baseB + n] << " twiddle = " << twiddle << std::endl;
-        m_inputs[baseT + n] = top + bot;
-        if (baseT + n == 0) {
-            //std::cout << "m_inputs[" << baseT + n << "] = " << top << " + " << bot << std::endl;
-        }
-        m_inputs[baseB + n] = top - bot;
-//        std::cout << "new top = " << m_inputs[baseT + n] << " new bot = " << m_inputs[baseB + n] << " twiddle = " << twiddle << std::endl;
-        if (baseB + n == 0) {
-            //std::cout << "m_inputs[" << baseB + n << "] = " << top << " + " << bot << std::endl;
-        }
+        size_t topIdx = reverseBits(m_inputs.size(), baseT + n);
+        size_t botIdx = reverseBits(m_inputs.size(), baseB + n);
+
+        ComplexDouble top = m_inputs[topIdx];
+        ComplexDouble bot = m_inputs[botIdx] * twiddle;
+        //std::cout << "stage " << stage << " x(" << topIdx << + ") & x(" << botIdx << ")" << std::endl;
+        m_inputs[topIdx] = top + bot;
+        m_inputs[botIdx] = top - bot;
     }
-//    std::cout << std::endl;
     dit(baseT, N, stage+1);
     dit(baseB, N, stage+1);
 }

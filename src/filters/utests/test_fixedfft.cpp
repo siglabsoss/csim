@@ -101,7 +101,7 @@ CSIM_TEST_CASE(FFT_MATLAB)
       }//Insert all input
   }//Insert input again to get output
 
-  checkError<ComplexDouble>(outputs, answers, 0.00000001);
+  checkError<ComplexDouble>(outputs, answers, 0.0000001);
 }
 
 template <typename T>
