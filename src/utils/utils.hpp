@@ -20,3 +20,6 @@ void print(std::vector<FixedComplex32> x, int begin = 0, int end = 0);
 double bound(double min, double max, double val);
 unsigned int calculateHammingDistance(uint8_t a, uint8_t b);
 #endif
+
+
+#define _UNUSED_     __attribute__ ((unused))

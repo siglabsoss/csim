@@ -10,8 +10,9 @@ set(SIGFILTERS_SOURCES
     mixer.cpp
     decimator.cpp
     hard_demod.cpp
+    noise_element.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
 add_library(sigfilters $<TARGET_OBJECTS:sigfiltersobj>)
-
+target_link_libraries(sigfilters sigutils)

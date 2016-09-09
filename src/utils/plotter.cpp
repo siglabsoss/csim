@@ -30,6 +30,13 @@ void plotter::send(const Json::Value &jsn) const
 
 } //Sends data off to server
 
+void plotter::hello()
+{
+    Json::Value jsn;
+    jsn["method"] = "boot";
+    send(jsn);
+}
+
 const plotter &plotter::get()
 {
     if (m_instance == nullptr) {

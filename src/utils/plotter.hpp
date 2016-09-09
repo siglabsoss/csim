@@ -34,11 +34,23 @@ private:
     {
         this->context = new zmq::context_t(1);
         this->socket = new zmq::socket_t(*this->context, ZMQ_PUB);
+
+        // should flush all packets immediatly
+        int val;
+        val = 0; // set linger to 0
+        this->socket->setsockopt(ZMQ_LINGER, &val, sizeof(val));
+
         socket->connect("tcp://localhost:5556"); //Port number
+        cout << "Plotter Connecting" << endl;
         usleep(1000000.0 / 4.0);
+        hello();
     }
 
+
     plotter(const plotter &other) = delete;
+
+    void hello();
+
 public:
 
     static const plotter & get(); //singleton
@@ -103,7 +115,7 @@ public:
     }
 
     // Plots the FFT of the data.  the FFT is performed by Python's using numpy's floating point FFT
-    template<typename T> void nplotfft(const CircularBuffer<T> &obj, const string &title) const
+    template<typename T> void nplotfft(const T &obj, const string &title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplotfft";
