@@ -11,6 +11,7 @@ set(SIGFILTERS_SOURCES
     decimator.cpp
     hard_demod.cpp
     noise_element.cpp
+    ldpc_decode.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})

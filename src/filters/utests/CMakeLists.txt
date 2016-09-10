@@ -24,3 +24,6 @@ target_link_libraries(test_xcorrelator ${Boost_LIBRARIES} pthread sigfilters sig
 
 add_executable(test_zero_pad_interpolator ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_zero_pad_interpolator.cpp)
 target_link_libraries(test_zero_pad_interpolator ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
+
+add_executable(test_ldpc ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_ldpc.cpp)
+target_link_libraries(test_ldpc ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
