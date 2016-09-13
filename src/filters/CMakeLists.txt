@@ -12,6 +12,8 @@ set(SIGFILTERS_SOURCES
     hard_demod.cpp
     noise_element.cpp
     ldpc_decode.cpp
+    biquad.cpp
+    biquad_iir.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})

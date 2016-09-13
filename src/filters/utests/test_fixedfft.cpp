@@ -1,20 +1,11 @@
 #include <test/unit_test.hpp>
 
-#include <iostream>
-#include <cstring>
-#include <stdio.h>
-#include <iostream>     // cout, endl
 #include <vector> //For storing parsed data from file
-#include <iterator>     // ostream_operator
-#include <boost/tokenizer.hpp> //For parsing data from file
-#include <iomanip> //For setprecision
 #include <stdlib.h>
-
 #include <utils/utils.hpp> //reverseBits()
 #include <filters/fixedfft.hpp>
 
 using namespace std;
-
 
 CSIM_TEST_SUITE_BEGIN(FixedFFT)
 
@@ -35,11 +26,11 @@ CSIM_TEST_CASE(CONSTANT_INPUTS)
             fft.tick();
             if (fft.output(output)) {
                 if (outputCount % NUM_SAMPLES == 0) {
-                    BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
-                    BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.real().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.imag().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
                 } else {
-                    BOOST_CHECK_CLOSE(output.fcn32.real().to_double(), 0.0, 0.1);
-                    BOOST_CHECK_CLOSE(output.fcn32.imag().to_double(), 0.0, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.real().to_double(), 0.0, 0.1);
+                    BOOST_CHECK_CLOSE(output.fc.imag().to_double(), 0.0, 0.1);
                 }
                 outputCount++;
                 //std::cout << outputCount << ": " << output << std::endl;
@@ -101,7 +92,7 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 			fft.input(data);
 			bool test = fft.output(data);
 			if (test) {
-				outputs.push_back(data.fcn32);
+				outputs.push_back(data.fc);
 			}//If output is ready
 		}//Insert all input
 	}//Insert input again to get output
@@ -115,6 +106,47 @@ CSIM_TEST_CASE(FFT_OCTAVE)
 
 	assert(answers.size() == temp.size());
 	checkError(temp, answers, .20, 5000);
+}
+
+
+CSIM_TEST_CASE(FFT_RESET)
+{
+	string inFile("./data/fft/input/data_file_complex2.csv");
+	vector<FixedComplex32> inputs;
+	vector<FixedComplex32> outputs1; //Array to store answers
+	vector<FixedComplex32> outputs2; //Array to store answers
+	inputs = complexRead32Scaled(inFile);
+	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+
+	int points = inputs.size();
+	filter_io_t data;
+	fixedfft fft(points); //x point fft, y table size
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < points; j++) {
+			data = inputs[j];
+			fft.input(data);
+			bool test = fft.output(data);
+			if (test) {
+			   outputs1.push_back(data.fc);
+			}//If output is ready
+		}
+	}//Twice to get all outputs
+
+	fft.reset();
+
+	for (int i = 0; i < 2; i++) {
+		for (int j = 0; j < points; j++) {
+			data = inputs[j];
+			fft.input(data);
+			bool test = fft.output(data);
+			if (test) {
+			   outputs2.push_back(data.fc);
+			}//If output is ready
+		}
+	}//Twice to get all outputs
+
+	BOOST_REQUIRE(outputs1.size() == outputs2.size());
+	checkError(outputs1, outputs2, 0, 0); //Should be the same
 }
 
 CSIM_TEST_CASE(FFT_TWO_INPUTS)
@@ -142,7 +174,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-		   outputs.push_back(data.fcn32);
+		   outputs.push_back(data.fc);
 		}//If output is ready
 	}//Insert first set of data
 
@@ -157,7 +189,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
         fft.input(data);
         bool test = fft.output(data);
         if (test) {
-        	outputs.push_back(data.fcn32);
+        	outputs.push_back(data.fc);
         }
     }//second set of data, gets first set of answers out
     assert(answers.size() == outputs.size());
@@ -180,7 +212,7 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 		fft.input(data);
 		bool test = fft.output(data);
 		if (test) {
-			outputs.push_back(data.fcn32);
+			outputs.push_back(data.fc);
 		}// if output is ready
 	}//Get 2nd set of data out
 
@@ -193,82 +225,6 @@ CSIM_TEST_CASE(FFT_TWO_INPUTS)
 	checkError(temp2, answers, .01, 4);
 }//Checks for two consecutive sets of inputs in the same FFT.
 
-
-//
-//CSIM_TEST_CASE(FFT_2_FILES)
-//{
-//       string infile("../csim/data/fft/output/out1BitReversed.txt");
-//       string answersfile("../csim/data/fft/output/answers32768BitReversed.csv");
-//
-//       int i = 0;
-//       FixedComplex32 bitReversedInput[32768];
-//       ifstream in(infile.c_str());
-//       BOOST_REQUIRE_MESSAGE(in.is_open(), "Could not open " << infile);
-//       ifstream ans(answersfile.c_str());
-//       BOOST_REQUIRE_MESSAGE(ans.is_open(), "Could not open " << answersfile);
-//
-//       std::string token;
-//       string line;
-//       int inputs = 0;
-//       while(getline(in,line)) {
-//           istringstream ss(line);
-//           getline(ss, token, ',');
-//           stringstream strValue;
-//           strValue << token;
-//           int intValue;
-//           strValue >> intValue;
-//           bitReversedInput[inputs].real = intValue;
-//           getline(ss, token, ',');
-//           stringstream strValue2;
-//           strValue2 << token;
-//           strValue2 >> intValue;
-//           bitReversedInput[inputs++].imag = intValue;
-//       }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-//
-//       int numAnswers = 0;
-//       FixedComplex32 trueAnswers[32768];
-//       while(getline(ans,line)) {
-//
-//         istringstream ss(line);
-//         getline(ss, token, ',');
-//         stringstream strValue;
-//         strValue << token;
-//         int intValue;
-//         strValue >> intValue;
-//         trueAnswers[numAnswers].real = intValue;
-//         getline(ss, token, ',');
-//         stringstream strValue2;
-//         strValue2 << token;
-//         strValue2 >> intValue;
-//        trueAnswers[numAnswers++].imag = intValue;
-//
-//     }//Reads in inputs from file. Parsing by commas. Format is: real,imag\n
-//
-////
-////        FixedComplex32 temp[32769];
-////        for (i = 0; i < inputs; i++) {
-////            temp[i] = bitReversedOutput[reverseBits(inputs, i)];
-////        }//Reformats data in correct order
-//
-//
-////       FixedComplex32 temp[32769];
-////       for (i = 0; i < inputs; i++) {
-////           temp[i] = bitReversedOutput[i];
-////       }
-//
-//
-//
-//        for (i = 0; i < inputs; i++) {
-//            BOOST_CHECK_MESSAGE(abs((bitReversedInput[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) <  .10 || abs(abs(bitReversedInput[i].real) - abs(trueAnswers[i].real)) < 10 ,
-//                    "I: " << i << " Input: " << bitReversedInput[i].real << " Answer: " << trueAnswers[i].real << " Ratio: " << abs((bitReversedInput[i].real - trueAnswers[i].real)/(float)trueAnswers[i].real) );
-//            BOOST_CHECK_MESSAGE(abs((trueAnswers[i].imag - bitReversedInput[i].imag )/(float)trueAnswers[i].imag) < .10 || abs(abs(bitReversedInput[i].imag) - abs(trueAnswers[i].imag)) < 10,
-//                    "I: " << i << " Input: " << bitReversedInput[i].imag << " Answer: " << trueAnswers[i].imag << " Ratio: " << abs((bitReversedInput[i].imag - trueAnswers[i].imag)/(float)trueAnswers[i].imag) );
-//
-//        }
-//
-//
-//}//Used for comparing percent error
-
 void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference)
 {
 	for (unsigned int i = 0; i < answers.size(); i++) {
@@ -276,9 +232,9 @@ void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, 
 		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
 		    double realDiff = abs(outputs[i].real() - answers[i].real());
 		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
-			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 ,
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 || realDiff == 0,
 			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
-			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0,
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0 || imagDiff == 0,
 			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
 		}
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int

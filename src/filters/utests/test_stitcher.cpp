@@ -36,7 +36,7 @@ CSIM_TEST_CASE(PYTHON_COMPARISON)
 
     Stitcher stitch(waves, samples); //Creates stitcher
     vector<FixedComplex32 > outdatas; //Vector for output data
-    outdatas = stitch.stitch(400, 1000, 100, datas);
+    outdatas = stitch.stitch(1000, 100, datas);
 
     vector<double> answers = readFromFile("data/stitcher/answers/answers1.txt");
     assert(outdatas.size() == answers.size());
@@ -61,7 +61,7 @@ CSIM_TEST_CASE(CONCATENATION)
 
     Stitcher stitch(waves, samples); //Creates stitcher
     vector<FixedComplex32 > outdatas; //Vector for output data
-    outdatas = stitch.stitch(400, 1000, 100, datas); //Two separate waves
+    outdatas = stitch.stitch(1000, 100, datas); //Two separate waves
 
     vector<int> waves2;
     waves2.push_back(1);
@@ -70,7 +70,7 @@ CSIM_TEST_CASE(CONCATENATION)
 
     Stitcher stitch2(waves2, samples2); //Creates stitcher
     vector<FixedComplex32 > outdatas2; //Vector for output data
-    outdatas2 = stitch2.stitch(400, 1000, 100, datas); //One long wave
+    outdatas2 = stitch2.stitch(1000, 100, datas); //One long wave
 
     assert(outdatas.size() == outdatas2.size());
     for (unsigned int i = 0; i < outdatas.size(); i++) {

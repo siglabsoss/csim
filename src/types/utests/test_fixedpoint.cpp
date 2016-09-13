@@ -150,9 +150,7 @@ CSIM_TEST_CASE(FRACTIONAL_MULTIPLICATION)
     BOOST_CHECK_EQUAL(result, expectedResult);
 
     a = 1.0; b = -0.9921875; c = a * b; // 1 0000000 * 1 0000001 (roll over to sign bit) (-0.9921875 == 1.0078125)
-    std::cout << a.range().to_uint64() << " " << b.range().to_uint64() << std::endl;
     result = c.range().to_uint64();
-    std::cout << c << std::endl;
     expectedResult = 0b01111111; // 0[100 0000 1]000 0000
     BOOST_CHECK_EQUAL(result, expectedResult);
 }

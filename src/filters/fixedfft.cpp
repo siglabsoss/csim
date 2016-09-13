@@ -2,14 +2,31 @@
 #include <cmath>
 #include <filters/fixedfft.hpp>
 
+void fixedfft::reset()
+{
+	int stagesize = 0;
+	for (int i = 0; i < stagecount; i++) {
+		stagesize = pow(2, (stagecount - i));
+		stages[i].init(stagesize, m_inverse);
+	}//Re initializes stages
+
+	m_count = 0;//Resets number of inputs so far
+
+	while (!printer.m_output.empty()) {
+		printer.m_output.pop();
+	}//Clears output queue
+
+	newInput = false;
+}//Reset the fft
+
 bool fixedfft::input(const filter_io_t &data)
 {
     m_count++;//One more input has been received
     newInput = true; //Input has been received so an output may be taken
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW);
-    FixedComplex32 sample = data.fcn32;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    FixedComplex64 sample = data.fc;
     while (!stages[0].ready) {
-        stages[0].inputandtick(FixedComplex32(0, 0));
+        stages[0].inputandtick(FixedComplex64(0, 0));
     }
     stages[0].inputandtick(sample);//Perform fft
     return true;
@@ -71,7 +88,7 @@ void fixedfftstage::init(int Ninput, bool inverse)
 {
 	m_inverse = inverse;
     N = Ninput;
-    memory = std::vector<FixedComplex32>(N / 2);
+    memory = std::vector<FixedComplex64>(N / 2);
     state = FFFT_STATE_INITIAL;
     read_pointer = 0;
     write_pointer = 0;
@@ -91,16 +108,16 @@ fixedfftstage::fixedfftstage() :
         m_inverse(false)
 {}
 
-void fixedfftstage::butterfly(FixedComplex32 array[2], FixedComplex32 x,
-        FixedComplex32 y)
+void fixedfftstage::butterfly(FixedComplex64 array[2], FixedComplex64 x,
+        FixedComplex64 y)
 {
     array[0] = x + y;
     array[1] = x - y;
 }
 
-FixedComplex32 fixedfftstage::twiddler(int k)
+FixedComplex64 fixedfftstage::twiddler(int k)
 {
-    FixedComplex32 W;
+    FixedComplex64 W;
     int increment = (360 * ((int)(*mainTablePointer).size()/90)) / (N);
     int* b = new int[(N/4) + 1];
     for (int i = 0; i <= ((N/4)); i++) {
@@ -130,18 +147,18 @@ FixedComplex32 fixedfftstage::twiddler(int k)
     return W; // return lookup table value
 }//Performs bulk of calculations
 
-void fixedfftstage::output(FixedComplex32 x)
+void fixedfftstage::output(FixedComplex64 x)
 {
     while (!next->ready) {
-        next->inputandtick(FixedComplex32(0, 0));
+        next->inputandtick(FixedComplex64(0, 0));
     }
     next->inputandtick(x);
 }
 
-void fixedfftstage::inputandtick(FixedComplex32 x)
+void fixedfftstage::inputandtick(FixedComplex64 x)
 {
-    FixedComplex32 butterflyresult[2];
-    FixedComplex32 outputtemp;
+    FixedComplex64 butterflyresult[2];
+    FixedComplex64 outputtemp;
     switch (state) {
         case FFFT_STATE_INITIAL:
 
@@ -196,12 +213,12 @@ fixedfftprint::fixedfftprint(int Ninput, bool inverse) :
     ready = 1;
 }
 
-void fixedfftprint::inputandtick(FixedComplex32 x)
+void fixedfftprint::inputandtick(FixedComplex64 x)
 {
 	if (m_inverse == false) {
 		m_output.push(x);//adds this output to the queue of outputs
 	}//FFT
 	else {
-		m_output.push(FixedComplex32(x.real()/N, x.imag()/N));//adds this output to the queue of outputs
+		m_output.push(FixedComplex64(x.real()/N, x.imag()/N));//adds this output to the queue of outputs
 	}//IFFT
 }

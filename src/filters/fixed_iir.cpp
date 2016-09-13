@@ -6,7 +6,10 @@
  */
 /*
  *
- * NOTE: First a coefficient must be 1
+ * NOTE: First a coefficient must be 1. If it is not, the algorithm will proceed as if it is 1 anyway
+ * Using this diagram
+ * https://www.music.mcgill.ca/~gary/307/week2/img15.gif
+ *
  *
  */
 #include <filters/fixed_iir.hpp>
@@ -25,18 +28,16 @@ void fixediir::reset()
     } //Initialize registers
 
 }
+
 bool fixediir::input(const filter_io_t &data)
 {
 
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
-    FixedComplex16 sample = data.fcn;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    FixedComplex16 sample = data.fc;
     iir(sample);
     return true;
 }
-/**
- * output - provide an output sample to the caller.
- * @return false if no output sample is available.
- */
+
 bool fixediir::output(filter_io_t &data)
 {
     data = m_output;

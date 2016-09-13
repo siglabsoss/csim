@@ -1,12 +1,12 @@
 #include <test/unit_test.hpp>
-#include <iostream>
 #include <filters/fixed_iir.hpp>
 #include <utils/utils.hpp>
 
-using namespace boost;
 using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(IIRFilter)
+
+void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, float difference);
 
 CSIM_TEST_CASE(REAL_FILTER)
 {
@@ -78,14 +78,23 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
 
     assert(output.size() == answers.size());//Length of inputs is length of answers/outputs.
 
-    for (unsigned int k = 0; k < output.size(); k++) {
-        BOOST_CHECK_MESSAGE(
-                abs(output[k].real() - answers[k].real()) < .001,
-                output[k].real() << " is not the same as " << answers[k].real());
-        BOOST_CHECK_MESSAGE(
-                abs(output[k].imag() - answers[k].imag()) < .001,
-                output[k].imag() << " is not the same as " << answers[k].imag());
-    }
+    checkError(output, answers, .001, .001);
+
 }
+
+
+void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, float difference)
+{
+	for (unsigned int i = 0; i < answers.size(); i++) {
+		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
+		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
+		    double realDiff = abs(outputs[i].real() - answers[i].real());
+		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
+			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference || realDiff == 0,
+			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
+			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference || imagDiff == 0,
+			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
+		}
+}//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
 CSIM_TEST_SUITE_END()

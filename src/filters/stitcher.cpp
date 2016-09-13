@@ -37,12 +37,12 @@ void Stitcher::shiftTheta()
 	} //Shift m_currentTheta and m_endTheta down by 2pi if m_currentTheta is above 2pi
 }
 
-std::vector<FixedComplex32 > Stitcher::stitch(int numSamples, int sampleRate,
+std::vector<FixedComplex32 > Stitcher::stitch(int sampleRate,
         int frequency, std::vector<FixedComplex32 > data)
 {
 	reset();//Resets necessary values
 	m_inputData = data; //Sets new input data
-	totalTime = numSamples / sampleRate;
+	totalTime = m_sample_total / sampleRate;
 
     for (int i = 0; i < m_numSections; i++) {
         m_t = (totalTime * m_samples[i]) / m_sample_total; //total time of wave
@@ -90,7 +90,7 @@ void Stitcher::outputWave(int i)
 			}// !(0|1|2)
 
 			m_output.push_back(result); //Adds result to std::vector
-			m_currentTheta = m_currentTheta + m_delta;
+			m_currentTheta = m_currentTheta + m_delta; //Move forwards by delta radians
 		}
 	}//For clockup or clockdown
 }

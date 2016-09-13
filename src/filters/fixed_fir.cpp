@@ -1,5 +1,12 @@
 #include <filters/fixed_fir.hpp>
-
+/*
+ *
+ *
+ * Using this diagram
+ * https://upload.wikimedia.org/wikipedia/commons/thumb/d/d2/FIR_Filter_(Moving_Average).svg/2000px-FIR_Filter_(Moving_Average).svg.png
+ *
+ *
+ */
 FixedFIR::FixedFIR(std::vector<FixedComplex16> tap) :
 	FilterChainElement("FixedFIR"),
     m_taps(tap.size()),
@@ -13,8 +20,8 @@ FixedFIR::FixedFIR(std::vector<FixedComplex16> tap) :
 
 bool FixedFIR::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX_16_NEW);
-    FixedComplex16 sample = data.fcn;
+    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    FixedComplex16 sample = data.fc;
 
 
     m_output = filter(sample);

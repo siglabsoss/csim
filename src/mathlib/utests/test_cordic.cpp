@@ -14,7 +14,6 @@ CSIM_TEST_CASE(CordicFunctionality)
     cordic_complex_t cosine;
     cordic_complex_t sine;
 
-    //TODO write real test
     double sin_accum = 0.0;
     double cos_accum = 0.0;
     size_t iterations = 0;

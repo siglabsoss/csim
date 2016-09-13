@@ -85,24 +85,6 @@ std::vector<FixedComplex16> complexRead16Unscaled(std::string inFile)
 	return input;
 }//For reading from complex file with values between -1 and 1. Returns a std::vector of FixedComplex16
 
-void print(FixedComplex32 x)
-{
-	cout << (x.real().range().to_int64()) << " " << (x.imag().range().to_int64()) << endl;
-	cout << flush;
-}//To print the value of a single FixedComplex32
-
-void print(std::vector<FixedComplex32> x, int begin, int end)
-{
-	if (end == 0) {
-		end = x.size();
-	}
-	for (int i = begin; i < end; i++) {
-		cout << (x[i].real().range().to_int64()) << " " << (x[i].imag().range().to_int64()) << endl;
-	}
-	cout << flush;
-}// To print the values of a std::vector of FixedComplex32
-
-
 std::vector<FixedComplex32> complexRead32Scaled(std::string inFile)
 {
 	ifstream in(inFile.c_str());
@@ -150,7 +132,7 @@ std::vector<FixedComplex32> complexRead32Unscaled(std::string inFile)
 	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
 	in.close();
 	return input;
-}//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
+}//For reading from complex file scaled within -32768 and 32767. Returns a std::vector of FixedComplex32
 
 
 std::vector<FixedComplex64> complexRead64Scaled(std::string inFile)
@@ -202,3 +184,63 @@ std::vector<FixedComplex64> complexRead64Unscaled(std::string inFile)
 	return input;
 }//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
 
+//XXX wrap entire file in namespace
+namespace utils
+{
+
+std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, size_t &shiftBits)
+{
+    shiftBits = getShiftAmount(val);
+    size_t intBits = getIntegerBits(val);
+    assert(intBits <= bitWidth);
+    if (shiftBits > 0) {
+        val *= (1 << shiftBits);
+    }
+    return std::unique_ptr<sc_fix>(new sc_fix(val, bitWidth, intBits, SC_RND, SC_WRAP));
+}
+
+unsigned getShiftAmount(double coeff)
+{
+    int n = 0;
+    coeff = abs(coeff); //we want same result for + and -
+    if (coeff < 1) {
+        unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 2;
+        while (ratio) {
+            n++;
+            ratio >>= 1;
+        }
+    }
+    return n;
+}
+unsigned getIntegerBits(double coeff)
+{
+    unsigned int_coeff = abs(static_cast<int>(coeff));
+    unsigned n = 1; //one sign bit at a minimum
+    while (int_coeff) {
+        n++;
+        int_coeff >>= 1;
+    }
+    return n;
+}
+
+bool addition32DoesOverflow(int32_t a, int32_t b)
+{
+    //Consider overflow if signs were the same and then sign of result changed
+    bool sameSign = (a >= 0 && b >= 0) || (a < 0 && b < 0);
+    if (sameSign) {
+        int32_t sum = a + b;
+        if (a >= 0) {
+            if (sum < 0) {
+                return true;
+            }
+        } else {
+            if (sum >= 0) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+};

@@ -26,8 +26,8 @@ class Stitcher
 public:
 
     Stitcher(std::vector<int> waveNums, std::vector<int> samples); //Takes in array of corresponding wave number,number of samples for each wave number, and number of sections
-    std::vector<FixedComplex32 > stitch(int numSamples, int sampleRate,
-            int frequency, std::vector<FixedComplex32 > data); //stitches data based on inputs given. Returns as a vector of FixedComplex32
+    std::vector<FixedComplex32> stitch(int sampleRate,
+            int frequency, std::vector<FixedComplex32> data); //stitches data based on inputs given. Returns as a vector of FixedComplex32
 
 private:
     int						 	m_counter; //Which sample of actual data you are on

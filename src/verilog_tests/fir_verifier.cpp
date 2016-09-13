@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
         fir.input(data); //Filters data
         filter_io_t output_sample;
         fir.output(output_sample);
-        output.push_back(output_sample.fcn);
+        output.push_back(output_sample.fc);
      }
 
     ofstream out(outFile);
