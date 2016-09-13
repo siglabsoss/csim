@@ -41,7 +41,7 @@ class LDPCDecode : public FilterChainElement
 {
 public:
     virtual ~LDPCDecode();
-    LDPCDecode();
+    LDPCDecode(vector<vector<uint8_t> > H, uint32_t rows, uint32_t cols);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
@@ -53,6 +53,7 @@ public:
     void run();
     void get_message();
     void print_cw();
+    void decode(vector<int> cw, size_t iterations);
 private:
 
     void prep_once();
@@ -60,9 +61,11 @@ private:
     void iteration();
 
 
-    int H[h_rows][h_cols];
-    LDPC_N n[h_cols];
-    LDPC_M m[h_rows];
+    uint32_t m_hrows;
+    uint32_t m_hcols;
+    vector<vector<uint8_t> > m_H;
+    vector<LDPC_N> m_n;
+    vector<LDPC_M> m_m;
 
 
 private:
