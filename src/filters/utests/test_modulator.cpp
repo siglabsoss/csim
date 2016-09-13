@@ -49,6 +49,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
 
 bool test_mod_demod(Modulator& mod, HardDemod& demod, size_t ticks, uint8_t byte, uint8_t& byte_out)
 {
+//    cout << "testing " << (int) byte << endl;
     bool worked0, worked1, worked2;
     filter_io_t data, mod_output, demod_output;
     data = byte; // use the =operator overload
@@ -60,68 +61,50 @@ bool test_mod_demod(Modulator& mod, HardDemod& demod, size_t ticks, uint8_t byte
 
         if( worked1 )
         {
-
-
             demod.input(mod_output);
             demod.tick();
             worked2 = demod.output(demod_output);
-            cout << "worked " << worked2 << endl;
+//            cout << "worked " << worked2 << endl;
             if( worked2 )
             {
                 byte_out = demod_output.byte;
+                return true;
                 cout << "out: " << (int)demod_output.byte << endl;
             }
         }
-
-        int bit_idx = i / MOD_TICKS_PER_SYMBOL;
-
-        cout << "bit_idx " << bit_idx << endl;
     }
+    return false;
 }
 
 CSIM_TEST_CASE(MODULATOR_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
 {
     uint8_t byte = 0b01010101;
-    __attribute__ ((unused)) uint8_t byte_out = 0;
-    filter_io_t data, mod_output, demod_output;
-    data = byte;
-    bool worked0, worked1, worked2;
+    uint8_t byte_out = 0;
+    bool worked0;
     Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
     HardDemod demod(Modulator::MOD_SCHEME_BPSK, 0);
 
+    std::random_device engine;
 
-    worked0 = mod.input(data);
-    BOOST_CHECK_EQUAL(worked0, true);
-    for (unsigned int i = 0; i < (sizeof(byte) * 8) * MOD_TICKS_PER_SYMBOL; i++) {
-        mod.tick();
-        worked1 = mod.output(mod_output);
 
-        if( worked1 )
+    size_t ticks = sizeof(byte) * CHAR_BIT * MOD_TICKS_PER_SYMBOL;
+
+    for(size_t i = 0; i < 300; i++)
+    {
+
+        if(i < 256)
         {
-//            cout << "rf: " << mod_output.fc << endl;
-
-
-            demod.input(mod_output);
-            demod.tick();
-            worked2 = demod.output(demod_output);
-            cout << "worked " << worked2 << endl;
-            if( worked2 )
-            {
-                byte_out = demod_output.byte;
-                cout << "out: " << (int)demod_output.byte << endl;
-            }
+            byte = (uint8_t)i;
+        }
+        else
+        {
+            byte = engine();
         }
 
-        int bit_idx = i / MOD_TICKS_PER_SYMBOL;
+        worked0 = test_mod_demod(mod, demod, ticks, byte, byte_out);
 
-        cout << "bit_idx " << bit_idx << endl;
-//        if (byte & (1 << bit_idx)) {
-//            BOOST_CHECK_CLOSE(output.fc.real().to_double(),  1.0, DBL_EPSILON);
-//            BOOST_CHECK_CLOSE(output.fc.imag().to_double(),  0.0, DBL_EPSILON);
-//        } else {
-//            BOOST_CHECK_CLOSE(output.fc.real().to_double(), -1.0, DBL_EPSILON);
-//            BOOST_CHECK_CLOSE(output.fc.imag().to_double(),  0.0, DBL_EPSILON);
-//        }
+        BOOST_CHECK_EQUAL(worked0, true);
+        BOOST_CHECK_EQUAL(byte, byte_out);
     }
 }
 
