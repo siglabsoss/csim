@@ -17,14 +17,24 @@ CSIM_TEST_CASE(LDPC_Basic)
 
     p->parseCSV(rows, cols, bytes, H);
 
+    cout << "Loaded H with rows, cols" << endl << rows << ", " << cols << endl;
+
     LDPCDecode decode(H, rows, cols);
 
 
-//    vector<int> rx = {4161 * -1, 5953 * -1, -9328 * -1, 0 * -1, -1188 * -1, 0 * -1, -1144 * -1, 0 * -1, -3925 * -1, 0 * -1, -6833 * -1, 9005 * -1, -4161 * -1, 7449 * -1, 965 * -1, -7030 * -1, 0 * -1, 0 * -1, 0 * -1, -1967 * -1, 0 * -1, 0 * -1, -9328 * -1, -3154 * -1};
-//    decode.decode(rx, 10);
+    vector<int> rx = {4161 * -1, 5953 * -1, -9328 * -1, 0 * -1, -1188 * -1, 0 * -1, -1144 * -1, 0 * -1, -3925 * -1, 0 * -1, -6833 * -1, 9005 * -1, -4161 * -1, 7449 * -1, 965 * -1, -7030 * -1, 0 * -1, 0 * -1, 0 * -1, -1967 * -1, 0 * -1, 0 * -1, -9328 * -1, -3154 * -1};
 
 
-//    decode.run();
+    bool solved;
+    size_t solved_in;
+
+    decode.decode(rx, 10, solved, solved_in);
+    cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << endl;
+
+    decode.decode(rx, 10, solved, solved_in);
+    cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << endl;
+
+
 }
 
 //CSIM_TEST_CASE(CSV_Parse)

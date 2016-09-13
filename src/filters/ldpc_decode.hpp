@@ -49,11 +49,11 @@ public:
 
     void print_h();
     unsigned get_syndrome(void);
-    void calc_syndrome(void);
+    void calc_syndrome(unsigned print);
     void run();
     void get_message();
     void print_cw();
-    void decode(vector<int> cw, size_t iterations);
+    void decode(vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations);
 private:
 
     void prep_once();

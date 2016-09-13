@@ -50,6 +50,9 @@ m_H(H),
 m_n(cols),
 m_m(rows)
 {
+    assert(m_H.size() == rows);
+    assert(m_H[0].size() == cols);
+
     // calculate stuff about H
     prep_once();
 }
@@ -90,14 +93,13 @@ void LDPCDecode::prep_once()
             }
         }
 
-        //      cout << "Check node " << i << " has degree " << m[i].degree << endl;
+//        cout << "Check node " << i << " has degree " << m_m[i].degree << endl;
     }
 }
 
 
-void LDPCDecode::calc_syndrome(void)
+void LDPCDecode::calc_syndrome(unsigned print = 1)
 {
-    unsigned print = 1;
 
     for( unsigned i = 0; i < h_rows; ++i )
     {
@@ -289,15 +291,42 @@ void LDPCDecode::print_cw()
 }
 
 
-void LDPCDecode::decode(vector<int> cw, size_t iterations)
-{
-    m_n.clear();
 
-    for(auto it = cw.begin(); it != cw.end(); ++it)
+void LDPCDecode::decode(vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations)
+{
+    assert(cw.size() == m_n.size());
+    assert(m_n.size() == m_hcols);
+
+    unsigned count = 0;
+    for(auto it = m_n.begin(); it != m_n.end(); ++it)
     {
-//        m_n.push_back(*it);
+        it->llr = cw[count];
+        count++;
     }
 
+    // These stay here if code is unsolved
+    solved = false;
+    solved_iterations = 0;
+
+
+    unsigned syn;
+    for(size_t i = 0; i < iterations; ++i)
+    {
+        calc_syndrome(0);
+        syn = get_syndrome();
+
+        cout << "Syndrome starting at iteration " << i << " is " << syn << endl;
+
+        if(syn == 0)
+        {
+           cout << "Breaking after " << i-1 << " iteration" << endl;
+           solved = true;
+           solved_iterations = i;
+           return;
+        }
+
+        iteration();
+    }
 }
 
 void LDPCDecode::run()
