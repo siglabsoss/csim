@@ -83,7 +83,7 @@ void Biquad::init(const SOSCoeffs &coeffs)
     coeffIntWidth   = m_b[0].first->iwl();
     resultWidth     = inputWordWidth + coeffWordWidth;
     resultIntWidth  = inputIntWidth + coeffIntWidth;
-    m_bx0 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    m_bx0 = std::unique_ptr<FixedComplex >(new FixedComplex (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
     log_debug("bx0 (Q%d.%d)", m_bx0->real().iwl(), m_bx0->real().wl() - m_bx0->real().iwl());
     //std::cout << "bx0 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[0].second << std::endl;
 
@@ -91,7 +91,7 @@ void Biquad::init(const SOSCoeffs &coeffs)
     coeffIntWidth   = m_b[1].first->iwl();
     resultWidth     = inputWordWidth + coeffWordWidth;
     resultIntWidth  = inputIntWidth + coeffIntWidth;
-    m_bx1 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    m_bx1 = std::unique_ptr<FixedComplex >(new FixedComplex (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
     log_debug("bx1 (Q%d.%d)", m_bx1->real().iwl(), m_bx1->real().wl() - m_bx1->real().iwl());
     //std::cout << "bx1 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[1].second << std::endl;
 
@@ -99,7 +99,7 @@ void Biquad::init(const SOSCoeffs &coeffs)
     coeffIntWidth   = m_b[2].first->iwl();
     resultWidth     = inputWordWidth + coeffWordWidth;
     resultIntWidth  = inputIntWidth + coeffIntWidth;
-    m_bx2 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    m_bx2 = std::unique_ptr<FixedComplex >(new FixedComplex (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
     log_debug("bx2 (Q%d.%d)", m_bx2->real().iwl(), m_bx2->real().wl() - m_bx2->real().iwl());
     //std::cout << "bx2 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_b[2].second << std::endl;
 
@@ -107,7 +107,7 @@ void Biquad::init(const SOSCoeffs &coeffs)
     coeffIntWidth   = m_a[0].first->iwl();
     resultWidth     = inputWordWidth + coeffWordWidth;
     resultIntWidth  = inputIntWidth + coeffIntWidth;
-    m_ay1 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    m_ay1 = std::unique_ptr<FixedComplex >(new FixedComplex (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
     log_debug("ay1 (Q%d.%d)", m_ay1->real().iwl(), m_ay1->real().wl() - m_ay1->real().iwl());
     //std::cout << "ay1 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_a[0].second << std::endl;
 
@@ -115,7 +115,7 @@ void Biquad::init(const SOSCoeffs &coeffs)
     coeffIntWidth   = m_a[1].first->iwl();
     resultWidth     = inputWordWidth + coeffWordWidth;
     resultIntWidth  = inputIntWidth + coeffIntWidth;
-    m_ay2 = std::unique_ptr<std::complex<sc_fix> >(new std::complex<sc_fix> (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
+    m_ay2 = std::unique_ptr<FixedComplex >(new FixedComplex (sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT), sc_fix(resultWidth, resultIntWidth, SC_RND, SC_SAT)));
     log_debug("ay2 (Q%d.%d)", m_ay2->real().iwl(), m_ay2->real().wl() - m_ay2->real().iwl());
     //std::cout << "ay2 = Q" << resultIntWidth << "." << resultWidth - resultIntWidth << " scaled 2^" << m_a[1].second << std::endl;
 }
@@ -161,11 +161,11 @@ void Biquad::tick(void)
      * the results in the 5 intermediate values.
      */
 
-    std::complex<sc_fix> x0(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
-    std::complex<sc_fix> x1(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
-    std::complex<sc_fix> x2(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
-    std::complex<sc_fix> y1(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
-    std::complex<sc_fix> y2(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    FixedComplex x0(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    FixedComplex x1(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    FixedComplex x2(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    FixedComplex y1(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
+    FixedComplex y2(sc_fix(16, 1, SC_RND, SC_SAT), sc_fix(16, 1, SC_RND, SC_SAT));
 
     //This conversion from sc_fixed to sc_fix is needed for the types to play nice together
     x0 = m_x[0];
@@ -237,7 +237,7 @@ void Biquad::tick(void)
 //    m_y[0].real(x0x1x2y1y2);
 }
 
-void Biquad::complexScalarMultiply(std::complex<sc_fix> &result, const std::complex<sc_fix> &complex, const sc_fix &scalar)
+void Biquad::complexScalarMultiply(FixedComplex &result, const FixedComplex &complex, const sc_fix &scalar)
 {
     //For some reason not yet known, when dealing with complex<sc_fix> we must store the calculation in
     //intermediate results instead of acting on the complex variable directly. This does not seem to be necessary
@@ -252,7 +252,7 @@ void Biquad::complexScalarMultiply(std::complex<sc_fix> &result, const std::comp
     result.imag(tempResultImag);
 }
 
-void Biquad::shiftRightFixedComplex(std::complex<sc_fix> &val, size_t shiftBits)
+void Biquad::shiftRightFixedComplex(FixedComplex &val, size_t shiftBits)
 {
     if (shiftBits == 0) {
         return;
