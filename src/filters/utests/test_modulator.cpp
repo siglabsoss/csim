@@ -28,8 +28,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
     Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
 
     BOOST_CHECK_EQUAL(mod.input(data), true);
-    size_t expectedTicksPerOutput = 2; //derived from parameters at top of file
-    for (unsigned int i = 0; i < sizeof(byte) * expectedTicksPerOutput; i++) {
+    for (unsigned int i = 0; i < (sizeof(byte) * 8) * MOD_TICKS_PER_SYMBOL; i++) {
         mod.tick();
         mod.output(output);
         int bit_idx = i / MOD_TICKS_PER_SYMBOL;
