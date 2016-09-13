@@ -7,6 +7,7 @@
 
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
+#include <memory>
 
 class BFPFFT : public FilterChainElement
 {
@@ -17,12 +18,23 @@ public:
     void tick(void) override;
 private:
     FixedComplexNorm16 getTwiddleFactor(size_t stage, size_t n) const;
-    void dit(size_t baseT, size_t N, size_t stage);
+    void dit();
 
-    std::vector<FixedComplex32>      m_inputs;
+    template <typename COMPLEX_T>
+    void shiftFixedComplex(COMPLEX_T &val, ssize_t shiftBits);
+    void shiftOutput(ssize_t shiftAmount);
+    void shiftStage(ssize_t shiftAmount);
+    ssize_t calculateShiftAmountForStage(size_t stage);
+    void updateMaxValueForStage(size_t stage, const FixedComplex &val);
+
+    size_t                                           m_numStages;
+    std::vector<FixedComplexNorm32>  m_inputs;
     std::vector<FixedComplex32>      m_outputs;
     std::vector<FixedComplexNorm16>  m_twiddleFactors;
     bool                             m_outputValid;
     size_t                           m_outputIdx;
     size_t                           m_inputIdx;
+
+    std::vector<uint64_t>            m_maxValuePerStage;
+    ssize_t                          m_scaleExponent;
 };
