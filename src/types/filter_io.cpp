@@ -10,6 +10,9 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
         case IO_TYPE_FIXED_COMPLEX:
             os << obj.fc;
             break;
+        case IO_TYPE_INT32_COMPLEX:
+            os << obj.intc;
+            break;
         case IO_TYPE_BYTE:
             os << "[0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(obj.byte) << "]";
             break;
@@ -37,6 +40,9 @@ filter_io_t::filter_io_t(const filter_io_t &other) :
             case IO_TYPE_FIXED_COMPLEX:
                 this->fc = other.fc;
                 break;
+            case IO_TYPE_INT32_COMPLEX:
+                this->intc = other.intc;
+                break;
             case IO_TYPE_BYTE:
                 this->byte = other.byte;
                 break;
@@ -56,6 +62,9 @@ filter_io_t & filter_io_t::operator=(const filter_io_t &rhs)
                 break;
             case IO_TYPE_FIXED_COMPLEX:
                 this->fc = rhs.fc;
+                break;
+            case IO_TYPE_INT32_COMPLEX:
+                this->intc = rhs.intc;
                 break;
             case IO_TYPE_BYTE:
                 this->byte = rhs.byte;
@@ -88,6 +97,13 @@ filter_io_t & filter_io_t::operator=(const uint8_t &rhs)
     return *this;
 }
 
+//filter_io_t & filter_io_t::operator=(const ComplexInt64 &rhs)
+//{
+//    this->type = IO_TYPE_INT32_COMPLEX;
+//    this->intc = rhs;
+//    return *this;
+//}
+
 ComplexDouble filter_io_t::toComplexDouble() const
 {
     double real = 0, imag = 0;
@@ -101,6 +117,10 @@ ComplexDouble filter_io_t::toComplexDouble() const
         case IO_TYPE_FIXED_COMPLEX:
             real = this->fc.real().to_double();
             imag = this->fc.imag().to_double();
+            break;
+        case IO_TYPE_INT32_COMPLEX:
+            real = static_cast<double>(this->intc.real());
+            imag = static_cast<double>(this->intc.imag());
             break;
         case IO_TYPE_BYTE:
             break;
@@ -140,14 +160,25 @@ size_t filter_io_t::serialize(uint8_t *data) const
             numBytes += sizeof(value);
             break;
         }
-       case IO_TYPE_BYTE:
-       {
-           memcpy(data + numBytes, &byte, sizeof(byte));
-           numBytes += sizeof(byte);
-           break;
-       }
-       case IO_TYPE_NULL:
-           break;
+        case IO_TYPE_INT32_COMPLEX:
+        {
+            int64_t value = rf.real();
+            memcpy(data + numBytes, &value, sizeof(value));
+            numBytes += sizeof(value);
+
+            value = rf.imag();
+            memcpy(data + numBytes, &value, sizeof(value));
+            numBytes += sizeof(value);
+            break;
+        }
+        case IO_TYPE_BYTE:
+        {
+            memcpy(data + numBytes, &byte, sizeof(byte));
+            numBytes += sizeof(byte);
+            break;
+        }
+        case IO_TYPE_NULL:
+            break;
     }
 
     return numBytes;
