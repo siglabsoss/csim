@@ -6,14 +6,12 @@
  *
  * The "block floating point" technique was inspired by the paper here: http://www.ti.com/lit/an/spra948/spra948.pdf
  *
- * In order to switch between 32-bit and 16-bit inputs,
- * change the type of m_inputs and twiddle to match, and also the scale factor in the calculateShiftAmountForStage function
  */
 
 #include <filters/bfp_fft.hpp>
 #include <utils/utils.hpp>
 
-//NOTE: This is meant to match the scaling factor of the input fixed point type (Q.31)
+//NOTE: This is meant to match the input bit width (32-bits)
 static constexpr uint32_t SCALE_FACTOR = (1 << 31);
 
 BFPFFT::BFPFFT(size_t N, bool inverse) :
@@ -26,7 +24,7 @@ BFPFFT::BFPFFT(size_t N, bool inverse) :
     m_outputIdx(0),
     m_inputIdx(0),
     m_maxValuePerStage(m_numStages),
-    m_scaleExponent(0),
+    m_scaleExp(0),
     m_inverse(inverse)
 {
     //N must be power of two, use subtract and bit-compare trick
@@ -52,8 +50,10 @@ bool BFPFFT::input(const filter_io_t &data)
     size_t reverseIdx = reverseBits(N, m_inputIdx++);
 
     //XXX can we just set the underlying integer value directly instead of going through a double?
-    m_inputs[reverseIdx].real(static_cast<double>(data.intc.real()) / SCALE_FACTOR);
-    m_inputs[reverseIdx].imag(static_cast<double>(data.intc.imag()) / SCALE_FACTOR);
+    m_inputs[reverseIdx].real(static_cast<double>(data.intc.c.real()) / SCALE_FACTOR);
+    m_inputs[reverseIdx].imag(static_cast<double>(data.intc.c.imag()) / SCALE_FACTOR);
+
+    m_scaleExp = data.intc.exp;
 
     //Track the maximum input value for proper scaling
     updateMaxValueForStage(1, m_inputs[reverseIdx]);
@@ -64,8 +64,7 @@ bool BFPFFT::input(const filter_io_t &data)
 bool BFPFFT::output(filter_io_t &data)
 {
     if (m_outputValid == true) {
-        data.type = IO_TYPE_INT32_COMPLEX;
-        data.intc = m_outputs[m_outputIdx++];
+        data = m_outputs[m_outputIdx++];
         if (m_outputIdx >= m_outputs.size()) {
             m_outputIdx = 0;
         }
@@ -83,21 +82,21 @@ void BFPFFT::tick(void)
     //We're good to go...
     dit();
 
-    for (size_t i = 0; i < m_inputs.size(); i++) {
-        m_outputs[i].real(m_inputs[i].real().range().to_int64());
-        m_outputs[i].imag(m_inputs[i].imag().range().to_int64());
+    //For IIFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
+    if (m_inverse) {
+        m_scaleExp -= m_numStages;
     }
 
-    //For IIFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
-    //We keep track of the exponent, even though we're not doing with it right now
-    if (m_inverse) {
-        m_scaleExponent -= m_numStages;
+    for (size_t i = 0; i < m_inputs.size(); i++) {
+        m_outputs[i].c.real(m_inputs[i].real().range().to_int());
+        m_outputs[i].c.imag(m_inputs[i].imag().range().to_int());
+        m_outputs[i].exp = m_scaleExp;
     }
 
     //Reset some internal state for the next round
     m_inputIdx = 0;
     std::fill(m_maxValuePerStage.begin(), m_maxValuePerStage.end(), 0);
-    m_scaleExponent = 0;
+    m_scaleExp = 0;
 
     m_outputValid = true;
     assert(m_outputIdx == 0);
@@ -105,17 +104,23 @@ void BFPFFT::tick(void)
 
 void BFPFFT::dit()
 {
+    /**
+     * Block floating point scaling operates on a per-stage basis by executing the following steps
+     * 1) Calculate the appropriate shift for the entire "block" (inputs for the current stage) based on the single maximum input value.
+     * 2) Shift the "block" based on the scaling factor from step 1.
+     * 3) Perform the radix-2 butterflies
+     */
     size_t N = m_inputs.size() >> 1; //number of butterflies per block
     size_t numBlocks = 1; //number of blocks per stage
     for (size_t stage = 1; stage <= m_numStages; stage++) { //stage loop
-        //Calculate shift amount based on maximum value per stage and then shift the values
+        //Step 1 - Calculate shift amount
         ssize_t shiftAmount = calculateShiftAmountForStage(stage);
+        //Step 2 - Shift the inputs
         shiftStage(shiftAmount);
-//        std::cout << "stage " << stage << " shifted by " << shiftAmount << std::endl;
+        //std::cout << "stage " << stage << " shifted by " << shiftAmount << std::endl;
         //Track the accumulated scale amount so that we can scale back at the end
-        m_scaleExponent += shiftAmount;
+        m_scaleExp += shiftAmount;
         for (size_t block = 0; block < numBlocks; block++) { //block loop
-//            std::cout << "block = " << block << std::endl;
             size_t baseT = block * N * 2;
             size_t baseB = baseT + N;
             for (size_t n = 0; n < N; n++) { //butterfly loop
@@ -125,13 +130,13 @@ void BFPFFT::dit()
 
                 FixedComplex1_31 twiddle = getTwiddleFactor(stage, n + baseT/2);
 
-                //Radix-2 butterfly
+                //Step 3) Perform the Radix-2 butterflies
                 FixedComplex1_31 top = m_inputs[topIdx];
                 FixedComplex1_31 bot = m_inputs[botIdx] * twiddle;
                 m_inputs[topIdx] = top + bot;
                 m_inputs[botIdx] = top - bot;
 
-//                std::cout << "x(" << baseT + n << ") & x(" << baseB + n << ") * twiddle(" << n + baseT/2 << ")" << std::endl;
+                //std::cout << "x(" << baseT + n << ") & x(" << baseB + n << ") * twiddle(" << n + baseT/2 << ")" << std::endl;
 
                 //Track the max value to shift the next stage properly
                 if (stage != m_numStages) {
@@ -177,8 +182,8 @@ void BFPFFT::shiftFixedComplex(COMPLEX_T &val, ssize_t shiftBits)
 void BFPFFT::shiftOutput(ssize_t shiftAmount)
 {
     for (size_t i = 0; i < m_outputs.size(); i++) {
-        int32_t real = m_outputs[i].real();
-        int32_t imag = m_outputs[i].imag();
+        int32_t real = m_outputs[i].c.real();
+        int32_t imag = m_outputs[i].c.imag();
         if (shiftAmount < 0) {
             real <<= static_cast<size_t>(abs(shiftAmount));
             imag <<= static_cast<size_t>(abs(shiftAmount));
@@ -186,8 +191,8 @@ void BFPFFT::shiftOutput(ssize_t shiftAmount)
             real >>= shiftAmount;
             imag >>= shiftAmount;
         }
-        m_outputs[i].real(real);
-        m_outputs[i].imag(imag);
+        m_outputs[i].c.real(real);
+        m_outputs[i].c.imag(imag);
     }
 }
 

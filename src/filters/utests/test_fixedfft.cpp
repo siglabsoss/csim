@@ -13,9 +13,9 @@ template <typename T>
 void checkError(const vector<T> &outputs, const vector<T> &answers, double difference);
 
 void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<ComplexDouble> &answers, double difference);
-void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse, size_t outputShiftAmount);
-void runFFTLoopbackTest(const std::string &infile, size_t outputShiftAmount);
-void checkErrorComplexInt(const vector<ComplexInt> &actual, const vector<ComplexInt> &expected, uint32_t threshold);
+void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse);
+void runFFTLoopbackTest(const std::string &infile);
+void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const vector<std::complex<int32_t> > &expected, uint32_t threshold);
 
 CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
 {
@@ -24,7 +24,8 @@ CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
     filter_io_t data, output;
     static constexpr uint32_t SCALE_FACTOR = (1u << 31);
     data.type = IO_TYPE_INT32_COMPLEX;
-    data.intc = ComplexInt(SCALE_FACTOR * M_SQRT1_2/3, SCALE_FACTOR * M_SQRT1_2/3);
+    data.intc.c = std::complex<int32_t> (SCALE_FACTOR * M_SQRT1_2/3, SCALE_FACTOR * M_SQRT1_2/3);
+    data.intc.exp = 0;
     BFPFFT fft(NUM_SAMPLES, false);
     size_t outputCount = 0;
     size_t noOutputCount = 0;
@@ -36,8 +37,8 @@ CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
             if (fft.output(output)) {
                 //double outputReal = output.toComplexDouble().real();
                 //double outputImag = output.toComplexDouble().imag();
-                double outputReal = static_cast<double>(output.intc.real()) / (1 << 29);
-                double outputImag = static_cast<double>(output.intc.imag()) / (1 << 29);
+                double outputReal = static_cast<double>(output.intc.c.real()) / (1 << 29);
+                double outputImag = static_cast<double>(output.intc.c.imag()) / (1 << 29);
 
                 double realDiff = 1.0;
                 double imagDiff = 1.0;
@@ -76,7 +77,8 @@ CSIM_TEST_CASE(FFT_IO_PARITY)
     std::vector<filter_io_t> samples(NUM_SAMPLES*4);
     for (size_t i = 0; i < samples.size(); i++) {
         samples[i].type = IO_TYPE_INT32_COMPLEX;
-        samples[i].intc = ComplexInt(1,1);
+        samples[i].intc.c = std::complex<int32_t> (1,1);
+        samples[i].intc.exp = 0;
     }
 
     filter_io_t output;
@@ -98,20 +100,20 @@ CSIM_TEST_CASE(FFT_IO_PARITY)
 
 CSIM_TEST_CASE(FFT_MATLAB)
 {
-    runFFTTest("./data/fft/input/fft_input1.csv", "./data/fft/answers/fft_output1.csv", false, 25);
+    runFFTTest("./data/fft/input/fft_input1.csv", "./data/fft/answers/fft_output1.csv", false);
 }
 
 CSIM_TEST_CASE(IFFT_MATLAB)
 {
-    runFFTTest("./data/fft/input/ifft_input1.csv", "./data/fft/answers/ifft_output1.csv", true, 35);
+    runFFTTest("./data/fft/input/ifft_input1.csv", "./data/fft/answers/ifft_output1.csv", true);
 }
 
 CSIM_TEST_CASE(FFT_IFFT)
 {
-    runFFTLoopbackTest("./data/fft/input/ifft_input1.csv", 1);
+    runFFTLoopbackTest("./data/fft/input/ifft_input1.csv");
 }
 
-void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse, size_t outputShiftAmount)
+void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse)
 {
     string inFile(infile);
     string answersFile(outfile);
@@ -133,15 +135,15 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
         for (int j = 0; j < points; j++) {
             //std::cout << j << ": " << inputs[j] << std::endl;
             data.type = IO_TYPE_INT32_COMPLEX;
-            data.intc.real(inputs[j].real() * static_cast<double>(1u << scaleExponent));
-            data.intc.imag(inputs[j].imag() * static_cast<double>(1u << scaleExponent));
+            data.intc.c.real(inputs[j].real() * static_cast<double>(1u << scaleExponent));
+            data.intc.c.imag(inputs[j].imag() * static_cast<double>(1u << scaleExponent));
+            data.intc.exp = 0;
             fft.input(data);
             fft.tick();
             bool didGetOutput = fft.output(data);
             bool lastInput = (i == 1 && j == points - 1);
             if (didGetOutput && !lastInput) {
-                ComplexDouble output(static_cast<double>(data.intc.real()) / static_cast<double>(1ul << outputShiftAmount), static_cast<double>(data.intc.imag()) / static_cast<double>(1ul << outputShiftAmount));
-                outputs.push_back(output);
+                outputs.push_back(data.toComplexDouble());
             }//If output is ready
         }//Insert all input
     }//Insert input again to get output
@@ -150,14 +152,14 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
     checkErrorComplexDouble(outputs, answers, 0.007);
 }
 
-void runFFTLoopbackTest(const std::string &infile, size_t outputShiftAmount)
+void runFFTLoopbackTest(const std::string &infile)
 {
     string inFile(infile);
 
     std::vector<ComplexDouble> inputs;
-    std::vector<ComplexInt> inputsInt;
-    std::vector<ComplexInt> fftoutputs;
-    std::vector<ComplexInt> ifftoutputs;
+    std::vector<std::complex<int32_t> > inputsInt;
+    std::vector<std::complex<int32_t> > fftoutputs;
+    std::vector<std::complex<int32_t> > ifftoutputs;
 
     inputs = readComplexFromCSV<ComplexDouble>(inFile);
     BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
@@ -170,9 +172,10 @@ void runFFTLoopbackTest(const std::string &infile, size_t outputShiftAmount)
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
             //std::cout << j << ": " << inputs[j] << std::endl;
-            inputsInt.push_back(ComplexInt(inputs[j].real() * static_cast<double>(1u << scaleExponent), inputs[j].imag() * static_cast<double>(1u << scaleExponent)));
+            inputsInt.push_back(std::complex<int32_t> (inputs[j].real() * static_cast<double>(1u << scaleExponent), inputs[j].imag() * static_cast<double>(1u << scaleExponent)));
             data.type = IO_TYPE_INT32_COMPLEX;
-            data.intc = inputsInt[j];
+            data.intc.c = inputsInt[j];
+            data.intc.exp = 0;
             //data.intc.real(inputs[j].real() * static_cast<double>(1u << scaleExponent));
             //data.intc.imag(inputs[j].imag() * static_cast<double>(1u << scaleExponent));
             fft.input(data);
@@ -180,7 +183,7 @@ void runFFTLoopbackTest(const std::string &infile, size_t outputShiftAmount)
             bool didGetOutput = fft.output(data);
             bool lastInput = (i == 1 && j == points - 1);
             if (didGetOutput && !lastInput) {
-                fftoutputs.push_back(data.intc);
+                fftoutputs.push_back(data.intc.c);
             }//If output is ready
         }//Insert all input
     }//Insert input again to get output
@@ -188,22 +191,27 @@ void runFFTLoopbackTest(const std::string &infile, size_t outputShiftAmount)
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
             data.type = IO_TYPE_INT32_COMPLEX;
-            data.intc = fftoutputs[j];
+            data.intc.c = fftoutputs[j];
             ifft.input(data);
             ifft.tick();
             bool didGetOutput = ifft.output(data);
             bool lastInput = (i == 1 && j == points - 1);
             if (didGetOutput && !lastInput) {
                 //ComplexDouble output(static_cast<double>(data.intc.real()) / static_cast<double>(1ul << outputShiftAmount), static_cast<double>(data.intc.imag()) / static_cast<double>(1ul << outputShiftAmount));
-                int32_t real = data.intc.real();
-                int32_t imag = data.intc.imag();
-                real <<= outputShiftAmount;
-                imag <<= outputShiftAmount;
-                ifftoutputs.push_back(ComplexInt(real, imag));
+                int32_t real = data.intc.c.real();
+                int32_t imag = data.intc.c.imag();
+                ssize_t outputShiftAmount = -data.intc.exp;
+
+                if (outputShiftAmount < 0) {
+                    outputShiftAmount = static_cast<ssize_t>(abs(outputShiftAmount));
+                    real <<= outputShiftAmount;
+                    imag <<= outputShiftAmount;
+                }
+                ifftoutputs.push_back(std::complex<int32_t> (real, imag));
             }//If output is ready
         }
     }
-    checkErrorComplexInt(ifftoutputs, inputsInt, 32768*6);
+    checkErrorComplexInt (ifftoutputs, inputsInt, (8192)*27);
 }
 
 template <typename T>
@@ -223,14 +231,24 @@ void checkError(const vector<T> &outputs, const vector<T> &answers, double diffe
 		}
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
-void checkErrorComplexInt(const vector<ComplexInt> &actual, const vector<ComplexInt> &expected, uint32_t threshold)
+void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const vector<std::complex<int32_t> > &expected, uint32_t threshold)
 {
+    unsigned long long accumRealDiff = 0;
+    unsigned long long accumImagDiff = 0;
     for (size_t i = 0; i < actual.size(); i++) {
         uint32_t realDiff = abs(actual[i].real() - expected[i].real());
         uint32_t imagDiff = abs(actual[i].imag() - expected[i].imag());
+        accumRealDiff += realDiff;
+        accumImagDiff += imagDiff;
+
         BOOST_CHECK_MESSAGE(realDiff < threshold, "Real Output: " << actual[i].real() << " Real Answer: " << expected[i].real() << " Real Diff: " << realDiff);
         BOOST_CHECK_MESSAGE(imagDiff < threshold, "Imag Output: " << actual[i].imag() << " Imag Answer: " << expected[i].imag() << " Imag Diff: " << imagDiff);
     }
+
+    double avgRealDiff = static_cast<double>(accumRealDiff) / actual.size();
+    double avgImagDiff = static_cast<double>(accumImagDiff) / actual.size();
+
+    std::cout << "avgRealDiff = " << avgRealDiff << " avgImagDiff = " << avgImagDiff << std::endl;
 }
 
 void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<ComplexDouble> &answers, double difference)

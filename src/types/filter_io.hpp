@@ -11,7 +11,11 @@ enum type_t {
     IO_TYPE_BYTE
 };
 
-typedef std::complex<int32_t> ComplexInt;
+struct ComplexInt
+{
+    std::complex<int32_t> c;
+    ssize_t               exp;
+};
 
 struct filter_io_t
 {
@@ -33,7 +37,7 @@ struct filter_io_t
     filter_io_t & operator=(const ComplexDouble &rhs);
     filter_io_t & operator=(const FixedComplex &rhs);
     filter_io_t & operator=(const uint8_t &rhs);
-    //filter_io_t & operator=(const ComplexInt &rhs); XXX compiler considers FixedComplex assignment ambiguous with this
+    filter_io_t & operator=(const ComplexInt &rhs);
 
     size_t serialize(uint8_t *data) const;
     void deserialize(const uint8_t *data, filter_io_t &output) const;

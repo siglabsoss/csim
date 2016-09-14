@@ -129,8 +129,9 @@ bool Biquad::input(const filter_io_t &data)
     for (size_t i = 0; i < size - 1; i++) {
         m_x[size - i - 1] = m_x[size - i - 2];
     }
-    m_x[0].real(static_cast<double>(data.intc.real()) / SCALE_FACTOR);
-    m_x[0].imag(static_cast<double>(data.intc.imag()) / SCALE_FACTOR);
+    m_x[0].real(static_cast<double>(data.intc.c.real()) / SCALE_FACTOR);
+    m_x[0].imag(static_cast<double>(data.intc.c.imag()) / SCALE_FACTOR);
+    m_inputExp = data.intc.exp;
 
     m_newInput = true;
     return true;
@@ -140,8 +141,9 @@ bool Biquad::output(filter_io_t &data)
 {
     if (m_newInput) {
         data.type = IO_TYPE_INT32_COMPLEX;
-        data.intc.real(m_y[0].real().range().to_int() << 16);
-        data.intc.imag(m_y[0].imag().range().to_int() << 16);
+        data.intc.c.real(m_y[0].real().range().to_int() << 16);
+        data.intc.c.imag(m_y[0].imag().range().to_int() << 16);
+        data.intc.exp = m_inputExp;
         m_newInput = false;
         return true;
     }

@@ -25,8 +25,8 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
     double imagErrAccum = 0.0;
     for (size_t i = 0; i < inputs.size(); i++) {
         input.type = IO_TYPE_INT32_COMPLEX;
-        input.intc.real(inputs[i].real() * static_cast<double>(1u << scaleExponent));
-        input.intc.imag(inputs[i].imag() * static_cast<double>(1u << scaleExponent));
+        input.intc.c.real(inputs[i].real() * static_cast<double>(1u << scaleExponent));
+        input.intc.c.imag(inputs[i].imag() * static_cast<double>(1u << scaleExponent));
         bi.input(input);
         bi.tick();
         BOOST_CHECK(bi.output(output) == true);
@@ -34,9 +34,9 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
         //std::cout << output.fc.real() << "," << output.fc.imag() << std::endl;
         //ComplexDouble output(static_cast<double>(data.intc.real()) / static_cast<double>(1ul << outputShiftAmount), static_cast<double>(data.intc.imag()) / static_cast<double>(1ul << outputShiftAmount));
         double expectedReal = outputs[i].real();
-        double actualReal = static_cast<double>(output.intc.real()) / static_cast<double>(1ul << outputScaleExponent);
+        double actualReal = static_cast<double>(output.intc.c.real()) / static_cast<double>(1ul << outputScaleExponent);
         double expectedImag = outputs[i].imag();
-        double actualImag = static_cast<double>(output.intc.imag()) / static_cast<double>(1ul << outputScaleExponent);
+        double actualImag = static_cast<double>(output.intc.c.imag()) / static_cast<double>(1ul << outputScaleExponent);
 
         double realErrorAbs = 0.0;
         double imagErrorAbs = 0.0;

@@ -45,4 +45,5 @@ private:
 
     bool                        m_newInput;
     size_t                      m_coeffWidth;
+    ssize_t                     m_inputExp;
 };
