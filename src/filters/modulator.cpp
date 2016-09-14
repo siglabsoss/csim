@@ -97,9 +97,8 @@ constellation_map_t Modulator::getQPSKConstellations()
     constellation_map_t constellations;
     constellations[0b00] = constellation_t(-M_SQRT1_2, -M_SQRT1_2);
     constellations[0b01] = constellation_t(-M_SQRT1_2,  M_SQRT1_2);
-    constellations[0b11] = constellation_t( M_SQRT1_2,  M_SQRT1_2);
     constellations[0b10] = constellation_t( M_SQRT1_2, -M_SQRT1_2);
-
+    constellations[0b11] = constellation_t( M_SQRT1_2,  M_SQRT1_2);
     return constellations;
 }
 constellation_map_t Modulator::get8PSKConstellations()

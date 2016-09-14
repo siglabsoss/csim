@@ -10,6 +10,7 @@ set(SIGFILTERS_SOURCES
     mixer.cpp
     decimator.cpp
     hard_demod.cpp
+    soft_demod.cpp
     noise_element.cpp
     ldpc_decode.cpp
     biquad.cpp

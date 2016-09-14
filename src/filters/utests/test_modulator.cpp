@@ -2,11 +2,15 @@
 
 #include <filters/modulator.hpp>
 #include <filters/hard_demod.hpp>
-#include <boost/integer/integer_mask.hpp>
+#include <filters/soft_demod.hpp>
+#include <utils/plotter.hpp>
+
 
 #include <cfloat>
 
 static constexpr size_t MOD_TICKS_PER_SYMBOL = 3;
+
+using namespace std;
 
 
 
@@ -78,7 +82,7 @@ bool test_mod_demod(Modulator& mod, HardDemod& demod, size_t ticks, uint8_t byte
 
 CSIM_TEST_CASE(MODULATOR_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
 {
-    uint8_t byte = 0b01010101;
+    uint8_t byte = 0;
     uint8_t byte_out = 0;
     bool worked0;
     Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
@@ -107,6 +111,88 @@ CSIM_TEST_CASE(MODULATOR_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
         BOOST_CHECK_EQUAL(byte, byte_out);
     }
 }
+
+CSIM_TEST_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
+{
+//    uint8_t byte = 0;
+//    uint8_t byte_out = 0;
+//    bool worked0;
+    Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_QPSK);
+    SoftDemod demod(Modulator::MOD_SCHEME_QPSK);
+
+    std::random_device engine;
+
+
+
+
+    bool worked2;
+    filter_io_t data, mod_output, demod_output, demod_input;
+//    data = byte; // use the =operator overload
+//    worked0 = mod.input(data);
+//    BOOST_CHECK_EQUAL(worked0, true);
+
+    //demod_input = ComplexDouble(-1,-1);
+
+    vector<ComplexDouble> inputs = {ComplexDouble(-M_SQRT1_2,-M_SQRT1_2), ComplexDouble(M_SQRT1_2,-M_SQRT1_2), ComplexDouble(-M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2/1.20,-M_SQRT1_2/1.20)};
+
+
+    const plotter &plot = plotter::get();
+    plot.nplotqam(inputs, "h");
+
+    for(auto it = inputs.begin(); it != inputs.end(); ++it)
+    {
+        demod_input = *it;
+        demod.input(demod_input);
+        demod.tick();
+        worked2 = demod.output(demod_output);
+        if(worked2) {
+            cout << "input: " << demod_input.rf << endl << " output: " << std::real(demod_output.rf);
+        }
+
+        demod.tick();
+        worked2 = demod.output(demod_output);
+        if(worked2) {
+            cout << " " << std::real(demod_output.rf) << endl;
+        }
+//        cout << endl << endl << endl << endl;
+    }
+
+
+
+//            cout << "worked " << worked2 << endl;
+//    if( worked2 )
+//    {
+//        byte_out = demod_output.byte;
+//        cout << "out: " << (int)demod_output.byte << endl;
+//    }
+
+
+
+
+
+
+//    size_t ticks = sizeof(byte) * CHAR_BIT * MOD_TICKS_PER_SYMBOL;
+//
+//    for(size_t i = 0; i < 300; i++)
+//    {
+//
+//        if(i < 256)
+//        {
+//            byte = (uint8_t)i;
+//        }
+//        else
+//        {
+//            byte = engine();
+//        }
+//
+//        worked0 = test_mod_demod(mod, demod, ticks, byte, byte_out);
+//
+//        BOOST_CHECK_EQUAL(worked0, true);
+//        BOOST_CHECK_EQUAL(byte, byte_out);
+//    }
+}
+
+
 
 
 CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)

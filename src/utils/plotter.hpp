@@ -125,7 +125,7 @@ public:
     }
 
     // Constellation plot with transparent blobs (good for QAM)
-    template<typename T> void nplotqam(const CircularBuffer<T> &obj, string title) const
+    template<typename T> void nplotqam(const T &obj, string title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplotqam";

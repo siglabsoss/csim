@@ -14,7 +14,7 @@ public:
 
     void tick(void) override;
 
-private:
+protected:
     void    queueSymbol(symbol_t symbol);
     bool    dequeueByte(uint8_t &byte);
     static double angleDiff(double a, double b);
