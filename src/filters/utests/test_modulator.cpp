@@ -133,11 +133,28 @@ CSIM_TEST_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
 
     //demod_input = ComplexDouble(-1,-1);
 
-    vector<ComplexDouble> inputs = {ComplexDouble(-M_SQRT1_2,-M_SQRT1_2), ComplexDouble(M_SQRT1_2,-M_SQRT1_2), ComplexDouble(-M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2/1.20,-M_SQRT1_2/1.20)};
+//    vector<ComplexDouble> inputs = {ComplexDouble(-M_SQRT1_2,-M_SQRT1_2), ComplexDouble(M_SQRT1_2,-M_SQRT1_2), ComplexDouble(-M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2/1.20,-M_SQRT1_2/1.20)};
 
+    vector<ComplexDouble> inputs;
+
+    vector<double> b1out;
+    vector<double> fakellr;
+
+    for(size_t i = 0; i < 100; i++)
+    {
+        double v =  -M_SQRT1_2 + (i*M_SQRT1_2/50.0);
+        cout << v << endl;
+        inputs.push_back(ComplexDouble(M_SQRT1_2, v));
+
+
+        double pbi0 = (double)i;
+        double pbi1 = (double)100 - i;
+        fakellr.push_back(log2(pbi0/pbi1));
+    }
 
     const plotter &plot = plotter::get();
     plot.nplotqam(inputs, "h");
+//    plot.nplot(fakellr, "fake llr");
 
     for(auto it = inputs.begin(); it != inputs.end(); ++it)
     {
@@ -147,16 +164,21 @@ CSIM_TEST_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
         worked2 = demod.output(demod_output);
         if(worked2) {
             cout << "input: " << demod_input.rf << endl << " output: " << std::real(demod_output.rf);
+
+
         }
 
         demod.tick();
         worked2 = demod.output(demod_output);
         if(worked2) {
             cout << " " << std::real(demod_output.rf) << endl;
+            b1out.push_back(std::real(demod_output.rf));
+
         }
 //        cout << endl << endl << endl << endl;
     }
 
+    plot.nplot(b1out, "llr of b1");
 
 
 //            cout << "worked " << worked2 << endl;
