@@ -26,27 +26,27 @@ CSIM_TEST_CASE(HAMMING_DISTANCE)
 CSIM_TEST_CASE(DYNAMIC_RANGE_SHIFT_CALCULATION)
 {
     int shiftBits = utils::getShiftAmount(0.00582390);
-    BOOST_CHECK_EQUAL(shiftBits, 6);
+    BOOST_CHECK_EQUAL(-shiftBits, 6);
 
     shiftBits = utils::getShiftAmount(-0.00582390);
-    BOOST_CHECK_EQUAL(shiftBits, 6);
+    BOOST_CHECK_EQUAL(-shiftBits, 6);
 
     shiftBits = utils::getShiftAmount(0.003322259);
-    BOOST_CHECK_EQUAL(shiftBits, 7);
+    BOOST_CHECK_EQUAL(-shiftBits, 7);
 
     shiftBits = utils::getShiftAmount(0.5);
-    BOOST_CHECK_EQUAL(shiftBits, 0);
+    BOOST_CHECK_EQUAL(-shiftBits, 0);
 
     shiftBits = utils::getShiftAmount(0.999999);
-    BOOST_CHECK_EQUAL(shiftBits, 0);
+    BOOST_CHECK_EQUAL(-shiftBits, 0);
 
     shiftBits = utils::getShiftAmount(1.0);
-    BOOST_CHECK_EQUAL(shiftBits, 0);
+    BOOST_CHECK_EQUAL(shiftBits, 1);
 
     shiftBits = utils::getShiftAmount(2.5);
-    BOOST_CHECK_EQUAL(shiftBits, 0);
+    BOOST_CHECK_EQUAL(shiftBits, 2);
 
-    shiftBits = utils::getShiftAmount(150);
+    shiftBits = utils::getShiftAmount(0.0);
     BOOST_CHECK_EQUAL(shiftBits, 0);
 }
 

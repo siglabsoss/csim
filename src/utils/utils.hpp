@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <types/fixedcomplex.hpp>
+#include <types/complexdouble.hpp>
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <string>
 #include <stdint.h>
@@ -18,10 +19,11 @@ unsigned int calculateHammingDistance(uint8_t a, uint8_t b);
 
 namespace utils
 {
-std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, size_t &shiftBits);
-unsigned getShiftAmount(double coeff);
+std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, ssize_t &shiftBits);
+int getShiftAmount(double coeff);
 unsigned getIntegerBits(double coeff);
 bool addition32DoesOverflow(int32_t a, int32_t b);
+size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values);
 };
 
 #endif

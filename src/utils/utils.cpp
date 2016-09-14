@@ -61,32 +61,51 @@ std::vector<T> readComplexFromCSV(const std::string &inFile, double scaleDownFac
     in.close();
     return input;
 }
-template std::vector<ComplexDouble> readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
+template std::vector<ComplexDouble>  readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
 template std::vector<FixedComplex16> readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
 template std::vector<FixedComplex32> readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
+template std::vector<FixedComplex2_30> readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
 template std::vector<FixedComplex64> readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
 
 //XXX wrap entire file in namespace
 namespace utils
 {
 
-std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, size_t &shiftBits)
+std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, ssize_t &shiftBits)
 {
-    shiftBits = getShiftAmount(val);
+    shiftBits = -getShiftAmount(val);
     size_t intBits = getIntegerBits(val);
     assert(intBits <= bitWidth);
     if (shiftBits > 0) {
         val *= (1 << shiftBits);
+    } else {
+        shiftBits = 0; //we only consider scaling up, not down
     }
     return std::unique_ptr<sc_fix>(new sc_fix(val, bitWidth, intBits, SC_RND, SC_WRAP));
 }
 
-unsigned getShiftAmount(double coeff)
+/**
+ * Calculates the amount to shift a fixed point value such that there are no leading zeros
+ * in the fractional component, or in the case of values above one, how much to scale down
+ * in powers of two to normalize the value.
+ *
+ * @return Amount to shift. Left is negative.
+ */
+int getShiftAmount(double coeff)
 {
     int n = 0;
+    if (coeff == 0.0) {
+        return n;
+    }
     coeff = abs(coeff); //we want same result for + and -
     if (coeff < 1) {
         unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 2;
+        while (ratio) {
+            n--;
+            ratio >>= 1;
+        }
+    } else {
+        unsigned ratio = static_cast<unsigned>(coeff / 1.0);
         while (ratio) {
             n++;
             ratio >>= 1;
@@ -123,6 +142,25 @@ bool addition32DoesOverflow(int32_t a, int32_t b)
     }
 
     return false;
+}
+
+size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values)
+{
+    double max = 0.0;
+    for (size_t i = 0; i < values.size(); i++) {
+        if (abs(values[i].real()) > max) {
+            max = abs(values[i].real());
+        }
+        if (abs(values[i].imag()) > max) {
+            max = abs(values[i].imag());
+        }
+    }
+    size_t result = 0;
+    if (max == 0.0) {
+        return result;
+    }
+
+    return 31 + getShiftAmount(max);
 }
 
 };

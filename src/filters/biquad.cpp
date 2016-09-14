@@ -39,7 +39,7 @@ void Biquad::init(const SOSCoeffs &coeffs)
 
     log_debug("Initializing biquad filter structure...");
 
-    size_t bitShift = 0;
+    ssize_t bitShift = 0;
     m_b[0].first = utils::createDynamicFixedPoint(b0, m_coeffWidth, bitShift);
     m_b[0].second = bitShift;
 
