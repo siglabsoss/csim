@@ -12,7 +12,7 @@
 class BFPFFT : public FilterChainElement
 {
 public:
-    BFPFFT(size_t N);
+    BFPFFT(size_t N, bool inverse);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
@@ -28,8 +28,8 @@ private:
     void updateMaxValueForStage(size_t stage, const FixedComplex &val);
 
     size_t                                           m_numStages;
-    std::vector<FixedComplexNorm32>  m_inputs;
-    std::vector<FixedComplex32>      m_outputs;
+    std::vector<FixedComplex1_31>    m_inputs;
+    std::vector<ComplexInt>          m_outputs;
     std::vector<FixedComplexNorm16>  m_twiddleFactors;
     bool                             m_outputValid;
     size_t                           m_outputIdx;
@@ -37,4 +37,5 @@ private:
 
     std::vector<uint64_t>            m_maxValuePerStage;
     ssize_t                          m_scaleExponent;
+    bool                             m_inverse;
 };

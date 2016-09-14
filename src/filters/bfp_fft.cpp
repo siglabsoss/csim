@@ -13,7 +13,10 @@
 #include <filters/bfp_fft.hpp>
 #include <utils/utils.hpp>
 
-BFPFFT::BFPFFT(size_t N) :
+//NOTE: This is meant to match the scaling factor of the input fixed point type (Q.31)
+static constexpr uint32_t SCALE_FACTOR = (1 << 31);
+
+BFPFFT::BFPFFT(size_t N, bool inverse) :
     FilterChainElement(std::string("BFPFFT")),
     m_numStages(static_cast<uint64_t>(log2(N))),
     m_inputs(N),
@@ -23,8 +26,8 @@ BFPFFT::BFPFFT(size_t N) :
     m_outputIdx(0),
     m_inputIdx(0),
     m_maxValuePerStage(m_numStages),
-    m_scaleExponent(0)
-
+    m_scaleExponent(0),
+    m_inverse(inverse)
 {
     //N must be power of two, use subtract and bit-compare trick
     assert((N != 0) && !(N & (N - 1)));
@@ -32,17 +35,25 @@ BFPFFT::BFPFFT(size_t N) :
     for (size_t i = 0; i < N; i++) {
         //Calculate twiddle factors
         double theta = (-2 * M_PI * i) / N;
-        m_twiddleFactors[i] = FixedComplexNorm16(cos(theta), sin(theta));
+
+        if (m_inverse) {
+            m_twiddleFactors[i] = FixedComplexNorm16(cos(theta), -sin(theta));
+        } else {
+            m_twiddleFactors[i] = FixedComplexNorm16(cos(theta), sin(theta));
+        }
     }
 }
 
 bool BFPFFT::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    assert(data.type == IO_TYPE_INT32_COMPLEX);
     size_t N = m_inputs.capacity();
     //using a bit-reversed index to decimate in time
     size_t reverseIdx = reverseBits(N, m_inputIdx++);
-    m_inputs[reverseIdx] = data.fc;
+
+    //XXX can we just set the underlying integer value directly instead of going through a double?
+    m_inputs[reverseIdx].real(static_cast<double>(data.intc.real()) / SCALE_FACTOR);
+    m_inputs[reverseIdx].imag(static_cast<double>(data.intc.imag()) / SCALE_FACTOR);
 
     //Track the maximum input value for proper scaling
     updateMaxValueForStage(1, m_inputs[reverseIdx]);
@@ -53,7 +64,8 @@ bool BFPFFT::input(const filter_io_t &data)
 bool BFPFFT::output(filter_io_t &data)
 {
     if (m_outputValid == true) {
-        data = m_outputs[m_outputIdx++];
+        data.type = IO_TYPE_INT32_COMPLEX;
+        data.intc = m_outputs[m_outputIdx++];
         if (m_outputIdx >= m_outputs.size()) {
             m_outputIdx = 0;
         }
@@ -67,13 +79,20 @@ void BFPFFT::tick(void)
     if (m_inputIdx != m_inputs.capacity()) {
         return;
     }
+
     //We're good to go...
     dit();
 
     for (size_t i = 0; i < m_inputs.size(); i++) {
-        m_outputs[i] = m_inputs[i];
+        m_outputs[i].real(m_inputs[i].real().range().to_int64());
+        m_outputs[i].imag(m_inputs[i].imag().range().to_int64());
     }
-    shiftOutput(-m_scaleExponent);
+
+    //For IIFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
+    //We keep track of the exponent, even though we're not doing with it right now
+    if (m_inverse) {
+        m_scaleExponent -= m_numStages;
+    }
 
     //Reset some internal state for the next round
     m_inputIdx = 0;
@@ -89,11 +108,10 @@ void BFPFFT::dit()
     size_t N = m_inputs.size() >> 1; //number of butterflies per block
     size_t numBlocks = 1; //number of blocks per stage
     for (size_t stage = 1; stage <= m_numStages; stage++) { //stage loop
-//        std::cout << "stage = " << stage << std::endl;
         //Calculate shift amount based on maximum value per stage and then shift the values
         ssize_t shiftAmount = calculateShiftAmountForStage(stage);
         shiftStage(shiftAmount);
-//        std::cout << "shifting by " << shiftAmount << std::endl;
+//        std::cout << "stage " << stage << " shifted by " << shiftAmount << std::endl;
         //Track the accumulated scale amount so that we can scale back at the end
         m_scaleExponent += shiftAmount;
         for (size_t block = 0; block < numBlocks; block++) { //block loop
@@ -105,11 +123,11 @@ void BFPFFT::dit()
                 size_t topIdx = reverseBits(m_inputs.size(), baseT + n);
                 size_t botIdx = reverseBits(m_inputs.size(), baseB + n);
 
-                FixedComplexNorm32 twiddle = getTwiddleFactor(stage, n + baseT/2);
+                FixedComplex1_31 twiddle = getTwiddleFactor(stage, n + baseT/2);
 
                 //Radix-2 butterfly
-                FixedComplexNorm32 top = m_inputs[topIdx];
-                FixedComplexNorm32 bot = m_inputs[botIdx] * twiddle;
+                FixedComplex1_31 top = m_inputs[topIdx];
+                FixedComplex1_31 bot = m_inputs[botIdx] * twiddle;
                 m_inputs[topIdx] = top + bot;
                 m_inputs[botIdx] = top - bot;
 
@@ -159,21 +177,29 @@ void BFPFFT::shiftFixedComplex(COMPLEX_T &val, ssize_t shiftBits)
 void BFPFFT::shiftOutput(ssize_t shiftAmount)
 {
     for (size_t i = 0; i < m_outputs.size(); i++) {
-        //std::cout << "shift " << i << std::endl;
-        shiftFixedComplex<FixedComplex32>(m_outputs[i], shiftAmount);
+        int32_t real = m_outputs[i].real();
+        int32_t imag = m_outputs[i].imag();
+        if (shiftAmount < 0) {
+            real <<= static_cast<size_t>(abs(shiftAmount));
+            imag <<= static_cast<size_t>(abs(shiftAmount));
+        } else {
+            real >>= shiftAmount;
+            imag >>= shiftAmount;
+        }
+        m_outputs[i].real(real);
+        m_outputs[i].imag(imag);
     }
 }
 
 void BFPFFT::shiftStage(ssize_t shiftAmount)
 {
     for (size_t i = 0; i < m_inputs.size(); i++) {
-        shiftFixedComplex<FixedComplexNorm32>(m_inputs[i], shiftAmount);
+        shiftFixedComplex<FixedComplex1_31>(m_inputs[i], shiftAmount);
     }
 }
 
 ssize_t BFPFFT::calculateShiftAmountForStage(size_t stage)
 {
-    static constexpr uint32_t FP_SCALE_FACTOR = (1 << 31);
     ssize_t shiftCount = 0;
     size_t upper, lower;
     uint64_t value = m_maxValuePerStage[stage - 1];
@@ -186,19 +212,19 @@ ssize_t BFPFFT::calculateShiftAmountForStage(size_t stage)
     //grow by 2 bits. Set the upper and lower thresholds to know how
     //much to shift to accommodate the potential growth
     if (stage == 1 || stage == 2) {
-        upper = FP_SCALE_FACTOR >> 1;
-        lower = FP_SCALE_FACTOR >> 2;
+        upper = SCALE_FACTOR >> 1;
+        lower = SCALE_FACTOR >> 2;
     } else {
-        upper = FP_SCALE_FACTOR >> 2;
-        lower = FP_SCALE_FACTOR >> 3;
+        upper = SCALE_FACTOR >> 2;
+        lower = SCALE_FACTOR >> 3;
     }
     while (value >= upper || value < lower) {
         if (value >= upper) {
             value >>= 1;
-            shiftCount += 1; //right shift is negative
+            shiftCount += 1; //right shift is positive
         } else {
             value <<= 1;
-            shiftCount -= 1; //left shift is positive
+            shiftCount -= 1; //left shift is negative
         }
     }
     return shiftCount;
@@ -218,10 +244,11 @@ void BFPFFT::updateMaxValueForStage(size_t stage, const FixedComplex &val)
 
 FixedComplexNorm16 BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
 {
+    //see https://www.dsprelated.com/showarticle/107.php
     size_t N = m_inputs.size();
     size_t stageSize = (1 << stage);
     size_t A1 = (stageSize * n) / N;
-    int temp = static_cast<int>(log2(N)) - 1;
+    int temp = m_numStages - 1;
     A1 = reverseBits(1 << temp, A1);
     return m_twiddleFactors[A1];
 }
