@@ -2,11 +2,13 @@
 
 #include <core/filter_chain_element.hpp>
 #include <filters/modulator.hpp>
+#include <utils/plotter.hpp>
 
 class HardDemod : public FilterChainElement
 {
 public:
     HardDemod(Modulator::mod_scheme_t scheme, double theta);
+    ~HardDemod();
 
     bool input(const filter_io_t &data) override;
 
@@ -25,4 +27,5 @@ protected:
     double                      m_theta;
     constellation_map_t         m_constellations; //mapping of symbol -> constellation vector
     size_t                      m_bitsPerSymbol;
+    std::vector<ComplexDouble>         m_points;
 };
