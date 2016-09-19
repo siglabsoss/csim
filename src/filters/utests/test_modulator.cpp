@@ -51,7 +51,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
 }
 
 
-bool test_mod_demod(Modulator& mod, HardDemod& demod, size_t ticks, uint8_t byte, uint8_t& byte_out)
+bool test_mod_hard_demod(Modulator& mod, HardDemod& demod, size_t ticks, uint8_t byte, uint8_t& byte_out)
 {
 //    cout << "testing " << (int) byte << endl;
     bool worked0, worked1, worked2;
@@ -105,14 +105,14 @@ CSIM_TEST_CASE(MODULATOR_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
             byte = engine();
         }
 
-        worked0 = test_mod_demod(mod, demod, ticks, byte, byte_out);
+        worked0 = test_mod_hard_demod(mod, demod, ticks, byte, byte_out);
 
         BOOST_CHECK_EQUAL(worked0, true);
         BOOST_CHECK_EQUAL(byte, byte_out);
     }
 }
 
-CSIM_TEST_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
+CSIM_TESX_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_QPSK_SYMBOLS)
 {
 //    uint8_t byte = 0;
 //    uint8_t byte_out = 0;
@@ -213,6 +213,190 @@ CSIM_TEST_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
 //        BOOST_CHECK_EQUAL(byte, byte_out);
 //    }
 }
+
+
+CSIM_TESX_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
+{
+//    uint8_t byte = 0;
+//    uint8_t byte_out = 0;
+//    bool worked0;
+    Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
+    SoftDemod demod(Modulator::MOD_SCHEME_BPSK);
+
+    std::random_device engine;
+
+
+
+
+    bool worked2;
+    filter_io_t data, mod_output, demod_output, demod_input;
+//    data = byte; // use the =operator overload
+//    worked0 = mod.input(data);
+//    BOOST_CHECK_EQUAL(worked0, true);
+
+    //demod_input = ComplexDouble(-1,-1);
+
+//    vector<ComplexDouble> inputs = {ComplexDouble(-M_SQRT1_2,-M_SQRT1_2), ComplexDouble(M_SQRT1_2,-M_SQRT1_2), ComplexDouble(-M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2/1.20,-M_SQRT1_2/1.20)};
+
+    vector<ComplexDouble> inputs;
+
+    vector<double> b1out;
+    vector<double> fakellr;
+
+    double maxswing = 1.0; // this is M_SQRT1_2 for QPSK
+
+    for(size_t i = 0; i < 100; i++)
+    {
+        double v =  -maxswing + (i*maxswing/50.0);
+        cout << v << endl;
+        inputs.push_back(ComplexDouble(v, 0));
+
+
+        double pbi0 = (double)i;
+        double pbi1 = (double)100 - i;
+        fakellr.push_back(log2(pbi0/pbi1));
+    }
+
+    const plotter &plot = plotter::get();
+    plot.nplotqam(inputs, "h");
+//    plot.nplot(fakellr, "fake llr");
+
+    for(auto it = inputs.begin(); it != inputs.end(); ++it)
+    {
+        demod_input = *it;
+        demod.input(demod_input);
+        demod.tick();
+        worked2 = demod.output(demod_output);
+        if(worked2) {
+            cout << "input: " << demod_input.rf << endl << " output: " << std::real(demod_output.rf) << endl << endl;
+            b1out.push_back(std::real(demod_output.rf));
+
+        }
+
+//        demod.tick();
+//        worked2 = demod.output(demod_output);
+//        if(worked2) {
+//            cout << " " << std::real(demod_output.rf) << endl;
+//
+//
+//        }
+//        cout << endl << endl << endl << endl;
+    }
+
+    plot.nplot(b1out, "llr of b0");
+
+
+//            cout << "worked " << worked2 << endl;
+//    if( worked2 )
+//    {
+//        byte_out = demod_output.byte;
+//        cout << "out: " << (int)demod_output.byte << endl;
+//    }
+
+
+
+
+
+
+//    size_t ticks = sizeof(byte) * CHAR_BIT * MOD_TICKS_PER_SYMBOL;
+//
+//    for(size_t i = 0; i < 300; i++)
+//    {
+//
+//        if(i < 256)
+//        {
+//            byte = (uint8_t)i;
+//        }
+//        else
+//        {
+//            byte = engine();
+//        }
+//
+//        worked0 = test_mod_demod(mod, demod, ticks, byte, byte_out);
+//
+//        BOOST_CHECK_EQUAL(worked0, true);
+//        BOOST_CHECK_EQUAL(byte, byte_out);
+//    }
+}
+
+
+
+
+
+
+
+CSIM_TESX_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS_XXX)
+{
+    Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
+    SoftDemod demod(Modulator::MOD_SCHEME_BPSK);
+
+    std::random_device engine;
+
+
+
+
+    bool worked2;
+    filter_io_t data, mod_output, demod_output, demod_input;
+//    data = byte; // use the =operator overload
+//    worked0 = mod.input(data);
+//    BOOST_CHECK_EQUAL(worked0, true);
+
+    //demod_input = ComplexDouble(-1,-1);
+
+//    vector<ComplexDouble> inputs = {ComplexDouble(-M_SQRT1_2,-M_SQRT1_2), ComplexDouble(M_SQRT1_2,-M_SQRT1_2), ComplexDouble(-M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2, M_SQRT1_2), ComplexDouble(M_SQRT1_2/1.20,-M_SQRT1_2/1.20)};
+
+    vector<ComplexDouble> inputs;
+
+    vector<double> b1out;
+    vector<double> fakellr;
+
+    double maxswing = 1.0; // this is M_SQRT1_2 for QPSK
+
+    for(size_t i = 0; i < 100; i++)
+    {
+        double v =  -maxswing + (i*maxswing/50.0);
+        cout << v << endl;
+        inputs.push_back(ComplexDouble((i%2)*1.9-2, 0));
+
+
+        double pbi0 = (double)i;
+        double pbi1 = (double)100 - i;
+        fakellr.push_back(log2(pbi0/pbi1));
+    }
+
+    const plotter &plot = plotter::get();
+    plot.nplotqam(inputs, "h");
+//    plot.nplot(fakellr, "fake llr");
+
+    for(auto it = inputs.begin(); it != inputs.end(); ++it)
+    {
+        demod_input = *it;
+        demod.input(demod_input);
+        demod.tick();
+        worked2 = demod.output(demod_output);
+        if(worked2) {
+            cout << "input: " << demod_input.rf << endl << " output: " << std::real(demod_output.rf) << endl << endl;
+            b1out.push_back(std::real(demod_output.rf));
+
+        }
+
+//        demod.tick();
+//        worked2 = demod.output(demod_output);
+//        if(worked2) {
+//            cout << " " << std::real(demod_output.rf) << endl;
+//
+//
+//        }
+//        cout << endl << endl << endl << endl;
+    }
+
+    plot.nplot(b1out, "llr of b0");
+
+
+}
+
+
+
 
 
 

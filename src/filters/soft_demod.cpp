@@ -2,11 +2,14 @@
 #include <cassert>
 #include <iomanip>
 #include <bitset>
+#include <utils/plotter.hpp>
+
 //
 SoftDemod::SoftDemod(Modulator::mod_scheme_t scheme, double noise_variance) :
 HardDemod(scheme, 0),
 m_noise_variance(noise_variance)
 {
+//    cout << "SoftDemod with " << m_bitsPerSymbol << " m_bitsPerSymbol" << endl;
 }
 
 bool SoftDemod::output(filter_io_t &data)
@@ -37,13 +40,15 @@ void SoftDemod::tick(void)
         double llr_den = 0;
         for (auto it = m_constellations.begin(); it != m_constellations.end(); ++it) {
             double distance = abs(it->second - value);
+//            cout << endl << endl << "value: " << value << " dist " << distance << endl;
             if(it->first & (1<<j)) {
-                llr_num += exp(-pow(distance,2)/m_noise_variance);
+                llr_num += distance;
             } else {
-                llr_den += exp(-pow(distance,2)/m_noise_variance);
+                llr_den += distance;
            }
 
         }
+//        cout << endl << endl << "l " << log2(llr_num/llr_den) << endl;
         m_llrs.push( log2(llr_num/llr_den) );
     }
 }
