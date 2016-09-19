@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <memory>
 #include <stdlib.h>
 #include <boost/circular_buffer.hpp>
 
@@ -11,17 +12,19 @@
 class FixedFIR : public FilterChainElement
 {
 public:
-    FixedFIR(std::vector<FixedComplex16> tap);
+    FixedFIR(std::vector<double> coeffs, unsigned coeffWidth);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick() override;
 
 private: //methods
-    void reset();
-    FixedComplex16 filter(FixedComplex16 &input);
+    ComplexInt     filter(FixedComplex16 &input);
+    ComplexInt     accumToComplexInt() const;
 
 private: //members
-    std::vector< FixedComplex16>   		m_taps;
-    CircularBuffer< FixedComplex16> 	m_bench;
-    FixedComplex16                  	m_output;
+    std::vector< std::unique_ptr<FixPoint> >       		    m_coeffs;
+    CircularBuffer< FixedComplex16 > 	                    m_x;
+    ComplexInt                                          	m_output;
+    std::unique_ptr<FixedComplex>                           m_accum;
+    ssize_t                                                 m_inputExp;
 };

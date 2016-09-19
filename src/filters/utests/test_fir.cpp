@@ -2,94 +2,73 @@
 #include <filters/fixed_fir.hpp>
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <utils/utils.hpp>
-using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(FIRFilter)
 
+static constexpr double ONE_BIT_ERROR = (1.0 / (1 << 15));
 
-void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, float difference);
-
-CSIM_TEST_CASE(REAL_FILTER)
+void checkError(std::vector<ComplexInt> outputs, std::vector<ComplexDouble> answers, float threshold)
 {
-    vector<FixedComplex16> input; //Vector to hold inputs
-    vector<FixedComplex16> output; //Vector to hold outputs
-    vector<FixedComplex16> answers; //Vector to hold answers
-    vector<FixedComplex16> tap; //Vector to hold taps
+    for (unsigned int i = 0; i < answers.size(); i++) {
+            double realDiff = abs(outputs[i].toComplexDouble().real() - answers[i].real());
+            double imagDiff = abs(outputs[i].toComplexDouble().imag() - answers[i].imag());
+            BOOST_CHECK_MESSAGE(realDiff < threshold  || realDiff == 0,
+            "I: " << i << " Output: " << outputs[i].toComplexDouble().real() << " Answer: " << answers[i].real());
+            BOOST_CHECK_MESSAGE(imagDiff < threshold || imagDiff == 0,
+            "I: " << i << " Output: " << outputs[i].toComplexDouble().imag() << " Answer: " << answers[i].imag());
+        }
+}//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
-    string data("./data/fir/input/data1_in.csv"); //Input data file
-    input = readComplexFromCSV<FixedComplex16>(data); //Reads input file
-    BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << data);
-
-    string taps("./data/fir/input/taps1.txt");
-    tap = readComplexFromCSV<FixedComplex16>(taps);//Reads in taps from file
-    BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps);
-
-    string answersFile("./data/fir/answers/answers1.csv"); //Answers data file
-    answers = readComplexFromCSV<FixedComplex16>(answersFile); //Reads answer file
-    BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << answersFile);
-
-    FixedFIR fir(tap); //Creates instance of fixed FIR filter given a vector of taps.
-    for (unsigned int k = 0; k < input.size(); k++)
-    {
-        filter_io_t data;
-        data = input[k];
-        fir.input(data); //Filters data
-        filter_io_t output_sample;
-        fir.output(output_sample);
-        output.push_back(output_sample.fc);
-    }//Filters using FIR
-
-    checkError(output,answers, .001, 0);
-}//Test using only read numbers
-
-CSIM_TEST_CASE(COMPLEX_FILTER)
+void runTest(const std::string &coeffFile, const std::string &inputFile, const std::string &outputFile, float threshold)
 {
-	vector<FixedComplex16> input; //Vector to hold inputs
-	vector<FixedComplex16> output; //Vector to hold outputs
-	vector<FixedComplex16> answers;
-	vector<FixedComplex16> tap;
+    std::vector<ComplexDouble> input; //Vector to hold inputs
+    std::vector<ComplexInt> output; //Vector to hold outputs
+    std::vector<ComplexDouble> answers; //Vector to hold answers
+    std::vector<ComplexDouble>  coeffs; //Vector to hold coefficients
+    coeffs = readComplexFromCSV<ComplexDouble>(coeffFile);//Reads in taps from file
+    BOOST_REQUIRE_MESSAGE(!coeffs.empty(), "Could not read from " << coeffFile);
 
-	string data("./data/fir/input/data2_in.csv"); //Input data file
-	input = readComplexFromCSV<FixedComplex16>(data); //Reads input file
-	BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << data);
+    std::vector<double> realCoeffs;
+    for (size_t i = 0; i < coeffs.size(); i++) {
+        realCoeffs.push_back(coeffs[i].real());
+    }
 
-    string taps("./data/fir/input/taps2.txt");
-    tap = readComplexFromCSV<FixedComplex16>(taps); //Reads taps file
-    BOOST_REQUIRE_MESSAGE(!tap.empty(), "Could not read from " << taps);
+    input = readComplexFromCSV<ComplexDouble>(inputFile); //Reads input file
+    BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << inputFile);
 
-    string data3("./data/fir/answers/answers2.csv"); //Answers data file
-    answers = readComplexFromCSV<FixedComplex16>(data3); //Reads answers file
-    BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << data3);
+    answers = readComplexFromCSV<ComplexDouble>(outputFile); //Reads answer file
+    BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << outputFile);
 
-    FixedFIR fir(tap); //Creates instance of fixed FIR filter given vector of taps.
+    FixedFIR fir(realCoeffs, 16);
+
     for (unsigned int k = 0; k < input.size(); k++) {
         filter_io_t data;
-        data = input[k];
+        ComplexInt sample;
+        sample.c.real(static_cast<int>(input[k].real() * (1u << 31)));
+        sample.c.imag(static_cast<int>(input[k].imag() * (1u << 31)));
+        sample.exp = 0;
+        data = sample;
         fir.input(data); //Filters data
         filter_io_t output_sample;
-        fir.output(output_sample);
-        output.push_back(output_sample.fc);
-     }//Filters data
+        bool didOutput = fir.output(output_sample);
+        BOOST_REQUIRE_EQUAL(didOutput, true);
+        output.push_back(output_sample.intc);
+        //std::cout << output_sample.toComplexDouble() << std::endl;
+    }
 
-    assert (output.size() == answers.size());//Checks number of outputs
-    checkError(output,answers, .001, .001);
+    checkError(output, answers, threshold);
+}
 
-}//Test using complex numbers
-
-
-void checkError(vector<FixedComplex16> outputs, vector<FixedComplex16> answers, float percent, float difference)
+CSIM_TEST_CASE(FIR_REAL_ONLY_INPUTS)
 {
-	for (unsigned int i = 0; i < answers.size(); i++) {
-		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
-		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
-		    double realDiff = abs(outputs[i].real() - answers[i].real());
-		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
-			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference  || realDiff == 0,
-			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
-			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference || imagDiff == 0,
-			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
-		}
-}//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
+    runTest("./data/fir/input/taps1.txt", "./data/fir/input/data1_in.csv", "./data/fir/answers/answers1.csv", ONE_BIT_ERROR);
+
+}
+
+CSIM_TEST_CASE(FIR_COMPLEX_INPUTS)
+{
+    runTest("./data/fir/input/taps2.txt", "./data/fir/input/data2_in.csv", "./data/fir/answers/answers2.csv", 2*ONE_BIT_ERROR);
+}
 
 CSIM_TEST_SUITE_END()
 
