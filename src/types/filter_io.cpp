@@ -126,8 +126,7 @@ ComplexDouble filter_io_t::toComplexDouble() const
             imag = this->fc.imag().to_double();
             break;
         case IO_TYPE_INT32_COMPLEX:
-            real = static_cast<double>(this->intc.c.real()) / (1ul << (-this->intc.exp + 31));
-            imag = static_cast<double>(this->intc.c.imag()) / (1ul << (-this->intc.exp + 31));
+            return this->intc.toComplexDouble();
             break;
         case IO_TYPE_BYTE:
             break;

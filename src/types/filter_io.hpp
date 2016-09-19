@@ -15,6 +15,13 @@ struct ComplexInt
 {
     std::complex<int32_t> c;
     ssize_t               exp;
+
+    ComplexDouble toComplexDouble() const
+    {
+        double real = static_cast<double>(this->c.real()) / (1ul << (-this->exp + 31));
+        double imag = static_cast<double>(this->c.imag()) / (1ul << (-this->exp + 31));
+        return ComplexDouble(real, imag);
+    }
 };
 
 struct filter_io_t
