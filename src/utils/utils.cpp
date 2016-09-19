@@ -113,6 +113,13 @@ int getShiftAmount(double coeff)
     }
     return n;
 }
+
+/**
+ * Calculates the number of bits required to store the non-fractional component of a signed,
+ * fixed-point integer.
+ *
+ * @return The number of bits required to store the non-fractional component of a signed, fixed-point integer.
+ */
 unsigned getIntegerBits(double coeff)
 {
     unsigned int_coeff = abs(static_cast<int>(coeff));
@@ -161,6 +168,39 @@ size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values)
     }
 
     return 31 + getShiftAmount(max);
+}
+
+void complexScalarMultiply(FixedComplex &result, const FixedComplex &complex, const sc_dt::sc_fix &scalar)
+{
+    //For some reason not yet known, when dealing with complex<sc_fix> we must store the calculation in
+    //intermediate results instead of acting on the complex variable directly. This does not seem to be necessary
+    //when dealing with sc_fixed<N,M>.
+    sc_dt::sc_fix tempResultReal(result.real().wl(), result.real().iwl());
+    sc_dt::sc_fix tempResultImag(result.imag().wl(), result.imag().iwl());
+
+    tempResultReal = complex.real() * scalar;
+    tempResultImag = complex.imag() * scalar;
+
+    result.real(tempResultReal);
+    result.imag(tempResultImag);
+}
+
+void complexScalarMultiplyAccumulate(FixedComplex &accum, const FixedComplex &complex, const sc_dt::sc_fix &scalar)
+{
+    //For some reason not yet known, when dealing with complex<sc_fix> we must store the calculation in
+    //intermediate results instead of acting on the complex variable directly. This does not seem to be necessary
+    //when dealing with sc_fixed<N,M>.
+    sc_dt::sc_fix tempResultReal(accum.real().wl(), accum.real().iwl());
+    sc_dt::sc_fix tempResultImag(accum.imag().wl(), accum.imag().iwl());
+
+    tempResultReal = complex.real() * scalar;
+    tempResultImag = complex.imag() * scalar;
+
+    tempResultReal += accum.real();
+    tempResultImag += accum.imag();
+
+    accum.real(tempResultReal);
+    accum.imag(tempResultImag);
 }
 
 };

@@ -24,6 +24,8 @@ int getShiftAmount(double coeff);
 unsigned getIntegerBits(double coeff);
 bool addition32DoesOverflow(int32_t a, int32_t b);
 size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values);
+void complexScalarMultiply(FixedComplex &result, const FixedComplex &complex, const FixPoint &scalar);
+void complexScalarMultiplyAccumulate(FixedComplex &accum, const FixedComplex &complex, const FixPoint &scalar);
 };
 
 #endif

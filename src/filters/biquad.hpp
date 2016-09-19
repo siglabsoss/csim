@@ -25,7 +25,6 @@ public:
     void tick(void) override;
 
 private:
-    static void complexScalarMultiply(FixedComplex &result, const FixedComplex &complex, const sc_fix &scalar);
     static void shiftRightFixedComplex(FixedComplex &val, size_t shiftBits);
 
 private:

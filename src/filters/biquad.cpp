@@ -10,7 +10,8 @@ Biquad::Biquad(size_t coeffBitWidth) :
     m_b(3),
     m_a(2),
     m_newInput(false),
-    m_coeffWidth(coeffBitWidth)
+    m_coeffWidth(coeffBitWidth),
+    m_inputExp(0)
 {
 
 }
@@ -22,7 +23,8 @@ Biquad::Biquad(const Biquad &other) :
         m_b(3),
         m_a(2),
         m_newInput(false),
-        m_coeffWidth(other.m_coeffWidth)
+        m_coeffWidth(other.m_coeffWidth),
+        m_inputExp(0)
 {
     //We don't actually care for the notion of "copying"
     //Biquads, so we just start with a clean slate. Default
@@ -182,23 +184,23 @@ void Biquad::tick(void)
     y2 = m_y[2];
 
     //bx0 = (*(m_b[0].first) * x0);
-    complexScalarMultiply(*m_bx0, x0, *(m_b[0].first));
+    utils::complexScalarMultiply(*m_bx0, x0, *(m_b[0].first));
     shiftRightFixedComplex(*m_bx0, m_b[0].second);
 //    std::cout << "bx0 (Q" << m_bx0->real().iwl() << "." << m_bx0->real().wl() - m_bx0->real().iwl() << ") = " << *m_bx0 << " (" << *(m_b[0].first) << " * " << x0 << ")" << std::endl;
 
-    complexScalarMultiply(*m_bx1, x1, *(m_b[1].first));
+    utils::complexScalarMultiply(*m_bx1, x1, *(m_b[1].first));
     shiftRightFixedComplex(*m_bx1, m_b[1].second);
 //    std::cout << "bx1 (Q" << m_bx1->real().iwl() << "." << m_bx1->real().wl() - m_bx1->real().iwl() << ") = " << *m_bx1 << " (" << *(m_b[1].first) << " * " << x1 << ")" << std::endl;
 
-    complexScalarMultiply(*m_bx2, x2, *(m_b[2].first));
+    utils::complexScalarMultiply(*m_bx2, x2, *(m_b[2].first));
     shiftRightFixedComplex(*m_bx2, m_b[2].second);
 //    std::cout << "bx2 (Q" << m_bx2->real().iwl() << "." << m_bx2->real().wl() - m_bx2->real().iwl() << ") = " << *m_bx2 << " (" << *(m_b[2].first) << " * " << x2 << ")" << std::endl;
 
-    complexScalarMultiply(*m_ay1, y1, *(m_a[0].first));
+    utils::complexScalarMultiply(*m_ay1, y1, *(m_a[0].first));
     shiftRightFixedComplex(*m_ay1, m_a[0].second);
 //    std::cout << "ay1 (Q" << m_ay1->real().iwl() << "." << m_ay1->real().wl() - m_ay1->real().iwl() << ") = " << *m_ay1 << " (" << *(m_a[0].first) << " * " << y1 << ")" << std::endl;
 
-    complexScalarMultiply(*m_ay2, y2, *(m_a[1].first));
+    utils::complexScalarMultiply(*m_ay2, y2, *(m_a[1].first));
     shiftRightFixedComplex(*m_ay2, m_a[1].second);
 //    std::cout << "ay2 (Q" << m_ay2->real().iwl() << "." << m_ay2->real().wl() - m_ay2->real().iwl() << ") = " << *m_ay2 << " (" << *(m_a[1].first) << " * " << y2 << ")" << std::endl;
 
@@ -242,21 +244,6 @@ void Biquad::tick(void)
 //    x0x1x2y1y2 = x0x1x2y1 + m_ay2->real();
 //
 //    m_y[0].real(x0x1x2y1y2);
-}
-
-void Biquad::complexScalarMultiply(FixedComplex &result, const FixedComplex &complex, const sc_fix &scalar)
-{
-    //For some reason not yet known, when dealing with complex<sc_fix> we must store the calculation in
-    //intermediate results instead of acting on the complex variable directly. This does not seem to be necessary
-    //when dealing with sc_fixed<N,M>.
-    sc_fix tempResultReal(result.real().wl(), result.real().iwl());
-    sc_fix tempResultImag(result.imag().wl(), result.imag().iwl());
-
-    tempResultReal = complex.real() * scalar;
-    tempResultImag = complex.imag() * scalar;
-
-    result.real(tempResultReal);
-    result.imag(tempResultImag);
 }
 
 void Biquad::shiftRightFixedComplex(FixedComplex &val, size_t shiftBits)
