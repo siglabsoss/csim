@@ -7,3 +7,4 @@ template <size_t N, size_t M>
 using FixedPoint = sc_dt::sc_fixed <N, M, SC_RND, SC_SAT>;
 
 typedef FixedPoint<32, 4> FixedPoint32;
+typedef sc_dt::sc_fix   FixPoint; //run-time configurable version
