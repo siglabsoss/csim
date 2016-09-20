@@ -1,6 +1,5 @@
 set(SIGFILTERS_SOURCES
     fixed_fir.cpp
-    fixed_iir.cpp
     fixed_cic.cpp
     stitcher.cpp
     modulator.cpp

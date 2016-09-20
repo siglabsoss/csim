@@ -8,9 +8,6 @@ target_link_libraries(test_fir ${Boost_LIBRARIES} pthread sigfilters sigcore sig
 add_executable(test_fixedfft ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_fixedfft.cpp)
 target_link_libraries(test_fixedfft ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
 
-add_executable(test_iir ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_iir.cpp)
-target_link_libraries(test_iir ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
-
 add_executable(test_modulator ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_modulator.cpp)
 target_link_libraries(test_modulator ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
 
