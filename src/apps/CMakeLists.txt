@@ -10,3 +10,6 @@ target_link_libraries(bertester1 ${Boost_LIBRARIES} sigcore sigtypes sigmath sig
 
 add_executable(bertester2 ber_tester2.cpp)
 target_link_libraries(bertester2 ${Boost_LIBRARIES} sigcore sigtypes sigmath sigutils sigfilters sigprobes jsoncpp ${SystemC_LIBRARIES} pthread rt zmq)
+
+add_executable(bertester3 ber_tester3.cpp)
+target_link_libraries(bertester3 ${Boost_LIBRARIES} sigcore sigtypes sigmath sigutils sigfilters sigprobes jsoncpp ${SystemC_LIBRARIES} pthread rt zmq)
