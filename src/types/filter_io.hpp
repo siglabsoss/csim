@@ -11,8 +11,17 @@ enum type_t {
     IO_TYPE_BYTE
 };
 
+/**
+ * Datatype used to pass integer representation of complex fixed point values between filter.
+ *
+ * This datatype was created because using a generic SystemC datatype to pass the fixed point data between
+ * filters became somewhat cumbersome as the scaling of the type can only be defined during construction
+ * of the object. It became more difficult than necessary to reuse the same object to carry fixed point
+ * values of different scaling factors.
+ */
 struct ComplexInt
 {
+    static constexpr uint32_t SCALE_FACTOR = (1 << 31);
     std::complex<int32_t> c;
     ssize_t               exp;
 
@@ -22,6 +31,19 @@ struct ComplexInt
         double imag = static_cast<double>(this->c.imag()) / (1ul << (-this->exp + 31));
         return ComplexDouble(real, imag);
     }
+
+    double normalizedReal() const
+    {
+        return static_cast<double>(c.real()) / SCALE_FACTOR;
+    }
+
+    double normalizedImag() const
+    {
+        return static_cast<double>(c.imag()) / SCALE_FACTOR;
+    }
+
+    ComplexInt & operator=(const FixedComplex &rhs);
+    void assignFixedComplexWithExp(const FixedComplex &val, ssize_t exp);
 };
 
 struct filter_io_t

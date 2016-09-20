@@ -2,6 +2,43 @@
 
 #include <iomanip>
 
+/**
+ * Extract the underlying bits from the fixed complex type. Use the most signicant bits of the
+ * integer by shifting the underlying fixed complex bits appropriately. Set the scale exponent
+ * based on the number of fractional bits.
+ */
+ComplexInt & ComplexInt::operator=(const FixedComplex &rhs)
+{
+    size_t realWordLength = rhs.real().wl();
+    size_t imagWordLength = rhs.imag().wl();
+
+    assert(realWordLength == imagWordLength);
+    assert(realWordLength <= 32);
+
+    size_t fracLen = realWordLength - rhs.real().iwl();
+
+    int32_t realInt = rhs.real().range().to_int();
+    int32_t imagInt = rhs.imag().range().to_int();
+
+    realInt <<= (32 - realWordLength);
+    imagInt <<= (32 - imagWordLength);
+    this->c.real(realInt);
+    this->c.imag(imagInt);
+    this->exp = 31 - fracLen; //XXX double check sign
+
+    return *this;
+}
+
+/**
+ * Extract the underlying bits from the fixed complex type, allowing the user to set the
+ * scaling exponent.
+ */
+void ComplexInt::assignFixedComplexWithExp(const FixedComplex &val, ssize_t exp)
+{
+    *this = val;
+    this->exp = exp;
+}
+
 std::ostream& operator<<(std::ostream& os, const ComplexInt& obj)
 {
     os << obj.c << " (2^" << obj.exp << ")";
@@ -92,8 +129,8 @@ filter_io_t & filter_io_t::operator=(const ComplexDouble &rhs)
 
 filter_io_t & filter_io_t::operator=(const FixedComplex &rhs)
 {
-    this->type = IO_TYPE_FIXED_COMPLEX;
-    this->fc = rhs;
+    this->type = IO_TYPE_INT32_COMPLEX;
+    this->intc = rhs;
     return *this;
 }
 
