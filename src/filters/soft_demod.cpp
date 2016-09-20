@@ -9,6 +9,7 @@ SoftDemod::SoftDemod(Modulator::mod_scheme_t scheme, double noise_variance) :
 HardDemod(scheme, 0),
 m_noise_variance(noise_variance)
 {
+    assert(noise_variance > 0);
 //    cout << "SoftDemod with " << m_bitsPerSymbol << " m_bitsPerSymbol" << endl;
 }
 
@@ -49,6 +50,16 @@ void SoftDemod::tick(void)
 
         }
 //        cout << endl << endl << "l " << log2(llr_num/llr_den) << endl;
+
+        if( llr_den == 0.0 ) {
+            llr_den = 0.000000001; // fudge to avoid infinity
+        }
+        if( llr_num == 0.0 ) {
+            llr_num = 0.000000001;
+        }
+
+//        cout << "num: " << llr_num << " / " << llr_den << endl;
+
         m_llrs.push( log2(llr_num/llr_den) );
     }
 }

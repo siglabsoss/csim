@@ -112,6 +112,78 @@ CSIM_TEST_CASE(MODULATOR_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
     }
 }
 
+
+
+bool test_mod_soft_demod(Modulator& mod, SoftDemod& demod, size_t ticks, uint8_t byte, uint8_t& byte_out)
+{
+    bool worked0, worked1, worked2;
+    filter_io_t data, mod_output, demod_output;
+    data = byte; // use the =operator overload
+    worked0 = mod.input(data);
+    BOOST_CHECK_EQUAL(worked0, true);
+    size_t j = 0;
+    byte_out = 0;
+    double llr;
+    for (size_t i = 0; i < ticks; i++) {
+        mod.tick();
+        worked1 = mod.output(mod_output);
+
+        if( worked1 )
+        {
+            demod.input(mod_output);
+            demod.tick();
+            worked2 = demod.output(demod_output);
+
+            if( worked2 )
+            {
+                llr = std::real(demod_output.rf);
+
+                if( llr < 0 )
+                {
+                    byte_out |= (1<<j);
+                }
+                j++;
+            }
+        }
+    }
+    return j == 8;
+}
+
+CSIM_TEST_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_BPSK_SYMBOLS)
+{
+    uint8_t byte = 0;
+    uint8_t byte_out = 0;
+    bool worked0;
+    Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
+    SoftDemod demod(Modulator::MOD_SCHEME_BPSK);
+
+    std::random_device engine;
+
+
+    size_t ticks = sizeof(byte) * CHAR_BIT * MOD_TICKS_PER_SYMBOL;
+
+    for(size_t i = 0; i < 300; i++)
+    {
+
+        if(i < 256)
+        {
+            byte = (uint8_t)i;
+        }
+        else
+        {
+            byte = engine();
+        }
+
+        worked0 = test_mod_soft_demod(mod, demod, ticks, byte, byte_out);
+
+
+        BOOST_CHECK_EQUAL(worked0, true);
+        BOOST_CHECK_EQUAL(byte, byte_out);
+    }
+}
+
+
+
 CSIM_TESX_CASE(MODULATOR_SOFT_DEMODULATOR_CORRECT_USING_QPSK_SYMBOLS)
 {
 //    uint8_t byte = 0;
