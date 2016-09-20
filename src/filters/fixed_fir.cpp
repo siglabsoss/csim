@@ -47,9 +47,8 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, unsigned coeffWidth) :
 
 bool FixedFIR::input(const filter_io_t &data)
 {
-    static constexpr uint32_t SCALE_FACTOR = (1 << 31);
     assert(data.type == IO_TYPE_INT32_COMPLEX);
-    FixedComplex16 sample(static_cast<double>(data.intc.c.real()) / SCALE_FACTOR, static_cast<double>(data.intc.c.imag()) / SCALE_FACTOR);
+    FixedComplex16 sample(data.intc.normalizedReal(), data.intc.normalizedImag());
     //std::cout << "input: " << sample << std::endl;
     m_inputExp = data.intc.exp;
     m_output = filter(sample);

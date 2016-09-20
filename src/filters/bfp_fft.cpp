@@ -50,8 +50,8 @@ bool BFPFFT::input(const filter_io_t &data)
     size_t reverseIdx = reverseBits(N, m_inputIdx++);
 
     //XXX can we just set the underlying integer value directly instead of going through a double?
-    m_inputs[reverseIdx].real(static_cast<double>(data.intc.c.real()) / SCALE_FACTOR);
-    m_inputs[reverseIdx].imag(static_cast<double>(data.intc.c.imag()) / SCALE_FACTOR);
+    m_inputs[reverseIdx].real(data.intc.normalizedReal());
+    m_inputs[reverseIdx].imag(data.intc.normalizedImag());
 
     m_scaleExp = data.intc.exp;
 
@@ -88,9 +88,7 @@ void BFPFFT::tick(void)
     }
 
     for (size_t i = 0; i < m_inputs.size(); i++) {
-        m_outputs[i].c.real(m_inputs[i].real().range().to_int());
-        m_outputs[i].c.imag(m_inputs[i].imag().range().to_int());
-        m_outputs[i].exp = m_scaleExp;
+        m_outputs[i].assignFixedComplexWithExp(m_inputs[i], m_scaleExp);
     }
 
     //Reset some internal state for the next round

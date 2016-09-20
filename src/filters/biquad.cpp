@@ -124,15 +124,14 @@ void Biquad::init(const SOSCoeffs &coeffs)
 
 bool Biquad::input(const filter_io_t &data)
 {
-    static constexpr uint32_t SCALE_FACTOR = (1 << 31);
     assert(data.type == IO_TYPE_INT32_COMPLEX);
     //shift inputs to make room for new sample
     size_t size = m_x.size();
     for (size_t i = 0; i < size - 1; i++) {
         m_x[size - i - 1] = m_x[size - i - 2];
     }
-    m_x[0].real(static_cast<double>(data.intc.c.real()) / SCALE_FACTOR);
-    m_x[0].imag(static_cast<double>(data.intc.c.imag()) / SCALE_FACTOR);
+    m_x[0].real(data.intc.normalizedReal());
+    m_x[0].imag(data.intc.normalizedImag());
     m_inputExp = data.intc.exp;
 
     m_newInput = true;
@@ -142,10 +141,7 @@ bool Biquad::input(const filter_io_t &data)
 bool Biquad::output(filter_io_t &data)
 {
     if (m_newInput) {
-        data.type = IO_TYPE_INT32_COMPLEX;
-        data.intc.c.real(m_y[0].real().range().to_int() << 16);
-        data.intc.c.imag(m_y[0].imag().range().to_int() << 16);
-        data.intc.exp = m_inputExp;
+        data = m_y[0];
         m_newInput = false;
         return true;
     }
