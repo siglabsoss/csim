@@ -10,9 +10,6 @@
 
 
 #define LARGER_THAN_COLS (25)
-#define h_rows (16)
-#define h_cols (24)
-
 
 
 typedef struct

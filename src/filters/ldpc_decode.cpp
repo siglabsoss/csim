@@ -66,9 +66,9 @@ LDPCDecode::~LDPCDecode()
 void LDPCDecode::print_h()
 {
     cout << "H = " << endl;
-    for( unsigned i = 0; i < h_rows; ++i )
+    for( unsigned i = 0; i < m_hrows; ++i )
     {
-        for( unsigned j = 0; j < h_cols; ++j)
+        for( unsigned j = 0; j < m_hcols; ++j)
         {
             cout << m_H[i][j] << ",";
         }
@@ -80,10 +80,10 @@ void LDPCDecode::print_h()
 void LDPCDecode::prep_once()
 {
     // calculate degree for each check node, fill in node_index
-    for( unsigned i = 0; i < h_rows; ++i )
+    for( unsigned i = 0; i < m_hrows; ++i )
     {
         m_m[i].degree = 0;
-        for( unsigned j = 0; j < h_cols; ++j)
+        for( unsigned j = 0; j < m_hcols; ++j)
         {
             if( m_H[i][j] )
             {
@@ -101,7 +101,7 @@ void LDPCDecode::prep_once()
 void LDPCDecode::calc_syndrome(unsigned print = 1)
 {
 
-    for( unsigned i = 0; i < h_rows; ++i )
+    for( unsigned i = 0; i < m_hrows; ++i )
     {
         if( print ) cout << "equation (" << i << ") = ";
         LDPC_M *mi = &(m_m[i]);
@@ -130,7 +130,7 @@ unsigned LDPCDecode::get_syndrome(void)
 {
     unsigned syndrome = 0;  // "And IncrediBoy!!"
 
-    for( unsigned i = 0; i < h_rows; ++i )
+    for( unsigned i = 0; i < m_hrows; ++i )
     {
         syndrome += m_m[i].parity;
     }
@@ -144,7 +144,7 @@ unsigned LDPCDecode::get_syndrome(void)
 void LDPCDecode::iteration()
 {
     // Load up min 1,2.  This is the Q message stage
-    for( unsigned i = 0; i < h_rows; ++i )
+    for( unsigned i = 0; i < m_hrows; ++i )
     {
         LDPC_M *mi = &(m_m[i]);
         LDPC_N *ni = &(m_n[mi->node_index[0]]);
@@ -195,13 +195,13 @@ void LDPCDecode::iteration()
 
 
     // we can't modify n array directly because we assume the sign of llr on variable nodes stays the same throughout the whole loop
-    float additions[h_cols];
+    float additions[m_hcols];
 
-    for( unsigned j = 0; j < h_cols; ++j )
+    for( unsigned j = 0; j < m_hcols; ++j )
         additions[j] = 0;
 
     // Pass R messages
-    for( unsigned i = 0; i < h_rows; ++i )
+    for( unsigned i = 0; i < m_hrows; ++i )
     {
         LDPC_M *mi = &(m_m[i]);
 
@@ -240,7 +240,7 @@ void LDPCDecode::iteration()
     }
 
     // apply additions all at once
-    for( unsigned j = 0; j < h_cols; ++j )
+    for( unsigned j = 0; j < m_hcols; ++j )
     {
         LDPC_N *ni = &(m_n[j]);
         ni->llr += additions[j];
@@ -254,7 +254,7 @@ void LDPCDecode::get_message()
 
     cout << "Assuming that the syndrome is 0, the message is: " << endl;
 
-    unsigned degreek = h_cols - h_rows;
+    unsigned degreek = m_hcols - m_hrows;
 
     for( unsigned j = 0; j <= degreek; ++j )
     {
@@ -319,7 +319,7 @@ void LDPCDecode::decode(vector<int> cw, size_t iterations, bool& solved, size_t&
 
         if(syn == 0)
         {
-           cout << "Breaking after " << i-1 << " iteration" << endl;
+           cout << "Breaking after " << (signed)i-1 << " iteration" << endl;
            solved = true;
            solved_iterations = i;
            return;
