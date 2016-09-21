@@ -70,31 +70,31 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
     vector<uint8_t> cw;
 
 //    cout << "m_hcols " << m_hcols <<
-    cout << "encode: " << endl << endl;
+//    cout << "encode: " << endl << endl;
 
     for(size_t i = 0; i < m_hcols; i++)
     {
 
-        int res = 0;
-
+        uint8_t res = 0;
+        uint8_t bit;
 
         for(size_t j = 0; j < m_hrows; j++)
         {
-            res += m_G[j][i] * u[j];
+            if(m_G[j][i] == 1 && u[j] == 1) {
+                bit = 1;
+            } else {
+                bit = 0;
+            }
+            res ^= bit;
         }
-        cout << res << " ";
+//        cout << (int)res << " ";
 
-        cw.push_back(res%2);
+        cw.push_back(res);
 
     }
 
-    cout << endl;
+//    cout << endl;
     return cw;
-//    assert(cw.size() == m_n.size());
-//    assert(m_n.size() == m_hcols);
-//
-//    unsigned count = 0;
-
 }
 
 
