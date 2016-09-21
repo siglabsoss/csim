@@ -75,7 +75,7 @@ CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
 
 }
 
-CSIM_TESX_CASE(LDPC_ENCODE)
+CSIM_TEST_CASE(LDPC_ENCODE)
 {
     CSVMatrix* p = new CSVMatrix();
     vector<char> g_bytes = p->loadCSVFile("data/ldpc/code2_g.txt");
@@ -95,6 +95,7 @@ CSIM_TESX_CASE(LDPC_ENCODE)
 
     vector<uint8_t> u = {0,1,1,0,1,1,0,1,0};
     vector<uint8_t> cw;
+    vector<uint8_t> expected = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
 
     LDPCEncode encode(G, g_rows, g_cols);
 
@@ -104,6 +105,7 @@ CSIM_TESX_CASE(LDPC_ENCODE)
 
     for(size_t i = 0; i < cw.size(); ++i) {
         cout << (int)cw[i] << ", ";
+        BOOST_CHECK_EQUAL(cw[i], expected[i]);
     }
 
     cout << endl;
@@ -112,7 +114,7 @@ CSIM_TESX_CASE(LDPC_ENCODE)
 }
 
 
-CSIM_TEST_CASE(LDPC_ENCODE_COOKED)
+CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
 {
     std::string gstring( "1,1,1,1,1\n0,1,0,0,0\n0,1,1,0,0\n" );
     std::vector<char> g_bytes( gstring.begin(), gstring.end() );
