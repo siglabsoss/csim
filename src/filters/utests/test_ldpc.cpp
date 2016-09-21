@@ -10,7 +10,7 @@ CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 CSIM_TEST_CASE(LDPC_Basic)
 {
     CSVMatrix* p = new CSVMatrix();
-    vector<char> bytes = p->loadCSVFile("data/ldpc/mat1.txt");
+    vector<char> bytes = p->loadCSVFile("data/ldpc/code1_h.txt");
 
     vector<vector<uint8_t> > H;
     uint32_t rows, cols;
@@ -39,7 +39,7 @@ CSIM_TEST_CASE(LDPC_Basic)
 CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
 {
     CSVMatrix* p = new CSVMatrix();
-    vector<char> bytes = p->loadCSVFile("data/ldpc/mat2.txt");
+    vector<char> bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
 
     vector<vector<uint8_t> > H;
     uint32_t rows, cols;
@@ -71,6 +71,11 @@ CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
     for(size_t i = 0; i < (cols-rows); i++) {
         BOOST_CHECK_EQUAL(rx[i], decoded[i]);
     }
+
+}
+
+CSIM_TEST_CASE(LDPC_ENCODE)
+{
 
 }
 
