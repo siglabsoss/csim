@@ -256,7 +256,7 @@ vector<uint8_t> LDPCDecode::get_message()
 
     unsigned degreek = m_hcols - m_hrows;
 
-    for( unsigned j = 0; j <= degreek; ++j )
+    for( unsigned j = 0; j < degreek; ++j )
     {
         LDPC_N *ni = &(m_n[j]);
 
