@@ -88,7 +88,7 @@ void LDPCDecode::prep_once()
             if( m_H[i][j] )
             {
                 // keep track of the index of which variable nodes this check node is connected to
-                m_m[i].node_index[m_m[i].degree] = j;
+                m_m[i].node_index.push_back(j);
                 m_m[i].degree++;
             }
         }
@@ -249,10 +249,10 @@ void LDPCDecode::iteration()
 }
 
 
-void LDPCDecode::get_message()
+vector<uint8_t> LDPCDecode::get_message()
 {
-
-    cout << "Assuming that the syndrome is 0, the message is: " << endl;
+    vector<uint8_t> message;
+//    cout << "Assuming that the syndrome is 0, the message is: " << endl;
 
     unsigned degreek = m_hcols - m_hrows;
 
@@ -260,7 +260,7 @@ void LDPCDecode::get_message()
     {
         LDPC_N *ni = &(m_n[j]);
 
-        short val;
+        uint8_t val;
         if( ni->llr < 0 )
         {
             val = 1;
@@ -270,9 +270,13 @@ void LDPCDecode::get_message()
             val = 0;
         }
 
-        cout << val << endl;
+        message.push_back(val);
+
+//        cout << val << endl;
 
     }
+
+    return message;
 
 }
 

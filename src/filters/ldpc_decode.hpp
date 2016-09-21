@@ -9,8 +9,6 @@
 
 
 
-#define LARGER_THAN_COLS (25)
-
 
 typedef struct
 {
@@ -27,7 +25,7 @@ typedef struct
     float min_index[2];
 
     // static defined for now
-    unsigned node_index[LARGER_THAN_COLS];
+    vector<unsigned> node_index;
 
     // 0 means that this check node is satisfied
     short parity;
@@ -48,7 +46,7 @@ public:
     unsigned get_syndrome(void);
     void calc_syndrome(unsigned print);
     void run();
-    void get_message();
+    vector<uint8_t> get_message();
     void print_cw();
     void decode(vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations);
 private:

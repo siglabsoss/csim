@@ -7,7 +7,7 @@
 
 CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 
-CSIM_TESX_CASE(LDPC_Basic)
+CSIM_TEST_CASE(LDPC_Basic)
 {
     CSVMatrix* p = new CSVMatrix();
     vector<char> bytes = p->loadCSVFile("data/ldpc/mat1.txt");
@@ -36,7 +36,7 @@ CSIM_TESX_CASE(LDPC_Basic)
 
 }
 
-CSIM_TEST_CASE(LDPC_Basic2)
+CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
 {
     CSVMatrix* p = new CSVMatrix();
     vector<char> bytes = p->loadCSVFile("data/ldpc/mat2.txt");
@@ -50,22 +50,27 @@ CSIM_TEST_CASE(LDPC_Basic2)
 
     LDPCDecode decode(H, rows, cols);
 
-    // 0     1     1     0     1     1     0     1     0
-    vector<int> rx = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
+    //                    0,1,1,0,1,1,0,1,0
+    vector<uint8_t> rx = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
+    vector<int> llr = vector<int>(rx.size());
 
-    for(size_t i = 0; i < rx.size(); i++)
-    {
-        rx[i] *= -100; // convert to llr
+    for(size_t i = 0; i < rx.size(); i++) {
+        llr[i] = rx[i] * -100; // convert to llr
     }
 
     bool solved;
-        size_t solved_in;
+    size_t solved_in;
 
-        decode.decode(rx, 10, solved, solved_in);
-        cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << endl;
+    decode.decode(llr, 10, solved, solved_in);
+    cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << endl;
 
+    BOOST_CHECK_EQUAL(solved, true);
 
+    vector<uint8_t> decoded = decode.get_message();
 
+    for(size_t i = 0; i < (cols-rows); i++) {
+        BOOST_CHECK_EQUAL(rx[i], decoded[i]);
+    }
 
 }
 
