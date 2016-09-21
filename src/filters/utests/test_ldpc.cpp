@@ -1,13 +1,14 @@
 #include <test/unit_test.hpp>
 
 #include <filters/ldpc_decode.hpp>
+#include <filters/ldpc_encode.hpp>
 #include <utils/ldpc_utils.hpp>
 
 #include <boost/tokenizer.hpp> //For parsing data from file
 
 CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 
-CSIM_TEST_CASE(LDPC_Basic)
+CSIM_TESX_CASE(LDPC_Basic)
 {
     CSVMatrix* p = new CSVMatrix();
     vector<char> bytes = p->loadCSVFile("data/ldpc/code1_h.txt");
@@ -36,7 +37,7 @@ CSIM_TEST_CASE(LDPC_Basic)
 
 }
 
-CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
+CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
 {
     CSVMatrix* p = new CSVMatrix();
     vector<char> bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
@@ -74,8 +75,63 @@ CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
 
 }
 
-CSIM_TEST_CASE(LDPC_ENCODE)
+CSIM_TESX_CASE(LDPC_ENCODE)
 {
+    CSVMatrix* p = new CSVMatrix();
+    vector<char> g_bytes = p->loadCSVFile("data/ldpc/code2_g.txt");
+    vector<char> h_bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
+
+
+    vector<vector<uint8_t> > G;
+    uint32_t g_rows, g_cols;
+    p->parseCSV(g_rows, g_cols, g_bytes, G);
+
+    vector<vector<uint8_t> > H;
+    uint32_t h_rows, h_cols;
+    p->parseCSV(h_rows, h_cols, h_bytes, H);
+
+
+
+
+    vector<uint8_t> u = {0,1,1,0,1,1,0,1,0};
+    vector<uint8_t> cw;
+
+    LDPCEncode encode(G, g_rows, g_cols);
+
+    cw = encode.encode(u);
+
+    cout << "gotback cw " << cw.size() << endl;
+
+    for(size_t i = 0; i < cw.size(); ++i) {
+        cout << (int)cw[i] << ", ";
+    }
+
+    cout << endl;
+
+
+}
+
+
+CSIM_TEST_CASE(LDPC_ENCODE_COOKED)
+{
+    std::string gstring( "1,1,1,1,1\n0,1,0,0,0\n0,1,1,0,0\n" );
+    std::vector<char> g_bytes( gstring.begin(), gstring.end() );
+
+    vector<vector<uint8_t> > G;
+    uint32_t g_rows, g_cols;
+    CSVMatrix* p = new CSVMatrix();
+    p->parseCSV(g_rows, g_cols, g_bytes, G);
+
+    cout << "Loaded G with rows, cols" << endl << g_rows << ", " << g_cols << endl;
+
+    vector<uint8_t> u = {1,0,1};
+
+    LDPCEncode encode(G, g_rows, g_cols);
+
+    vector<uint8_t> cw;
+
+    cw = encode.encode(u);
+
 
 }
 

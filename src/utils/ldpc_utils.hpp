@@ -29,6 +29,9 @@ public:
         ifstream ifs(filename, ios::binary|ios::ate);
         ifstream::pos_type bytecount = ifs.tellg();
 
+        assert(ifs && "file does not exist");
+        assert(bytecount > 0 && "file is empty");
+
         std::vector<char> result(bytecount);
         ifs.seekg(0, ios::beg);
         ifs.read(&result[0], bytecount);

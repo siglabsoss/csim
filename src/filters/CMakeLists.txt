@@ -13,6 +13,7 @@ set(SIGFILTERS_SOURCES
     soft_demod.cpp
     noise_element.cpp
     ldpc_decode.cpp
+    ldpc_encode.cpp
     biquad.cpp
     biquad_iir.cpp
     )
