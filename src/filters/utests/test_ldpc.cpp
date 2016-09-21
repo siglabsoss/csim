@@ -129,8 +129,14 @@ CSIM_TEST_CASE(LDPC_ENCODE_COOKED)
     LDPCEncode encode(G, g_rows, g_cols);
 
     vector<uint8_t> cw;
+    vector<uint8_t> expected = {1,0,0,1,1};
 
     cw = encode.encode(u);
+
+    for(size_t i = 0; i < cw.size(); i++)
+    {
+        BOOST_CHECK_EQUAL(cw[i], expected[i]);
+    }
 
 
 }

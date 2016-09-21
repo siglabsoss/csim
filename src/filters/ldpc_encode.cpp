@@ -84,9 +84,11 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
         }
         cout << res << " ";
 
+        cw.push_back(res%2);
+
     }
 
-    cout << endl;;
+    cout << endl;
     return cw;
 //    assert(cw.size() == m_n.size());
 //    assert(m_n.size() == m_hcols);
