@@ -72,7 +72,10 @@ add_subdirectory(probes)
 add_subdirectory(types)
 add_subdirectory(utils)
 add_subdirectory(3rd)
-add_subdirectory(mex)
+
+if (EXISTS MATLAB_INCLUDE_PATH)
+    add_subdirectory(mex)
+endif()
 
 if (BUILD_UTESTS)
     add_subdirectory(core/utests)
