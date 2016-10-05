@@ -44,6 +44,7 @@ struct ComplexInt
     }
 
     ComplexInt & operator=(const FixedComplex &rhs);
+    ComplexInt & operator=(const SLFixComplex &rhs);
     void assignFixedComplexWithExp(const FixedComplex &val, ssize_t exp);
 };
 
@@ -66,6 +67,7 @@ struct filter_io_t
     filter_io_t & operator=(const filter_io_t &rhs);
     filter_io_t & operator=(const ComplexDouble &rhs);
     filter_io_t & operator=(const FixedComplex &rhs);
+    filter_io_t & operator=(const SLFixComplex &rhs);
     filter_io_t & operator=(const uint8_t &rhs);
     filter_io_t & operator=(const ComplexInt &rhs);
 

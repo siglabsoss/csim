@@ -34,6 +34,28 @@ ComplexInt & ComplexInt::operator=(const FixedComplex &rhs)
     return *this;
 }
 
+ComplexInt & ComplexInt::operator=(const SLFixComplex &rhs)
+{
+    size_t realWordLength = rhs.real().wl();
+    size_t imagWordLength = rhs.imag().wl();
+
+    assert(realWordLength == imagWordLength);
+    assert(realWordLength <= 32);
+
+    size_t fracLen = realWordLength - rhs.real().iwl();
+
+    uint32_t realInt = static_cast<uint32_t>(rhs.real().to_uint64());
+    uint32_t imagInt = static_cast<uint32_t>(rhs.imag().to_uint64());
+
+    realInt <<= (32 - realWordLength);
+    imagInt <<= (32 - imagWordLength);
+    this->c.real(realInt);
+    this->c.imag(imagInt);
+    this->exp = 31 - fracLen; //XXX double check sign
+
+    return *this;
+}
+
 /**
  * Extract the underlying bits from the fixed complex type, allowing the user to set the
  * scaling exponent.
@@ -133,6 +155,13 @@ filter_io_t & filter_io_t::operator=(const ComplexDouble &rhs)
 }
 
 filter_io_t & filter_io_t::operator=(const FixedComplex &rhs)
+{
+    this->type = IO_TYPE_INT32_COMPLEX;
+    this->intc = rhs;
+    return *this;
+}
+
+filter_io_t & filter_io_t::operator=(const SLFixComplex &rhs)
 {
     this->type = IO_TYPE_INT32_COMPLEX;
     this->intc = rhs;
