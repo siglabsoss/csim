@@ -8,7 +8,7 @@ SLFixPoint::SLFixPoint() :
 {
 }
 
-SLFixPoint::SLFixPoint(size_t wordLength, size_t intLength) :
+SLFixPoint::SLFixPoint(size_t wordLength, ssize_t intLength) :
     m_value(0),
     m_wl(0),
     m_fl(0)
@@ -41,10 +41,8 @@ SLFixPoint SLFixPoint::operator+(const SLFixPoint &rhs)
 {
     assert(this->m_fl == rhs.m_fl);
     SLFixPoint result = *this;
-    long long thisVal = signExtendedValue(*this);
-    long long rhsVal = signExtendedValue(rhs);
-    result.m_value = thisVal + rhsVal;
-    maskValue();
+    result.m_value = this->m_value + rhs.m_value;
+    maskAndSignExtend();
     return result;
 }
 
@@ -52,10 +50,8 @@ SLFixPoint SLFixPoint::operator-(const SLFixPoint &rhs)
 {
     assert(this->m_fl == rhs.m_fl);
     SLFixPoint result = *this;
-    long long thisVal = signExtendedValue(*this);
-    long long rhsVal = signExtendedValue(rhs);
-    result.m_value = thisVal - rhsVal;
-    maskValue();
+    result.m_value = this->m_value - rhs.m_value;
+    maskAndSignExtend();
     return result;
 }
 
@@ -63,10 +59,8 @@ SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs)
 {
     assert(this->m_wl + rhs.m_wl <= sizeof(this->m_value)*8);
     SLFixPoint result(this->m_wl + rhs.m_wl, this->m_wl + rhs.m_wl - (this->m_fl + rhs.m_fl));
-    long long thisVal = signExtendedValue(*this);
-    long long rhsVal = signExtendedValue(rhs);
-    result.m_value = (thisVal * rhsVal);
-    maskValue();
+    result.m_value = (this->m_value * rhs.m_value);
+    maskAndSignExtend();
     return result;
 }
 
@@ -100,16 +94,14 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
             this->m_value = (rhs.m_value >> fracDiff);
         }
     }
-
-    maskValue();
-
+    maskAndSignExtend();
     return *this;
 }
 
 SLFixPoint &SLFixPoint::operator=(double val)
 {
     this->m_value = static_cast<long long>(val * (1 << m_fl));
-    maskValue();
+    maskAndSignExtend();
     return *this;
 }
 
@@ -125,50 +117,73 @@ SLFixPoint &SLFixPoint::operator<<(size_t shift)
 SLFixPoint &SLFixPoint::operator>>(size_t shift)
 {
     assert (shift >= 0);
-    unsigned long long m_value = static_cast<unsigned long long>(this->m_value);
-    m_value >>= shift; //unsigned shift to ensure we don't ever extend a sign bit
+    this->m_value >>= shift;
     this->m_value = m_value;
     this->m_fl -= shift;
     this->m_wl -= shift;
-
     return *this;
 }
 
 uint64_t SLFixPoint::to_uint64() const
 {
-    return static_cast<uint64_t>(this->m_value);
+    return static_cast<uint64_t>(getMaskedValue());
 }
 
 int64_t SLFixPoint::to_int64() const
 {
-    return static_cast<int64_t>(signExtendedValue(*this));
+    return static_cast<int64_t>(this->m_value);
 }
 
 double SLFixPoint::to_double() const
 {
-    return static_cast<double>(signExtendedValue(*this)) / (1 << this->m_fl);
+    double scale = 1.0 / static_cast<double>(1 << this->m_fl);
+    return static_cast<double>(this->m_value) * scale;
 }
 
-long long SLFixPoint::signExtendedValue(const SLFixPoint &fp)
+size_t SLFixPoint::wl() const
 {
-    size_t spareBits = sizeof(fp.m_value) * 8 - fp.m_wl;
-    long long val = fp.m_value;
-    val = (val << spareBits) >> spareBits;
-    return val;
+    return m_wl;
 }
 
-void SLFixPoint::maskValue()
+ssize_t SLFixPoint::iwl() const
+{
+    return static_cast<ssize_t>(m_wl - m_fl);
+}
+
+void SLFixPoint::extendSign()
+{
+    size_t spareBits = sizeof(m_value) * 8 - m_wl;
+    long long val = m_value;
+    val = (val << spareBits) >> spareBits;
+    m_value = val;
+}
+
+long long SLFixPoint::getMaskedValue() const
 {
     //XXX check for overflow, saturate, etc
     unsigned long long mask = ~0;
     mask >>= sizeof(this->m_value) * 8 - this->m_wl;
-    this->m_value &= mask;
+    if (this->m_value < 0) {
+        assert((~mask & -this->m_value) == 0);
+    } else {
+        assert((~mask & this->m_value) == 0);
+    }
+
+    return (this->m_value & mask);
 }
 
-void SLFixPoint::setFormat(size_t wordLength, size_t intLength)
+void SLFixPoint::maskAndSignExtend()
 {
-    assert(wordLength >= intLength);
+    this->m_value = getMaskedValue();
+    extendSign();
+}
+
+void SLFixPoint::setFormat(size_t wordLength, ssize_t intLength)
+{
+    assert(static_cast<ssize_t>(wordLength) >= intLength);
     assert(wordLength <= sizeof(m_value)*8);
+    //intLength can be negative to represent small values with
+    //higher precision. thus m_fl can be greater than m_wl
     m_wl = wordLength;
     m_fl = wordLength - intLength;
 }

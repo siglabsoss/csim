@@ -13,7 +13,7 @@ class SLFixPoint
 {
 public:
     SLFixPoint();
-    SLFixPoint(size_t wordLength, size_t intLength);
+    SLFixPoint(size_t wordLength, ssize_t intLength);
     SLFixPoint(const SLFixPoint &other);
     virtual ~SLFixPoint();
 
@@ -27,15 +27,18 @@ public:
     SLFixPoint &operator<<(size_t shift);
     SLFixPoint &operator>>(size_t shift);
 
-    void       setFormat(size_t wordLength, size_t intLength);
+    void       setFormat(size_t wordLength, ssize_t intLength);
 
     uint64_t to_uint64() const;
     int64_t  to_int64()  const;
     double   to_double() const;
+    size_t   wl() const; //word length
+    ssize_t  iwl() const; //integer word length
 
 protected:
-    void                maskValue();
-    static long long    signExtendedValue(const SLFixPoint &fp);
+    long long           getMaskedValue() const;
+    void                extendSign();
+    void                maskAndSignExtend();
 
 public:
     long long   m_value;
@@ -61,7 +64,6 @@ public:
         SLFixPoint(N, M)
     {
         this->m_value = static_cast<long long>(val * (1 << m_fl));
-        maskValue();
     }
 
     using SLFixPoint::operator+;
