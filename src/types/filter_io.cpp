@@ -2,6 +2,11 @@
 
 #include <iomanip>
 
+ComplexInt::ComplexInt() :
+    exp(0)
+{
+
+}
 /**
  * Extract the underlying bits from the fixed complex type. Use the most signicant bits of the
  * integer by shifting the underlying fixed complex bits appropriately. Set the scale exponent

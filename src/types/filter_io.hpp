@@ -21,6 +21,7 @@ enum type_t {
  */
 struct ComplexInt
 {
+    ComplexInt();
     static constexpr uint32_t SCALE_FACTOR = (1 << 31);
     std::complex<int32_t> c;
     ssize_t               exp;
