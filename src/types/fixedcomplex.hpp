@@ -31,4 +31,37 @@ typedef FixedComplex2<32, 2>    FixedComplex2_30;
 
 typedef std::complex<sc_fix>    FixedComplex;
 
+class SLFixComplex
+{
+public:
+    SLFixComplex();
+    SLFixComplex(size_t wordLength, size_t intLength);
+
+    SLFixComplex operator+(const SLFixComplex &rhs);
+    SLFixComplex operator-(const SLFixComplex &rhs);
+    SLFixComplex operator*(const SLFixComplex &rhs);
+    SLFixComplex operator*(const SLFixPoint &rhs);
+    SLFixComplex operator/(const SLFixComplex &rhs);
+
+    SLFixComplex &operator=(const SLFixComplex &rhs);
+    SLFixComplex &operator=(double val);
+    SLFixComplex &operator<<(size_t shift);
+    SLFixComplex &operator>>(size_t shift);
+
+    SLFixPoint  real() const;
+    void        real(const SLFixPoint &val);
+    void        real(double val);
+
+    SLFixPoint  imag() const;
+    void        imag(const SLFixPoint &val);
+    void        imag(double val);
+
+    void        setFormat(size_t wordLength, size_t intLength);
+private:
+    SLFixPoint m_real;
+    SLFixPoint m_imag;
+};
+
+std::ostream& operator<<(std::ostream& os, const SLFixComplex& obj);
+
 #endif /* FixedComplex_H_ */
