@@ -18,13 +18,12 @@ public:
     void tick() override;
 
 private: //methods
-    ComplexInt     filter(FixedComplex16 &input);
+    ComplexInt     filter(SLFixComplex &input);
     ComplexInt     accumToComplexInt() const;
 
 private: //members
-    std::vector< std::unique_ptr<FixPoint> >       		    m_coeffs;
-    CircularBuffer< FixedComplex16 > 	                    m_x;
+    std::vector<SLFixPoint>                        		    m_coeffs;
+    CircularBuffer< SLFixComplex > 	                        m_x;
     ComplexInt                                          	m_output;
-    std::unique_ptr<FixedComplex>                           m_accum;
-    ssize_t                                                 m_inputExp;
+    SLFixComplex                                            m_accum;
 };

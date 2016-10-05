@@ -61,7 +61,7 @@ void runTest(const std::string &coeffFile, const std::string &inputFile, const s
 
 CSIM_TEST_CASE(FIR_REAL_ONLY_INPUTS)
 {
-    runTest("./data/fir/input/taps1.txt", "./data/fir/input/data1_in.csv", "./data/fir/answers/answers1.csv", ONE_BIT_ERROR);
+    runTest("./data/fir/input/taps1.txt", "./data/fir/input/data1_in.csv", "./data/fir/answers/answers1.csv", 2*ONE_BIT_ERROR);
 
 }
 
