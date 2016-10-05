@@ -35,7 +35,9 @@ SLFixComplex SLFixComplex::operator-(const SLFixComplex &rhs)
 
 SLFixComplex SLFixComplex::operator*(const SLFixComplex &rhs)
 {
-    SLFixComplex result(m_real.m_wl + rhs.real().m_wl, m_real.m_wl + rhs.real().m_wl - (m_real.m_fl + rhs.real().m_fl));
+    ssize_t lhsIntWidth = m_real.m_wl - m_real.m_fl;
+    ssize_t rhsIntWidth = rhs.real().m_wl - rhs.real().m_fl;
+    SLFixComplex result(m_real.m_wl + rhs.real().m_wl, lhsIntWidth + rhsIntWidth);
 
     result.m_real = (this->m_real * rhs.m_real) - (this->m_imag * rhs.m_imag);
     result.m_imag = (this->m_real * rhs.m_imag) + (this->m_imag * rhs.m_real);
@@ -45,7 +47,7 @@ SLFixComplex SLFixComplex::operator*(const SLFixComplex &rhs)
 
 SLFixComplex SLFixComplex::operator*(const SLFixPoint &rhs)
 {
-    SLFixComplex result(m_real.m_wl + rhs.m_wl, m_real.m_wl + rhs.m_wl - (m_real.m_fl + rhs.m_fl));
+    SLFixComplex result(m_real.m_wl + rhs.m_wl, (m_real.m_wl + rhs.m_wl) - (m_real.m_fl + rhs.m_fl));
 
     result.m_real = this->m_real * rhs;
     result.m_imag = this->m_imag * rhs;

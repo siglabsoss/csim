@@ -35,7 +35,7 @@ class SLFixComplex
 {
 public:
     SLFixComplex();
-    SLFixComplex(size_t wordLength, size_t intLength);
+    explicit SLFixComplex(size_t wordLength, size_t intLength);
 
     SLFixComplex operator+(const SLFixComplex &rhs);
     SLFixComplex operator-(const SLFixComplex &rhs);

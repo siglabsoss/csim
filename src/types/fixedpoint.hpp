@@ -27,6 +27,8 @@ public:
     SLFixPoint &operator<<(size_t shift);
     SLFixPoint &operator>>(size_t shift);
 
+    SLFixPoint addition(const SLFixPoint &rhs);
+
     void       setFormat(size_t wordLength, ssize_t intLength);
 
     uint64_t to_uint64() const;

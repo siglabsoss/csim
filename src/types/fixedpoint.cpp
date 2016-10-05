@@ -37,28 +37,39 @@ SLFixPoint::~SLFixPoint()
 //
 //}
 
-SLFixPoint SLFixPoint::operator+(const SLFixPoint &rhs)
+SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
 {
-    assert(this->m_fl == rhs.m_fl);
-    SLFixPoint result = *this;
-    result.m_value = this->m_value + rhs.m_value;
+    size_t resultWordLength = std::max(this->m_wl, rhs.m_wl);
+    ssize_t resultIntLength = resultWordLength - std::max(this->m_fl, rhs.m_fl);
+    SLFixPoint tempRHS(resultWordLength, resultIntLength);
+    SLFixPoint tempLHS(resultWordLength, resultIntLength);
+    tempRHS = rhs;
+    tempLHS = *this;
+
+    assert(tempLHS.m_fl == tempRHS.m_fl);
+    SLFixPoint result(resultWordLength, resultIntLength);
+    result.m_value = tempLHS.m_value + tempRHS.m_value;
     maskAndSignExtend();
     return result;
 }
 
+SLFixPoint SLFixPoint::operator+(const SLFixPoint &rhs)
+{
+    return addition(rhs);
+}
+
 SLFixPoint SLFixPoint::operator-(const SLFixPoint &rhs)
 {
-    assert(this->m_fl == rhs.m_fl);
-    SLFixPoint result = *this;
-    result.m_value = this->m_value - rhs.m_value;
-    maskAndSignExtend();
-    return result;
+    SLFixPoint temp = rhs;
+    temp.m_value = -temp.m_value;
+    return addition(temp);
 }
 
 SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs)
 {
     assert(this->m_wl + rhs.m_wl <= sizeof(this->m_value)*8);
-    SLFixPoint result(this->m_wl + rhs.m_wl, this->m_wl + rhs.m_wl - (this->m_fl + rhs.m_fl));
+    ssize_t intWidth = (this->m_wl - this->m_fl) + (rhs.m_wl - rhs.m_fl);
+    SLFixPoint result(this->m_wl + rhs.m_wl, intWidth);
     result.m_value = (this->m_value * rhs.m_value);
     maskAndSignExtend();
     return result;
@@ -79,7 +90,7 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
     } else {
         //XXX precision loss! implement rounding
         fracDiff = -fracDiff;
-        if (true) { //XXX make rounding an option
+        if (false) { //XXX make rounding an option
             //shift one bit short of the final amount so that we can take the last bit for rounding
             this->m_value = (rhs.m_value >> (fracDiff - 1));
             int roundBit = this->m_value & 0x01;
@@ -100,7 +111,7 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
 
 SLFixPoint &SLFixPoint::operator=(double val)
 {
-    this->m_value = static_cast<long long>(val * (1 << m_fl));
+    this->m_value = static_cast<long long>(val * (1ull << m_fl));
     maskAndSignExtend();
     return *this;
 }
@@ -110,7 +121,6 @@ SLFixPoint &SLFixPoint::operator<<(size_t shift)
     assert (shift >= 0);
     this->m_value <<= shift;
     this->m_fl += shift;
-    this->m_wl += shift;
     return *this;
 }
 
@@ -118,9 +128,7 @@ SLFixPoint &SLFixPoint::operator>>(size_t shift)
 {
     assert (shift >= 0);
     this->m_value >>= shift;
-    this->m_value = m_value;
     this->m_fl -= shift;
-    this->m_wl -= shift;
     return *this;
 }
 
@@ -136,7 +144,7 @@ int64_t SLFixPoint::to_int64() const
 
 double SLFixPoint::to_double() const
 {
-    double scale = 1.0 / static_cast<double>(1 << this->m_fl);
+    double scale = 1.0 / static_cast<double>(1ull << this->m_fl);
     return static_cast<double>(this->m_value) * scale;
 }
 
