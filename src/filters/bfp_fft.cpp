@@ -33,7 +33,8 @@ BFPFFT::BFPFFT(size_t N, bool inverse) :
     for (size_t i = 0; i < N; i++) {
         //Calculate twiddle factors
         double theta = (-2 * M_PI * i) / N;
-        m_twiddleFactors[i].setFormat(16, 1);
+        //XXX change format back to 16, 1 after saturation is implemented so that 1.0 doesn't wrap to -1.0
+        m_twiddleFactors[i].setFormat(16, 2);
         m_twiddleFactors[i].real(cos(theta));
         if (m_inverse) {
             m_twiddleFactors[i].imag(-sin(theta));
@@ -83,12 +84,11 @@ void BFPFFT::tick(void)
     //We're good to go...
     dit();
 
-    //For IIFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
-    if (m_inverse) {
-        m_scaleExp -= m_numStages;
-    }
-
     for (size_t i = 0; i < m_inputs.size(); i++) {
+        //For IIFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
+        if (m_inverse) {
+            m_inputs[i].shiftRadixRight(m_numStages);
+        }
         m_outputs[i] = m_inputs[i];
     }
 
@@ -114,7 +114,6 @@ void BFPFFT::dit()
     for (size_t stage = 1; stage <= m_numStages; stage++) { //stage loop
         //Step 1 - Calculate shift amount
         ssize_t shiftAmount = calculateShiftAmountForStage(stage);
-        std::cout << "shifting stage " << stage << " by " << shiftAmount << std::endl;
         //Step 2 - Shift the inputs
         shiftStage(shiftAmount);
         //std::cout << "stage " << stage << " shifted by " << shiftAmount << std::endl;
@@ -135,12 +134,6 @@ void BFPFFT::dit()
                 SLFixComplex bot = m_inputs[botIdx] * twiddle;
                 m_inputs[topIdx] = top + bot;
                 m_inputs[botIdx] = top - bot;
-
-                if (topIdx == 0) {
-                    std::cout << "top = " << top << " bot = " << bot << " top + bot = " << m_inputs[topIdx] << " top - bot = " << m_inputs[botIdx] << std::endl;
-                }
-
-                //std::cout << "x(" << baseT + n << ") & x(" << baseB + n << ") * twiddle(" << n + baseT/2 << ")" << std::endl;
 
                 //Track the max value to shift the next stage properly
                 if (stage != m_numStages) {
