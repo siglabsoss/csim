@@ -90,6 +90,18 @@ SLFixComplex &SLFixComplex::operator>>(size_t shift)
     return *this;
 }
 
+void SLFixComplex::shiftRadixRight(size_t shiftAmount)
+{
+    this->m_real.shiftRadixRight(shiftAmount);
+    this->m_imag.shiftRadixRight(shiftAmount);
+}
+
+void SLFixComplex::shiftRadixLeft(size_t shiftAmount)
+{
+    this->m_real.shiftRadixLeft(shiftAmount);
+    this->m_real.shiftRadixLeft(shiftAmount);
+}
+
 void SLFixComplex::setFormat(size_t wordLength, size_t intLength)
 {
     m_real.setFormat(wordLength, intLength);

@@ -118,7 +118,6 @@ SLFixPoint &SLFixPoint::operator=(double val)
 
 SLFixPoint &SLFixPoint::operator<<(size_t shift)
 {
-    assert (shift >= 0);
     this->m_value <<= shift;
     this->m_fl += shift;
     return *this;
@@ -126,10 +125,19 @@ SLFixPoint &SLFixPoint::operator<<(size_t shift)
 
 SLFixPoint &SLFixPoint::operator>>(size_t shift)
 {
-    assert (shift >= 0);
     this->m_value >>= shift;
     this->m_fl -= shift;
     return *this;
+}
+
+void SLFixPoint::shiftRadixRight(size_t shiftAmount)
+{
+    this->m_fl += shiftAmount;
+}
+
+void SLFixPoint::shiftRadixLeft(size_t shiftAmount)
+{
+    this->m_fl -= shiftAmount;
 }
 
 uint64_t SLFixPoint::to_uint64() const

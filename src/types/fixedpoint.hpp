@@ -27,7 +27,8 @@ public:
     SLFixPoint &operator<<(size_t shift);
     SLFixPoint &operator>>(size_t shift);
 
-    SLFixPoint addition(const SLFixPoint &rhs);
+    void        shiftRadixRight(size_t shiftAmount);
+    void        shiftRadixLeft(size_t shiftAmount);
 
     void       setFormat(size_t wordLength, ssize_t intLength);
 
@@ -41,6 +42,7 @@ protected:
     long long           getMaskedValue() const;
     void                extendSign();
     void                maskAndSignExtend();
+    SLFixPoint          addition(const SLFixPoint &rhs);
 
 public:
     long long   m_value;

@@ -48,6 +48,9 @@ public:
     SLFixComplex &operator<<(size_t shift);
     SLFixComplex &operator>>(size_t shift);
 
+    void        shiftRadixRight(size_t shiftAmount);
+    void        shiftRadixLeft(size_t shiftAmount);
+
     SLFixPoint  real() const;
     void        real(const SLFixPoint &val);
     void        real(double val);
