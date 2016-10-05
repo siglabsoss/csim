@@ -169,5 +169,27 @@ CSIM_TEST_CASE(FRACTIONAL_MULTIPLICATION)
     BOOST_CHECK_EQUAL(result, expectedResult);
 }
 
+CSIM_TEST_CASE(DOUBLE_TO_FIXED_TO_DOUBLE)
+{
+    constexpr double testVal = 0.999999;
+    SLFixPoint a;
+    for (size_t width = 16; width < 64; width++) {
+        a.setFormat(width, 1);
+        a = testVal;
+        BOOST_CHECK_CLOSE(a.to_double(), testVal, 0.005);
+    }
+}
+
+CSIM_TEST_CASE(ADDITION_OF_DIFFERING_FORMATS)
+{
+    SLFixPoint a, b, c;
+    a.setFormat(48, 2);
+    b.setFormat(16, 1);
+    c.setFormat(32, 1);
+    a = 0.3;
+    b = -0.3;
+    c = a - b;
+    BOOST_CHECK_CLOSE(c.to_double(), 0.6, 0.005);
+}
 
 CSIM_TEST_SUITE_END()
