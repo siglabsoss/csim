@@ -27,7 +27,7 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
     SLFixedPoint<8, 4> fp;
     for (auto it = tests.begin(); it != tests.end(); it++) {
         fp = it->first;
-        int64_t result = fp.to_uint64();
+        uint64_t result = fp.to_uint64();
         int64_t expectedResult = it->second;
         BOOST_CHECK_EQUAL(result, expectedResult);
     }
