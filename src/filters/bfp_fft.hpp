@@ -17,20 +17,19 @@ public:
     bool output(filter_io_t &data) override;
     void tick(void) override;
 private:
-    FixedComplexNorm16 getTwiddleFactor(size_t stage, size_t n) const;
+    SLFixComplex getTwiddleFactor(size_t stage, size_t n) const;
     void dit();
 
-    template <typename COMPLEX_T>
-    void shiftFixedComplex(COMPLEX_T &val, ssize_t shiftBits);
+    void shiftFixedComplex(SLFixComplex &val, ssize_t shiftBits);
     void shiftOutput(ssize_t shiftAmount);
     void shiftStage(ssize_t shiftAmount);
     ssize_t calculateShiftAmountForStage(size_t stage);
-    void updateMaxValueForStage(size_t stage, const FixedComplex &val);
+    void updateMaxValueForStage(size_t stage, const SLFixComplex &val);
 
     size_t                           m_numStages;
-    std::vector<FixedComplex1_31>    m_inputs;
-    std::vector< ComplexInt >        m_outputs;
-    std::vector<FixedComplexNorm16>  m_twiddleFactors;
+    std::vector<SLFixComplex>        m_inputs;
+    std::vector<ComplexInt>          m_outputs;
+    std::vector<SLFixComplex>        m_twiddleFactors;
     bool                             m_outputValid;
     size_t                           m_outputIdx;
     size_t                           m_inputIdx;

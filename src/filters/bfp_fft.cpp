@@ -33,11 +33,12 @@ BFPFFT::BFPFFT(size_t N, bool inverse) :
     for (size_t i = 0; i < N; i++) {
         //Calculate twiddle factors
         double theta = (-2 * M_PI * i) / N;
-
+        m_twiddleFactors[i].setFormat(16, 1);
+        m_twiddleFactors[i].real(cos(theta));
         if (m_inverse) {
-            m_twiddleFactors[i] = FixedComplexNorm16(cos(theta), -sin(theta));
+            m_twiddleFactors[i].imag(-sin(theta));
         } else {
-            m_twiddleFactors[i] = FixedComplexNorm16(cos(theta), sin(theta));
+            m_twiddleFactors[i].imag(sin(theta));
         }
     }
 }
@@ -49,7 +50,7 @@ bool BFPFFT::input(const filter_io_t &data)
     //using a bit-reversed index to decimate in time
     size_t reverseIdx = reverseBits(N, m_inputIdx++);
 
-    //XXX can we just set the underlying integer value directly instead of going through a double?
+    m_inputs[reverseIdx].setFormat(32, 1);
     m_inputs[reverseIdx].real(data.intc.normalizedReal());
     m_inputs[reverseIdx].imag(data.intc.normalizedImag());
 
@@ -88,7 +89,7 @@ void BFPFFT::tick(void)
     }
 
     for (size_t i = 0; i < m_inputs.size(); i++) {
-        m_outputs[i].assignFixedComplexWithExp(m_inputs[i], m_scaleExp);
+        m_outputs[i] = m_inputs[i];
     }
 
     //Reset some internal state for the next round
@@ -113,6 +114,7 @@ void BFPFFT::dit()
     for (size_t stage = 1; stage <= m_numStages; stage++) { //stage loop
         //Step 1 - Calculate shift amount
         ssize_t shiftAmount = calculateShiftAmountForStage(stage);
+        std::cout << "shifting stage " << stage << " by " << shiftAmount << std::endl;
         //Step 2 - Shift the inputs
         shiftStage(shiftAmount);
         //std::cout << "stage " << stage << " shifted by " << shiftAmount << std::endl;
@@ -126,13 +128,17 @@ void BFPFFT::dit()
                 size_t topIdx = reverseBits(m_inputs.size(), baseT + n);
                 size_t botIdx = reverseBits(m_inputs.size(), baseB + n);
 
-                FixedComplex1_31 twiddle = getTwiddleFactor(stage, n + baseT/2);
+                SLFixComplex twiddle = getTwiddleFactor(stage, n + baseT/2);
 
                 //Step 3) Perform the Radix-2 butterflies
-                FixedComplex1_31 top = m_inputs[topIdx];
-                FixedComplex1_31 bot = m_inputs[botIdx] * twiddle;
+                SLFixComplex top = m_inputs[topIdx];
+                SLFixComplex bot = m_inputs[botIdx] * twiddle;
                 m_inputs[topIdx] = top + bot;
                 m_inputs[botIdx] = top - bot;
+
+                if (topIdx == 0) {
+                    std::cout << "top = " << top << " bot = " << bot << " top + bot = " << m_inputs[topIdx] << " top - bot = " << m_inputs[botIdx] << std::endl;
+                }
 
                 //std::cout << "x(" << baseT + n << ") & x(" << baseB + n << ") * twiddle(" << n + baseT/2 << ")" << std::endl;
 
@@ -148,8 +154,7 @@ void BFPFFT::dit()
     } //end stage loop
 }
 
-template <typename COMPLEX_T>
-void BFPFFT::shiftFixedComplex(COMPLEX_T &val, ssize_t shiftBits)
+void BFPFFT::shiftFixedComplex(SLFixComplex &val, ssize_t shiftBits)
 {
     if (shiftBits == 0) {
         return;
@@ -157,24 +162,11 @@ void BFPFFT::shiftFixedComplex(COMPLEX_T &val, ssize_t shiftBits)
     bool leftShift = (shiftBits < 0); //left shift is negative
     shiftBits = abs(shiftBits);
 
-    //Found that we must use an intermediate value here in order for the shifting to work properly. Unsure as of why exactly.
-    sc_fix temp(val.real().wl(), val.real().iwl());
-
-    temp = val.real();
     if (leftShift) {
-        temp <<= shiftBits;
+        val = val << shiftBits;
     } else {
-        temp >>= shiftBits;
+        val = val >> shiftBits;
     }
-    val.real(temp);
-
-    temp = val.imag();
-    if (leftShift) {
-        temp <<= shiftBits;
-    } else {
-        temp >>= shiftBits;
-    }
-    val.imag(temp);
 }
 
 void BFPFFT::shiftOutput(ssize_t shiftAmount)
@@ -197,7 +189,7 @@ void BFPFFT::shiftOutput(ssize_t shiftAmount)
 void BFPFFT::shiftStage(ssize_t shiftAmount)
 {
     for (size_t i = 0; i < m_inputs.size(); i++) {
-        shiftFixedComplex<FixedComplex1_31>(m_inputs[i], shiftAmount);
+        shiftFixedComplex(m_inputs[i], shiftAmount);
     }
 }
 
@@ -233,19 +225,19 @@ ssize_t BFPFFT::calculateShiftAmountForStage(size_t stage)
     return shiftCount;
 }
 
-void BFPFFT::updateMaxValueForStage(size_t stage, const FixedComplex &val)
+void BFPFFT::updateMaxValueForStage(size_t stage, const SLFixComplex &val)
 {
-    int64_t rawValue = val.real().range().to_int64();
+    int64_t rawValue = val.real().to_int64();
     if (static_cast<uint64_t>(abs(rawValue)) > m_maxValuePerStage[stage - 1]) {
         m_maxValuePerStage[stage - 1] = abs(rawValue);
     }
-    rawValue = val.imag().range().to_int64();
+    rawValue = val.imag().to_int64();
     if (static_cast<uint64_t>(abs(rawValue)) > m_maxValuePerStage[stage - 1]) {
         m_maxValuePerStage[stage - 1] = abs(rawValue);
     }
 }
 
-FixedComplexNorm16 BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
+SLFixComplex BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
 {
     //see https://www.dsprelated.com/showarticle/107.php
     size_t N = m_inputs.size();
