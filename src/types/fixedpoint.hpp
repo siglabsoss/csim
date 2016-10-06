@@ -24,6 +24,8 @@ public:
     SLFixPoint operator-(const SLFixPoint &rhs);
     SLFixPoint operator*(const SLFixPoint &rhs);
     SLFixPoint operator/(const SLFixPoint &rhs);
+    SLFixPoint &operator+=(const SLFixPoint &rhs);
+    SLFixPoint &operator-=(const SLFixPoint &rhs);
 
     virtual SLFixPoint &operator=(const SLFixPoint &rhs);
     virtual SLFixPoint &operator=(double val);

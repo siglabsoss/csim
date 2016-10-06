@@ -34,6 +34,19 @@ SLFixComplex SLFixComplex::operator-(const SLFixComplex &rhs)
     return result;
 }
 
+SLFixComplex &SLFixComplex::operator+=(const SLFixComplex &rhs)
+{
+    this->m_real += rhs.m_real;
+    this->m_imag += rhs.m_imag;
+    return *this;
+}
+SLFixComplex &SLFixComplex::operator-=(const SLFixComplex &rhs)
+{
+    this->m_real -= rhs.m_real;
+    this->m_imag -= rhs.m_imag;
+    return *this;
+}
+
 SLFixComplex SLFixComplex::operator*(const SLFixComplex &rhs)
 {
     ssize_t lhsIntWidth = m_real.m_wl - m_real.m_fl;

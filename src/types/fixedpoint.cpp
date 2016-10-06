@@ -39,14 +39,6 @@ SLFixPoint::~SLFixPoint()
 
 }
 
-//SLFixPoint::SLFixPoint(double val) :
-//        m_value(0),
-//        m_wl(0),
-//        m_fl(0)
-//{
-//
-//}
-
 SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
 {
     size_t resultWordLength = std::max(this->m_wl, rhs.m_wl);
@@ -59,13 +51,27 @@ SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
     assert(tempLHS.m_fl == tempRHS.m_fl);
     SLFixPoint result(resultWordLength, resultIntLength);
     result.m_value = tempLHS.m_value + tempRHS.m_value;
-    maskAndSignExtend();
+    result.maskAndSignExtend();
     return result;
 }
 
 SLFixPoint SLFixPoint::operator+(const SLFixPoint &rhs)
 {
     return addition(rhs);
+}
+
+SLFixPoint &SLFixPoint::operator+=(const SLFixPoint &rhs)
+{
+    *this = addition(rhs);
+    return *this;
+}
+
+SLFixPoint &SLFixPoint::operator-=(const SLFixPoint &rhs)
+{
+    SLFixPoint temp = rhs;
+    temp.m_value = -temp.m_value;
+    *this = addition(temp);
+    return *this;
 }
 
 SLFixPoint SLFixPoint::operator-(const SLFixPoint &rhs)
@@ -81,7 +87,7 @@ SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs)
     ssize_t intWidth = (this->m_wl - this->m_fl) + (rhs.m_wl - rhs.m_fl);
     SLFixPoint result(this->m_wl + rhs.m_wl, intWidth);
     result.m_value = (this->m_value * rhs.m_value);
-    maskAndSignExtend();
+    result.maskAndSignExtend();
     return result;
 }
 
@@ -100,22 +106,27 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
     //Shift the value to align the fractional bits
     if (fracDiff >= 0) {
         this->m_value = (rhs.m_value << fracDiff);
-    } else {
-        //XXX precision loss! implement rounding
+    } else { //here we are losing precision
         fracDiff = -fracDiff;
-        if (false) { //XXX make rounding an option
-            //shift one bit short of the final amount so that we can take the last bit for rounding
-            this->m_value = (rhs.m_value >> (fracDiff - 1));
-            int roundBit = this->m_value & 0x01;
-            this->m_value >>= 1; //shift that last bit off
-            this->m_value += roundBit;
-//            if (roundBit == 1) {
-//                std::cout << "ROUNDING UP" << std::endl;
-//            } else {
-//                std::cout << "ROUNDING DOWN" << std::endl;
-//            }
-        } else {
-            this->m_value = (rhs.m_value >> fracDiff);
+        switch (m_quantMode) {
+            case QUANT_RND_HALF_UP:
+            {
+                //shift one bit short of the final amount so that we can take the last bit for rounding
+                this->m_value = (rhs.m_value >> (fracDiff - 1));
+                int roundBit = this->m_value & 0x01;
+                this->m_value >>= 1; //shift that last bit off
+                this->m_value += roundBit;
+    //            if (roundBit == 1) {
+    //                std::cout << "ROUNDING UP" << std::endl;
+    //            } else {
+    //                std::cout << "ROUNDING DOWN" << std::endl;
+    //            }
+                break;
+            }
+            case QUANT_TRUNCATE:
+            default:
+                this->m_value = (rhs.m_value >> fracDiff);
+                break;
         }
     }
     maskAndSignExtend();

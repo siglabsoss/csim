@@ -24,6 +24,8 @@ public:
     SLFixComplex operator*(const SLFixComplex &rhs);
     SLFixComplex operator*(const SLFixPoint &rhs);
     SLFixComplex operator/(const SLFixComplex &rhs);
+    SLFixComplex &operator+=(const SLFixComplex &rhs);
+    SLFixComplex &operator-=(const SLFixComplex &rhs);
 
     SLFixComplex &operator=(const SLFixComplex &rhs);
     SLFixComplex &operator=(double val);
