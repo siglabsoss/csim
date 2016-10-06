@@ -14,7 +14,7 @@ void checkError(const vector<T> &outputs, const vector<T> &answers, double diffe
 
 void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<ComplexDouble> &answers, double difference);
 void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse);
-//void runFFTLoopbackTest(const std::string &infile);
+void runFFTLoopbackTest(const std::string &infile);
 void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const vector<std::complex<int32_t> > &expected, uint32_t threshold);
 
 CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
@@ -107,10 +107,10 @@ CSIM_TEST_CASE(IFFT_MATLAB)
     runFFTTest("./data/fft/input/ifft_input1.csv", "./data/fft/answers/ifft_output1.csv", true);
 }
 
-//CSIM_TEST_CASE(FFT_IFFT)
-//{
-//    runFFTLoopbackTest("./data/fft/input/ifft_input1.csv");
-//}
+CSIM_TEST_CASE(FFT_IFFT)
+{
+    runFFTLoopbackTest("./data/fft/input/ifft_input1.csv");
+}
 
 void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse)
 {
@@ -150,67 +150,52 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
     checkErrorComplexDouble(outputs, answers, 0.007);
 }
 
-//void runFFTLoopbackTest(const std::string &infile)
-//{
-//    string inFile(infile);
-//
-//    std::vector<ComplexDouble> inputs;
-//    std::vector<std::complex<int32_t> > inputsInt;
-//    std::vector<std::complex<int32_t> > fftoutputs;
-//    std::vector<std::complex<int32_t> > ifftoutputs;
-//
-//    inputs = readComplexFromCSV<ComplexDouble>(inFile);
-//    BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-//
-//    int points = inputs.size();
-//    size_t scaleExponent = utils::calculateInt32ScaleExponent(inputs);
-//    BFPFFT fft(points, false);
-//    BFPFFT ifft(points, true);
-//    filter_io_t data;
-//    for (unsigned int i = 0; i < 2; i++) {
-//        for (int j = 0; j < points; j++) {
-//            //std::cout << j << ": " << inputs[j] << std::endl;
-//            inputsInt.push_back(std::complex<int32_t> (inputs[j].real() * static_cast<double>(1u << scaleExponent), inputs[j].imag() * static_cast<double>(1u << scaleExponent)));
-//            data.type = IO_TYPE_INT32_COMPLEX;
-//            data.intc.c = inputsInt[j];
-//            data.intc.exp = 0;
-//            //data.intc.real(inputs[j].real() * static_cast<double>(1u << scaleExponent));
-//            //data.intc.imag(inputs[j].imag() * static_cast<double>(1u << scaleExponent));
-//            fft.input(data);
-//            fft.tick();
-//            bool didGetOutput = fft.output(data);
-//            bool lastInput = (i == 1 && j == points - 1);
-//            if (didGetOutput && !lastInput) {
-//                fftoutputs.push_back(data.intc.c);
-//            }//If output is ready
-//        }//Insert all input
-//    }//Insert input again to get output
-//
-//    for (unsigned int i = 0; i < 2; i++) {
-//        for (int j = 0; j < points; j++) {
-//            data.type = IO_TYPE_INT32_COMPLEX;
-//            data.intc.c = fftoutputs[j];
-//            ifft.input(data);
-//            ifft.tick();
-//            bool didGetOutput = ifft.output(data);
-//            bool lastInput = (i == 1 && j == points - 1);
-//            if (didGetOutput && !lastInput) {
-//                //ComplexDouble output(static_cast<double>(data.intc.real()) / static_cast<double>(1ul << outputShiftAmount), static_cast<double>(data.intc.imag()) / static_cast<double>(1ul << outputShiftAmount));
-//                int32_t real = data.intc.c.real();
-//                int32_t imag = data.intc.c.imag();
-//                ssize_t outputShiftAmount = -data.intc.exp;
-//
-//                if (outputShiftAmount < 0) {
-//                    outputShiftAmount = static_cast<ssize_t>(abs(outputShiftAmount));
-//                    real <<= outputShiftAmount;
-//                    imag <<= outputShiftAmount;
-//                }
-//                ifftoutputs.push_back(std::complex<int32_t> (real, imag));
-//            }//If output is ready
-//        }
-//    }
-//    checkErrorComplexInt (ifftoutputs, inputsInt, (8192)*43);
-//}
+void runFFTLoopbackTest(const std::string &infile)
+{
+    string inFile(infile);
+
+    std::vector<ComplexDouble>          inputs;
+    std::vector< SLFixComplex >         fftoutputs;
+    std::vector< ComplexDouble >         ifftoutputs;
+
+    inputs = readComplexFromCSV<ComplexDouble>(inFile);
+    BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+
+    int points = inputs.size();
+    BFPFFT fft(points, false);
+    BFPFFT ifft(points, true);
+    filter_io_t data;
+    for (unsigned int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(32, 2);
+            data.fc.set(inputs[j].real(), inputs[j].imag());
+            fft.input(data);
+            fft.tick();
+            bool didGetOutput = fft.output(data);
+            bool lastInput = (i == 1 && j == points - 1);
+            if (didGetOutput && !lastInput) {
+                fftoutputs.push_back(data.fc);
+            }//If output is ready
+        }//Insert all input
+    }//Insert input again to get output
+
+    for (unsigned int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(fftoutputs[j]);
+            data.fc = fftoutputs[j];
+            ifft.input(data);
+            ifft.tick();
+            bool didGetOutput = ifft.output(data);
+            bool lastInput = (i == 1 && j == points - 1);
+            if (didGetOutput && !lastInput) {
+                ifftoutputs.push_back(data.fc.toComplexDouble());
+            }//If output is ready
+        }
+    }
+    checkErrorComplexDouble (ifftoutputs, inputs, 0.00018);
+}
 
 template <typename T>
 void checkError(const vector<T> &outputs, const vector<T> &answers, double difference)
