@@ -7,7 +7,7 @@
 
 #include <core/filter_chain_element.hpp>
 #include <types/fixedcomplex.hpp>
-#include <memory>
+#include <vector>
 
 class BFPFFT : public FilterChainElement
 {

@@ -2,6 +2,7 @@
 #include <core/logger.hpp>
 #include <utils/utils.hpp>
 #include <cassert>
+#include <limits.h>
 
 Biquad::Biquad(size_t coeffBitWidth) :
     FilterChainElement("Biquad"),

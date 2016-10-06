@@ -1,7 +1,7 @@
 #pragma once
 
 #include <core/filter_chain_element.hpp>
-#include <memory>
+#include <vector>
 
 class Biquad : public FilterChainElement
 {
