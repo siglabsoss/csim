@@ -28,7 +28,7 @@ private:
 
     size_t                           m_numStages;
     std::vector<SLFixComplex>        m_inputs;
-    std::vector<ComplexInt>          m_outputs;
+    std::vector<SLFixComplex>        m_outputs;
     std::vector<SLFixComplex>        m_twiddleFactors;
     bool                             m_outputValid;
     size_t                           m_outputIdx;

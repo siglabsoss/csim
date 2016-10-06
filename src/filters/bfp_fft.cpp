@@ -46,16 +46,13 @@ BFPFFT::BFPFFT(size_t N, bool inverse) :
 
 bool BFPFFT::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_INT32_COMPLEX);
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
     size_t N = m_inputs.capacity();
     //using a bit-reversed index to decimate in time
     size_t reverseIdx = reverseBits(N, m_inputIdx++);
 
-    m_inputs[reverseIdx].setFormat(32, 1);
-    m_inputs[reverseIdx].real(data.intc.normalizedReal());
-    m_inputs[reverseIdx].imag(data.intc.normalizedImag());
-
-    m_scaleExp = data.intc.exp;
+    m_inputs[reverseIdx].setFormat(data.fc);
+    m_inputs[reverseIdx] = data.fc;
 
     //Track the maximum input value for proper scaling
     updateMaxValueForStage(1, m_inputs[reverseIdx]);
@@ -89,6 +86,7 @@ void BFPFFT::tick(void)
         if (m_inverse) {
             m_inputs[i].shiftRadixRight(m_numStages);
         }
+        m_outputs[i].setFormat(m_inputs[i]);
         m_outputs[i] = m_inputs[i];
     }
 
@@ -159,23 +157,6 @@ void BFPFFT::shiftFixedComplex(SLFixComplex &val, ssize_t shiftBits)
         val = val << shiftBits;
     } else {
         val = val >> shiftBits;
-    }
-}
-
-void BFPFFT::shiftOutput(ssize_t shiftAmount)
-{
-    for (size_t i = 0; i < m_outputs.size(); i++) {
-        int32_t real = m_outputs[i].c.real();
-        int32_t imag = m_outputs[i].c.imag();
-        if (shiftAmount < 0) {
-            real <<= static_cast<size_t>(abs(shiftAmount));
-            imag <<= static_cast<size_t>(abs(shiftAmount));
-        } else {
-            real >>= shiftAmount;
-            imag >>= shiftAmount;
-        }
-        m_outputs[i].c.real(real);
-        m_outputs[i].c.imag(imag);
     }
 }
 

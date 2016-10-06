@@ -11,12 +11,13 @@
 
 #include <complex>
 #include <types/fixedpoint.hpp>
+#include <types/complexdouble.hpp>
 
 class SLFixComplex
 {
 public:
     SLFixComplex();
-    explicit SLFixComplex(size_t wordLength, size_t intLength);
+    SLFixComplex(size_t wordLength, size_t intLength);
 
     SLFixComplex operator+(const SLFixComplex &rhs);
     SLFixComplex operator-(const SLFixComplex &rhs);
@@ -41,7 +42,10 @@ public:
     void        imag(double val);
 
     void        setFormat(size_t wordLength, size_t intLength);
+    void        setFormat(const SLFixComplex &other);
+
     void        set(double real, double imag);
+    ComplexDouble toComplexDouble() const;
 private:
     SLFixPoint m_real;
     SLFixPoint m_imag;

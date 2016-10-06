@@ -109,6 +109,12 @@ void SLFixComplex::setFormat(size_t wordLength, size_t intLength)
     m_imag.setFormat(wordLength, intLength);
 }
 
+void SLFixComplex::setFormat(const SLFixComplex &other)
+{
+    m_real.setFormat(other.real().wl(), other.real().iwl());
+    m_imag.setFormat(other.imag().wl(), other.real().iwl());
+}
+
 SLFixPoint  SLFixComplex::real() const
 {
     return m_real;
@@ -143,6 +149,11 @@ void        SLFixComplex::set(double real, double imag)
 {
     m_real = real;
     m_imag = imag;
+}
+
+ComplexDouble SLFixComplex::toComplexDouble() const
+{
+    return ComplexDouble(m_real.to_double(), m_imag.to_double());
 }
 
 std::ostream& operator<<(std::ostream& os, const SLFixComplex& obj)

@@ -8,7 +8,7 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, unsigned coeffWidth) :
     FilterChainElement("FixedFIR"),
     m_coeffs(coeffs.size()),
     m_x(coeffs.size()),
-    m_output(),
+    m_output(16, 1),
     m_accum()
 {
     unsigned maxIntWidth = 0;
@@ -17,7 +17,7 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, unsigned coeffWidth) :
     for (unsigned int i = 0; i < coeffs.size(); i++) {
         unsigned intWidth = utils::getIntegerBits(coeffs[i]);
         //std::cout << "intWidth = " << intWidth << "for " << coeffs[i] << std::endl;
-        coeffArea += abs(coeffs[i]);
+        coeffArea += fabs(coeffs[i]);
         if (intWidth > maxIntWidth) {
             maxIntWidth = intWidth;
         }
@@ -42,19 +42,17 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, unsigned coeffWidth) :
 
 bool FixedFIR::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_INT32_COMPLEX);
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
     SLFixComplex sample(16, 1);
-    sample.real(data.intc.normalizedReal());
-    sample.imag(data.intc.normalizedImag());
+    sample = data.fc;
 
-    m_output = filter(sample);
+    filter(sample);
     return true;
 }
 
 bool FixedFIR::output(filter_io_t &data)
 {
-    data.type = IO_TYPE_INT32_COMPLEX;
-    data.intc = m_output;
+    data = m_output;
     return true;
 }
 
@@ -62,7 +60,7 @@ void FixedFIR::tick()
 {
 }
 
-ComplexInt FixedFIR::filter(SLFixComplex &input)
+void FixedFIR::filter(SLFixComplex &input)
 {
     m_accum = 0;
     m_x.push_front(input);
@@ -71,20 +69,5 @@ ComplexInt FixedFIR::filter(SLFixComplex &input)
         m_accum = m_accum + (m_x[j] * m_coeffs[j]);
     } //Accumulate
 
-    return accumToComplexInt();
-}
-
-ComplexInt FixedFIR::accumToComplexInt() const
-{
-    size_t accumWidth = m_accum.real().m_wl;
-    int64_t real = m_accum.real().to_int64();
-    int64_t imag = m_accum.imag().to_int64();
-    //Take 16 MSBs XXX we should actually find the leading 1
-    real >>= (accumWidth - (32 - 15));
-    imag >>= (accumWidth - (32 - 15));
-    ComplexInt result;
-    result.c.real((real & 0xFFFF) << 16);
-    result.c.imag((imag & 0xFFFF) << 16);
-    result.exp = 0;
-    return result;
+    m_output = m_accum;
 }

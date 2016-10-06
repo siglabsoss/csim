@@ -95,7 +95,7 @@ bool HardDemod::dequeueByte(uint8_t &byte)
 
 double HardDemod::angleDiff(double a, double b)
 {
-    double diff = abs(a - b);
+    double diff = fabs(a - b);
     if (diff > M_PI) {
         diff = 2 * M_PI - diff;
     }

@@ -54,8 +54,8 @@ CSIM_TEST_CASE(PHASE_ROTATION_CALCULATION)
         ComplexDouble sample(1.0, 0.0);
         RadioPhysics::complexRotation(sample, it->first);
         //for some reason BOOST_CHECK_CLOSE wasn't working, using BOOST_CHECK on the difference instead
-        BOOST_CHECK(abs((sample.real() - it->second.real())) < DBL_EPSILON);
-        BOOST_CHECK(abs((sample.imag() - it->second.imag())) < DBL_EPSILON);
+        BOOST_CHECK(fabs((sample.real() - it->second.real())) < 2*DBL_EPSILON);
+        BOOST_CHECK(fabs((sample.imag() - it->second.imag())) < 2*DBL_EPSILON);
     }
 }
 

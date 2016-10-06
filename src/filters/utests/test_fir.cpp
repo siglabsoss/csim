@@ -7,22 +7,22 @@ CSIM_TEST_SUITE_BEGIN(FIRFilter)
 
 static constexpr double ONE_BIT_ERROR = (1.0 / (1 << 15));
 
-void checkError(std::vector<ComplexInt> outputs, std::vector<ComplexDouble> answers, float threshold)
+void checkError(const std::vector<ComplexDouble> &outputs, const std::vector<ComplexDouble> &answers, float threshold)
 {
     for (unsigned int i = 0; i < answers.size(); i++) {
-            double realDiff = abs(outputs[i].toComplexDouble().real() - answers[i].real());
-            double imagDiff = abs(outputs[i].toComplexDouble().imag() - answers[i].imag());
+            double realDiff = fabs(outputs[i].real() - answers[i].real());
+            double imagDiff = fabs(outputs[i].imag() - answers[i].imag());
             BOOST_CHECK_MESSAGE(realDiff < threshold  || realDiff == 0,
-            "I: " << i << " Output: " << outputs[i].toComplexDouble().real() << " Answer: " << answers[i].real());
+            "I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real());
             BOOST_CHECK_MESSAGE(imagDiff < threshold || imagDiff == 0,
-            "I: " << i << " Output: " << outputs[i].toComplexDouble().imag() << " Answer: " << answers[i].imag());
+            "I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag());
         }
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
 void runTest(const std::string &coeffFile, const std::string &inputFile, const std::string &outputFile, float threshold)
 {
     std::vector<ComplexDouble> input; //Vector to hold inputs
-    std::vector<ComplexInt> output; //Vector to hold outputs
+    std::vector<ComplexDouble> output; //Vector to hold outputs
     std::vector<ComplexDouble> answers; //Vector to hold answers
     std::vector<ComplexDouble>  coeffs; //Vector to hold coefficients
     coeffs = readComplexFromCSV<ComplexDouble>(coeffFile);//Reads in taps from file
@@ -43,16 +43,16 @@ void runTest(const std::string &coeffFile, const std::string &inputFile, const s
 
     for (unsigned int k = 0; k < input.size(); k++) {
         filter_io_t data;
-        ComplexInt sample;
-        sample.c.real(static_cast<int>(input[k].real() * (1u << 31)));
-        sample.c.imag(static_cast<int>(input[k].imag() * (1u << 31)));
-        sample.exp = 0;
+        SLFixComplex sample;
+        sample.setFormat(16, 1);
+        sample.real(input[k].real());
+        sample.imag(input[k].imag());
         data = sample;
         fir.input(data); //Filters data
         filter_io_t output_sample;
         bool didOutput = fir.output(output_sample);
         BOOST_REQUIRE_EQUAL(didOutput, true);
-        output.push_back(output_sample.intc);
+        output.push_back(output_sample.fc.toComplexDouble());
         //std::cout << output_sample.toComplexDouble() << std::endl;
     }
 

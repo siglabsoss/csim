@@ -67,8 +67,8 @@ void Biquad::init(const SOSCoeffs &coeffs)
     m_a[1] = a2;
 
     for (size_t i = 0; i < m_x.size(); i++) {
-        m_x[i].setFormat(16, 1);
-        m_y[i].setFormat(16, 1);
+       m_x[i].setFormat(16, 1);
+       m_y[i].setFormat(16, 1);
     }
 
     log_debug("Coefficient format is Q(%d.%d)", maxIntLength, m_coeffWidth - maxIntLength);
@@ -91,14 +91,14 @@ void Biquad::init(const SOSCoeffs &coeffs)
 
 bool Biquad::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_INT32_COMPLEX);
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
     //shift inputs to make room for new sample
     size_t size = m_x.size();
     for (size_t i = 0; i < size - 1; i++) {
         m_x[size - i - 1] = m_x[size - i - 2];
     }
-    m_x[0].real(data.intc.normalizedReal());
-    m_x[0].imag(data.intc.normalizedImag());
+
+    m_x[0] = data.fc;
 
     m_newInput = true;
     return true;
