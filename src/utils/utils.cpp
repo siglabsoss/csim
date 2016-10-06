@@ -1,7 +1,6 @@
 #include <cmath>
 #include <utils/utils.hpp>
 #include <types/complexdouble.hpp>
-#include <fstream>
 
 unsigned int reverseBits(int N, unsigned int num)
 {
@@ -63,6 +62,7 @@ std::vector<T> readComplexFromCSV(const std::string &inFile, double scaleDownFac
     return input;
 }
 template std::vector<ComplexDouble>  readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
+
 
 //XXX wrap entire file in namespace
 namespace utils
@@ -139,18 +139,16 @@ size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values)
 {
     double max = 0.0;
     for (size_t i = 0; i < values.size(); i++) {
-        if (abs(values[i].real()) > max) {
-            max = abs(values[i].real());
+        double real = fabs(values[i].real());
+        double imag = fabs(values[i].imag());
+        if (real > max) {
+            max = real;
         }
-        if (abs(values[i].imag()) > max) {
-            max = abs(values[i].imag());
+        if (imag > max) {
+            max = imag;
         }
     }
-    size_t result = 0;
-    if (max == 0.0) {
-        return result;
-    }
-
+    assert(max > 0.0);
     return 31 + getShiftAmount(max);
 }
 
