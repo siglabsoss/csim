@@ -129,12 +129,11 @@ void Biquad::tick(void)
     /**
      * Multiply accumulator
      */
-    //XXX revise after implementing += operator
-    m_accum =           (m_x[0] * m_b[0]);
-    m_accum = m_accum + (m_x[1] * m_b[1]);
-    m_accum = m_accum + (m_x[2] * m_b[2]);
-    m_accum = m_accum + (m_y[1] * m_a[0]);
-    m_accum = m_accum + (m_y[2] * m_a[1]);
+    m_accum =  (m_x[0] * m_b[0]);
+    m_accum += (m_x[1] * m_b[1]);
+    m_accum += (m_x[2] * m_b[2]);
+    m_accum += (m_y[1] * m_a[0]);
+    m_accum += (m_y[2] * m_a[1]);
 
     //Store larger width accumulator in smaller width output
     m_y[0] = m_accum;
