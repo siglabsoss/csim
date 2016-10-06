@@ -7,6 +7,14 @@
 class SLFixPoint
 {
 public:
+    enum quant_mode_t {
+        QUANT_TRUNCATE = 0,
+        QUANT_RND_HALF_UP
+    };
+    enum overflow_mode_t {
+        OVERFLOW_WRAP_AROUND = 0,
+        OVERFLOW_SATURATE
+    };
     SLFixPoint();
     SLFixPoint(size_t wordLength, ssize_t intLength);
     SLFixPoint(const SLFixPoint &other);
@@ -26,6 +34,8 @@ public:
     void     shiftRadixLeft(size_t shiftAmount);
 
     void     setFormat(size_t wordLength, ssize_t intLength);
+    void     setFormat(size_t wordLength, ssize_t intLength, quant_mode_t quantMode, overflow_mode_t overflowMode);
+    void     setFormat(const SLFixPoint &other);
 
     uint64_t to_uint64() const;
     int64_t  to_int64()  const;
@@ -40,9 +50,12 @@ protected:
     SLFixPoint          addition(const SLFixPoint &rhs);
 
 public:
-    long long   m_value;
-    size_t      m_wl;
-    size_t      m_fl;
+    long long       m_value;
+    size_t          m_wl;
+    size_t          m_fl;
+    bool            m_formatSet;
+    quant_mode_t    m_quantMode;
+    overflow_mode_t m_overflowMode;
 };
 
 template <size_t N, size_t M>

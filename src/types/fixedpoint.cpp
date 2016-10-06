@@ -5,14 +5,20 @@
 SLFixPoint::SLFixPoint() :
     m_value(0),
     m_wl(0),
-    m_fl(0)
+    m_fl(0),
+    m_formatSet(false),
+    m_quantMode(QUANT_TRUNCATE),
+    m_overflowMode(OVERFLOW_WRAP_AROUND)
 {
 }
 
 SLFixPoint::SLFixPoint(size_t wordLength, ssize_t intLength) :
     m_value(0),
     m_wl(0),
-    m_fl(0)
+    m_fl(0),
+    m_formatSet(false),
+    m_quantMode(QUANT_TRUNCATE),
+    m_overflowMode(OVERFLOW_WRAP_AROUND)
 {
     setFormat(wordLength, intLength);
 }
@@ -20,7 +26,10 @@ SLFixPoint::SLFixPoint(size_t wordLength, ssize_t intLength) :
 SLFixPoint::SLFixPoint(const SLFixPoint &other) :
         m_value(other.m_value),
         m_wl(other.m_wl),
-        m_fl(other.m_fl)
+        m_fl(other.m_fl),
+        m_formatSet(other.m_formatSet),
+        m_quantMode(other.m_quantMode),
+        m_overflowMode(other.m_overflowMode)
 {
 
 }
@@ -84,6 +93,9 @@ SLFixPoint SLFixPoint::operator/(const SLFixPoint &rhs)
 
 SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
 {
+    if (!m_formatSet) {
+        setFormat(rhs);
+    }
     ssize_t fracDiff = this->m_fl - rhs.m_fl;
     //Shift the value to align the fractional bits
     if (fracDiff >= 0) {
@@ -112,6 +124,7 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
 
 SLFixPoint &SLFixPoint::operator=(double val)
 {
+    assert(m_formatSet);
     this->m_value = static_cast<long long>(val * (1ull << m_fl));
     maskAndSignExtend();
     return *this;
@@ -203,6 +216,19 @@ void SLFixPoint::setFormat(size_t wordLength, ssize_t intLength)
     //higher precision. thus m_fl can be greater than m_wl
     m_wl = wordLength;
     m_fl = wordLength - intLength;
+    m_formatSet = true;
+}
+
+void SLFixPoint::setFormat(size_t wordLength, ssize_t intLength, quant_mode_t quantMode, overflow_mode_t overflowMode)
+{
+    m_quantMode = quantMode;
+    m_overflowMode = overflowMode;
+    setFormat(wordLength, intLength);
+}
+
+void SLFixPoint::setFormat(const SLFixPoint &other)
+{
+    setFormat(other.m_wl, other.m_fl, other.m_quantMode, other.m_overflowMode);
 }
 
 std::ostream& operator<<(std::ostream& os, const SLFixPoint& obj)
