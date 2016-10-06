@@ -1,4 +1,5 @@
 #include <types/fixedcomplex.hpp>
+#include <cassert>
 
 SLFixComplex::SLFixComplex() :
     m_real(),
@@ -136,6 +137,12 @@ void        SLFixComplex::imag(const SLFixPoint &val)
 void        SLFixComplex::imag(double val)
 {
     m_imag = val;
+}
+
+void        SLFixComplex::set(double real, double imag)
+{
+    m_real = real;
+    m_imag = imag;
 }
 
 std::ostream& operator<<(std::ostream& os, const SLFixComplex& obj)
