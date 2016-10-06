@@ -1,6 +1,8 @@
 #include <types/filter_io.hpp>
 
 #include <iomanip>
+#include <cassert>
+#include <cstring>
 
 ComplexInt::ComplexInt() :
     exp(0)

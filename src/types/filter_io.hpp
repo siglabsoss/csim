@@ -42,9 +42,7 @@ struct ComplexInt
         return static_cast<double>(c.imag()) / SCALE_FACTOR;
     }
 
-    ComplexInt & operator=(const FixedComplex &rhs);
     ComplexInt & operator=(const SLFixComplex &rhs);
-    void assignFixedComplexWithExp(const FixedComplex &val, ssize_t exp);
 };
 
 struct filter_io_t
