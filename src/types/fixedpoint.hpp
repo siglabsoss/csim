@@ -1,13 +1,8 @@
+#include <cstdlib>
+#include <cstdint>
+#include <iostream>
+
 #pragma once
-
-#define SC_INCLUDE_FX
-#include <systemc.h>
-
-template <size_t N, size_t M>
-using FixedPoint = sc_dt::sc_fixed <N, M, SC_RND, SC_SAT>;
-
-typedef FixedPoint<32, 4> FixedPoint32;
-typedef sc_dt::sc_fix   FixPoint; //run-time configurable version
 
 class SLFixPoint
 {
@@ -27,10 +22,10 @@ public:
     SLFixPoint &operator<<(size_t shift);
     SLFixPoint &operator>>(size_t shift);
 
-    void        shiftRadixRight(size_t shiftAmount);
-    void        shiftRadixLeft(size_t shiftAmount);
+    void     shiftRadixRight(size_t shiftAmount);
+    void     shiftRadixLeft(size_t shiftAmount);
 
-    void       setFormat(size_t wordLength, ssize_t intLength);
+    void     setFormat(size_t wordLength, ssize_t intLength);
 
     uint64_t to_uint64() const;
     int64_t  to_int64()  const;
@@ -67,13 +62,16 @@ public:
     SLFixedPoint(double val) :
         SLFixPoint(N, M)
     {
-        this->m_value = static_cast<long long>(val * (1 << m_fl));
+        this->m_value = static_cast<long long>(val * (1ull << m_fl));
     }
 
     using SLFixPoint::operator+;
     using SLFixPoint::operator-;
     using SLFixPoint::operator*;
     using SLFixPoint::operator/;
+
+    using SLFixPoint::operator<<;
+    using SLFixPoint::operator>>;
 
     SLFixPoint &operator=(double val) override
     {

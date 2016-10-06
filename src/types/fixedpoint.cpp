@@ -1,5 +1,6 @@
 #include <types/fixedpoint.hpp>
 #include <cassert>
+#include <algorithm>
 
 SLFixPoint::SLFixPoint() :
     m_value(0),
@@ -179,11 +180,11 @@ long long SLFixPoint::getMaskedValue() const
     //XXX check for overflow, saturate, etc
     unsigned long long mask = ~0;
     mask >>= sizeof(this->m_value) * 8 - this->m_wl;
-    if (this->m_value < 0) {
-        assert((~mask & -this->m_value) == 0);
-    } else {
-        assert((~mask & this->m_value) == 0);
-    }
+//    if (this->m_value < 0) {
+//        assert((~mask & -this->m_value) == 0);
+//    } else {
+//        assert((~mask & this->m_value) == 0);
+//    }
 
     return (this->m_value & mask);
 }
