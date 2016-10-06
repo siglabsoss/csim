@@ -12,27 +12,6 @@ ComplexInt::ComplexInt() :
  * integer by shifting the underlying fixed complex bits appropriately. Set the scale exponent
  * based on the number of fractional bits.
  */
-ComplexInt & ComplexInt::operator=(const FixedComplex &rhs)
-{
-    size_t realWordLength = rhs.real().wl();
-    size_t imagWordLength = rhs.imag().wl();
-
-    assert(realWordLength == imagWordLength);
-    assert(realWordLength <= 32);
-
-    size_t fracLen = realWordLength - rhs.real().iwl();
-
-    int32_t realInt = rhs.real().range().to_int();
-    int32_t imagInt = rhs.imag().range().to_int();
-
-    realInt <<= (32 - realWordLength);
-    imagInt <<= (32 - imagWordLength);
-    this->c.real(realInt);
-    this->c.imag(imagInt);
-    this->exp = 31 - fracLen; //XXX double check sign
-
-    return *this;
-}
 
 ComplexInt & ComplexInt::operator=(const SLFixComplex &rhs)
 {
@@ -56,16 +35,6 @@ ComplexInt & ComplexInt::operator=(const SLFixComplex &rhs)
     return *this;
 }
 
-/**
- * Extract the underlying bits from the fixed complex type, allowing the user to set the
- * scaling exponent.
- */
-void ComplexInt::assignFixedComplexWithExp(const FixedComplex &val, ssize_t exp)
-{
-    *this = val;
-    this->exp = exp;
-}
-
 std::ostream& operator<<(std::ostream& os, const ComplexInt& obj)
 {
     os << obj.c << " (2^" << obj.exp << ")";
@@ -77,9 +46,6 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
     switch(obj.type) {
         case IO_TYPE_COMPLEX_DOUBLE:
             os << obj.rf;
-            break;
-        case IO_TYPE_FIXED_COMPLEX:
-            os << obj.fc;
             break;
         case IO_TYPE_INT32_COMPLEX:
             os << obj.intc;
@@ -95,21 +61,16 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
 }
 
 filter_io_t::filter_io_t() :
-    type(IO_TYPE_NULL),
-    fc(sc_fix(0.0, 128, 64, SC_RND, SC_SAT), sc_fix(0.0, 128, 64, SC_RND, SC_SAT))
+    type(IO_TYPE_NULL)
 {}
 
 filter_io_t::filter_io_t(const filter_io_t &other) :
-        type(other.type),
-        fc(sc_fix(0.0, 128, 64, SC_RND, SC_SAT), sc_fix(0.0, 128, 64, SC_RND, SC_SAT))
+        type(other.type)
 {
     if (this != &other) {
         switch (other.type) {
             case IO_TYPE_COMPLEX_DOUBLE:
                 this->rf = other.rf;
-                break;
-            case IO_TYPE_FIXED_COMPLEX:
-                this->fc = other.fc;
                 break;
             case IO_TYPE_INT32_COMPLEX:
                 this->intc = other.intc;
@@ -131,9 +92,6 @@ filter_io_t & filter_io_t::operator=(const filter_io_t &rhs)
             case IO_TYPE_COMPLEX_DOUBLE:
                 this->rf = rhs.rf;
                 break;
-            case IO_TYPE_FIXED_COMPLEX:
-                this->fc = rhs.fc;
-                break;
             case IO_TYPE_INT32_COMPLEX:
                 this->intc = rhs.intc;
                 break;
@@ -151,13 +109,6 @@ filter_io_t & filter_io_t::operator=(const ComplexDouble &rhs)
 {
     this->type = IO_TYPE_COMPLEX_DOUBLE;
     this->rf = rhs;
-    return *this;
-}
-
-filter_io_t & filter_io_t::operator=(const FixedComplex &rhs)
-{
-    this->type = IO_TYPE_INT32_COMPLEX;
-    this->intc = rhs;
     return *this;
 }
 
@@ -192,10 +143,6 @@ ComplexDouble filter_io_t::toComplexDouble() const
             real = this->rf.real();
             imag = this->rf.imag();
             break;
-        case IO_TYPE_FIXED_COMPLEX:
-            real = this->fc.real().to_double();
-            imag = this->fc.imag().to_double();
-            break;
         case IO_TYPE_INT32_COMPLEX:
             return this->intc.toComplexDouble();
             break;
@@ -222,17 +169,6 @@ size_t filter_io_t::serialize(uint8_t *data) const
             numBytes += sizeof(value);
 
             value = rf.imag();
-            memcpy(data + numBytes, &value, sizeof(value));
-            numBytes += sizeof(value);
-            break;
-        }
-        case IO_TYPE_FIXED_COMPLEX:
-        {
-            double value = fc.real().to_double();
-            memcpy(data + numBytes, &value, sizeof(value));
-            numBytes += sizeof(value);
-
-            value = fc.imag().to_double();
             memcpy(data + numBytes, &value, sizeof(value));
             numBytes += sizeof(value);
             break;
