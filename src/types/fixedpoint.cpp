@@ -2,6 +2,12 @@
 #include <cassert>
 #include <algorithm>
 
+bool     SLFixPoint::throwOnOverflow = false;
+size_t   SLFixPoint::overflowCount = 0;
+size_t   SLFixPoint::roundUpCount = 0;
+size_t   SLFixPoint::roundDownCount = 0;
+size_t   SLFixPoint::precisionLossCount = 0;
+
 SLFixPoint::SLFixPoint() :
     m_value(0),
     m_wl(0),
@@ -21,6 +27,17 @@ SLFixPoint::SLFixPoint(size_t wordLength, ssize_t intLength) :
     m_overflowMode(OVERFLOW_WRAP_AROUND)
 {
     setFormat(wordLength, intLength);
+}
+
+SLFixPoint::SLFixPoint(size_t wordLength, ssize_t intLength, quant_mode_t quantMode, overflow_mode_t overflowMode) :
+    m_value(0),
+    m_wl(0),
+    m_fl(0),
+    m_formatSet(false),
+    m_quantMode(QUANT_TRUNCATE),
+    m_overflowMode(OVERFLOW_WRAP_AROUND)
+{
+    setFormat(wordLength, intLength, quantMode, overflowMode);
 }
 
 SLFixPoint::SLFixPoint(const SLFixPoint &other) :
@@ -51,7 +68,29 @@ SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
     assert(tempLHS.m_fl == tempRHS.m_fl);
     SLFixPoint result(resultWordLength, resultIntLength);
     result.m_value = tempLHS.m_value + tempRHS.m_value;
+
+    bool sameSign = (tempLHS.m_value >= 0 && tempRHS.m_value >= 0) || (tempLHS.m_value < 0 && tempRHS.m_value < 0);
+    bool wasPositive = (tempLHS.m_value >= 0);
     result.maskAndSignExtend();
+    bool isNegative = (result.m_value < 0);
+
+    if (sameSign) {
+        //a sign change resulting after same sign operands indicates overflow
+        bool didOverflow = (wasPositive && isNegative) || (!wasPositive && !isNegative);
+        if (didOverflow) {
+            handleOverflow();
+            switch(m_overflowMode) {
+                case OVERFLOW_SATURATE:
+                {
+                    result.m_value = getSaturatedValue(!wasPositive);
+                    break;
+                }
+                case OVERFLOW_WRAP_AROUND:
+                default:
+                    break;
+            }
+        }
+    }
     return result;
 }
 
@@ -105,28 +144,74 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
     ssize_t fracDiff = this->m_fl - rhs.m_fl;
     //Shift the value to align the fractional bits
     if (fracDiff >= 0) {
-        this->m_value = (rhs.m_value << fracDiff);
+        long long value = rhs.m_value;
+        for (ssize_t i = 0; i < fracDiff; i++) {
+
+            bool signBitSet = value & (1ull << (m_wl - 1));
+            bool mostSigBitSet = value & (1ull << (m_wl - 2));
+
+            if ((signBitSet && !mostSigBitSet) || (!signBitSet && mostSigBitSet)) {
+                handleOverflow();
+                switch(m_overflowMode) {
+                    case OVERFLOW_SATURATE:
+                    {
+                        value = getSaturatedValue(signBitSet);
+                        break;
+                    }
+                    case OVERFLOW_WRAP_AROUND:
+                    default:
+                        break;
+                }
+                break;
+            }
+            value <<= 1;
+        }
+        this->m_value = value;
     } else { //here we are losing precision
+        precisionLossCount++;
         fracDiff = -fracDiff;
+        long long value = rhs.m_value;
         switch (m_quantMode) {
             case QUANT_RND_HALF_UP:
             {
                 //shift one bit short of the final amount so that we can take the last bit for rounding
-                this->m_value = (rhs.m_value >> (fracDiff - 1));
+                this->m_value = (value >> (fracDiff - 1));
                 int roundBit = this->m_value & 0x01;
                 this->m_value >>= 1; //shift that last bit off
                 this->m_value += roundBit;
-    //            if (roundBit == 1) {
-    //                std::cout << "ROUNDING UP" << std::endl;
-    //            } else {
-    //                std::cout << "ROUNDING DOWN" << std::endl;
-    //            }
+                if (roundBit == 1) {
+                    roundUpCount++;
+                } else {
+                    roundDownCount++;
+                }
                 break;
             }
             case QUANT_TRUNCATE:
             default:
-                this->m_value = (rhs.m_value >> fracDiff);
+                this->m_value = (value >> fracDiff);
                 break;
+        }
+        bool wasPositive = (value >= 0);
+        bool isNegative = (this->m_value & (1ull << (this->m_wl - 1)));
+        unsigned long long mask = ~(~(0ull) >> (sizeof(m_value) * 8 - m_wl));
+        long long tempVal = this->m_value;
+        if (tempVal < 0) {
+            tempVal = -tempVal;
+        }
+        bool excessBits = (tempVal & mask);
+        //either of these three conditions indicates overflow
+        if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
+            handleOverflow();
+            switch(m_overflowMode) {
+                case OVERFLOW_SATURATE:
+                {
+                    this->m_value = getSaturatedValue(!wasPositive);
+                    break;
+                }
+                case OVERFLOW_WRAP_AROUND:
+                default:
+                    break;
+            }
         }
     }
     maskAndSignExtend();
@@ -137,6 +222,28 @@ SLFixPoint &SLFixPoint::operator=(double val)
 {
     assert(m_formatSet);
     this->m_value = static_cast<long long>(val * (1ull << m_fl));
+
+    bool wasPositive = (val >= 0);
+    bool isNegative = (this->m_value & (1ull << (this->m_wl - 1)));
+    unsigned long long mask = ~(~(0ull) >> (sizeof(m_value) * 8 - m_wl));
+    long long tempVal = this->m_value;
+    if (tempVal < 0) {
+        tempVal = -tempVal;
+    }
+    bool excessBits = (tempVal & mask);
+    if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
+        handleOverflow();
+        switch(m_overflowMode) {
+            case OVERFLOW_SATURATE:
+            {
+                this->m_value = getSaturatedValue(!wasPositive);
+                break;
+            }
+            case OVERFLOW_WRAP_AROUND:
+            default:
+                break;
+        }
+    }
     maskAndSignExtend();
     return *this;
 }
@@ -201,22 +308,35 @@ void SLFixPoint::extendSign()
 
 long long SLFixPoint::getMaskedValue() const
 {
-    //XXX check for overflow, saturate, etc
-    unsigned long long mask = ~0;
-    mask >>= sizeof(this->m_value) * 8 - this->m_wl;
-//    if (this->m_value < 0) {
-//        assert((~mask & -this->m_value) == 0);
-//    } else {
-//        assert((~mask & this->m_value) == 0);
-//    }
+    unsigned long long mask = ~(0ull) >> (sizeof(m_value) * 8 - m_wl);
 
     return (this->m_value & mask);
+}
+
+long long SLFixPoint::getSaturatedValue(bool negative) const
+{
+    long long value;
+    unsigned long long mask = ~(0ull) >> (sizeof(m_value) * 8 - m_wl);
+    if (!negative) {
+        value = (mask >> 1);
+    } else {
+        value = mask;
+    }
+    return value;
 }
 
 void SLFixPoint::maskAndSignExtend()
 {
     this->m_value = getMaskedValue();
     extendSign();
+}
+
+void SLFixPoint::handleOverflow()
+{
+    overflowCount++;
+    if (throwOnOverflow) {
+        //TODO
+    }
 }
 
 void SLFixPoint::setFormat(size_t wordLength, ssize_t intLength)

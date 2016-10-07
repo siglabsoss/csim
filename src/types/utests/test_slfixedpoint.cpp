@@ -192,4 +192,54 @@ CSIM_TEST_CASE(ADDITION_OF_DIFFERING_FORMATS)
     BOOST_CHECK_CLOSE(c.to_double(), 0.6, 0.005);
 }
 
+CSIM_TEST_CASE(OVERFLOW_ON_ASSIGNMENT_TO_LESSER_FRACTION_LENGTH)
+{
+    SLFixPoint a(16, 6, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
+    SLFixPoint b(8, 3, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
+
+    a = 7.5;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), 0x7f);
+
+    a = 3.5;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), 0x70);
+
+    a = -32.5;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), static_cast<int64_t>(~0));
+
+    a = -2.5;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), -0x50);
+}
+
+CSIM_TEST_CASE(OVERFLOW_ON_ASSIGNMENT_TO_GREATER_FRACTION_LENGTH)
+{
+    SLFixPoint a(8, 4, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
+    SLFixPoint b(8, 2, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
+    a = 2.5;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), 0x7f);
+
+    a = -2.5;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), static_cast<int64_t>(~0));
+
+    a = 4.5;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), 0x7f);
+}
+
+CSIM_TEST_CASE(OVERFLOW_ON_DOUBLE_ASSIGNMENT)
+{
+    SLFixPoint a(8, 2, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
+
+    a = 2.5;
+    BOOST_CHECK_EQUAL(a.to_int64(), 0x7f);
+
+    a = -2.5;
+    BOOST_CHECK_EQUAL(a.to_int64(), static_cast<int64_t>(~0));
+}
+
 CSIM_TEST_SUITE_END()

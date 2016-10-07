@@ -17,6 +17,7 @@ public:
     };
     SLFixPoint();
     SLFixPoint(size_t wordLength, ssize_t intLength);
+    SLFixPoint(size_t wordLength, ssize_t intLength, quant_mode_t quantMode, overflow_mode_t overflowMode);
     SLFixPoint(const SLFixPoint &other);
     virtual ~SLFixPoint();
 
@@ -47,8 +48,10 @@ public:
 
 protected:
     long long           getMaskedValue() const;
+    long long           getSaturatedValue(bool negative) const;
     void                extendSign();
     void                maskAndSignExtend();
+    static void         handleOverflow();
     SLFixPoint          addition(const SLFixPoint &rhs);
 
 public:
@@ -58,6 +61,13 @@ public:
     bool            m_formatSet;
     quant_mode_t    m_quantMode;
     overflow_mode_t m_overflowMode;
+
+    //Global options
+    static bool     throwOnOverflow;
+    static size_t   overflowCount;
+    static size_t   roundUpCount;
+    static size_t   roundDownCount;
+    static size_t   precisionLossCount;
 };
 
 template <size_t N, size_t M>
@@ -71,7 +81,6 @@ public:
     SLFixedPoint(const SLFixedPoint &other) :
         SLFixPoint(other)
     {
-
     }
 
     SLFixedPoint(double val) :
