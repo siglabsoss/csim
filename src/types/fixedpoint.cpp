@@ -149,7 +149,7 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
 
             bool signBitSet = value & (1ull << (m_wl - 1));
             bool mostSigBitSet = value & (1ull << (m_wl - 2));
-
+            //if the next single bit shift is going to cause the sign bit to invert we have an overflow
             if ((signBitSet && !mostSigBitSet) || (!signBitSet && mostSigBitSet)) {
                 handleOverflow();
                 switch(m_overflowMode) {
@@ -248,6 +248,16 @@ SLFixPoint &SLFixPoint::operator=(double val)
     return *this;
 }
 
+SLFixPoint &SLFixPoint::operator=(uint64_t val)
+{
+    assert(m_formatSet);
+    unsigned long long mask = ~(~(0ull) >> (sizeof(m_value) * 8 - m_wl));
+    bool excessBits = (val & mask);
+    assert(!excessBits);
+    this->m_value = val;
+    return *this;
+}
+
 SLFixPoint &SLFixPoint::operator<<(size_t shift)
 {
     this->m_value <<= shift;
@@ -323,6 +333,18 @@ long long SLFixPoint::getSaturatedValue(bool negative) const
         value = mask;
     }
     return value;
+}
+
+uint64_t SLFixPoint::slice(size_t start, size_t end) const
+{
+    assert(start < end);
+    assert(end < m_wl);
+    long long mask = 0;
+    for (size_t i = 0; i <= (end - start); i++) {
+        mask |= (1ull << i);
+    }
+    mask <<= start;
+    return (m_value & mask) >> start;
 }
 
 void SLFixPoint::maskAndSignExtend()

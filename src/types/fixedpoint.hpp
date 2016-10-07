@@ -30,6 +30,7 @@ public:
 
     virtual SLFixPoint &operator=(const SLFixPoint &rhs);
     virtual SLFixPoint &operator=(double val);
+    virtual SLFixPoint &operator=(uint64_t val);
     SLFixPoint &operator<<(size_t shift);
     SLFixPoint &operator>>(size_t shift);
 
@@ -43,8 +44,9 @@ public:
     uint64_t to_uint64() const;
     int64_t  to_int64()  const;
     double   to_double() const;
-    size_t   wl() const; //word length
+    size_t   wl()  const; //word length
     ssize_t  iwl() const; //integer word length
+    uint64_t slice(size_t start, size_t end) const;
 
 protected:
     long long           getMaskedValue() const;
@@ -105,6 +107,10 @@ public:
     SLFixPoint &operator=(const SLFixPoint &rhs) override
     {
         return SLFixPoint::operator=(rhs);
+    }
+    SLFixPoint &operator=(uint64_t val) override
+    {
+        return SLFixPoint::operator=(val);
     }
 };
 

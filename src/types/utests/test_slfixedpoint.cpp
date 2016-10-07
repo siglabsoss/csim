@@ -242,4 +242,19 @@ CSIM_TEST_CASE(OVERFLOW_ON_DOUBLE_ASSIGNMENT)
     BOOST_CHECK_EQUAL(a.to_int64(), static_cast<int64_t>(~0));
 }
 
+CSIM_TEST_CASE(SLICING_BITS)
+{
+    SLFixPoint a(32, 17, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
+    SLFixPoint b(8, 8, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
+    a = (uint64_t)0xDEADBEEF;
+    uint64_t slice = a.slice(0, 31);
+    BOOST_CHECK_EQUAL(slice, 0xDEADBEEF);
+    slice = a.slice(16, 19);
+    BOOST_CHECK_EQUAL(slice, 0xD);
+    slice = a.slice(16, 23);
+    BOOST_CHECK_EQUAL(slice, 0xAD);
+    b = a.slice(16, 23);
+    BOOST_CHECK_EQUAL((int)b.to_double(), 0xAD);
+}
+
 CSIM_TEST_SUITE_END()
