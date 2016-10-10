@@ -4,6 +4,7 @@
 
 bool     SLFixPoint::throwOnOverflow = false;
 size_t   SLFixPoint::overflowCount = 0;
+size_t   SLFixPoint::underflowCount = 0;
 size_t   SLFixPoint::roundUpCount = 0;
 size_t   SLFixPoint::roundDownCount = 0;
 size_t   SLFixPoint::precisionLossCount = 0;
@@ -59,7 +60,7 @@ SLFixPoint::~SLFixPoint()
 SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
 {
     size_t resultWordLength = std::max(this->m_wl, rhs.m_wl);
-    ssize_t resultIntLength = resultWordLength - std::max(this->m_fl, rhs.m_fl);
+    ssize_t resultIntLength = resultWordLength - std::min(this->m_fl, rhs.m_fl);
     SLFixPoint tempRHS(resultWordLength, resultIntLength);
     SLFixPoint tempLHS(resultWordLength, resultIntLength);
     tempRHS = rhs;
@@ -170,7 +171,7 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
     } else { //here we are losing precision
         precisionLossCount++;
         fracDiff = -fracDiff;
-        long long value = rhs.m_value;
+        const long long value = rhs.m_value;
         switch (m_quantMode) {
             case QUANT_RND_HALF_UP:
             {
@@ -200,17 +201,20 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
         }
         bool excessBits = (tempVal & mask);
         //either of these three conditions indicates overflow
-        if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
-            handleOverflow();
-            switch(m_overflowMode) {
-                case OVERFLOW_SATURATE:
-                {
-                    this->m_value = getSaturatedValue(!wasPositive);
-                    break;
+        bool tooSmall = (value >= 0 && this->m_value == 0) || (value < 0 && (this->m_value == -1 || this->m_value == 0));
+        if (!tooSmall) { //if our value was too small such that all sigbits were shifted away, we don't want to count it as overflow
+            if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
+                handleOverflow();
+                switch(m_overflowMode) {
+                    case OVERFLOW_SATURATE:
+                    {
+                        this->m_value = getSaturatedValue(!wasPositive);
+                        break;
+                    }
+                    case OVERFLOW_WRAP_AROUND:
+                    default:
+                        break;
                 }
-                case OVERFLOW_WRAP_AROUND:
-                default:
-                    break;
             }
         }
     }
@@ -230,18 +234,25 @@ SLFixPoint &SLFixPoint::operator=(double val)
     if (tempVal < 0) {
         tempVal = -tempVal;
     }
+    if (tempVal == 0 && val != 0.0) {
+        underflowCount++; //value was too small to represent with current scaling format
+    }
     bool excessBits = (tempVal & mask);
-    if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
-        handleOverflow();
-        switch(m_overflowMode) {
-            case OVERFLOW_SATURATE:
-            {
-                this->m_value = getSaturatedValue(!wasPositive);
-                break;
+    //if the floating point value is too small, the scaled integer may be 0, in which case
+    //a "sign change" is a red herring and not a real overflow
+    if (tempVal != 0) {
+        if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
+            handleOverflow();
+            switch(m_overflowMode) {
+                case OVERFLOW_SATURATE:
+                {
+                    this->m_value = getSaturatedValue(!wasPositive);
+                    break;
+                }
+                case OVERFLOW_WRAP_AROUND:
+                default:
+                    break;
             }
-            case OVERFLOW_WRAP_AROUND:
-            default:
-                break;
         }
     }
     maskAndSignExtend();
@@ -335,7 +346,7 @@ long long SLFixPoint::getSaturatedValue(bool negative) const
     return value;
 }
 
-uint64_t SLFixPoint::slice(size_t start, size_t end) const
+uint64_t SLFixPoint::slice(size_t end, size_t start) const
 {
     assert(start < end);
     assert(end < m_wl);
@@ -356,6 +367,9 @@ void SLFixPoint::maskAndSignExtend()
 void SLFixPoint::handleOverflow()
 {
     overflowCount++;
+    if (m_overflowMode == OVERFLOW_SATURATE) {
+        assert(!throwOnOverflow);
+    }
     if (throwOnOverflow) {
         //TODO
     }

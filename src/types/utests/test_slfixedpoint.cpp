@@ -247,14 +247,38 @@ CSIM_TEST_CASE(SLICING_BITS)
     SLFixPoint a(32, 17, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
     SLFixPoint b(8, 8, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE);
     a = (uint64_t)0xDEADBEEF;
-    uint64_t slice = a.slice(0, 31);
+    uint64_t slice = a.slice(31, 0);
     BOOST_CHECK_EQUAL(slice, 0xDEADBEEF);
-    slice = a.slice(16, 19);
+    slice = a.slice(19, 16);
     BOOST_CHECK_EQUAL(slice, 0xD);
-    slice = a.slice(16, 23);
+    slice = a.slice(23, 16);
     BOOST_CHECK_EQUAL(slice, 0xAD);
-    b = a.slice(16, 23);
+    b = a.slice(23, 16);
     BOOST_CHECK_EQUAL((int)b.to_double(), 0xAD);
+}
+
+CSIM_TEST_CASE(NEGATIVE_INTEGER_WIDTH)
+{
+    SLFixPoint a(8, -1);
+    a = 0.125;
+    BOOST_CHECK_EQUAL(a.to_uint64(), 0b01000000);
+
+    a = -0.125;
+    BOOST_CHECK_EQUAL(a.to_uint64(), 0b11000000);
+    SLFixPoint b(8, 4);
+    b = 0.5;
+
+    //result format should be 8 bits wide with 4 fraction bits
+    SLFixPoint c = a + b;
+    BOOST_CHECK_EQUAL(c.to_uint64(), 0b00000110);
+
+    //result should be 16 bits wide with 13 fraction bits
+    SLFixPoint d = a * b;
+
+    BOOST_CHECK_EQUAL(d.to_int64(), -512);
+
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), -2);
 }
 
 CSIM_TEST_SUITE_END()

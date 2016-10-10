@@ -46,14 +46,14 @@ public:
     double   to_double() const;
     size_t   wl()  const; //word length
     ssize_t  iwl() const; //integer word length
-    uint64_t slice(size_t start, size_t end) const;
+    uint64_t slice(size_t end, size_t start) const;
 
 protected:
     long long           getMaskedValue() const;
     long long           getSaturatedValue(bool negative) const;
     void                extendSign();
     void                maskAndSignExtend();
-    static void         handleOverflow();
+    void                handleOverflow();
     SLFixPoint          addition(const SLFixPoint &rhs);
 
 public:
@@ -67,17 +67,18 @@ public:
     //Global options
     static bool     throwOnOverflow;
     static size_t   overflowCount;
+    static size_t   underflowCount;
     static size_t   roundUpCount;
     static size_t   roundDownCount;
     static size_t   precisionLossCount;
 };
 
-template <size_t N, size_t M>
+template <size_t N, size_t M, SLFixPoint::quant_mode_t Q = SLFixPoint::QUANT_TRUNCATE, SLFixPoint::overflow_mode_t O = SLFixPoint::OVERFLOW_WRAP_AROUND>
 class SLFixedPoint : public SLFixPoint
 {
 public:
     SLFixedPoint() :
-        SLFixPoint(N, M)
+        SLFixPoint(N, M, Q, O)
     {}
 
     SLFixedPoint(const SLFixedPoint &other) :
@@ -86,7 +87,7 @@ public:
     }
 
     SLFixedPoint(double val) :
-        SLFixPoint(N, M)
+        SLFixPoint(N, M, Q, O)
     {
         this->m_value = static_cast<long long>(val * (1ull << m_fl));
     }
