@@ -14,8 +14,8 @@ SLFixPoint::SLFixPoint() :
     m_wl(0),
     m_fl(0),
     m_formatSet(false),
-    m_quantMode(QUANT_TRUNCATE),
-    m_overflowMode(OVERFLOW_WRAP_AROUND)
+    m_quantMode(DEFAULT_QUANT_MODE),
+    m_overflowMode(DEFAULT_OVERFLOW_MODE)
 {
 }
 
@@ -24,8 +24,8 @@ SLFixPoint::SLFixPoint(size_t wordLength, ssize_t intLength) :
     m_wl(0),
     m_fl(0),
     m_formatSet(false),
-    m_quantMode(QUANT_TRUNCATE),
-    m_overflowMode(OVERFLOW_WRAP_AROUND)
+    m_quantMode(DEFAULT_QUANT_MODE),
+    m_overflowMode(DEFAULT_OVERFLOW_MODE)
 {
     setFormat(wordLength, intLength);
 }
@@ -35,8 +35,8 @@ SLFixPoint::SLFixPoint(size_t wordLength, ssize_t intLength, quant_mode_t quantM
     m_wl(0),
     m_fl(0),
     m_formatSet(false),
-    m_quantMode(QUANT_TRUNCATE),
-    m_overflowMode(OVERFLOW_WRAP_AROUND)
+    m_quantMode(DEFAULT_QUANT_MODE),
+    m_overflowMode(DEFAULT_OVERFLOW_MODE)
 {
     setFormat(wordLength, intLength, quantMode, overflowMode);
 }

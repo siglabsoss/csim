@@ -281,4 +281,16 @@ CSIM_TEST_CASE(NEGATIVE_INTEGER_WIDTH)
     BOOST_CHECK_EQUAL(b.to_int64(), -2);
 }
 
+CSIM_TEST_CASE(COPYING_OBJECTS)
+{
+    SLFixedPoint<10, 5, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_SATURATE> a;
+    SLFixedPoint<8, 4, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_WRAP_AROUND> b;
+    b = a;
+    //After assignment, these attributes should be left unchanged.
+    BOOST_CHECK_EQUAL(b.m_overflowMode, SLFixPoint::OVERFLOW_WRAP_AROUND);
+    BOOST_CHECK_EQUAL(b.m_quantMode, SLFixPoint::QUANT_RND_HALF_UP);
+    BOOST_CHECK_EQUAL(b.m_fl, 4);
+    BOOST_CHECK_EQUAL(b.m_wl, 8);
+}
+
 CSIM_TEST_SUITE_END()

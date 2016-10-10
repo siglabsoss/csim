@@ -1,8 +1,11 @@
+#pragma once
+
 #include <cstdlib>
 #include <cstdint>
 #include <iostream>
 
-#pragma once
+#define DEFAULT_QUANT_MODE SLFixPoint::QUANT_TRUNCATE
+#define DEFAULT_OVERFLOW_MODE SLFixPoint::OVERFLOW_WRAP_AROUND
 
 class SLFixPoint
 {
@@ -73,7 +76,7 @@ public:
     static size_t   precisionLossCount;
 };
 
-template <size_t N, size_t M, SLFixPoint::quant_mode_t Q = SLFixPoint::QUANT_TRUNCATE, SLFixPoint::overflow_mode_t O = SLFixPoint::OVERFLOW_WRAP_AROUND>
+template <size_t N, size_t M, SLFixPoint::quant_mode_t Q = DEFAULT_QUANT_MODE, SLFixPoint::overflow_mode_t O = DEFAULT_OVERFLOW_MODE>
 class SLFixedPoint : public SLFixPoint
 {
 public:
