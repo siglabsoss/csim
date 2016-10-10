@@ -4,6 +4,10 @@ set(SIGFILTERS_SOURCES
     biquad_iir.cpp
     bfp_fft.cpp
     ddc.cpp
+    mixer.cpp
+    decimator.cpp
+    modulator.cpp
+    hard_demod.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
