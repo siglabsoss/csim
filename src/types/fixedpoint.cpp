@@ -57,7 +57,7 @@ SLFixPoint::~SLFixPoint()
 
 }
 
-SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
+SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs) const
 {
     size_t resultWordLength = std::max(this->m_wl, rhs.m_wl);
     ssize_t resultIntLength = resultWordLength - std::min(this->m_fl, rhs.m_fl);
@@ -79,7 +79,7 @@ SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
         //a sign change resulting after same sign operands indicates overflow
         bool didOverflow = (wasPositive && isNegative) || (!wasPositive && !isNegative);
         if (didOverflow) {
-            handleOverflow();
+            result.handleOverflow();
             switch(m_overflowMode) {
                 case OVERFLOW_SATURATE:
                 {
@@ -95,7 +95,7 @@ SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs)
     return result;
 }
 
-SLFixPoint SLFixPoint::operator+(const SLFixPoint &rhs)
+SLFixPoint SLFixPoint::operator+(const SLFixPoint &rhs) const
 {
     return addition(rhs);
 }
@@ -114,14 +114,14 @@ SLFixPoint &SLFixPoint::operator-=(const SLFixPoint &rhs)
     return *this;
 }
 
-SLFixPoint SLFixPoint::operator-(const SLFixPoint &rhs)
+SLFixPoint SLFixPoint::operator-(const SLFixPoint &rhs) const
 {
     SLFixPoint temp = rhs;
     temp.m_value = -temp.m_value;
     return addition(temp);
 }
 
-SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs)
+SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs) const
 {
     assert(this->m_wl + rhs.m_wl <= sizeof(this->m_value)*8);
     ssize_t intWidth = (this->m_wl - this->m_fl) + (rhs.m_wl - rhs.m_fl);
@@ -131,7 +131,7 @@ SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs)
     return result;
 }
 
-SLFixPoint SLFixPoint::operator/(const SLFixPoint &rhs)
+SLFixPoint SLFixPoint::operator/(const SLFixPoint &rhs) const
 {
     //XXX TODO
     return *this;

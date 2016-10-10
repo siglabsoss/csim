@@ -24,18 +24,23 @@ public:
     SLFixPoint(const SLFixPoint &other);
     virtual ~SLFixPoint();
 
-    SLFixPoint operator+(const SLFixPoint &rhs);
-    SLFixPoint operator-(const SLFixPoint &rhs);
-    SLFixPoint operator*(const SLFixPoint &rhs);
-    SLFixPoint operator/(const SLFixPoint &rhs);
+    //Const operators, which return new objects
+    SLFixPoint operator+(const SLFixPoint &rhs) const;
+    SLFixPoint operator-(const SLFixPoint &rhs) const;
+    SLFixPoint operator*(const SLFixPoint &rhs) const;
+    SLFixPoint operator/(const SLFixPoint &rhs) const;
+
+    //Self-mutating operators
     SLFixPoint &operator+=(const SLFixPoint &rhs);
     SLFixPoint &operator-=(const SLFixPoint &rhs);
+    SLFixPoint &operator<<(size_t shift);
+    SLFixPoint &operator>>(size_t shift);
 
+    //Assignment operators
     virtual SLFixPoint &operator=(const SLFixPoint &rhs);
     virtual SLFixPoint &operator=(double val);
     virtual SLFixPoint &operator=(uint64_t val);
-    SLFixPoint &operator<<(size_t shift);
-    SLFixPoint &operator>>(size_t shift);
+
 
     void     shiftRadixRight(size_t shiftAmount);
     void     shiftRadixLeft(size_t shiftAmount);
@@ -57,7 +62,7 @@ protected:
     void                extendSign();
     void                maskAndSignExtend();
     void                handleOverflow();
-    SLFixPoint          addition(const SLFixPoint &rhs);
+    SLFixPoint          addition(const SLFixPoint &rhs) const;
 
 public:
     long long       m_value;
@@ -85,6 +90,11 @@ public:
     {}
 
     SLFixedPoint(const SLFixedPoint &other) :
+        SLFixPoint(other)
+    {
+    }
+
+    SLFixedPoint(const SLFixPoint &other) :
         SLFixPoint(other)
     {
     }
