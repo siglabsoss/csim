@@ -1,111 +1,24 @@
-#include <iostream>
-#include <fstream>
-#include <complex>
-#include <cmath>
+#include <filters/ddc.hpp>
 
-#include "/home/behrooze/Work/csim/src/types/fixedpoint.hpp"
 
-// Number of iterations to run simulation
-constexpr int MAX_ITERS  = 200000;
-
-// In implementation it may be helpful to exploint half-wave and 
-// quarter-wave symmetry to reduce storage requirements. In that
-// case a table of 1024 samples requires only 256 samples of storage.
-constexpr int TBSIZE     = 1024; // TBSIZE of 4*8192 guarantees ~120 dB dynamic range
-constexpr int LOG2TBSIZE = std::ceil(std::log(TBSIZE) / std::log(2));
-constexpr int TBWIDTH    = 18;
-constexpr int PWIDTH     = 32;
-constexpr int INWIDTH    = 16;
-constexpr int OUTWIDTH   = 18; // Easiest way to remove small DC bias is to increaase this (22 works)
-
-// Filter coefficient files and lengths
-constexpr char HB_FILENAME[] = "halfband.txt";
-constexpr int  HB_LENGTH     = 71;
-constexpr char B5_FILENAME[] = "downby5.txt";
-constexpr int  B5_LENGTH     = 378;
-
-class DigitalDownConverter
-{
-    // Digital Synthesis of Sinusoid
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> _cos[TBSIZE];
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> _sin[TBSIZE];
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND> _phase_acc;
-    unsigned long                               _dither_lfsr_memory;
-
-    // Decimation Filter (by 2)
-    SLFixedPoint<18, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>       _halfband_coeffs[HB_LENGTH];
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> _halfband_inph_delays[HB_LENGTH];
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> _halfband_quad_delays[HB_LENGTH];
-    unsigned long             _halfband_iteration;
-
-    // Decimation Filter (by 5)
-    SLFixedPoint<18, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>     _by5_coeffs[B5_LENGTH];
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> _by5_inph_delays[B5_LENGTH];
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> _by5_quad_delays[B5_LENGTH];
-    unsigned long             _by5_iteration;
-
-public:
-    DigitalDownConverter();
-    bool push(
-        // Inputs
-        SLFixedPoint<INWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> input_sample,
-        SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  phase_increment,
-        // Outputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out);
-    bool pull_sinusoid(
-        // Inputs
-        SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>    phase_increment,
-        // Outputs
-        SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & cosine_out,
-        SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & sine_out);
-    bool push_halfband(
-        // Inputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  inph_in,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  quad_in,
-        // Outputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out);
-    bool push_by5(
-        // Inputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>   inph_in,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>   quad_in,
-        // Outputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out);
-};
-
-int main(int argc, char * argv[])
-{
-    SLFixPoint::throwOnOverflow = true;
-    double frequency = 0.16;
-    SLFixedPoint<INWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> input_sample;
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> phase_increment;
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> inph;
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> quad;
-
-    auto ddc = DigitalDownConverter();
-    phase_increment = -frequency;
-
-    for (int ii = 0; ii < MAX_ITERS; ++ii) {
-        input_sample = 0.1
-            + 0.125 * std::cos(2*M_PI*(frequency + 0.005)*ii + 0.72)
-            + 0.125 * std::cos(2*M_PI*(0.5 * frequency)*ii)
-            + 0.125 * std::cos(2*M_PI*(frequency - 0.005)*ii + 0.72)
-            + 0.125 * std::cos(2*M_PI*(frequency + 0.01)*ii - 1.333)
-            + 0.125 * std::cos(2*M_PI*(0.25 * frequency)*ii)
-            + 0.125 * std::cos(2*M_PI*(frequency - 0.01)*ii - 1.333);
-
-        if (ddc.push(input_sample, phase_increment, inph, quad)) {
-            std::cout << inph.to_double() << ", " << quad.to_double() << ", " << std::endl;
-        }
-    }
-    
-    return 0;
-}
-
-DigitalDownConverter::DigitalDownConverter(void) : 
-    _phase_acc(0.0)
+DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double> &halfbandCoeffs, const std::vector<double> &by5Coeffs) :
+    FilterChainElement("DDC"),
+    _cos(TBSIZE),
+    _sin(TBSIZE),
+    _phase_acc(0.0),
+    _dither_lfsr_memory(0x5678), //something nonzero
+    _phase_increment(-freq),
+    _halfband_coeffs(),
+    _halfband_inph_delays(),
+    _halfband_quad_delays(),
+    _halfband_iteration(0),
+    _by5_coeffs(),
+    _by5_inph_delays(),
+    _by5_quad_delays(),
+    _by5_iteration(0),
+    _output_ready(false),
+    _output_inph(0.0),
+    _output_quad(0.0)
 {
     // Initialize Sin/Cos LUTs
     for (int i = 0; i < TBSIZE; i++) {
@@ -113,66 +26,63 @@ DigitalDownConverter::DigitalDownConverter(void) :
         _sin[i] = std::sin(2.0 * M_PI * i / double(TBSIZE));
     }
 
-    int c;
-    std::ifstream halfband_file(HB_FILENAME);
-    double raw_coeffs[std::max(HB_LENGTH,B5_LENGTH)];
     double coeff_accum = 0.0;
-    for (int i = 0; i < HB_LENGTH; i++) {
-        halfband_file >> c;
-        coeff_accum += c;
-        raw_coeffs[i] = double(c);
+    for (size_t i = 0; i < halfbandCoeffs.size(); i++) {
+        coeff_accum += halfbandCoeffs[i];
+    }
+    double coeff_scale = (1.0 / coeff_accum);
+    _halfband_coeffs.resize(halfbandCoeffs.size());
+    _halfband_inph_delays.resize(halfbandCoeffs.size());
+    _halfband_quad_delays.resize(halfbandCoeffs.size());
+    for (size_t i = 0; i < halfbandCoeffs.size(); i++) {
+        _halfband_coeffs[i] = halfbandCoeffs[i] * coeff_scale;
         _halfband_inph_delays[i] = 0.0;
         _halfband_quad_delays[i] = 0.0;
     }
-    double max = 0.0;
-    double min = 1.0;
-    for (int i = 0; i < HB_LENGTH; i++) {
-        double coeff = raw_coeffs[i] * (1.0 / coeff_accum);
-        _halfband_coeffs[i] = coeff;
-        if (fabs(coeff) > max) {
-            max = fabs(coeff);
-        }
-        if (fabs(coeff) < min && fabs(coeff) != 0.0) {
-            min = fabs(coeff);
-        }
-    }
-//    std::cout << "max = " << max << " min = " << min << std::endl;
-    _halfband_iteration = 0;
-    halfband_file.close();
 
-    std::ifstream by5_file(B5_FILENAME);
     coeff_accum = 0.0;
-    for (int i = 0; i < B5_LENGTH; i++) {
-        by5_file >> c;
-        coeff_accum += c;
-        raw_coeffs[i] = double(c);
+    for (size_t i = 0; i < by5Coeffs.size(); i++) {
+        coeff_accum += by5Coeffs[i];
+    }
+    coeff_scale = (1.0 / coeff_accum);
+    _by5_coeffs.resize(by5Coeffs.size());
+    _by5_inph_delays.resize(by5Coeffs.size());
+    _by5_quad_delays.resize(by5Coeffs.size());
+    for (size_t i = 0; i < by5Coeffs.size(); i++) {
+        _by5_coeffs[i] = by5Coeffs[i] * coeff_scale;
         _by5_inph_delays[i] = 0.0;
         _by5_quad_delays[i] = 0.0;
     }
-    max = 0.0;
-    min = 1.0;
-    for (int i = 0; i < B5_LENGTH; i++) {
-        double coeff = raw_coeffs[i] * (1.0 / coeff_accum);
-        _by5_coeffs[i] = coeff;
-        if (fabs(coeff) > max) {
-            max = fabs(coeff);
-        }
-        if (fabs(coeff) < min && fabs(coeff) != 0.0) {
-            min = fabs(coeff);
-        }
-    }
-//    std::cout << "max = " << max << " min = " << min << std::endl;
-    _by5_iteration = 0;
-    by5_file.close();
+}
 
-    // Initialize LFSR to something nonzero
-    _dither_lfsr_memory = 0x5678;
+bool DigitalDownConverter::input(const filter_io_t &data)
+{
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
+    SLFixedPoint<INWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> input = data.fc.real();
+    _output_ready = push(input, _output_inph, _output_quad);
+    return true;
+}
+
+bool DigitalDownConverter::output(filter_io_t &data)
+{
+    if (_output_ready) {
+        data.type = IO_TYPE_COMPLEX_FIXPOINT;
+        data.fc.setFormat(_output_inph.wl(), _output_quad.iwl());
+        data.fc.real(static_cast<SLFixPoint>(_output_inph));
+        data.fc.imag(static_cast<SLFixPoint>(_output_quad));
+    }
+
+    return _output_ready;
+}
+
+void DigitalDownConverter::tick(void)
+{
+
 }
 
 bool DigitalDownConverter::push(
         // Inputs
-        SLFixedPoint<INWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>    input_sample,
-        SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>     phase_increment,
+        const SLFixedPoint<INWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>    &input_sample,
         // Outputs
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out)
@@ -181,7 +91,7 @@ bool DigitalDownConverter::push(
     SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> cosine;
     SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> sine;
 
-    if (pull_sinusoid(phase_increment, cosine, sine)) {
+    if (pull_sinusoid(cosine, sine)) {
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_inph;
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_quad;
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> half_inph;
@@ -213,8 +123,6 @@ bool DigitalDownConverter::push(
 
 // Push two more samples in, and report if there is an output available
 bool DigitalDownConverter::pull_sinusoid(
-        // Inputs
-        SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>    phase_increment,
         // Outputs
         SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & cosine_out,
         SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & sine_out)
@@ -222,8 +130,8 @@ bool DigitalDownConverter::pull_sinusoid(
     // Constants
     SLFixedPoint<OUTWIDTH, 3, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> FPM_2PI = 2.0 * M_PI;
     // Fixed point local variables
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>               dithered_phase_acc;
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>               phase_corr;
+    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>                                dithered_phase_acc;
+    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>                                phase_corr;
     SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                dither_amount;
     SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                dithered_phase_corr;
     SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                               lut_sine;
@@ -261,20 +169,23 @@ bool DigitalDownConverter::pull_sinusoid(
     output_ready = true;
 
     // Update Phase Accumulator
-    _phase_acc += phase_increment;
+    _phase_acc += _phase_increment;
 
     return output_ready;    
 }
 
 bool DigitalDownConverter::push_halfband(
         // Inputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  inph_in,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  quad_in,
+        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_in,
+        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_in,
         // Outputs
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out)
 {
+    const size_t HB_LENGTH = _halfband_coeffs.size();
     bool output_ready = false;
+
+    //XXX how can we analytically determine the best accumulator format here
     SLFixedPoint<52, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  inph_accum = 0.0;
     SLFixedPoint<52, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  quad_accum = 0.0;
 
@@ -296,12 +207,10 @@ bool DigitalDownConverter::push_halfband(
 
         inph_accum = _halfband_inph_delays[(HB_LENGTH-1)/2] * _halfband_coeffs[(HB_LENGTH-1)/2];
         quad_accum = _halfband_quad_delays[(HB_LENGTH-1)/2] * _halfband_coeffs[(HB_LENGTH-1)/2];
-        for (int i = 0; i < HB_LENGTH; i += 2) {
+        for (size_t i = 0; i < HB_LENGTH; i += 2) {
             inph_accum += _halfband_inph_delays[i] * _halfband_coeffs[i];
             quad_accum += _halfband_quad_delays[i] * _halfband_coeffs[i];
         }
-        //inph_out = inph_accum * _halfband_normalization;
-        //quad_out = quad_accum * _halfband_normalization;
         inph_out = inph_accum;
         quad_out = quad_accum;
 
@@ -314,13 +223,16 @@ bool DigitalDownConverter::push_halfband(
 
 bool DigitalDownConverter::push_by5(
         // Inputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  inph_in,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  quad_in,
+        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_in,
+        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_in,
         // Outputs
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out)
 {
+    const size_t B5_LENGTH = _by5_coeffs.size();
     bool output_ready = false;
+
+    //XXX how can we analytically determine the best accumulator format here
     SLFixedPoint<52, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  inph_accum = 0.0;
     SLFixedPoint<52, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  quad_accum = 0.0;
 
@@ -338,12 +250,10 @@ bool DigitalDownConverter::push_by5(
             // Compute output (use polyphase structure in hardware implementation)
             inph_accum = 0.0;
             quad_accum = 0.0;
-            for (int i = 0; i < B5_LENGTH; i++) {
+            for (size_t i = 0; i < B5_LENGTH; i++) {
                 inph_accum += _by5_inph_delays[i] * _by5_coeffs[i];
                 quad_accum += _by5_quad_delays[i] * _by5_coeffs[i];
             }
-            //inph_out = inph_accum * _by5_normalization;
-            //quad_out = quad_accum * _by5_normalization;
             inph_out = inph_accum;
             quad_out = quad_accum;
             output_ready = true;

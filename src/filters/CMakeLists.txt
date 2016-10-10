@@ -3,6 +3,7 @@ set(SIGFILTERS_SOURCES
     biquad.cpp
     biquad_iir.cpp
     bfp_fft.cpp
+    ddc.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
