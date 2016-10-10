@@ -5,7 +5,6 @@
 #include <filters/sine_wave.hpp>
 #include <filters/automatic_gain.hpp>
 #include <filters/mixer.hpp>
-#include <filters/zero_pad_interpolator.hpp>
 #include <filters/decimator.hpp>
 #include <filters/hard_demod.hpp>
 
