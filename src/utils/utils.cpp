@@ -38,7 +38,7 @@ unsigned int calculateHammingDistance(uint8_t a, uint8_t b)
 }
 
 template <typename T>
-std::vector<T> readComplexFromCSV(const std::string &inFile, double scaleDownFactor)
+std::vector<T> readComplexFromCSV(const std::string &inFile)
 {
     std::ifstream in(inFile.c_str());
     std::vector<T> input;
@@ -49,9 +49,9 @@ std::vector<T> readComplexFromCSV(const std::string &inFile, double scaleDownFac
     while (getline(in, line)) {
         tokenizer tok(line);
         vec.assign(tok.begin(), tok.end());
-        temp.real(atof(vec[0].c_str()) / scaleDownFactor);
+        temp.real(atof(vec[0].c_str()));
         if (vec.size() == 2) {
-            temp.imag(atof(vec[1].c_str()) / scaleDownFactor);
+            temp.imag(atof(vec[1].c_str()));
         }
         else {
             temp.imag(0);
@@ -61,7 +61,7 @@ std::vector<T> readComplexFromCSV(const std::string &inFile, double scaleDownFac
     in.close();
     return input;
 }
-template std::vector<ComplexDouble>  readComplexFromCSV(const std::string &inFile, double scaleDownFactor);
+template std::vector<ComplexDouble>  readComplexFromCSV(const std::string &inFile);
 
 
 //XXX wrap entire file in namespace

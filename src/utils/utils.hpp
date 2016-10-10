@@ -10,7 +10,7 @@
 #include <stdint.h>
 
 template <typename T>
-std::vector<T> readComplexFromCSV(const std::string &inFile, double scaleDownFactor = 1.0);
+std::vector<T> readComplexFromCSV(const std::string &inFile);
 
 unsigned int reverseBits(int N, unsigned int num);
 
