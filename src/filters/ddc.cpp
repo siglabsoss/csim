@@ -1,9 +1,6 @@
 #include <filters/ddc.hpp>
 
-#define DDC_OUTPUT_FP_FORMAT            OUTWIDTH,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define DDC_INPUT_FP_FORMAT             INWIDTH,      2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define DDC_NCO_FP_FORMAT               NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
 //These were set emperically. What analysis needs to be done to set these properly to handle any given input?
 #define DDC_HALFBAND_ACCUM_FORMAT       52,  0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define DDC_BY5_ACCUM_FORMAT            52, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
