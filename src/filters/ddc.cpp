@@ -1,5 +1,12 @@
 #include <filters/ddc.hpp>
 
+#define DDC_OUTPUT_FP_FORMAT            OUTWIDTH,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_INPUT_FP_FORMAT             INWIDTH,      2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_NCO_FP_FORMAT               NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+
+//These were set emperically. What analysis needs to be done to set these properly to handle any given input?
+#define DDC_HALFBAND_ACCUM_FORMAT       52,  0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_BY5_ACCUM_FORMAT            52, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double> &halfbandCoeffs, const std::vector<double> &by5Coeffs) :
     FilterChainElement("DDC"),
@@ -48,7 +55,7 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
 bool DigitalDownConverter::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-    SLFixedPoint<INWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> input = data.fc.real();
+    SLFixedPoint<DDC_INPUT_FP_FORMAT> input = data.fc.real();
     _output_ready = push(input, _output_inph, _output_quad);
     return true;
 }
@@ -72,28 +79,28 @@ void DigitalDownConverter::tick(void)
 
 bool DigitalDownConverter::push(
         // Inputs
-        const SLFixedPoint<INWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>    &input_sample,
+        const SLFixedPoint<DDC_INPUT_FP_FORMAT>    &input_sample,
         // Outputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out)
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & inph_out,
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & quad_out)
 {
     bool output_ready = false;
-    SLFixedPoint<NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> cosine;
-    SLFixedPoint<NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> sine;
+    SLFixedPoint<DDC_NCO_FP_FORMAT> cosine;
+    SLFixedPoint<DDC_NCO_FP_FORMAT> sine;
 
     _nco.pullNextSample(cosine, sine);
 
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_inph;
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_quad;
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> half_inph;
-    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> half_quad;
+    SLFixedPoint<DDC_OUTPUT_FP_FORMAT> bb_inph;
+    SLFixedPoint<DDC_OUTPUT_FP_FORMAT> bb_quad;
+    SLFixedPoint<DDC_OUTPUT_FP_FORMAT> half_inph;
+    SLFixedPoint<DDC_OUTPUT_FP_FORMAT> half_quad;
 
     bb_inph = input_sample * cosine;
     bb_quad = input_sample * sine;
 
     if (push_halfband(bb_inph, bb_quad, half_inph, half_quad)) {
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> by5_inph;
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> by5_quad;
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> by5_inph;
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> by5_quad;
 
         if (push_by5(half_inph, half_quad, by5_inph, by5_quad)) {
             inph_out = by5_inph;
@@ -107,18 +114,17 @@ bool DigitalDownConverter::push(
 
 bool DigitalDownConverter::push_halfband(
         // Inputs
-        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_in,
-        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_in,
+        const SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & inph_in,
+        const SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & quad_in,
         // Outputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out)
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & inph_out,
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & quad_out)
 {
     const size_t HB_LENGTH = _halfband_coeffs.size();
     bool output_ready = false;
 
-    //XXX how can we analytically determine the best accumulator format here
-    SLFixedPoint<52, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  inph_accum = 0.0;
-    SLFixedPoint<52, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  quad_accum = 0.0;
+    SLFixedPoint<DDC_HALFBAND_ACCUM_FORMAT>  inph_accum = 0.0;
+    SLFixedPoint<DDC_HALFBAND_ACCUM_FORMAT>  quad_accum = 0.0;
 
     // Rotate delay line
     for (int i = HB_LENGTH-1; i > 0; i--) {
@@ -154,18 +160,18 @@ bool DigitalDownConverter::push_halfband(
 
 bool DigitalDownConverter::push_by5(
         // Inputs
-        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_in,
-        const SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_in,
+        const SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & inph_in,
+        const SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & quad_in,
         // Outputs
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & inph_out,
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out)
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & inph_out,
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & quad_out)
 {
     const size_t B5_LENGTH = _by5_coeffs.size();
     bool output_ready = false;
 
     //XXX how can we analytically determine the best accumulator format here
-    SLFixedPoint<52, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  inph_accum = 0.0;
-    SLFixedPoint<52, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>  quad_accum = 0.0;
+    SLFixedPoint<DDC_BY5_ACCUM_FORMAT>  inph_accum = 0.0;
+    SLFixedPoint<DDC_BY5_ACCUM_FORMAT>  quad_accum = 0.0;
 
     // Rotate delay line
     for (int i = B5_LENGTH-1; i > 0; i--) {
