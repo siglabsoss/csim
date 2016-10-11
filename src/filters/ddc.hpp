@@ -9,11 +9,8 @@
 #include <core/filter_chain_element.hpp>
 #include <filters/nco.hpp>
 
-static constexpr int INWIDTH    = 16;
-static constexpr int OUTWIDTH   = 18;
-
-#define DDC_OUTPUT_FP_FORMAT            OUTWIDTH,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define DDC_INPUT_FP_FORMAT             INWIDTH,      2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_OUTPUT_FP_FORMAT            22,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_INPUT_FP_FORMAT             16,      2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 #define HALFBAND_COEFF_FP_FORMAT        18,  0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define BY5_COEFF_FP_FORMAT             18, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE

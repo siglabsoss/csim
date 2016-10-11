@@ -169,7 +169,6 @@ bool DigitalDownConverter::push_by5(
     const size_t B5_LENGTH = _by5_coeffs.size();
     bool output_ready = false;
 
-    //XXX how can we analytically determine the best accumulator format here
     SLFixedPoint<DDC_BY5_ACCUM_FORMAT>  inph_accum = 0.0;
     SLFixedPoint<DDC_BY5_ACCUM_FORMAT>  quad_accum = 0.0;
 
