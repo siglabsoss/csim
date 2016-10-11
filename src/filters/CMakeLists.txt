@@ -8,6 +8,7 @@ set(SIGFILTERS_SOURCES
     decimator.cpp
     modulator.cpp
     hard_demod.cpp
+    nco.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})

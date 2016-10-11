@@ -3,11 +3,7 @@
 
 DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double> &halfbandCoeffs, const std::vector<double> &by5Coeffs) :
     FilterChainElement("DDC"),
-    _cos(TBSIZE),
-    _sin(TBSIZE),
-    _phase_acc(0.0),
-    _dither_lfsr_memory(0x5678), //something nonzero
-    _phase_increment(-freq),
+    _nco(freq),
     _halfband_coeffs(),
     _halfband_inph_delays(),
     _halfband_quad_delays(),
@@ -20,12 +16,6 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
     _output_inph(0.0),
     _output_quad(0.0)
 {
-    // Initialize Sin/Cos LUTs
-    for (int i = 0; i < TBSIZE; i++) {
-        _cos[i] = std::cos(2.0 * M_PI * i / double(TBSIZE));
-        _sin[i] = std::sin(2.0 * M_PI * i / double(TBSIZE));
-    }
-
     double coeff_accum = 0.0;
     for (size_t i = 0; i < halfbandCoeffs.size(); i++) {
         coeff_accum += halfbandCoeffs[i];
@@ -88,90 +78,31 @@ bool DigitalDownConverter::push(
         SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & quad_out)
 {
     bool output_ready = false;
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> cosine;
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> sine;
+    SLFixedPoint<NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> cosine;
+    SLFixedPoint<NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> sine;
 
-    if (pull_sinusoid(cosine, sine)) {
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_inph;
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_quad;
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> half_inph;
-        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> half_quad;
+    _nco.pullNextSample(cosine, sine);
 
-        bb_inph = input_sample * cosine;
-        bb_quad = input_sample * sine;
+    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_inph;
+    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> bb_quad;
+    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> half_inph;
+    SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> half_quad;
 
-        // std::cout << double(bb_inph) << ", " << double(bb_quad) << ", " << std::endl;
+    bb_inph = input_sample * cosine;
+    bb_quad = input_sample * sine;
 
-        if (push_halfband(bb_inph, bb_quad, half_inph, half_quad)) {
-            SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> by5_inph;
-            SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> by5_quad;
+    if (push_halfband(bb_inph, bb_quad, half_inph, half_quad)) {
+        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> by5_inph;
+        SLFixedPoint<OUTWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> by5_quad;
 
-            // std::cout << double(half_inph) << ", " << double(half_quad) << ", " << std::endl;
-
-            if (push_by5(half_inph, half_quad, by5_inph, by5_quad)) {
-                inph_out = by5_inph;
-                quad_out = by5_quad;
-                output_ready = true;
-
-                // std::cout << double(by5_inph) << ", " << double(by5_quad) << ", " << std::endl;
-            }
+        if (push_by5(half_inph, half_quad, by5_inph, by5_quad)) {
+            inph_out = by5_inph;
+            quad_out = by5_quad;
+            output_ready = true;
         }
     }
 
     return output_ready;
-}
-
-// Push two more samples in, and report if there is an output available
-bool DigitalDownConverter::pull_sinusoid(
-        // Outputs
-        SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & cosine_out,
-        SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & sine_out)
-{
-    // Constants
-    SLFixedPoint<OUTWIDTH, 3, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> FPM_2PI = 2.0 * M_PI;
-    // Fixed point local variables
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>                                dithered_phase_acc;
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>                                phase_corr;
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                dither_amount;
-    SLFixedPoint<PWIDTH, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                dithered_phase_corr;
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                               lut_sine;
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                               lut_cosine;
-    // Indicates whether an output is available to be read.
-    bool output_ready = false;
-
-    // Implement an LFSR for the dithering operation
-    unsigned long lfsr_bit = ((_dither_lfsr_memory >> 31) ^ (_dither_lfsr_memory >> 28)) & 0x1;
-    _dither_lfsr_memory = ((_dither_lfsr_memory << 1) & 0xFFFFFFFF) | lfsr_bit;
-    if ((_dither_lfsr_memory & 0x1) == 0) {
-        // Grab 20 bits, and place them at half significance of the phase_correction
-        dither_amount = -double(_dither_lfsr_memory & 0xFFFFF) * std::pow(2, -LOG2TBSIZE - 21);
-    }
-    else {
-        dither_amount = double(_dither_lfsr_memory & 0xFFFFF) * std::pow(2, -LOG2TBSIZE - 21);
-    }
-    dithered_phase_acc = _phase_acc + dither_amount;
-
-    // Slice the phase accumulator into a phase index (for lookup) and a phase correction
-    //phase_index = dithered_phase_acc.slice(PWIDTH-1, PWIDTH-LOG2TBSIZE);
-    phase_corr = double(dithered_phase_acc.slice(PWIDTH-LOG2TBSIZE-1, 0)) * std::pow(2.0, -PWIDTH);
-
-    // Lookup values of sine and cosine in the tables
-    uint64_t phase_index_int = dithered_phase_acc.slice(PWIDTH-1, PWIDTH-LOG2TBSIZE);
-    lut_cosine = _cos[phase_index_int];
-    lut_sine = _sin[phase_index_int];
-    
-    //dithered_phase_corr = phase_corr + dither_amount;
-    dithered_phase_corr = FPM_2PI * phase_corr;
-
-    // Apply correction
-    sine_out = lut_sine - lut_cosine * dithered_phase_corr;
-    cosine_out = lut_cosine + lut_sine * dithered_phase_corr;
-    output_ready = true;
-
-    // Update Phase Accumulator
-    _phase_acc += _phase_increment;
-
-    return output_ready;    
 }
 
 bool DigitalDownConverter::push_halfband(
