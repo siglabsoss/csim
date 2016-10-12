@@ -7,11 +7,12 @@
 FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
     FilterChainElement("FixedFIR"),
     m_coeffs(coeffs.size()),
-    m_x(coeffs.size(), SLFixComplex(conf.wlDelay, conf.iwlDelay)),
-    m_output(conf.wlOut, conf.iwlOut),
+    m_x(coeffs.size(), SLFixComplex(conf.wlDelay, conf.iwlDelay, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE)),
+    m_output(conf.wlOut, conf.iwlOut, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE),
     m_accum(),
     m_rateAdj(conf.rateChange),
-    m_iteration(0)
+    m_iteration(0),
+    m_outputReady(false)
 {
     unsigned maxIntWidth = 0;
     double coeffArea = 0.0; // "coefficient area" defined as the sum of the magnitudes, used to determine accumulator width.
@@ -38,8 +39,8 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
     unsigned bitsRequired = conf.wlCoeff + conf.wlDelay + worstCaseBitGrowth;
     assert(bitsRequired < 52); //Lattice ECP5 max accumulator width
 
-    m_accum.setFormat(bitsRequired, maxIntWidth + worstCaseBitGrowth);
-    log_debug("FIR coefficient format is Q%d.%d, Accumulator format is Q%d.%d (max growth = %d)", maxIntWidth, conf.wlCoeff - maxIntWidth, maxIntWidth + worstCaseBitGrowth, bitsRequired - (maxIntWidth + worstCaseBitGrowth), worstCaseBitGrowth);
+    m_accum.setFormat(bitsRequired, maxIntWidth + worstCaseBitGrowth, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    log_debug("FIR coefficient format is Q%d.%d, Accumulator format is Q%d.%d (max growth = %d). Number of taps is %d", maxIntWidth, conf.wlCoeff - maxIntWidth, maxIntWidth + worstCaseBitGrowth, bitsRequired - (maxIntWidth + worstCaseBitGrowth), worstCaseBitGrowth, coeffs.size());
 }
 
 bool FixedFIR::input(const filter_io_t &data)
@@ -55,8 +56,13 @@ bool FixedFIR::input(const filter_io_t &data)
 
 bool FixedFIR::output(filter_io_t &data)
 {
-    data = m_output;
-    return true;
+    if (m_outputReady) {
+        m_outputReady = false;
+        data = m_output;
+        m_iteration = 0;
+        return true;
+    }
+    return false;
 }
 
 void FixedFIR::tick()
@@ -68,9 +74,16 @@ void FixedFIR::filter(SLFixComplex &input)
     m_accum = 0;
     m_x.push_front(input);
 
-    for (unsigned int j = 0; (j < m_x.size()); j++) {
-        m_accum += (m_x[j] * m_coeffs[j]);
-    } //Accumulate
+    bool downSample = (m_rateAdj < 0);
+    size_t rateAdj = abs(m_rateAdj);
 
-    m_output = m_accum;
+    m_iteration++;
+
+    if (!downSample || m_iteration >= rateAdj) {
+        for (unsigned int j = 0; (j < m_x.size()); j++) {
+            m_accum += (m_x[j] * m_coeffs[j]);
+        } //Accumulate
+        m_output = m_accum;
+        m_outputReady = true;
+    }
 }

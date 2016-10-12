@@ -35,4 +35,5 @@ private: //members
     SLFixComplex                                            m_accum;
     ssize_t                                                 m_rateAdj;
     size_t                                                  m_iteration;
+    bool                                                    m_outputReady;
 };
