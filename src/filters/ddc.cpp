@@ -2,12 +2,6 @@
 
 #define DDC_NCO_FP_FORMAT               NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
-//Halfband integer width = output int width + halfband coeff int width
-#define DDC_HALFBAND_ACCUM_FORMAT       52,  2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
-//By5 integer width = output int width + by5 coeff int width
-#define DDC_BY5_ACCUM_FORMAT            52, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
 DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double> &halfbandCoeffs, const std::vector<double> &by5Coeffs) :
     FilterChainElement("DDC"),
     _nco(freq),
