@@ -9,9 +9,6 @@
 #include <core/filter_chain_element.hpp>
 #include <filters/nco.hpp>
 
-static constexpr int INWIDTH    = 16;
-static constexpr int OUTWIDTH   = 18;
-
 #define DUC_OUTPUT_FP_FORMAT            16,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define DUC_INPUT_FP_FORMAT             18,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
