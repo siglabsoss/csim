@@ -14,6 +14,12 @@ SLFixComplex::SLFixComplex(size_t wordLength, size_t intLength) :
 {
 
 }
+SLFixComplex::SLFixComplex(size_t wordLength, size_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode) :
+    m_real(wordLength, intLength, quantMode, overflowMode),
+    m_imag(wordLength, intLength, quantMode, overflowMode)
+{
+
+}
 
 SLFixComplex SLFixComplex::operator+(const SLFixComplex &rhs)
 {
@@ -122,10 +128,22 @@ void SLFixComplex::setFormat(size_t wordLength, size_t intLength)
     m_imag.setFormat(wordLength, intLength);
 }
 
+void SLFixComplex::setFormat(size_t wordLength, size_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode)
+{
+    m_real.setFormat(wordLength, intLength, quantMode, overflowMode);
+    m_imag.setFormat(wordLength, intLength, quantMode, overflowMode);
+}
+
 void SLFixComplex::setFormat(const SLFixComplex &other)
 {
     m_real.setFormat(other.real().wl(), other.real().iwl());
     m_imag.setFormat(other.imag().wl(), other.real().iwl());
+}
+
+void SLFixComplex::setFormat(const SLFixPoint &other)
+{
+    m_real.setFormat(other.wl(), other.iwl());
+    m_imag.setFormat(other.wl(), other.iwl());
 }
 
 SLFixPoint  SLFixComplex::real() const

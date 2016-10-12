@@ -18,6 +18,7 @@ class SLFixComplex
 public:
     SLFixComplex();
     SLFixComplex(size_t wordLength, size_t intLength);
+    SLFixComplex(size_t wordLength, size_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode);
 
     SLFixComplex operator+(const SLFixComplex &rhs);
     SLFixComplex operator-(const SLFixComplex &rhs);
@@ -44,7 +45,9 @@ public:
     void        imag(double val);
 
     void        setFormat(size_t wordLength, size_t intLength);
+    void        setFormat(size_t wordLength, size_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode);
     void        setFormat(const SLFixComplex &other);
+    void        setFormat(const SLFixPoint &other);
 
     void        set(double real, double imag);
     ComplexDouble toComplexDouble() const;
