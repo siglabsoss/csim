@@ -17,18 +17,18 @@ NCO::NCO(double freq) :
 // Push two more samples in, and report if there is an output available
 void NCO::pullNextSample(
         // Outputs
-        SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & cosine_out,
-        SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> & sine_out)
+        SLFixedPoint<NCO_FP_FORMAT> & cosine_out,
+        SLFixedPoint<NCO_FP_FORMAT> & sine_out)
 {
     // Constants
     SLFixedPoint<TWOPIWIDTH, 3, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE> FPM_2PI = 2.0 * M_PI;
     // Fixed point local variables
-    SLFixedPoint<PWIDTH,  0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>                                dithered_phase_acc;
-    SLFixedPoint<PWIDTH,  0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND>                                phase_corr;
-    SLFixedPoint<PWIDTH,  0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                dither_amount;
-    SLFixedPoint<PWIDTH,  0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                dithered_phase_corr;
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                lut_sine;
-    SLFixedPoint<TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE>                                lut_cosine;
+    SLFixedPoint<NCO_PHASE_FORMAT>                                dithered_phase_acc;
+    SLFixedPoint<NCO_PHASE_FORMAT>                                phase_corr;
+    SLFixedPoint<NCO_PHASE_FORMAT>                                dither_amount;
+    SLFixedPoint<NCO_PHASE_FORMAT>                                dithered_phase_corr;
+    SLFixedPoint<NCO_FP_FORMAT>                                   lut_sine;
+    SLFixedPoint<NCO_FP_FORMAT>                                   lut_cosine;
 
     // Implement an LFSR for the dithering operation
     unsigned long lfsr_bit = ((_dither_lfsr_memory >> 31) ^ (_dither_lfsr_memory >> 28)) & 0x1;
