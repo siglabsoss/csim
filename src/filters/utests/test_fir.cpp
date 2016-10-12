@@ -21,6 +21,7 @@ void checkError(const std::vector<ComplexDouble> &outputs, const std::vector<Com
 
 void runTest(const std::string &coeffFile, const std::string &inputFile, const std::string &outputFile, float threshold)
 {
+    SLFixPoint::throwOnOverflow = true;
     std::vector<ComplexDouble> input; //Vector to hold inputs
     std::vector<ComplexDouble> output; //Vector to hold outputs
     std::vector<ComplexDouble> answers; //Vector to hold answers
@@ -39,12 +40,20 @@ void runTest(const std::string &coeffFile, const std::string &inputFile, const s
     answers = readComplexFromCSV<ComplexDouble>(outputFile); //Reads answer file
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << outputFile);
 
-    FixedFIR fir(realCoeffs, 16);
+    FixedFIR::Config conf = {
+            .wlCoeff = 18,
+            .wlDelay = 18,
+            .iwlDelay = 1,
+            .wlOut = 18,
+            .iwlOut = 1,
+            .rateChange = 0
+    };
+    FixedFIR fir(realCoeffs, conf);
 
     for (unsigned int k = 0; k < input.size(); k++) {
         filter_io_t data;
         SLFixComplex sample;
-        sample.setFormat(16, 1);
+        sample.setFormat(18, 1);
         sample.real(input[k].real());
         sample.imag(input[k].imag());
         data = sample;
@@ -59,6 +68,56 @@ void runTest(const std::string &coeffFile, const std::string &inputFile, const s
     checkError(output, answers, threshold);
 }
 
+void runImpulseResponse(const std::string &coeffFile)
+{
+    SLFixPoint::throwOnOverflow = true;
+    std::vector<ComplexDouble>  coeffs; //Vector to hold coefficients
+    std::vector<ComplexDouble> output; //Vector to hold outputs
+
+    coeffs = readComplexFromCSV<ComplexDouble>(coeffFile);//Reads in taps from file
+    BOOST_REQUIRE_MESSAGE(!coeffs.empty(), "Could not read from " << coeffFile);
+
+    std::vector<double> realCoeffs;
+    for (size_t i = 0; i < coeffs.size(); i++) {
+        realCoeffs.push_back(coeffs[i].real());
+    }
+
+    FixedFIR::Config conf = {
+            .wlCoeff = 18,
+            .wlDelay = 18,
+            .iwlDelay = 1,
+            .wlOut = 18,
+            .iwlOut = 1,
+            .rateChange = 0
+    };
+
+    FixedFIR fir(realCoeffs, conf);
+    filter_io_t data;
+    SLFixComplex sample;
+    sample.setFormat(18, 1);
+    for (size_t i = 0; i < realCoeffs.size(); i++) {
+        if (i == 0) {
+            sample.real(0.5);
+            sample.imag(0.5);
+        } else {
+            sample.real(0.0);
+            sample.imag(0.0);
+        }
+        data = sample;
+        fir.input(data); //Filters data
+        filter_io_t output_sample;
+        bool didOutput = fir.output(output_sample);
+        BOOST_REQUIRE_EQUAL(didOutput, true);
+        output.push_back(output_sample.fc.toComplexDouble());
+    }
+    for (size_t i = 0; i < realCoeffs.size(); i++) {
+        double realDiff = fabs(realCoeffs[i] - 2*output[i].real());
+        double imagDiff = fabs(realCoeffs[i] - 2*output[i].imag());
+        BOOST_CHECK(realDiff < 0.00002);
+        BOOST_CHECK(imagDiff < 0.00002);
+    }
+}
+
 CSIM_TEST_CASE(FIR_REAL_ONLY_INPUTS)
 {
     runTest("./data/fir/input/taps1.txt", "./data/fir/input/data1_in.csv", "./data/fir/answers/answers1.csv", 2*ONE_BIT_ERROR);
@@ -68,6 +127,11 @@ CSIM_TEST_CASE(FIR_REAL_ONLY_INPUTS)
 CSIM_TEST_CASE(FIR_COMPLEX_INPUTS)
 {
     runTest("./data/fir/input/taps2.txt", "./data/fir/input/data2_in.csv", "./data/fir/answers/answers2.csv", 2*ONE_BIT_ERROR);
+}
+
+CSIM_TEST_CASE(FIR_IMPULSE_RESPONSE)
+{
+    runImpulseResponse("./data/fir/input/taps2.txt");
 }
 
 CSIM_TEST_SUITE_END()
