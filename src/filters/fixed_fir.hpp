@@ -20,20 +20,23 @@ public:
         size_t iwlOut;          //output integer length
         ssize_t rateChange;     //up/down sample factor (positive = upsample, negative = downsample, 0 = no rate change)
     };
-    FixedFIR(std::vector<double> coeffs, Config conf);
+    FixedFIR(const std::vector<double> &coeffs, const Config &conf);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick() override;
 
 private: //methods
-    void     filter(SLFixComplex &input);
+    void     filter(SLFixComplex &input, size_t polyPhaseOffset);
 
 private: //members
     std::vector<SLFixPoint>                        		    m_coeffs;
-    CircularBuffer< SLFixComplex > 	                        m_x;
+    CircularBuffer< SLFixComplex > 	                        m_delayLine;
     SLFixComplex                                          	m_output;
     SLFixComplex                                            m_accum;
     ssize_t                                                 m_rateAdj;
-    size_t                                                  m_iteration;
     bool                                                    m_outputReady;
+    SLFixComplex                                            m_lastInput;
+    bool                                                    m_newInput;
+    size_t                                                  m_ticksSinceLastInput;
+    size_t                                                  m_filterIteration;
 };

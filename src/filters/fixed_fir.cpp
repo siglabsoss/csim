@@ -4,15 +4,18 @@
 #include <core/logger.hpp>
 #include <utils/utils.hpp>
 
-FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
+FixedFIR::FixedFIR(const std::vector<double> &coeffs, const Config &conf) :
     FilterChainElement("FixedFIR"),
-    m_coeffs(coeffs.size()),
-    m_x(coeffs.size(), SLFixComplex(conf.wlDelay, conf.iwlDelay, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE)),
+    m_coeffs(),
+    m_delayLine(),
     m_output(conf.wlOut, conf.iwlOut, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE),
     m_accum(),
     m_rateAdj(conf.rateChange),
-    m_iteration(0),
-    m_outputReady(false)
+    m_outputReady(false),
+    m_lastInput(),
+    m_newInput(false),
+    m_ticksSinceLastInput(0),
+    m_filterIteration(0)
 {
     unsigned maxIntWidth = 0;
     double coeffArea = 0.0; // "coefficient area" defined as the sum of the magnitudes, used to determine accumulator width.
@@ -20,7 +23,6 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
     for (unsigned int i = 0; i < coeffs.size(); i++) {
         if (coeffs[i] != 0.0) {
             ssize_t intWidth = utils::getShiftAmount(coeffs[i]);
-            std::cout << "intWidth = " << intWidth << " for " << coeffs[i] << std::endl;
             coeffArea += fabs(coeffs[i]);
             if (intWidth > maxIntWidth) {
                 maxIntWidth = intWidth;
@@ -30,10 +32,40 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
     ++maxIntWidth; //accomodate sign bit
     assert(maxIntWidth <= conf.wlCoeff);
 
+    if (m_rateAdj >= -1 && m_rateAdj <= 1) {
+        //-1, 0, and 1 all mean "no rate change" use 1 as the canonical value to make calculations easier
+        m_rateAdj = 1;
+    }
+
+    if (m_rateAdj > 1) {
+        //extend coefficients up to the next multiple
+        size_t coeffExtention = (m_rateAdj - coeffs.size() % m_rateAdj) % m_rateAdj;
+        m_coeffs.resize(coeffs.size() +  coeffExtention);
+        log_debug("Interpolation by a factor of %d. Zero padding with %d additional coefficients for polyphase operations.", m_rateAdj, coeffExtention);
+    } else {
+        m_coeffs.resize(coeffs.size());
+    }
     //Construct the fixed point coefficients with scaling of 2^(wlCoeff - maxIntWidth)
     for (unsigned int i = 0; i < coeffs.size(); i++) {
         m_coeffs[i].setFormat(conf.wlCoeff, maxIntWidth, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
         m_coeffs[i] = coeffs[i];
+    }
+
+    //Padding extra zero coefficients to simplify polyphase operations
+    for (unsigned int i = coeffs.size(); i < m_coeffs.size(); i++) {
+        m_coeffs[i].setFormat(conf.wlCoeff, maxIntWidth, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+        m_coeffs[i] = 0.0;
+    }
+
+    size_t delaySize = m_coeffs.size();
+    //If we are upsampling, our delay line size is a fraction of the coefficient size
+    if (m_rateAdj > 1) {
+        delaySize /= m_rateAdj;
+    }
+    m_delayLine = CircularBuffer<SLFixComplex>(delaySize, SLFixComplex(conf.wlDelay, conf.iwlDelay, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE));
+
+    if (m_rateAdj < -1) {
+        log_debug("Decimation filter downsampling by a factor of %d.", abs(m_rateAdj));
     }
 
     //See http://www.digitalsignallabs.com/fir.pdf for analysis on FIR bit growth
@@ -49,11 +81,10 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
 bool FixedFIR::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-    SLFixComplex sample;
-    sample.setFormat(data.fc);
-    sample = data.fc;
+    m_lastInput.setFormat(data.fc);
+    m_lastInput = data.fc;
+    m_newInput = true;
 
-    filter(sample);
     return true;
 }
 
@@ -62,7 +93,6 @@ bool FixedFIR::output(filter_io_t &data)
     if (m_outputReady) {
         m_outputReady = false;
         data = m_output;
-        m_iteration = 0;
         return true;
     }
     return false;
@@ -70,23 +100,62 @@ bool FixedFIR::output(filter_io_t &data)
 
 void FixedFIR::tick()
 {
+    bool receivedFirstSample = m_lastInput.isFormatSet();
+    if (!receivedFirstSample) {
+        return;
+    }
+    if (m_newInput) {
+        m_ticksSinceLastInput = 0;
+    }
+
+    //If we are downsampling or not rate adjusting, then we should only invoke
+    //the filter when we get new input. In the case of upsampling, we need to
+    //invoke the filter multiple times per new input
+    bool shouldFilter = ((m_rateAdj <= 1) && m_newInput) || (m_rateAdj > 1);
+
+    if (m_rateAdj == 0 || m_rateAdj == 1) {
+        assert(m_ticksSinceLastInput == 0);
+    } else if (m_rateAdj > 1) {
+        assert(m_ticksSinceLastInput < static_cast<size_t>(m_rateAdj));
+    }
+
+    if (shouldFilter) {
+        filter(m_lastInput, m_ticksSinceLastInput);
+    }
+    m_ticksSinceLastInput++;
+    m_newInput = false;
 }
 
-void FixedFIR::filter(SLFixComplex &input)
+void FixedFIR::filter(SLFixComplex &input, size_t polyPhaseOffset)
 {
     m_accum = 0;
-    m_x.push_front(input);
 
-    bool downSample = (m_rateAdj < 0);
-    size_t rateAdj = abs(m_rateAdj);
+    bool noRateAdjustment = (m_rateAdj >= -1 && m_rateAdj <= 1);
+    bool downSampling = (m_rateAdj < -1);
+    bool newSample = (polyPhaseOffset == 0);
+    bool addSampleToDelayLine = noRateAdjustment || newSample;
 
-    m_iteration++;
+    if (addSampleToDelayLine) {
+        m_delayLine.push_front(input);
+    }
 
-    if (!downSample || m_iteration >= rateAdj) {
-        for (unsigned int j = 0; (j < m_x.size()); j++) {
-            m_accum += (m_x[j] * m_coeffs[j]);
+    size_t decimationFactor = 0;
+    if (downSampling) {
+        ++m_filterIteration;
+        decimationFactor = abs(m_rateAdj);
+    }
+
+    size_t polyPhaseIncrement = 1;
+    if (m_rateAdj > 1) {
+        polyPhaseIncrement = m_rateAdj;
+    }
+    if (!downSampling || m_filterIteration >= decimationFactor) {
+        unsigned int delayIdx = 0;
+        for (unsigned int coeffIdx = polyPhaseOffset; (coeffIdx < m_coeffs.size()); coeffIdx += polyPhaseIncrement) {
+            m_accum += (m_delayLine[delayIdx++] * m_coeffs[coeffIdx]);
         } //Accumulate
         m_output = m_accum;
         m_outputReady = true;
+        m_filterIteration = 0;
     }
 }

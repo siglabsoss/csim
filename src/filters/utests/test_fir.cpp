@@ -58,6 +58,7 @@ void runTest(const std::string &coeffFile, const std::string &inputFile, const s
         sample.imag(input[k].imag());
         data = sample;
         fir.input(data); //Filters data
+        fir.tick();
         filter_io_t output_sample;
         bool didOutput = fir.output(output_sample);
         BOOST_REQUIRE_EQUAL(didOutput, true);
@@ -105,6 +106,7 @@ void runImpulseResponse(const std::string &coeffFile)
         }
         data = sample;
         fir.input(data); //Filters data
+        fir.tick();
         filter_io_t output_sample;
         bool didOutput = fir.output(output_sample);
         BOOST_REQUIRE_EQUAL(didOutput, true);
