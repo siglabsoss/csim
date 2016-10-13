@@ -47,7 +47,7 @@ DigitalUpConverter::DigitalUpConverter(double freq, const std::vector<double> &u
         .iwlDelay       =  1,
         .wlOut          = 18,
         .iwlOut         =  2,
-        .rateChange     =  0
+        .rateChange     =  2
     };
     FixedFIR::Config up5Conf = {
         .wlCoeff        = 18,
@@ -55,7 +55,7 @@ DigitalUpConverter::DigitalUpConverter(double freq, const std::vector<double> &u
         .iwlDelay       =  1,
         .wlOut          = 18,
         .iwlOut         =  2,
-        .rateChange     =  0
+        .rateChange     =  5
     };
     _up2FIR = new FixedFIR(up2NormCoeffs, up2Conf);
     _up5FIR = new FixedFIR(up5NormCoeffs, up5Conf);
@@ -85,16 +85,15 @@ bool DigitalUpConverter::output(filter_io_t &data)
 
 void DigitalUpConverter::tick(void)
 {
-    if (_got_input) {
-        assert(_iteration == 0);
-        _got_input = false;
-    } else {
-        _inph_in = 0.0;
-        _quad_in = 0.0;
-    }
     SLFixedPoint<DUC_INPUT_FP_FORMAT> temp_inph_out;
     SLFixedPoint<DUC_INPUT_FP_FORMAT> temp_quad_out;
     _output_ready = push(_inph_in, _quad_in, temp_inph_out, temp_quad_out);
+
+    if (_got_input) {
+        assert(_iteration == 0);
+        _got_input = false;
+    }
+
     if (_output_ready) {
         _output_inph = temp_inph_out;
         _output_quad = temp_quad_out;
@@ -123,13 +122,21 @@ bool DigitalUpConverter::push(
     sample.fc.real(inph_in);
     sample.fc.imag(quad_in);
 
+    bool up5_has_input = _got_input;
+    bool up2_has_input = false;
+
     if ( (_iteration & 0x01) == 0) {
-        _up5FIR->input(sample);
+        if (up5_has_input) {
+            _up5FIR->input(sample);
+        }
         _up5FIR->tick();
-        assert(_up5FIR->output(sample));
+        up2_has_input = _up5FIR->output(sample);
+        assert(up2_has_input);
     }
 
-    _up2FIR->input(sample);
+    if (up2_has_input) {
+        _up2FIR->input(sample);
+    }
     _up2FIR->tick();
     assert(_up2FIR->output(sample));
 
