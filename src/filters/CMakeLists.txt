@@ -4,6 +4,7 @@ set(SIGFILTERS_SOURCES
     biquad_iir.cpp
     bfp_fft.cpp
     ddc.cpp
+    duc.cpp
     mixer.cpp
     decimator.cpp
     modulator.cpp
