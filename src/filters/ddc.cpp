@@ -1,7 +1,5 @@
 #include <filters/ddc.hpp>
 
-#define DDC_NCO_FP_FORMAT               NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
 DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double> &halfbandCoeffs, const std::vector<double> &by5Coeffs) :
     FilterChainElement("DDC"),
     _nco(freq),
@@ -33,18 +31,18 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
 
     FixedFIR::Config hbConf = {
         .wlCoeff        = 18,
-        .wlDelay        = 18,
-        .iwlDelay       =  1,
-        .wlOut          = 18,
-        .iwlOut         =  1,
+        .wlDelay        = DDC_OUTPUT_WL,
+        .iwlDelay       =  DDC_OUTPUT_IWL,
+        .wlOut          = DDC_OUTPUT_WL,
+        .iwlOut         =  DDC_OUTPUT_IWL,
         .rateChange     = -2
     };
     FixedFIR::Config by5Conf = {
         .wlCoeff        = 18,
         .wlDelay        = 18,
         .iwlDelay       =  1,
-        .wlOut          = 18,
-        .iwlOut         =  1,
+        .wlOut          = DDC_OUTPUT_WL,
+        .iwlOut         =  DDC_OUTPUT_IWL,
         .rateChange     = -5
     };
     _halfbandFIR = new FixedFIR(halfbandNormCoeffs, hbConf);
@@ -84,8 +82,8 @@ bool DigitalDownConverter::push(
         SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & quad_out)
 {
     bool output_ready = false;
-    SLFixedPoint<DDC_NCO_FP_FORMAT> cosine;
-    SLFixedPoint<DDC_NCO_FP_FORMAT> sine;
+    SLFixedPoint<NCO_FP_FORMAT> cosine;
+    SLFixedPoint<NCO_FP_FORMAT> sine;
 
     _nco.pullNextSample(cosine, sine);
 

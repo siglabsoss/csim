@@ -1,13 +1,5 @@
 #include <filters/duc.hpp>
 
-#define DUC_NCO_FP_FORMAT               NCO::TBWIDTH, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
-//Up2 integer width = output int width + halfband coeff int width
-#define DUC_UP2_ACCUM_FORMAT            52, 3, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
-//Up5 integer width = output int width + up5 coeff int width
-#define DUC_UP5_ACCUM_FORMAT            52, 4, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
 DigitalUpConverter::DigitalUpConverter(double freq, const std::vector<double> &up2Coeffs, const std::vector<double> &up5Coeffs) :
     FilterChainElement("DDC"),
     _nco(freq),
@@ -43,18 +35,18 @@ DigitalUpConverter::DigitalUpConverter(double freq, const std::vector<double> &u
     }
     FixedFIR::Config up2Conf = {
         .wlCoeff        = 18,
-        .wlDelay        = 18,
-        .iwlDelay       =  1,
-        .wlOut          = 18,
-        .iwlOut         =  2,
+        .wlDelay        = DUC_INPUT_WL,
+        .iwlDelay       =  DUC_INPUT_IWL,
+        .wlOut          =  DUC_INPUT_WL,
+        .iwlOut         =  DUC_INPUT_IWL,
         .rateChange     =  2
     };
     FixedFIR::Config up5Conf = {
         .wlCoeff        = 18,
-        .wlDelay        = 18,
-        .iwlDelay       =  1,
-        .wlOut          = 18,
-        .iwlOut         =  2,
+        .wlDelay        = DUC_INPUT_WL,
+        .iwlDelay       =  DUC_INPUT_IWL,
+        .wlOut          =  DUC_INPUT_WL,
+        .iwlOut         =  DUC_INPUT_IWL,
         .rateChange     =  5
     };
     _up2FIR = new FixedFIR(up2NormCoeffs, up2Conf);
@@ -113,8 +105,8 @@ bool DigitalUpConverter::push(
         SLFixedPoint<DUC_INPUT_FP_FORMAT> & quad_out)
 {
     bool output_ready = false;
-    SLFixedPoint<DUC_NCO_FP_FORMAT> cosine;
-    SLFixedPoint<DUC_NCO_FP_FORMAT> sine;
+    SLFixedPoint<NCO_FP_FORMAT> cosine;
+    SLFixedPoint<NCO_FP_FORMAT> sine;
 
     filter_io_t sample;
     sample.type = IO_TYPE_COMPLEX_FIXPOINT;

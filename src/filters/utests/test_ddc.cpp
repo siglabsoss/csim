@@ -10,7 +10,7 @@
 CSIM_TEST_SUITE_BEGIN(DigitalDownConverterVerification)
 
 // Number of iterations to run simulation
-static constexpr int MAX_ITERS  = 200000; //1068576;
+static constexpr int MAX_ITERS  = 1068576;
 static constexpr double MIXER_FREQ = 0.16;
 
 static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5CoeffFile)
@@ -113,9 +113,9 @@ static void runDUC(const std::string &up2CoeffFile, const std::string &up5CoeffF
 //    runDDC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt");
 //}
 
-//CSIM_TEST_CASE(BASIC_DUC_FUNCTIONALITY)
-//{
-//    runDUC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/ddc_out.csv");
-//}
+CSIM_TEST_CASE(BASIC_DUC_FUNCTIONALITY)
+{
+    runDUC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/ddc_out.csv");
+}
 
 CSIM_TEST_SUITE_END()

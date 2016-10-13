@@ -10,8 +10,13 @@
 #include <filters/nco.hpp>
 #include <filters/fixed_fir.hpp>
 
-#define DDC_OUTPUT_FP_FORMAT            22,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define DDC_INPUT_FP_FORMAT             16,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_INPUT_WL   16
+#define DDC_INPUT_IWL  2
+#define DDC_OUTPUT_WL  22
+#define DDC_OUTPUT_IWL 2
+
+#define DDC_OUTPUT_FP_FORMAT            DDC_OUTPUT_WL,     DDC_OUTPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_INPUT_FP_FORMAT             DDC_INPUT_WL,      DDC_INPUT_IWL,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 class DigitalDownConverter : public FilterChainElement
 {

@@ -10,11 +10,13 @@
 #include <filters/nco.hpp>
 #include <filters/fixed_fir.hpp>
 
-#define DUC_OUTPUT_FP_FORMAT            16,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define DUC_INPUT_FP_FORMAT             18,     2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DUC_INPUT_WL 18
+#define DUC_INPUT_IWL 2
+#define DUC_OUTPUT_WL 16
+#define DUC_OUTPUT_IWL 2
 
-#define UP2_COEFF_FP_FORMAT             18,  1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define UP5_COEFF_FP_FORMAT             18,  2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DUC_OUTPUT_FP_FORMAT            DUC_OUTPUT_WL,     DUC_OUTPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DUC_INPUT_FP_FORMAT             DUC_INPUT_WL,      DUC_INPUT_IWL,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 class DigitalUpConverter : public FilterChainElement
 {
