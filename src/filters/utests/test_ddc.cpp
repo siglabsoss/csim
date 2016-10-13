@@ -10,7 +10,7 @@
 CSIM_TEST_SUITE_BEGIN(DigitalDownConverterVerification)
 
 // Number of iterations to run simulation
-static constexpr int MAX_ITERS  = 200000;
+static constexpr int MAX_ITERS  = 200000; //1068576;
 static constexpr double MIXER_FREQ = 0.16;
 
 static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5CoeffFile)
@@ -39,14 +39,16 @@ static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5C
 
     for (int ii = 0; ii < MAX_ITERS; ++ii) {
         input_sample = 0.1
-            + 0.125 * std::cos(2*M_PI*(frequency + 0.005)*ii + 0.72)
-            + 0.125 * std::cos(2*M_PI*(0.5 * frequency)*ii)
-            + 0.125 * std::cos(2*M_PI*(frequency - 0.005)*ii + 0.72)
-            + 0.125 * std::cos(2*M_PI*(frequency + 0.01)*ii - 1.333)
-            + 0.125 * std::cos(2*M_PI*(0.25 * frequency)*ii)
-            + 0.125 * std::cos(2*M_PI*(frequency - 0.01)*ii - 1.333);
+            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ + 0.005)*ii + 0.72)
+            + 0.125 * std::cos(2*M_PI*(0.5 * MIXER_FREQ)*ii)
+            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ - 0.005)*ii + 0.72)
+            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ + 0.01)*ii - 1.333)
+            + 0.125 * std::cos(2*M_PI*(0.25 * MIXER_FREQ)*ii)
+            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ - 0.01)*ii - 1.333);
 
-        std::cout << input_sample << ",0" << std::endl;
+        //input_sample = 0.5 * std::cos(2*M_PI*(MIXER_FREQ)*ii + 0.72);
+
+        //std::cout << input_sample << ",0" << std::endl;
 
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
         data.fc.setFormat(input_sample.wl(), input_sample.iwl());
@@ -54,7 +56,7 @@ static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5C
         data.fc.imag(0.0);
         ddc.input(data);
         if (ddc.output(data)) {
-            //std::cout << data.fc.real().to_double() << "," << data.fc.imag().to_double() << std::endl;
+            std::cout << data.fc.real().to_double() << "," << data.fc.imag().to_double() << std::endl;
         }
     }
 }
@@ -111,9 +113,9 @@ static void runDUC(const std::string &up2CoeffFile, const std::string &up5CoeffF
 //    runDDC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt");
 //}
 
-CSIM_TEST_CASE(BASIC_DUC_FUNCTIONALITY)
-{
-    runDUC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/ddc_out.txt");
-}
+//CSIM_TEST_CASE(BASIC_DUC_FUNCTIONALITY)
+//{
+//    runDUC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/ddc_out_new.txt");
+//}
 
 CSIM_TEST_SUITE_END()
