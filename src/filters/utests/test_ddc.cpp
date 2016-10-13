@@ -108,14 +108,14 @@ static void runDUC(const std::string &up2CoeffFile, const std::string &up5CoeffF
     }
 }
 
-//CSIM_TEST_CASE(BASIC_DDC_FUNCTIONALITY)
-//{
+CSIM_TEST_CASE(BASIC_DDC_FUNCTIONALITY)
+{
 //    runDDC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt");
-//}
+}
 
 CSIM_TEST_CASE(BASIC_DUC_FUNCTIONALITY)
 {
-    runDUC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/ddc_out.csv");
+//    runDUC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/ddc_out.csv");
 }
 
 CSIM_TEST_SUITE_END()
