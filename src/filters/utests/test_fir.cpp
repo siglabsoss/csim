@@ -132,6 +132,8 @@ CSIM_TEST_CASE(FIR_COMPLEX_INPUTS)
 CSIM_TEST_CASE(FIR_IMPULSE_RESPONSE)
 {
     runImpulseResponse("./data/fir/input/taps2.txt");
+    runImpulseResponse("./data/fir/input/taps3.txt"); //DDC down by 5 coefficients
+    runImpulseResponse("./data/fir/input/taps4.txt"); //DDC down by 2 coefficients
 }
 
 CSIM_TEST_SUITE_END()
