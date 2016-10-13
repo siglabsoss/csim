@@ -18,13 +18,16 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
     double coeffArea = 0.0; // "coefficient area" defined as the sum of the magnitudes, used to determine accumulator width.
     //Find the number of integer bits needed to store the largest coefficient
     for (unsigned int i = 0; i < coeffs.size(); i++) {
-        unsigned intWidth = utils::getIntegerBits(coeffs[i]);
-        //std::cout << "intWidth = " << intWidth << "for " << coeffs[i] << std::endl;
-        coeffArea += fabs(coeffs[i]);
-        if (intWidth > maxIntWidth) {
-            maxIntWidth = intWidth;
+        if (coeffs[i] != 0.0) {
+            ssize_t intWidth = utils::getShiftAmount(coeffs[i]);
+            std::cout << "intWidth = " << intWidth << " for " << coeffs[i] << std::endl;
+            coeffArea += fabs(coeffs[i]);
+            if (intWidth > maxIntWidth) {
+                maxIntWidth = intWidth;
+            }
         }
     }
+    ++maxIntWidth; //accomodate sign bit
     assert(maxIntWidth <= conf.wlCoeff);
 
     //Construct the fixed point coefficients with scaling of 2^(wlCoeff - maxIntWidth)
@@ -34,13 +37,13 @@ FixedFIR::FixedFIR(std::vector<double> coeffs, Config conf) :
     }
 
     //See http://www.digitalsignallabs.com/fir.pdf for analysis on FIR bit growth
-    unsigned worstCaseBitGrowth = static_cast<unsigned>(ceil(log2(coeffArea)));
+    //unsigned worstCaseBitGrowth = static_cast<unsigned>(ceil(log2(coeffArea)));
     //Construct the fixed point accumulator with enough width to avoid overflow
-    unsigned bitsRequired = conf.wlCoeff + conf.wlDelay + worstCaseBitGrowth;
-    assert(bitsRequired < 52); //Lattice ECP5 max accumulator width
-
-    m_accum.setFormat(bitsRequired, maxIntWidth + worstCaseBitGrowth, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
-    log_debug("FIR coefficient format is Q%d.%d, Accumulator format is Q%d.%d (max growth = %d). Number of taps is %d", maxIntWidth, conf.wlCoeff - maxIntWidth, maxIntWidth + worstCaseBitGrowth, bitsRequired - (maxIntWidth + worstCaseBitGrowth), worstCaseBitGrowth, coeffs.size());
+    //unsigned bitsRequired = conf.wlCoeff + conf.wlDelay + worstCaseBitGrowth;
+    //assert(bitsRequired <= 52); //Lattice ECP5 max accumulator width
+    m_accum.setFormat(52, conf.iwlOut + m_coeffs[0].iwl(), SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    //m_accum.setFormat(bitsRequired, maxIntWidth + worstCaseBitGrowth, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    log_debug("FIR coefficient format is Q%d.%d, Accumulator format is Q%d.%d. Number of taps is %d", m_coeffs[0].iwl(), m_coeffs[0].wl() - m_coeffs[0].iwl(), m_accum.real().iwl(), m_accum.real().wl() - m_accum.real().iwl(), coeffs.size());
 }
 
 bool FixedFIR::input(const filter_io_t &data)
