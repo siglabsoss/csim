@@ -319,6 +319,11 @@ ssize_t SLFixPoint::iwl() const
     return static_cast<ssize_t>(m_wl - m_fl);
 }
 
+bool SLFixPoint::isFormatSet() const
+{
+    return m_formatSet;
+}
+
 void SLFixPoint::extendSign()
 {
     size_t spareBits = sizeof(m_value) * 8 - m_wl;

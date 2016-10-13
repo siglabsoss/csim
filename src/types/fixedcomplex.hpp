@@ -51,6 +51,11 @@ public:
 
     void        set(double real, double imag);
     ComplexDouble toComplexDouble() const;
+
+    size_t   wl()  const; //word length
+    ssize_t  iwl() const; //integer word length
+    bool     isFormatSet() const;
+
 private:
     SLFixPoint m_real;
     SLFixPoint m_imag;

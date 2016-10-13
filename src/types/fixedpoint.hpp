@@ -54,6 +54,7 @@ public:
     double   to_double() const;
     size_t   wl()  const; //word length
     ssize_t  iwl() const; //integer word length
+    bool     isFormatSet() const;
     uint64_t slice(size_t end, size_t start) const;
 
 protected:

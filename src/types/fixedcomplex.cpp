@@ -187,6 +187,23 @@ ComplexDouble SLFixComplex::toComplexDouble() const
     return ComplexDouble(m_real.to_double(), m_imag.to_double());
 }
 
+size_t   SLFixComplex::wl()  const
+{
+    //real/imag word lengths are equal
+    return m_real.wl();
+}
+
+ssize_t  SLFixComplex::iwl() const
+{
+    //real/imag int word lengths are equal
+    return m_real.iwl();
+}
+
+bool     SLFixComplex::isFormatSet() const
+{
+    return m_real.isFormatSet();
+}
+
 std::ostream& operator<<(std::ostream& os, const SLFixComplex& obj)
 {
     os << "(" << obj.real() << ", " << obj.imag() << ")";
