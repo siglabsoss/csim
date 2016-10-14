@@ -9,6 +9,8 @@
 #include <types/fixedcomplex.hpp>
 #include <vector>
 
+#define FFT_TWIDDLE_FORMAT            16, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+
 class BFPFFT : public FilterChainElement
 {
 public:

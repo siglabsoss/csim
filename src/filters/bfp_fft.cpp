@@ -33,8 +33,7 @@ BFPFFT::BFPFFT(size_t N, bool inverse) :
     for (size_t i = 0; i < N; i++) {
         //Calculate twiddle factors
         double theta = (-2 * M_PI * i) / N;
-        //XXX change format back to 16, 1 after saturation is implemented so that 1.0 doesn't wrap to -1.0
-        m_twiddleFactors[i].setFormat(16, 2);
+        m_twiddleFactors[i].setFormat(FFT_TWIDDLE_FORMAT);
         m_twiddleFactors[i].real(cos(theta));
         if (m_inverse) {
             m_twiddleFactors[i].imag(-sin(theta));
