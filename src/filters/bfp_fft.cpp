@@ -48,7 +48,7 @@ bool BFPFFT::input(const filter_io_t &data)
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
     size_t N = m_inputs.capacity();
     //using a bit-reversed index to decimate in time
-    size_t reverseIdx = reverseBits(N, m_inputIdx++);
+    size_t reverseIdx = utils::reverseBits(N, m_inputIdx++);
 
     m_inputs[reverseIdx].setFormat(data.fc);
     m_inputs[reverseIdx] = data.fc;
@@ -121,8 +121,8 @@ void BFPFFT::dit()
             size_t baseB = baseT + N;
             for (size_t n = 0; n < N; n++) { //butterfly loop
 
-                size_t topIdx = reverseBits(m_inputs.size(), baseT + n);
-                size_t botIdx = reverseBits(m_inputs.size(), baseB + n);
+                size_t topIdx = utils::reverseBits(m_inputs.size(), baseT + n);
+                size_t botIdx = utils::reverseBits(m_inputs.size(), baseB + n);
 
                 SLFixComplex twiddle = getTwiddleFactor(stage, n + baseT/2);
 
@@ -217,6 +217,6 @@ SLFixComplex BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
     size_t stageSize = (1 << stage);
     size_t A1 = (stageSize * n) / N;
     int temp = m_numStages - 1;
-    A1 = reverseBits(1 << temp, A1);
+    A1 = utils::reverseBits(1 << temp, A1);
     return m_twiddleFactors[A1];
 }

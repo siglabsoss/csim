@@ -12,8 +12,8 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
 {
     BiquadIIR bi(coeffs.size());
     bi.init(coeffs);
-    std::vector<ComplexDouble> inputs = readComplexFromCSV<ComplexDouble>(inputFile);
-    std::vector<ComplexDouble> outputs = readComplexFromCSV<ComplexDouble>(outputFile);
+    std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>(inputFile);
+    std::vector<ComplexDouble> outputs = utils::readComplexFromCSV<ComplexDouble>(outputFile);
 
     BOOST_CHECK_EQUAL(inputs.size(), outputs.size());
     BOOST_CHECK(inputs.size() > 0);

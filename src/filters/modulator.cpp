@@ -44,7 +44,7 @@ bool Modulator::input(const filter_io_t &data)
         return false;
     }
     for (size_t i = 0; i < sizeof(data.byte) * 8; i++) {
-        m_inputBuffer.push(data.byte & (1 << i));//XXX confirm left to right of vice versa
+        m_inputBuffer.push(data.byte & (1 << i));
     }
     return true;
 }
@@ -74,7 +74,7 @@ void Modulator::tick(void)
 symbol_t Modulator::getNextSymbol()
 {
     symbol_t symbol = 0;
-    for (size_t i = 0; i < m_bitsPerSymbol; i++) { //XXX confirm direction
+    for (size_t i = 0; i < m_bitsPerSymbol; i++) {
         symbol_t nextBit = !!m_inputBuffer.front();
         m_inputBuffer.pop();
         symbol |= (nextBit << i);

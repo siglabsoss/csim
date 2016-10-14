@@ -9,6 +9,8 @@
 #include <string>
 #include <stdint.h>
 
+namespace utils
+{
 template <typename T>
 std::vector<T> readComplexFromCSV(const std::string &inFile);
 
@@ -17,8 +19,7 @@ unsigned int reverseBits(int N, unsigned int num);
 double bound(double min, double max, double val);
 unsigned int calculateHammingDistance(uint8_t a, uint8_t b);
 
-namespace utils
-{
+
 int getShiftAmount(double coeff);
 unsigned getIntegerBits(double coeff);
 bool addition32DoesOverflow(int32_t a, int32_t b);

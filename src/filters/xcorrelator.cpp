@@ -49,7 +49,7 @@ std::vector<FixedComplex64 > XCorrelator::fft(std::vector<FixedComplex64> vals)
     	}//Insert input again to get output
 
     for (unsigned int i = 0; i < m_n; i++) {
-             outputs.push_back(outputsBitReversed[reverseBits(m_n, i)]);
+             outputs.push_back(outputsBitReversed[utils::reverseBits(m_n, i)]);
      }//Reformats data in correct order
 
     return outputs;
@@ -74,7 +74,7 @@ std::vector<FixedComplex64 > XCorrelator::ifft(std::vector<FixedComplex64> vals)
 	}//Insert input again to get output
 
 	for (unsigned int i = 0; i < m_n; i++) {
-		outputs.push_back(outputsBitReversed[reverseBits(m_n, i)]);
+		outputs.push_back(outputsBitReversed[utils::reverseBits(m_n, i)]);
 	}//Reformats data in correct order
 
 	return outputs;

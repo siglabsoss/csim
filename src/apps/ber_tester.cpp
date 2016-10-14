@@ -42,7 +42,7 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
                 if (id == RECEIVING_RADIO_ID) {
                     didReceive = true;
                     rxCount++;
-                    bitDiff += calculateHammingDistance(lastSent, rxByte);
+                    bitDiff += utils::calculateHammingDistance(lastSent, rxByte);
                     //std::cout << "radio #" << id << " received " << (int)rxByte << " bitDiff = " << bitDiff << std::endl;
                 }
             });

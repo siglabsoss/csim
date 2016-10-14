@@ -121,9 +121,9 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
     std::vector<ComplexDouble> answers;
     std::vector<ComplexDouble> outputs;
 
-    inputs = readComplexFromCSV<ComplexDouble>(inFile);
+    inputs = utils::readComplexFromCSV<ComplexDouble>(inFile);
     BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-    answers = readComplexFromCSV<ComplexDouble >(answersFile);
+    answers = utils::readComplexFromCSV<ComplexDouble >(answersFile);
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
     int points = inputs.size();
@@ -158,7 +158,7 @@ void runFFTLoopbackTest(const std::string &infile)
     std::vector< SLFixComplex >         fftoutputs;
     std::vector< ComplexDouble >         ifftoutputs;
 
-    inputs = readComplexFromCSV<ComplexDouble>(inFile);
+    inputs = utils::readComplexFromCSV<ComplexDouble>(inFile);
     BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
 
     int points = inputs.size();

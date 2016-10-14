@@ -26,7 +26,7 @@ void runTest(const std::string &coeffFile, const std::string &inputFile, const s
     std::vector<ComplexDouble> output; //Vector to hold outputs
     std::vector<ComplexDouble> answers; //Vector to hold answers
     std::vector<ComplexDouble>  coeffs; //Vector to hold coefficients
-    coeffs = readComplexFromCSV<ComplexDouble>(coeffFile);//Reads in taps from file
+    coeffs = utils::readComplexFromCSV<ComplexDouble>(coeffFile);//Reads in taps from file
     BOOST_REQUIRE_MESSAGE(!coeffs.empty(), "Could not read from " << coeffFile);
 
     std::vector<double> realCoeffs;
@@ -34,10 +34,10 @@ void runTest(const std::string &coeffFile, const std::string &inputFile, const s
         realCoeffs.push_back(coeffs[i].real());
     }
 
-    input = readComplexFromCSV<ComplexDouble>(inputFile); //Reads input file
+    input = utils::readComplexFromCSV<ComplexDouble>(inputFile); //Reads input file
     BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << inputFile);
 
-    answers = readComplexFromCSV<ComplexDouble>(outputFile); //Reads answer file
+    answers = utils::readComplexFromCSV<ComplexDouble>(outputFile); //Reads answer file
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << outputFile);
 
     FixedFIR::Config conf = {
@@ -75,7 +75,7 @@ void runImpulseResponse(const std::string &coeffFile)
     std::vector<ComplexDouble>  coeffs; //Vector to hold coefficients
     std::vector<ComplexDouble> output; //Vector to hold outputs
 
-    coeffs = readComplexFromCSV<ComplexDouble>(coeffFile);//Reads in taps from file
+    coeffs = utils::readComplexFromCSV<ComplexDouble>(coeffFile);//Reads in taps from file
     BOOST_REQUIRE_MESSAGE(!coeffs.empty(), "Could not read from " << coeffFile);
 
     std::vector<double> realCoeffs;

@@ -133,7 +133,7 @@ SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs) const
 
 SLFixPoint SLFixPoint::operator/(const SLFixPoint &rhs) const
 {
-    //XXX TODO
+    //TODO implement
     return *this;
 }
 

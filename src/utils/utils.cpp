@@ -2,6 +2,10 @@
 #include <utils/utils.hpp>
 #include <types/complexdouble.hpp>
 
+
+namespace utils
+{
+
 unsigned int reverseBits(int N, unsigned int num)
 {
 //    unsigned int  NO_OF_BITS = sizeof(num) * 8;
@@ -62,11 +66,6 @@ std::vector<T> readComplexFromCSV(const std::string &inFile)
     return input;
 }
 template std::vector<ComplexDouble>  readComplexFromCSV(const std::string &inFile);
-
-
-//XXX wrap entire file in namespace
-namespace utils
-{
 
 /**
  * Calculates the amount to shift a fixed point value such that there are no leading zeros

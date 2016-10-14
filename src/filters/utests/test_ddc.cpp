@@ -16,9 +16,9 @@ static constexpr double MIXER_FREQ = 0.16;
 static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5CoeffFile, const std::string &answersFile)
 {
     SLFixPoint::throwOnOverflow = true;
-    std::vector<ComplexDouble> halfbandComplexCoeffs = readComplexFromCSV<ComplexDouble>(halfbandCoeffFile);
-    std::vector<ComplexDouble> by5ComplexCoeffs      = readComplexFromCSV<ComplexDouble>(by5CoeffFile);
-    std::vector<ComplexDouble> answers               = readComplexFromCSV<ComplexDouble>(answersFile);
+    std::vector<ComplexDouble> halfbandComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(halfbandCoeffFile);
+    std::vector<ComplexDouble> by5ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(by5CoeffFile);
+    std::vector<ComplexDouble> answers               = utils::readComplexFromCSV<ComplexDouble>(answersFile);
 
     assert(answers.size() > 0);
 
@@ -73,11 +73,11 @@ static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5C
 static void runDUC(const std::string &up2CoeffFile, const std::string &up5CoeffFile, const std::string &inputsFile, const std::string &answersFile)
 {
     SLFixPoint::throwOnOverflow = true;
-    std::vector<ComplexDouble> up2ComplexCoeffs = readComplexFromCSV<ComplexDouble>(up2CoeffFile);
-    std::vector<ComplexDouble> up5ComplexCoeffs = readComplexFromCSV<ComplexDouble>(up5CoeffFile);
+    std::vector<ComplexDouble> up2ComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(up2CoeffFile);
+    std::vector<ComplexDouble> up5ComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(up5CoeffFile);
 
-    std::vector<ComplexDouble> inputs = readComplexFromCSV<ComplexDouble>(inputsFile);
-    std::vector<ComplexDouble> answers = readComplexFromCSV<ComplexDouble>(answersFile);
+    std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>(inputsFile);
+    std::vector<ComplexDouble> answers = utils::readComplexFromCSV<ComplexDouble>(answersFile);
 
     assert(answers.size() > 0);
 

@@ -59,5 +59,5 @@ double RadioPhysics::freeSpacePowerLoss(double distance)
 
     double wavelength = LIGHTSPEED / FREQ;
     double loss = (1.0 / pow(4 * M_PI * distance / wavelength, 2));
-    return bound(0.0, 1.0, loss);
+    return utils::bound(0.0, 1.0, loss);
 }
