@@ -13,9 +13,9 @@ ZeroPadInterpolator::ZeroPadInterpolator(size_t chunkSize, size_t upSampleFactor
 
 bool ZeroPadInterpolator::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX);
+    assert(data.type == IO_TYPE_INT32_COMPLEX);
     if (m_inputBuffer.size() < m_inputBuffer.capacity()) {
-        m_inputBuffer.push_back(data.fc);
+        m_inputBuffer.push_back(FixedComplex32(data.toComplexDouble().real(), data.toComplexDouble().imag()));
         return true;
     }
     return false; //overrun of input buffer!

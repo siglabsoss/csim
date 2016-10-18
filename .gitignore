@@ -42,6 +42,9 @@
 # Vimdiff conflict resolution original backups
 *.orig
 
+# Vim temp files
+*.swp
+
 /data/fft/output/results.txt
 /data/fft/output/out1.csv
 /data/fft/output/out2.csv

@@ -14,7 +14,7 @@ Mixer::Mixer(uint32_t ticksPerPeriod, bool upMix) :
 
 bool Mixer::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_FIXED_COMPLEX || data.type == IO_TYPE_COMPLEX_DOUBLE);
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT || data.type == IO_TYPE_COMPLEX_DOUBLE);
     m_inputValid = true;
     m_input = data.toComplexDouble();
     return true;

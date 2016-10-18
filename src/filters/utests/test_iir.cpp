@@ -56,16 +56,16 @@ CSIM_TEST_CASE(COMPLEX_FILTER)
     vector<FixedComplex16> btap; //Vector for B taps
 
     string inFile("./data/iir/input/data1_in.csv"); //Input data file
-    input = complexRead16Unscaled(inFile);
+    input = readComplexFromCSV<FixedComplex16>(inFile);
 
     string ataps("./data/iir/input/ataps.txt");
-    atap = complexRead16Unscaled(ataps);
+    atap = readComplexFromCSV<FixedComplex16>(ataps);
 
     string btaps("./data/iir/input/btaps.txt");
-    btap = complexRead16Unscaled(btaps);
+    btap = readComplexFromCSV<FixedComplex16>(btaps);
 
     string answersFile("./data/iir/answers/answers1.txt"); //Answers data file
-    answers = complexRead16Unscaled(answersFile);
+    answers = readComplexFromCSV<FixedComplex16>(answersFile);
 
 
     fixediir iir(atap, btap);

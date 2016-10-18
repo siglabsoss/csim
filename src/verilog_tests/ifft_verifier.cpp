@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     string inFile(argv[1]);
     string outFile(argv[2]);
 
-    vector<FixedComplex32> inputs = complexRead32Scaled(inFile);
+    vector<FixedComplex32> inputs = readComplexFromCSV<FixedComplex32>(inFile, 32768.0);
     if (inputs.empty()){
             cout << "error reading" << inFile << endl;
             return 1;// "Could not open data/fft/input/input3.txt");

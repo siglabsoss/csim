@@ -2,7 +2,7 @@
 
 LevelTrigger::LevelTrigger(const std::string &name, size_t sampleCount, double level) :
     FilterProbe(name, sampleCount),
-    m_level(abs(level)),
+    m_level(fabs(level)),
     m_didTrigger(false)
 {
 

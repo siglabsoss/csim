@@ -4,7 +4,7 @@
 
 BiquadIIR::BiquadIIR(size_t numStages) :
     FilterChainElement("BiquadIIR"),
-    m_stages(numStages, Biquad(32)),
+    m_stages(numStages, Biquad(18)),
     m_outputReady(false)
 {
 

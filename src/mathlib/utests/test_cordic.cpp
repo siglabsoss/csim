@@ -28,8 +28,8 @@ CSIM_TEST_CASE(CordicFunctionality)
         double cordic_cos = cosine.real();
         double libm_sin = sin(i);
         double libm_cos = cos(i);
-        double sin_error = abs(cordic_sine - libm_sin);
-        double cos_error = abs(cordic_cos - libm_cos);
+        double sin_error = fabs(cordic_sine - libm_sin);
+        double cos_error = fabs(cordic_cos - libm_cos);
         //std::cout << "cordic sine = " << sine.real() << "\tsine = " << sin(i) << "\ttheta = " << i << std::endl;
 
 

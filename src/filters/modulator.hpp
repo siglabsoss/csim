@@ -6,7 +6,7 @@
 #pragma once
 
 typedef uint8_t                                 symbol_t;
-typedef FixedComplex32                          constellation_t;
+typedef SLFixComplex                            constellation_t;
 typedef std::map <symbol_t, constellation_t>    constellation_map_t;
 
 class Modulator : public FilterChainElement

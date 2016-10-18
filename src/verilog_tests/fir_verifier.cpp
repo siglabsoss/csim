@@ -23,13 +23,13 @@ int main(int argc, char *argv[])
 	string outFile(argv[2]);
 	string tapsFile(argv[3]);
 
-	input = complexRead16Scaled(inFile);
+	input = readComplexFromCSV<FixedComplex16>(inFile, 32768.0);
 	if (input.empty()) {
 		cout << "Could not read from " << inFile << endl;
 		return 1;
 	}
 
-	tap = complexRead16Scaled(tapsFile);
+	tap = readComplexFromCSV<FixedComplex16>(tapsFile, 32768.0);
 	if (tap.empty()) {
 		cout << "Could not read from " << tapsFile;
 		return 1;

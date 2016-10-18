@@ -518,31 +518,22 @@ CSIM_TEST_CASE(Top_Level_Values)
 
 	BOOST_CHECK(x.int64Val == 3);// 3 * 2^0
 	BOOST_CHECK(x.int64Val == x.range().to_int64());
-	BOOST_CHECK(x.binaryVal == "00011.");
 	BOOST_CHECK(x.doubleVal == 3);
 	BOOST_CHECK(x.doubleVal == x.to_double());
-	x.binaryVal.pop_back();//Removes decimal point
-	BOOST_CHECK((x.binaryVal.insert(0,"0b")) == x.to_bin());
 
 	BOOST_CHECK(y.int64Val == 4);// 2 * (2^(5-4))
 	BOOST_CHECK(y.int64Val == y.range().to_int64());
-	BOOST_CHECK(y.binaryVal == "0010.0");
-	BOOST_CHECK(y.binaryVal.insert(0,"0b") == y.to_bin());
 	BOOST_CHECK(y.doubleVal == 2);
 	BOOST_CHECK(y.doubleVal == y.to_double());
 
 	BOOST_CHECK(z.int64Val == 160); // (3 + 2) * 2 ^(10-5)
 	BOOST_CHECK(z.int64Val == z.range().to_int64());
-	BOOST_CHECK(z.binaryVal == "00101.00000");
-	BOOST_CHECK(z.binaryVal.insert(0,"0b") == z.to_bin());
 	BOOST_CHECK(z.doubleVal == 5); //3 + 2
 	BOOST_CHECK(z.doubleVal == z.to_double());
 
 	z = 0;
 	BOOST_CHECK(z.int64Val == 0); // (0) * 2 ^(10-5)
 	BOOST_CHECK(z.int64Val == z.range().to_int64());
-	BOOST_CHECK(z.binaryVal == "00000.00000");
-	BOOST_CHECK(z.binaryVal.insert(0,"0b") == z.to_bin());
 	BOOST_CHECK(z.doubleVal == 0);
 	BOOST_CHECK(z.doubleVal == z.to_double());
 }
@@ -553,10 +544,8 @@ CSIM_TEST_CASE(Conversion)
 	FixedPoint<64,49> y = x;
 
 	BOOST_CHECK(x.int64Val == 32768 );// 3 * 2^0
-	BOOST_CHECK(x.binaryVal == "00000000000000001.000000000000000");
 	BOOST_CHECK(x.doubleVal == 1);
 	BOOST_CHECK(y.int64Val == 32768);// 2 * (2^(5-4))
-	BOOST_CHECK(y.binaryVal == "0000000000000000000000000000000000000000000000001.000000000000000");
 	BOOST_CHECK(y.doubleVal == 1);
 }//Ensures conversion doesn't change the value
 #endif

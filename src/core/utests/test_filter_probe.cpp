@@ -22,11 +22,11 @@ CSIM_TEST_CASE(PROPER_PASSTHROUGH)
 {
     TestProbe probe;
     filter_io_t data1, data2, output;
-    data1.type = IO_TYPE_FIXED_COMPLEX;
-    data1.fc = FixedComplex32(0.75, 0.1);
+    data1.type = IO_TYPE_COMPLEX_DOUBLE;
+    data1.rf = ComplexDouble(0.75, 0.1);
 
-    data2.type = IO_TYPE_FIXED_COMPLEX;
-    data2.fc = FixedComplex32(0.45, 0.12);
+    data2.type = IO_TYPE_COMPLEX_DOUBLE;
+    data2.rf = ComplexDouble(0.45, 0.12);
 
     //outputs false as long as nothing was input
     BOOST_CHECK(probe.output(output) == false);

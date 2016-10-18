@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
 	string inFile(argv[1]); //Input data file
 	string outFile(argv[2]); //Input data file
 
-	input = complexRead16Scaled(inFile);
+	input = readComplexFromCSV<FixedComplex16>(inFile, 32768.0);
 	if(input.empty()) {
 	   cout << "Could not read from " << inFile; //Reads input file
 	}//Verifies input was read

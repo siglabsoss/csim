@@ -1,5 +1,6 @@
 #include <cmath>
 #include <utils/utils.hpp>
+#include <types/complexdouble.hpp>
 
 unsigned int reverseBits(int N, unsigned int num)
 {
@@ -36,175 +37,59 @@ unsigned int calculateHammingDistance(uint8_t a, uint8_t b)
     return count;
 }
 
-std::vector<FixedComplex16> complexRead16Scaled(std::string inFile)
+template <typename T>
+std::vector<T> readComplexFromCSV(const std::string &inFile)
 {
-	ifstream in(inFile.c_str());
-	std::vector<FixedComplex16> input;
-	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
-	std::vector<std::string> vec;
-	std::string line;
-	FixedComplex16 temp;
-	while (getline(in, line)) {
-		tokenizer tok(line);
-		vec.assign(tok.begin(), tok.end());
-		temp.real(atof(vec[0].c_str())/32768.0);
-		if (vec.size() == 2) {
-		temp.imag(atof(vec[1].c_str())/32768.0);
-		}
-		else {
-			temp.imag(0);
-		}
-		input.push_back(temp);
+    std::ifstream in(inFile.c_str());
+    std::vector<T> input;
+    typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
+    std::vector<std::string> vec;
+    std::string line;
+    T temp;
+    while (getline(in, line)) {
+        tokenizer tok(line);
+        vec.assign(tok.begin(), tok.end());
+        temp.real(atof(vec[0].c_str()));
+        if (vec.size() == 2) {
+            temp.imag(atof(vec[1].c_str()));
+        }
+        else {
+            temp.imag(0);
+        }
+        input.push_back(temp);
+    } //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
+    in.close();
+    return input;
+}
+template std::vector<ComplexDouble>  readComplexFromCSV(const std::string &inFile);
 
-	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-	in.close();
-	return input;
-}//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex16
-
-std::vector<FixedComplex16> complexRead16Unscaled(std::string inFile)
-{
-	ifstream in(inFile.c_str());
-	std::vector<FixedComplex16> input;
-	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
-	std::vector<std::string> vec;
-	std::string line;
-	FixedComplex16 temp;
-	while (getline(in, line)) {
-		tokenizer tok(line);
-		vec.assign(tok.begin(), tok.end());
-		temp.real(atof(vec[0].c_str()));
-		if (vec.size() == 2) {
-			temp.imag(atof(vec[1].c_str()));
-		}
-		else {
-			temp.imag(0);
-		}
-		input.push_back(temp);
-	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-	in.close();
-	return input;
-}//For reading from complex file with values between -1 and 1. Returns a std::vector of FixedComplex16
-
-std::vector<FixedComplex32> complexRead32Scaled(std::string inFile)
-{
-	ifstream in(inFile.c_str());
-	std::vector<FixedComplex32> input;
-	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
-	std::vector<std::string> vec;
-	std::string line;
-	FixedComplex32 temp;
-	while (getline(in, line)) {
-		tokenizer tok(line);
-		vec.assign(tok.begin(), tok.end());
-		temp.real(atof(vec[0].c_str())/32768.0);
-		if (vec.size() == 2) {
-		temp.imag(atof(vec[1].c_str())/32768.0);
-		}
-		else {
-			temp.imag(0);
-		}
-		input.push_back(temp);
-	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-	in.close();
-	return input;
-}//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
-
-
-std::vector<FixedComplex32> complexRead32Unscaled(std::string inFile)
-{
-	ifstream in(inFile.c_str());
-	std::vector<FixedComplex32> input;
-	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
-	std::vector<std::string> vec;
-	std::string line;
-	FixedComplex32 temp;
-	while (getline(in, line)) {
-		tokenizer tok(line);
-		vec.assign(tok.begin(), tok.end());
-		temp.real(atof(vec[0].c_str()));
-		if (vec.size() == 2) {
-		temp.imag(atof(vec[1].c_str()));
-		}
-		else {
-			temp.imag(0);
-		}
-		input.push_back(temp);
-	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-	in.close();
-	return input;
-}//For reading from complex file scaled within -32768 and 32767. Returns a std::vector of FixedComplex32
-
-
-std::vector<FixedComplex64> complexRead64Scaled(std::string inFile)
-{
-	ifstream in(inFile.c_str());
-	std::vector<FixedComplex64> input;
-	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
-	std::vector<std::string> vec;
-	std::string line;
-	FixedComplex64 temp;
-	while (getline(in, line)) {
-		tokenizer tok(line);
-		vec.assign(tok.begin(), tok.end());
-		temp.real(atof(vec[0].c_str())/32768.0);
-		if (vec.size() == 2) {
-		temp.imag(atof(vec[1].c_str())/32768.0);
-		}
-		else {
-			temp.imag(0);
-		}
-		input.push_back(temp);
-	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-	in.close();
-	return input;
-}//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
-
-
-std::vector<FixedComplex64> complexRead64Unscaled(std::string inFile)
-{
-	ifstream in(inFile.c_str());
-	std::vector<FixedComplex64> input;
-	typedef boost::tokenizer<boost::escaped_list_separator<char> > tokenizer;
-	std::vector<std::string> vec;
-	std::string line;
-	FixedComplex64 temp;
-	while (getline(in, line)) {
-		tokenizer tok(line);
-		vec.assign(tok.begin(), tok.end());
-		temp.real(atof(vec[0].c_str()));
-		if (vec.size() == 2) {
-		temp.imag(atof(vec[1].c_str()));
-		}
-		else {
-			temp.imag(0);
-		}
-		input.push_back(temp);
-	} //Gets each line of data. Stores real and imaginary parts separate in FixedComplex. i stores total number of inputs.
-	in.close();
-	return input;
-}//For reading from complex file scaled by 32768. Returns a std::vector of FixedComplex32
 
 //XXX wrap entire file in namespace
 namespace utils
 {
 
-std::unique_ptr<sc_fix> createDynamicFixedPoint(double val, size_t bitWidth, size_t &shiftBits)
-{
-    shiftBits = getShiftAmount(val);
-    size_t intBits = getIntegerBits(val);
-    assert(intBits <= bitWidth);
-    if (shiftBits > 0) {
-        val *= (1 << shiftBits);
-    }
-    return std::unique_ptr<sc_fix>(new sc_fix(val, bitWidth, intBits, SC_RND, SC_WRAP));
-}
-
-unsigned getShiftAmount(double coeff)
+/**
+ * Calculates the amount to shift a fixed point value such that there are no leading zeros
+ * in the fractional component, or in the case of values above one, how much to scale down
+ * in powers of two to normalize the value.
+ *
+ * @return Amount to shift. Left is negative.
+ */
+int getShiftAmount(double coeff)
 {
     int n = 0;
-    coeff = abs(coeff); //we want same result for + and -
+    if (coeff == 0.0) {
+        return n;
+    }
+    coeff = fabs(coeff); //we want same result for + and -
     if (coeff < 1) {
         unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 2;
+        while (ratio) {
+            n--;
+            ratio >>= 1;
+        }
+    } else {
+        unsigned ratio = static_cast<unsigned>(coeff / 1.0);
         while (ratio) {
             n++;
             ratio >>= 1;
@@ -212,6 +97,13 @@ unsigned getShiftAmount(double coeff)
     }
     return n;
 }
+
+/**
+ * Calculates the number of bits required to store the non-fractional component of a signed,
+ * fixed-point integer.
+ *
+ * @return The number of bits required to store the non-fractional component of a signed, fixed-point integer.
+ */
 unsigned getIntegerBits(double coeff)
 {
     unsigned int_coeff = abs(static_cast<int>(coeff));
@@ -241,6 +133,23 @@ bool addition32DoesOverflow(int32_t a, int32_t b)
     }
 
     return false;
+}
+
+size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values)
+{
+    double max = 0.0;
+    for (size_t i = 0; i < values.size(); i++) {
+        double real = fabs(values[i].real());
+        double imag = fabs(values[i].imag());
+        if (real > max) {
+            max = real;
+        }
+        if (imag > max) {
+            max = imag;
+        }
+    }
+    assert(max > 0.0);
+    return 31 + getShiftAmount(max);
 }
 
 };

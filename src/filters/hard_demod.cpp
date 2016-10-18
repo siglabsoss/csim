@@ -71,14 +71,14 @@ void HardDemod::tick(void)
         return;
     }
     m_inputValid = false;
-    constellation_t value = m_value.toComplexDouble();
+    ComplexDouble value = m_value.toComplexDouble();
     if (abs(value) < 0.1) { //XXX define threshold
         return;
     }
     symbol_t symbol;
     double minDistance = 1e100;
     for (auto it = m_constellations.begin(); it != m_constellations.end(); it++) {
-        double distance = abs(it->second - value);
+        double distance = abs(it->second.toComplexDouble() - value);
         if (distance < minDistance) {
             minDistance = distance;
             symbol = it->first;
@@ -111,7 +111,7 @@ bool HardDemod::dequeueByte(uint8_t &byte)
 
 double HardDemod::angleDiff(double a, double b)
 {
-    double diff = abs(a - b);
+    double diff = fabs(a - b);
     if (diff > M_PI) {
         diff = 2 * M_PI - diff;
     }

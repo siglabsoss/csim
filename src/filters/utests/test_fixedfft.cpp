@@ -3,53 +3,81 @@
 #include <vector> //For storing parsed data from file
 #include <stdlib.h>
 #include <utils/utils.hpp> //reverseBits()
-#include <filters/fixedfft.hpp>
+#include <filters/bfp_fft.hpp>
 
 using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(FixedFFT)
 
-void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference);
+template <typename T>
+void checkError(const vector<T> &outputs, const vector<T> &answers, double difference);
 
-CSIM_TEST_CASE(CONSTANT_INPUTS)
+void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<ComplexDouble> &answers, double difference);
+void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse);
+void runFFTLoopbackTest(const std::string &infile);
+void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const vector<std::complex<int32_t> > &expected, uint32_t threshold);
+
+CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
 {
     constexpr size_t NUM_SAMPLES = 8;
     constexpr size_t NUM_SAMPLE_SETS = 10;
     filter_io_t data, output;
-    data = FixedComplex32(M_SQRT1_2/3,  M_SQRT1_2/3); //QAM16 0000 symbol
-    fixedfft fft(NUM_SAMPLES);
+    data.type = IO_TYPE_COMPLEX_FIXPOINT;
+    data.fc.setFormat(32, 2);
+    data.fc.set(M_SQRT1_2/3, M_SQRT1_2/3);
+    BFPFFT fft(NUM_SAMPLES, false);
     size_t outputCount = 0;
     size_t noOutputCount = 0;
+
     for (unsigned int i = 0; i < NUM_SAMPLE_SETS; i++) {
         for (unsigned int j = 0; j < NUM_SAMPLES; j++) {
             fft.input(data);
             fft.tick();
             if (fft.output(output)) {
+                //double outputReal = output.toComplexDouble().real();
+                //double outputImag = output.toComplexDouble().imag();
+                double outputReal = output.fc.real().to_double();
+                double outputImag = output.fc.imag().to_double();
+
+                double realDiff = 1.0;
+                double imagDiff = 1.0;
+                double answersReal = 0.0;
+                double answersImag = 0.0;
+
                 if (outputCount % NUM_SAMPLES == 0) {
-                    BOOST_CHECK_CLOSE(output.fc.real().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
-                    BOOST_CHECK_CLOSE(output.fc.imag().to_double(), 8 * M_SQRT1_2 / 3, 0.1);
+                    answersReal = NUM_SAMPLES * M_SQRT1_2 / 3;
+                    answersImag = NUM_SAMPLES * M_SQRT1_2 / 3;
+                    realDiff = fabs(outputReal - answersReal);
+                    imagDiff = fabs(outputImag - answersImag);
                 } else {
-                    BOOST_CHECK_CLOSE(output.fc.real().to_double(), 0.0, 0.1);
-                    BOOST_CHECK_CLOSE(output.fc.imag().to_double(), 0.0, 0.1);
+                    realDiff = fabs(outputReal - answersReal);
+                    imagDiff = fabs(outputImag - answersImag);
                 }
+                double difference = 0.001;
+                BOOST_CHECK_MESSAGE(realDiff < difference,
+                "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+                BOOST_CHECK_MESSAGE(imagDiff < difference,
+                "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
+                //std::cout << outputCount << ": " << output << " " << output.toComplexDouble() << std::endl;
                 outputCount++;
-                //std::cout << outputCount << ": " << output << std::endl;
             } else {
                noOutputCount++;
             }
         }
     }
     //std::cout << "No outputs for " << noOutputCount << " counts" << std::endl;
-    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLES * (NUM_SAMPLE_SETS - 1) );
+    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLES * (NUM_SAMPLE_SETS - 1) + 1 );
 }
 
 CSIM_TEST_CASE(FFT_IO_PARITY)
 {
     constexpr size_t NUM_SAMPLES = 2;
-    fixedfft fft(NUM_SAMPLES);
+    BFPFFT fft(NUM_SAMPLES, false);
     std::vector<filter_io_t> samples(NUM_SAMPLES*4);
     for (size_t i = 0; i < samples.size(); i++) {
-        samples[i] = FixedComplex32(1.0,1.0);
+        samples[i].type = IO_TYPE_COMPLEX_FIXPOINT;
+        samples[i].fc.setFormat(32, 2);
+        samples[i].fc.set(1,1);
     }
 
     filter_io_t output;
@@ -62,181 +90,164 @@ CSIM_TEST_CASE(FFT_IO_PARITY)
         	count++;
         	isOutput = true;
         }
-        BOOST_CHECK(isOutput == ((j >= NUM_SAMPLES)));
+        BOOST_CHECK_MESSAGE(isOutput == ((j + 1 >= NUM_SAMPLES)), "isOutput = " << isOutput << " but j = " << j );
         isOutput = false;
     }
 
-    assert(count == samples.size() - NUM_SAMPLES);
+    assert( count == samples.size() - (NUM_SAMPLES - 1) );
 }
 
-CSIM_TEST_CASE(FFT_OCTAVE)
+CSIM_TEST_CASE(FFT_MATLAB)
 {
-	string inFile("./data/fft/input/data_file_complex1.csv");
-	string answersFile("./data/fft/answers/answers1.csv");
-
-	vector<FixedComplex32> inputs;
-	vector<FixedComplex32> answers;
-	vector<FixedComplex32> outputs;
-
-	inputs = complexRead32Scaled(inFile);
-	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-	answers = complexRead32Scaled(answersFile);
-	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
-
-	int points = inputs.size();
-	fixedfft fft(points ); //x point fft, y table size
-	filter_io_t data;
-	for (unsigned int i = 0; i < 2; i++) {
-		for (int j = 0; j < points; j++) {
-			data = inputs[j];
-			fft.input(data);
-			bool test = fft.output(data);
-			if (test) {
-				outputs.push_back(data.fc);
-			}//If output is ready
-		}//Insert all input
-	}//Insert input again to get output
-
-	assert(answers.size() == outputs.size());
-
-	vector<FixedComplex32> temp(outputs.size());
-	for (unsigned int i = 0; i < outputs.size(); i++) {
-		temp[reverseBits(inputs.size(), i)] = outputs[i];
-	}//Reformats data in correct order
-
-	assert(answers.size() == temp.size());
-	checkError(temp, answers, .20, 5000);
+    runFFTTest("./data/fft/input/fft_input1.csv", "./data/fft/answers/fft_output1.csv", false);
 }
 
-
-CSIM_TEST_CASE(FFT_RESET)
+CSIM_TEST_CASE(IFFT_MATLAB)
 {
-	string inFile("./data/fft/input/data_file_complex2.csv");
-	vector<FixedComplex32> inputs;
-	vector<FixedComplex32> outputs1; //Array to store answers
-	vector<FixedComplex32> outputs2; //Array to store answers
-	inputs = complexRead32Scaled(inFile);
-	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-
-	int points = inputs.size();
-	filter_io_t data;
-	fixedfft fft(points); //x point fft, y table size
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < points; j++) {
-			data = inputs[j];
-			fft.input(data);
-			bool test = fft.output(data);
-			if (test) {
-			   outputs1.push_back(data.fc);
-			}//If output is ready
-		}
-	}//Twice to get all outputs
-
-	fft.reset();
-
-	for (int i = 0; i < 2; i++) {
-		for (int j = 0; j < points; j++) {
-			data = inputs[j];
-			fft.input(data);
-			bool test = fft.output(data);
-			if (test) {
-			   outputs2.push_back(data.fc);
-			}//If output is ready
-		}
-	}//Twice to get all outputs
-
-	BOOST_REQUIRE(outputs1.size() == outputs2.size());
-	checkError(outputs1, outputs2, 0, 0); //Should be the same
+    runFFTTest("./data/fft/input/ifft_input1.csv", "./data/fft/answers/ifft_output1.csv", true);
 }
 
-CSIM_TEST_CASE(FFT_TWO_INPUTS)
+CSIM_TEST_CASE(FFT_IFFT)
 {
-    string inFile("./data/fft/input/data_file_complex2.csv");
-    string inFile2("./data/fft/input/data_file_complex3.csv");
-    string answersFile("./data/fft/answers/answers2.csv");
-    string answersFile2("./data/fft/answers/answers3.csv");
+    runFFTLoopbackTest("./data/fft/input/ifft_input1.csv");
+}
 
-    vector<FixedComplex32> inputs;
-    vector<FixedComplex32> answers;
-    vector<FixedComplex32> outputs; //Array to store answers
+void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse)
+{
+    string inFile(infile);
+    string answersFile(outfile);
 
-    inputs = complexRead32Scaled(inFile);
-	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
-	answers = complexRead32Scaled(answersFile);
-	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
+    std::vector<ComplexDouble> inputs;
+    std::vector<ComplexDouble> answers;
+    std::vector<ComplexDouble> outputs;
+
+    inputs = readComplexFromCSV<ComplexDouble>(inFile);
+    BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+    answers = readComplexFromCSV<ComplexDouble >(answersFile);
+    BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
     int points = inputs.size();
+    BFPFFT fft(points, inverse);
     filter_io_t data;
-    fixedfft fft(points); //x point fft, y table size
+    for (unsigned int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+            //std::cout << j << ": " << inputs[j] << std::endl;
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(32, 2);
+            data.fc.set(inputs[j].real(), inputs[j].imag());
+            //std::cout << inputs[j] << " = " << data << std::endl;
+            fft.input(data);
+            fft.tick();
+            bool didGetOutput = fft.output(data);
+            bool lastInput = (i == 1 && j == points - 1);
+            if (didGetOutput && !lastInput) {
+                outputs.push_back(data.toComplexDouble());
+            }//If output is ready
+        }//Insert all input
+    }//Insert input again to get output
 
-	for (int j = 0; j < points; j++) {
-		data = inputs[j];
-		fft.input(data);
-		bool test = fft.output(data);
-		if (test) {
-		   outputs.push_back(data.fc);
-		}//If output is ready
-	}//Insert first set of data
+    //This threshold is arbitrary and can be refined based on some kind of analysis
+    checkErrorComplexDouble(outputs, answers, 0.007);
+}
 
-    inputs.clear();//Clear out inputs vector
+void runFFTLoopbackTest(const std::string &infile)
+{
+    string inFile(infile);
 
-    inputs = complexRead32Scaled(inFile2);
-	BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile2);
+    std::vector<ComplexDouble>          inputs;
+    std::vector< SLFixComplex >         fftoutputs;
+    std::vector< ComplexDouble >         ifftoutputs;
 
-    for (int j = 0; j < points; j++) {
+    inputs = readComplexFromCSV<ComplexDouble>(inFile);
+    BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
 
-        data = inputs[j];
-        fft.input(data);
-        bool test = fft.output(data);
-        if (test) {
-        	outputs.push_back(data.fc);
+    int points = inputs.size();
+    BFPFFT fft(points, false);
+    BFPFFT ifft(points, true);
+    filter_io_t data;
+    for (unsigned int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(32, 2);
+            data.fc.set(inputs[j].real(), inputs[j].imag());
+            fft.input(data);
+            fft.tick();
+            bool didGetOutput = fft.output(data);
+            bool lastInput = (i == 1 && j == points - 1);
+            if (didGetOutput && !lastInput) {
+                fftoutputs.push_back(data.fc);
+            }//If output is ready
+        }//Insert all input
+    }//Insert input again to get output
+
+    for (unsigned int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(fftoutputs[j]);
+            data.fc = fftoutputs[j];
+            ifft.input(data);
+            ifft.tick();
+            bool didGetOutput = ifft.output(data);
+            bool lastInput = (i == 1 && j == points - 1);
+            if (didGetOutput && !lastInput) {
+                ifftoutputs.push_back(data.fc.toComplexDouble());
+            }//If output is ready
         }
-    }//second set of data, gets first set of answers out
-    assert(answers.size() == outputs.size());
-    assert(inputs.size() == outputs.size());
-    std::vector<FixedComplex32> temp(outputs.size());
-    for (unsigned int i = 0; i < outputs.size(); i++) {
-        temp[reverseBits(outputs.size(), i)] = outputs[i];
-    }//Reformats data in correct order
+    }
+    checkErrorComplexDouble (ifftoutputs, inputs, 0.00018);
+}
 
-	checkError(temp, answers, .03, 1);
-
-    answers.clear();
-	answers = complexRead32Scaled(answersFile2);
-	BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile2);
-	outputs.clear();
-
-    for (int j = 0; j < points; j++) {
-
-		data = FixedComplex32(0,0);
-		fft.input(data);
-		bool test = fft.output(data);
-		if (test) {
-			outputs.push_back(data.fc);
-		}// if output is ready
-	}//Get 2nd set of data out
-
-    std::vector<FixedComplex32> temp2(outputs.size());
-    assert(answers.size() == outputs.size());
-    for (unsigned int i = 0; i < answers.size(); i++) {
-        temp2[reverseBits(outputs.size(), i)] = outputs[i];
-    }//Reformats data in correct order
-
-	checkError(temp2, answers, .01, 4);
-}//Checks for two consecutive sets of inputs in the same FFT.
-
-void checkError(vector<FixedComplex32> outputs, vector<FixedComplex32> answers, float percent, int difference)
+template <typename T>
+void checkError(const vector<T> &outputs, const vector<T> &answers, double difference)
 {
 	for (unsigned int i = 0; i < answers.size(); i++) {
-		    double ratioReal = abs((outputs[i].real() - answers[i].real())/answers[i].real());
-		    double ratioImag = abs((answers[i].imag() - outputs[i].imag() )/answers[i].imag());
-		    double realDiff = abs(outputs[i].real() - answers[i].real());
-		    double imagDiff = abs(outputs[i].imag() - answers[i].imag());
-			BOOST_CHECK_MESSAGE(ratioReal < percent || realDiff < difference / 32768.0 || realDiff == 0,
-			"I: " << i << " Output: " << outputs[i].real() << " Answer: " << answers[i].real() << " Ratio: " << ratioReal );
-			BOOST_CHECK_MESSAGE(ratioImag < percent || imagDiff < difference / 32768.0 || imagDiff == 0,
-			"I: " << i << " Output: " << outputs[i].imag() << " Answer: " << answers[i].imag() << " Ratio: " << ratioImag );
+            double outputReal = outputs[i].real().to_double();
+            double outputImag = outputs[i].imag().to_double();
+            double answersReal = answers[i].real().to_double();
+            double answersImag = answers[i].imag().to_double();
+            double realDiff = fabs(outputReal - answersReal);
+            double imagDiff = fabs(outputImag - answersImag);
+            BOOST_REQUIRE_MESSAGE(realDiff < difference,
+            "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+            BOOST_REQUIRE_MESSAGE(imagDiff < difference,
+            "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
 		}
+}//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
+
+void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const vector<std::complex<int32_t> > &expected, uint32_t threshold)
+{
+    unsigned long long accumRealDiff = 0;
+    unsigned long long accumImagDiff = 0;
+    for (size_t i = 0; i < actual.size(); i++) {
+        uint32_t realDiff = fabs(actual[i].real() - expected[i].real());
+        uint32_t imagDiff = fabs(actual[i].imag() - expected[i].imag());
+        accumRealDiff += realDiff;
+        accumImagDiff += imagDiff;
+
+        BOOST_CHECK_MESSAGE(realDiff < threshold, "Real Output: " << actual[i].real() << " Real Answer: " << expected[i].real() << " Real Diff: " << realDiff);
+        BOOST_CHECK_MESSAGE(imagDiff < threshold, "Imag Output: " << actual[i].imag() << " Imag Answer: " << expected[i].imag() << " Imag Diff: " << imagDiff);
+    }
+
+    double avgRealDiff = static_cast<double>(accumRealDiff) / actual.size();
+    double avgImagDiff = static_cast<double>(accumImagDiff) / actual.size();
+
+    std::cout << "avgRealDiff = " << avgRealDiff << " avgImagDiff = " << avgImagDiff << std::endl;
+}
+
+void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<ComplexDouble> &answers, double difference)
+{
+    for (unsigned int i = 0; i < answers.size(); i++) {
+            double outputReal = outputs[i].real();
+            double outputImag = outputs[i].imag();
+            double answersReal = answers[i].real();
+            double answersImag = answers[i].imag();
+            double realDiff = fabs(outputReal - answersReal);
+            double imagDiff = fabs(outputImag - answersImag);
+            BOOST_CHECK_MESSAGE(realDiff < difference,
+            "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+            BOOST_CHECK_MESSAGE(imagDiff < difference,
+            "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
+        }
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
 CSIM_TEST_SUITE_END()
