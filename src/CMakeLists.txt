@@ -85,7 +85,6 @@ if (BUILD_UTESTS)
     add_subdirectory(utils/utests)
 else()
     add_subdirectory(apps)
-    add_subdirectory(verilog_tests)
     add_subdirectory(systemc)
 endif()
 
