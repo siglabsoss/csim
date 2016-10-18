@@ -15,9 +15,9 @@ void Scrambler::scramble(std::vector<bool> &data)
 {
     bool shifterBit;
     for (size_t i = 0; i < data.size(); i++) {
-        shifterBit = (m_reg[3] + m_reg[6]) & 0x1; //XOR bit 4 and 7
-        data[i] = (shifterBit + data[i]) & 0x1;  //XOR result of previous XOR and current data bit
-        (void)m_reg.shiftRight(shifterBit);     //Feedback result of first XOR into shift register
+        shifterBit = (m_reg[3] ^ m_reg[6]); //XOR bit 4 and 7
+        data[i] = (shifterBit ^ data[i]);   //XOR result of previous XOR and current data bit
+        (void)m_reg.shiftRight(shifterBit); //Feedback result of first XOR into shift register
     }
 }
 
