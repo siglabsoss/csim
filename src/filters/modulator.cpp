@@ -90,7 +90,7 @@ constellation_map_t Modulator::getBPSKConstellations()
     constellations[0b0] = constellation_t(32, 2);
     constellations[0b1] = constellation_t(32, 2);
 
-    constellations[0b0].set(-1.0, 1.0);
+    constellations[0b0].set(-1.0, 0.0);
     constellations[0b1].set(1.0, 0.0);
 
     return constellations;
