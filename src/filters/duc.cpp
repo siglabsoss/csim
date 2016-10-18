@@ -114,23 +114,22 @@ bool DigitalUpConverter::push(
     sample.fc.real(inph_in);
     sample.fc.imag(quad_in);
 
-    bool up5_has_input = _got_input;
-    bool up2_has_input = false;
+    bool up2_has_input = _got_input;
+    bool up5_has_input = false;
 
-    if ( (_iteration & 0x01) == 0) {
-        if (up5_has_input) {
-            _up5FIR->input(sample);
+    if (_iteration == 0 || _iteration == 5) {
+        if (up2_has_input) {
+            _up2FIR->input(sample);
         }
-        _up5FIR->tick();
-        up2_has_input = _up5FIR->output(sample);
-        assert(up2_has_input);
+        _up2FIR->tick();
+        up5_has_input = _up2FIR->output(sample);
+        assert(up5_has_input);
     }
-
-    if (up2_has_input) {
-        _up2FIR->input(sample);
+    if (up5_has_input) {
+        _up5FIR->input(sample);
     }
-    _up2FIR->tick();
-    assert(_up2FIR->output(sample));
+    _up5FIR->tick();
+    assert(_up5FIR->output(sample));
 
     _nco.pullNextSample(cosine, sine);
     inph_out = (sample.fc.real() * cosine) - (sample.fc.imag() * sine);
