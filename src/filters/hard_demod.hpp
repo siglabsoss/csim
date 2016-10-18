@@ -1,12 +1,12 @@
 #pragma once
 
 #include <core/filter_chain_element.hpp>
-#include <filters/modulator.hpp>
+#include <filters/mapper.hpp>
 
 class HardDemod : public FilterChainElement
 {
 public:
-    HardDemod(Modulator::mod_scheme_t scheme, double theta);
+    HardDemod(Mapper::constellation_set_t scheme, double theta);
 
     bool input(const filter_io_t &data) override;
 

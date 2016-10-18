@@ -1,7 +1,7 @@
 #include <filters/hard_demod.hpp>
 #include <cassert>
 
-HardDemod::HardDemod(Modulator::mod_scheme_t scheme, double theta) :
+HardDemod::HardDemod(Mapper::constellation_set_t scheme, double theta) :
     m_bits(),
     m_value(),
     m_inputValid(false),
@@ -10,23 +10,23 @@ HardDemod::HardDemod(Modulator::mod_scheme_t scheme, double theta) :
     m_bitsPerSymbol(0)
 {
     switch(scheme) {
-        case Modulator::MOD_SCHEME_BPSK:
-            m_constellations = Modulator::getBPSKConstellations();
+        case Mapper::CONST_SET_BPSK:
+            m_constellations = Mapper::getBPSKConstellations();
             m_bitsPerSymbol = 1;
             break;
-        case Modulator::MOD_SCHEME_QPSK:
-            m_constellations = Modulator::getQPSKConstellations();
+        case Mapper::CONST_SET_QPSK:
+            m_constellations = Mapper::getQPSKConstellations();
             m_bitsPerSymbol = 2;
             break;
-        case Modulator::MOD_SCHEME_8PSK:
-            m_constellations = Modulator::get8PSKConstellations();
+        case Mapper::CONST_SET_8PSK:
+            m_constellations = Mapper::get8PSKConstellations();
             m_bitsPerSymbol = 3;
             break;
-        case Modulator::MOD_SCHEME_QAM16:
-            m_constellations = Modulator::getQAM16Constellations();
+        case Mapper::CONST_SET_QAM16:
+            m_constellations = Mapper::getQAM16Constellations();
             m_bitsPerSymbol = 4;
             break;
-        case Modulator::MOD_SCHEME_NULL:
+        case Mapper::CONST_SET_NULL:
         default:
             break;
     }

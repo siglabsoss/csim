@@ -11,8 +11,8 @@ target_link_libraries(test_biquad ${Boost_LIBRARIES} sigfilters sigcore sigtypes
 add_executable(test_ddc ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_ddc.cpp)
 target_link_libraries(test_ddc ${Boost_LIBRARIES} sigfilters sigcore sigtypes sigutils)
 
-add_executable(test_modulator ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_modulator.cpp)
-target_link_libraries(test_modulator ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
+add_executable(test_mapper ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_mapper.cpp)
+target_link_libraries(test_mapper ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
 
 
 #Disabling CIC tests until it can pass with the new quantization / overflow modes

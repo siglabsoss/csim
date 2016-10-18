@@ -1,8 +1,8 @@
 #pragma once
 
-#include <filters/modulator.hpp>
+#include <filters/mapper.hpp>
 #include <core/filter_chain.hpp>
 #include <core/radio_set.hpp>
 
 
-void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, Modulator::mod_scheme_t scheme = Modulator::MOD_SCHEME_BPSK);
+void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, Mapper::constellation_set_t scheme = Mapper::CONST_SET_BPSK);

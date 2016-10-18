@@ -7,7 +7,7 @@ set(SIGFILTERS_SOURCES
     duc.cpp
     mixer.cpp
     decimator.cpp
-    modulator.cpp
+    mapper.cpp
     hard_demod.cpp
     nco.cpp
     )

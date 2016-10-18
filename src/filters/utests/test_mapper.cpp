@@ -1,16 +1,16 @@
 #include <test/unit_test.hpp>
 
-#include <filters/modulator.hpp>
+#include <filters/mapper.hpp>
 
 #include <cfloat>
 
 static constexpr size_t MOD_TICKS_PER_SYMBOL = 3;
 
-CSIM_TEST_SUITE_BEGIN(ModulatorFunctionality)
+CSIM_TEST_SUITE_BEGIN(MapperFunctionality)
 
 CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_NULL_SYMBOL)
 {
-    Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
+    Mapper mod(MOD_TICKS_PER_SYMBOL, Mapper::CONST_SET_BPSK);
     filter_io_t output;
     for (int i = 0; i < 100; i++) {
         mod.tick();
@@ -25,7 +25,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
     uint8_t byte = 0b01010101;
     filter_io_t data, output;
     data = byte;
-    Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_BPSK);
+    Mapper mod(MOD_TICKS_PER_SYMBOL, Mapper::CONST_SET_BPSK);
 
     BOOST_CHECK_EQUAL(mod.input(data), true);
     size_t expectedTicksPerOutput = 2; //derived from parameters at top of file
@@ -45,7 +45,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
 
 CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
 {
-    Modulator mod(MOD_TICKS_PER_SYMBOL, Modulator::MOD_SCHEME_QAM16);
+    Mapper mod(MOD_TICKS_PER_SYMBOL, Mapper::CONST_SET_QAM16);
     uint8_t testData[] = {
             0b00010000,
             0b00110010,
@@ -62,7 +62,7 @@ CSIM_TEST_CASE(MODULATOR_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
         BOOST_CHECK_EQUAL(mod.input(data), true);
     }
 
-    constellation_map_t expectedConstellations =  Modulator::getQAM16Constellations();
+    constellation_map_t expectedConstellations =  Mapper::getQAM16Constellations();
 
     size_t expectedTicksPerOutput = 2; //derived from parameters at top of file
     size_t symbolsPerByte = 2;

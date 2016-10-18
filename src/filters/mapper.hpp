@@ -9,21 +9,21 @@ typedef uint8_t                                 symbol_t;
 typedef SLFixComplex                            constellation_t;
 typedef std::map <symbol_t, constellation_t>    constellation_map_t;
 
-class Modulator : public FilterChainElement
+class Mapper : public FilterChainElement
 {
 private: //constants
     static constexpr size_t INPUT_BUFFER_BITS_MAX = 8 * 512;
     static constexpr symbol_t NULL_SYMBOL = 0;
 public: //types
-    enum mod_scheme_t {
-        MOD_SCHEME_NULL = 0,
-        MOD_SCHEME_BPSK,
-        MOD_SCHEME_QPSK,
-        MOD_SCHEME_8PSK,
-        MOD_SCHEME_QAM16
+    enum constellation_set_t {
+        CONST_SET_NULL = 0,
+        CONST_SET_BPSK,
+        CONST_SET_QPSK,
+        CONST_SET_8PSK,
+        CONST_SET_QAM16
     };
 public:
-    Modulator(unsigned int ticksPerSymbol, mod_scheme_t scheme);
+    Mapper(unsigned int ticksPerSymbol, constellation_set_t scheme);
 
     /**
      * Input is expected to be a digital bit stream (IO_TYPE_BYTE)

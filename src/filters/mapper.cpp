@@ -1,11 +1,11 @@
-#include <filters/modulator.hpp>
+#include <filters/mapper.hpp>
 
 #include <core/parameters.hpp>
 
 #include <cassert>
 
-Modulator::Modulator(unsigned int ticksPerSymbol, mod_scheme_t scheme = MOD_SCHEME_BPSK) :
-    FilterChainElement("Modulator"),
+Mapper::Mapper(unsigned int ticksPerSymbol, constellation_set_t scheme = CONST_SET_BPSK) :
+    FilterChainElement("Mapper"),
     m_constellations(),
     m_bitsPerSymbol(0),
     m_inputBuffer(),
@@ -14,29 +14,29 @@ Modulator::Modulator(unsigned int ticksPerSymbol, mod_scheme_t scheme = MOD_SCHE
 {
     m_tickCount = m_ticksPerSymbol; //set to trigger an output update on first iteration
     switch(scheme) {
-        case MOD_SCHEME_BPSK:
+        case CONST_SET_BPSK:
             m_constellations = getBPSKConstellations();
             m_bitsPerSymbol = 1;
             break;
-        case MOD_SCHEME_QPSK:
+        case CONST_SET_QPSK:
             m_constellations = getQPSKConstellations();
             m_bitsPerSymbol = 2;
             break;
-        case MOD_SCHEME_8PSK:
+        case CONST_SET_8PSK:
             m_constellations = get8PSKConstellations();
             m_bitsPerSymbol = 3;
             break;
-        case MOD_SCHEME_QAM16:
+        case CONST_SET_QAM16:
             m_constellations = getQAM16Constellations();
             m_bitsPerSymbol = 4;
             break;
-        case MOD_SCHEME_NULL:
+        case CONST_SET_NULL:
         default:
             break;
     }
 }
 
-bool Modulator::input(const filter_io_t &data)
+bool Mapper::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_BYTE);
     //make sure we have enough space left to store the next symbol
@@ -48,7 +48,7 @@ bool Modulator::input(const filter_io_t &data)
     }
     return true;
 }
-bool Modulator::output(filter_io_t &data)
+bool Mapper::output(filter_io_t &data)
 {
     if (m_tickCount == 1) {
         data = m_output;
@@ -56,7 +56,7 @@ bool Modulator::output(filter_io_t &data)
     }
     return false;
 }
-void Modulator::tick(void)
+void Mapper::tick(void)
 {
     if (m_tickCount >= m_ticksPerSymbol) {
         symbol_t symbol = NULL_SYMBOL;
@@ -71,7 +71,7 @@ void Modulator::tick(void)
     m_tickCount++;
 }
 
-symbol_t Modulator::getNextSymbol()
+symbol_t Mapper::getNextSymbol()
 {
     symbol_t symbol = 0;
     for (size_t i = 0; i < m_bitsPerSymbol; i++) {
@@ -84,7 +84,7 @@ symbol_t Modulator::getNextSymbol()
 
 /* Static constellation generators */
 
-constellation_map_t Modulator::getBPSKConstellations()
+constellation_map_t Mapper::getBPSKConstellations()
 {
     constellation_map_t constellations;
     constellations[0b0] = constellation_t(32, 2);
@@ -95,7 +95,7 @@ constellation_map_t Modulator::getBPSKConstellations()
 
     return constellations;
 }
-constellation_map_t Modulator::getQPSKConstellations()
+constellation_map_t Mapper::getQPSKConstellations()
 {
     constellation_map_t constellations;
     constellations[0b00] = constellation_t(32, 2);
@@ -110,7 +110,7 @@ constellation_map_t Modulator::getQPSKConstellations()
 
     return constellations;
 }
-constellation_map_t Modulator::get8PSKConstellations()
+constellation_map_t Mapper::get8PSKConstellations()
 {
     constellation_map_t constellations;
     for (size_t i = 0; i < 8; i++) {
@@ -127,7 +127,7 @@ constellation_map_t Modulator::get8PSKConstellations()
 
     return constellations;
 }
-constellation_map_t Modulator::getQAM16Constellations()
+constellation_map_t Mapper::getQAM16Constellations()
 {
     //https://upload.wikimedia.org/wikipedia/commons/9/90/QAM16_Demonstration.gif
     constellation_map_t constellations;
