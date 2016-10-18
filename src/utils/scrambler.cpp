@@ -8,8 +8,7 @@ static constexpr size_t SCRAMBLER_SHIFT_REGISTER_SIZE = 7;
 Scrambler::Scrambler(const std::vector<bool> &initState) :
     m_reg(SCRAMBLER_SHIFT_REGISTER_SIZE)
 {
-    assert(initState.size() == SCRAMBLER_SHIFT_REGISTER_SIZE);
-    m_reg = initState;
+    reset(initState);
 }
 
 void Scrambler::scramble(std::vector<bool> &data)
@@ -20,4 +19,10 @@ void Scrambler::scramble(std::vector<bool> &data)
         data[i] = (shifterBit + data[i]) & 0x1;  //XOR result of previous XOR and current data bit
         (void)m_reg.shiftRight(shifterBit);     //Feedback result of first XOR into shift register
     }
+}
+
+void Scrambler::reset(const std::vector<bool> &initState)
+{
+    assert(initState.size() == SCRAMBLER_SHIFT_REGISTER_SIZE);
+    m_reg = initState;
 }
