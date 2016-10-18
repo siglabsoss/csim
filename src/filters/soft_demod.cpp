@@ -21,7 +21,7 @@ bool SoftDemod::output(filter_io_t &data)
 
         data = ComplexDouble(m_llrs.front(),0);
         m_llrs.pop();
-        data.type = IO_TYPE_FIXED_COMPLEX;
+        data.type = IO_TYPE_COMPLEX_FIXPOINT;
     }
 
     return haveByte;
@@ -33,14 +33,14 @@ void SoftDemod::tick(void)
         return;
     }
     m_inputValid = false;
-    constellation_t value = m_value.toComplexDouble();
+    ComplexDouble value = m_value.toComplexDouble(); // FIXME
 
 
     for(size_t j = 0; j < m_bitsPerSymbol; j++) {
         double llr_num = 0;
         double llr_den = 0;
         for (auto it = m_constellations.begin(); it != m_constellations.end(); ++it) {
-            double distance = abs(it->second - value);
+            double distance = abs(it->second.toComplexDouble() - value);
 //            cout << endl << endl << "value: " << value << " dist " << distance << endl;
             if(it->first & (1<<j)) {
                 llr_num += distance;

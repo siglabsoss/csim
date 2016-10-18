@@ -5,6 +5,7 @@
 #include <iostream>
 #include <boost/tokenizer.hpp> //For parsing data from file
 #include <string>
+#include <fstream>      // std::ifstream
 
 
 //

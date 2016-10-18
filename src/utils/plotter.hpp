@@ -160,25 +160,10 @@ public:
         }
     }
 
-    void conv_real_int(const vector<FixedComplex32> &obj, Json::Value& t1) const
-    {
-        for (unsigned i = 0; i < obj.size(); i++) {
-            t1["arg0"]["r"][i] = std::real(obj[i]).to_double();
-            t1["arg0"]["i"][i] = std::imag(obj[i]).to_double();
-        }
-    }
-
     void conv_real_int(const CircularBuffer<int> &obj, Json::Value& t1) const
     {
         for (unsigned i = 0; i < obj.size(); i++) {
             t1["arg0"]["r"][i] = obj[i];
-        } //Adds each element in CircularBuffer to dictionary arg0
-    }
-
-    template<int B> void conv_real_int(const CircularBuffer<sc_int<B> > &obj, Json::Value& t1) const
-    {
-        for (unsigned i = 0; i < obj.size(); i++) {
-            t1["arg0"]["r"][i] = obj[i].to_int();
         } //Adds each element in CircularBuffer to dictionary arg0
     }
 

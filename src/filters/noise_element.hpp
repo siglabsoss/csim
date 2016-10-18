@@ -21,7 +21,7 @@ private:
 //    ComplexDouble m_carrier;
     filter_io_t m_input;
     ComplexGaussianNoise m_noise;
-    std::vector<FixedComplex32> buf;
+    std::vector<SLFixComplex> buf;
     std::vector<double> buf2;
 //
 //    size_t m_count;
