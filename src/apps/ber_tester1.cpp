@@ -1,7 +1,7 @@
 #include <core/sigworld.hpp>
 #include <core/logger.hpp>
 
-#include <filters/modulator.hpp>
+#include <filters/mapper.hpp>
 #include <filters/sine_wave.hpp>
 #include <filters/automatic_gain.hpp>
 #include <filters/mixer.hpp>
@@ -24,7 +24,7 @@
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
 
-static void constructRadiosForEbn0(RadioSet &rs, double distance, Modulator::mod_scheme_t scheme, double ebn0)
+static void constructRadiosForEbn0(RadioSet &rs, double distance, Mapper::constellation_set_t scheme, double ebn0)
 {
     std::vector<std::pair<double, double> > positions(2);
     positions[0] = std::pair<double, double>(0, 0);
@@ -43,7 +43,7 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
                 if (id == RECEIVING_RADIO_ID) {
                     didReceive = true;
                     rxCount++;
-                    bitDiff += calculateHammingDistance(lastSent, rxByte);
+                    bitDiff += utils::calculateHammingDistance(lastSent, rxByte);
                     //std::cout << "radio #" << id << " received " << (int)rxByte << " bitDiff = " << bitDiff << std::endl;
                 }
             });
@@ -66,37 +66,37 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
     return bitDiff;
 }
 
-_UNUSED_ static std::string modSchemeToString(Modulator::mod_scheme_t scheme)
+_UNUSED_ static std::string modSchemeToString(Mapper::constellation_set_t scheme)
 {
     switch(scheme) {
         default:
-        case Modulator::MOD_SCHEME_NULL:
+        case Mapper::CONST_SET_NULL:
             return "*(NULL)";
-        case Modulator::MOD_SCHEME_BPSK:
+        case Mapper::CONST_SET_BPSK:
             return "*BPSK";
-        case Modulator::MOD_SCHEME_QPSK:
+        case Mapper::CONST_SET_QPSK:
             return "*QPSK";
-        case Modulator::MOD_SCHEME_8PSK:
+        case Mapper::CONST_SET_8PSK:
             return "*8PSK";
-        case Modulator::MOD_SCHEME_QAM16:
+        case Mapper::CONST_SET_QAM16:
             return "*QAM16";
     }
 }
 
-_UNUSED_ static Modulator::mod_scheme_t getNextScheme(Modulator::mod_scheme_t scheme)
+_UNUSED_ static Mapper::constellation_set_t getNextScheme(Mapper::constellation_set_t scheme)
 {
     switch(scheme) {
         default:
-        case Modulator::MOD_SCHEME_NULL:
-            return Modulator::MOD_SCHEME_NULL;
-        case Modulator::MOD_SCHEME_BPSK:
-            return Modulator::MOD_SCHEME_QPSK;
-        case Modulator::MOD_SCHEME_QPSK:
-            return Modulator::MOD_SCHEME_QAM16; //skipping 8PSK
-        case Modulator::MOD_SCHEME_8PSK:
-            return Modulator::MOD_SCHEME_QAM16;
-        case Modulator::MOD_SCHEME_QAM16:
-            return Modulator::MOD_SCHEME_NULL;
+        case Mapper::CONST_SET_NULL:
+            return Mapper::CONST_SET_NULL;
+        case Mapper::CONST_SET_BPSK:
+            return Mapper::CONST_SET_QPSK;
+        case Mapper::CONST_SET_QPSK:
+            return Mapper::CONST_SET_QAM16; //skipping 8PSK
+        case Mapper::CONST_SET_8PSK:
+            return Mapper::CONST_SET_QAM16;
+        case Mapper::CONST_SET_QAM16:
+            return Mapper::CONST_SET_NULL;
     }
 }
 
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 
     //Sweep through modulation schemes
-    Modulator::mod_scheme_t scheme = Modulator::MOD_SCHEME_BPSK;
+    Mapper::constellation_set_t scheme = Mapper::CONST_SET_BPSK;
 
     //For each modulation scheme, sweep through distances from 0 - 15km
     for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
