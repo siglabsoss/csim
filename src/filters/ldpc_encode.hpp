@@ -21,6 +21,7 @@ public:
 private:
     std::vector<std::vector<bool> >    m_G;
     std::queue<bool>                   m_inputBuffer;
+    std::queue<bool>                   m_outputBuffer;
 };
 
 

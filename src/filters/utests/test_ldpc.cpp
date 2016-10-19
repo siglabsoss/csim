@@ -10,19 +10,18 @@ CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 
 CSIM_TESX_CASE(LDPC_Basic)
 {
-    CSVBitMatrix* p = new CSVBitMatrix();
-    std::vector<char> bytes = p->loadCSVFile("data/ldpc/code1_h.txt");
+    CSVBitMatrix p;
+    std::vector<char> bytes = p.loadCSVFile("data/ldpc/code1_h.txt");
 
     std::vector<std::vector<bool> > H;
 
-    p->parseCSV(bytes, H);
+    p.parseCSV(bytes, H);
 
     size_t rows = H.size();
     size_t cols = H[0].size();
     std::cout << "Loaded H with rows, cols" << std::endl << rows << ", " << cols << std::endl;
 
     LDPCDecode decode(H);
-
 
     std::vector<int> rx = {4161 * -1, 5953 * -1, -9328 * -1, 0 * -1, -1188 * -1, 0 * -1, -1144 * -1, 0 * -1, -3925 * -1, 0 * -1, -6833 * -1, 9005 * -1, -4161 * -1, 7449 * -1, 965 * -1, -7030 * -1, 0 * -1, 0 * -1, 0 * -1, -1967 * -1, 0 * -1, 0 * -1, -9328 * -1, -3154 * -1};
 
@@ -40,12 +39,12 @@ CSIM_TESX_CASE(LDPC_Basic)
 
 CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
 {
-    CSVBitMatrix* p = new CSVBitMatrix();
-    std::vector<char> bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
+    CSVBitMatrix p;
+    std::vector<char> bytes = p.loadCSVFile("data/ldpc/code2_h.txt");
 
     std::vector<std::vector<bool> > H;
 
-    p->parseCSV(bytes, H);
+    p.parseCSV(bytes, H);
 
     size_t rows = H.size();
     size_t cols = H[0].size();
@@ -79,37 +78,42 @@ CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
 
 CSIM_TEST_CASE(LDPC_ENCODE)
 {
-    CSVBitMatrix* p = new CSVBitMatrix();
-    std::vector<char> g_bytes = p->loadCSVFile("data/ldpc/code2_g.txt");
-    std::vector<char> h_bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
+    //the message size is 9-bits, but the input is byte aligned.
+    //inputting 16 bits but we will only get one 9-bit message encoded
+    //using the first 9 bits
+    std::vector<uint8_t> u = {0b01101101, 0b00000000};
 
+    //in this test the codeword size is 24-bits, so we can just make comparisons
+    //in a byte-wise fashion
+    std::vector<uint8_t> expectedCodeWord = {0b01101101, 0b01110111, 0b10100011};
+
+    CSVBitMatrix p;
+    std::vector<char> g_bytes = p.loadCSVFile("data/ldpc/code2_g.txt");
 
     std::vector<std::vector<bool> > G;
-    p->parseCSV(g_bytes, G);
+    p.parseCSV(g_bytes, G);
 
-    std::vector<std::vector<bool> > H;
-    p->parseCSV(h_bytes, H);
+    LDPCEncode encoder(G);
 
-    std::vector<bool> u = {0,1,1,0,1,1,0,1,0};
-    std::vector<bool> cw;
-    std::vector<bool> expected = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
 
-    LDPCEncode encode(G);
-
-    cw = encode.encode(u);
-
-    std::cout << "gotback cw " << cw.size() << std::endl;
-
-    for(size_t i = 0; i < cw.size(); ++i) {
-        std::cout << (int)cw[i] << ", ";
-        BOOST_CHECK_EQUAL(cw[i], expected[i]);
+    filter_io_t data;
+    for (size_t i = 0; i < u.size(); i++) {
+        data.type = IO_TYPE_BYTE;
+        data.byte = u[i];
+        encoder.input(data);
+        encoder.tick();
     }
 
-    std::cout << std::endl;
-
-
+    std::vector<uint8_t> output;
+    while (encoder.output(data)) {
+        BOOST_CHECK_EQUAL(data.type, IO_TYPE_BYTE);
+        output.push_back(data.byte);
+    }
+    BOOST_CHECK(output.size() == 3);
+    for (size_t i = 0; i < output.size(); i++) {
+        BOOST_CHECK_EQUAL(output[i], expectedCodeWord[i]);
+    }
 }
-
 
 CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
 {
@@ -117,8 +121,8 @@ CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
     std::vector<char> g_bytes( gstring.begin(), gstring.end() );
 
     std::vector<std::vector<bool> > G;
-    CSVBitMatrix* p = new CSVBitMatrix();
-    p->parseCSV(g_bytes, G);
+    CSVBitMatrix p;
+    p.parseCSV(g_bytes, G);
 
     size_t g_rows = G.size();
     size_t g_cols = G[0].size();
@@ -143,16 +147,16 @@ CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
 
 //CSIM_TEST_CASE(CSV_Parse)
 //{
-//    CSVBitMatrix* p = new CSVBitMatrix();
+//    CSVBitMatrix p;
 //
 //    std::vector<char> bytes;
-//    bytes = p->loadCSVFile("data/ldpc/mat1.txt");
+//    bytes = p.loadCSVFile("data/ldpc/mat1.txt");
 //
 //    uint32_t rows, cols;
 //
 //    std::vector<std::vector<bool> > H;
 //
-//    p->parseCSV(rows, cols, bytes, H);
+//    p.parseCSV(rows, cols, bytes, H);
 //
 //    std::cout << "H rows " << H.size() << " H cols " << H[0].size() << std::endl;
 //
