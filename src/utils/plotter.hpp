@@ -9,6 +9,7 @@
 #include <complex>
 #include <iostream>
 #include <mutex>
+#include <cassert>
 
 #include <3rd/json/json.h>
 #include <types/fixedcomplex.hpp>
@@ -33,11 +34,23 @@ private:
     {
         this->context = new zmq::context_t(1);
         this->socket = new zmq::socket_t(*this->context, ZMQ_PUB);
+
+        // should flush all packets immediatly
+        int val;
+        val = 0; // set linger to 0
+        this->socket->setsockopt(ZMQ_LINGER, &val, sizeof(val));
+
         socket->connect("tcp://localhost:5556"); //Port number
+        cout << "Plotter Connecting" << endl;
         usleep(1000000.0 / 4.0);
+        hello();
     }
 
+
     plotter(const plotter &other) = delete;
+
+    void hello();
+
 public:
 
     static const plotter & get(); //singleton
@@ -45,25 +58,64 @@ public:
 
     void send(const Json::Value &jsn) const;
 
-    template<typename T> void nplot(const CircularBuffer<T> &obj, const string &title) const
+
+
+//    static CircularBuffer<int> cb(const vector<int> &ivector)
+//    {
+//
+//        CircularBuffer<int> conv(ivector.size());
+//        for(unsigned i = 0; i < ivector.size(); i++)
+//        {
+//            conv.push_back(ivector[i]);
+//        }
+//
+//        return conv;
+//    }
+
+
+    void nplotber(const std::vector<std::vector<double> > &bers, const std::vector<std::vector<double> > &ebnos, const std::vector<string> &titles, const std::string title = std::string("")) const
+    {
+        Json::Value jsn;
+        jsn["method"] = "nplotber";
+
+        assert(bers.size() == ebnos.size());
+        assert(bers.size() == titles.size());
+
+        unsigned sz = bers.size();
+
+        for(unsigned i = 0; i < sz; i++)
+        {
+
+            assert(bers[i].size() == ebnos[i].size());
+            unsigned sz2 = bers[i].size();
+
+            for(unsigned j = 0; j < sz2; j++)
+            {
+                jsn["arg0"][i][j] = bers[i][j];
+                jsn["arg1"][i][j] = ebnos[i][j];
+            }
+            jsn["arg2"][i] = titles[i];
+
+        }
+
+        jsn["arg3"] = title;
+
+        send(jsn);
+    }
+
+
+    // Normal 2D plot, may plot imag() only if data is complex
+    template<typename T> void nplot(const T &obj, const string &title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplot";
         conv_real_int(obj, jsn); //Converts CircularBuffer into json
         jsn["arg1"] = title; //title of graph
         send(jsn);
-    } //Plots data normally. nplot(rt)
-
-    template<typename T> void nplot(const CircularBuffer<complex<T> > obj, const string &title) const
-    {
-    	Json::Value jsn;
-    	jsn["method"] = "nplot";
-    	conv_real_int(obj, jsn); //Converts CircularBuffer into json
-    	jsn["arg1"] = title; //title of graph
-    	send(jsn);
     }
 
-    template<typename T> void nplotfft(const CircularBuffer<T> &obj, const string &title) const
+    // Plots the FFT of the data.  the FFT is performed by Python's using numpy's floating point FFT
+    template<typename T> void nplotfft(const T &obj, const string &title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplotfft";
@@ -71,9 +123,9 @@ public:
         jsn["arg1"] = title; //title of graph
         send(jsn);
     }
-    ; //Plots fft of data. plt.plot(abs(fftshift(fft(rf))))
 
-    template<typename T> void nplotqam(const CircularBuffer<T> &obj, string title) const
+    // Constellation plot with transparent blobs (good for QAM)
+    template<typename T> void nplotqam(const T &obj, string title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplotqam";
@@ -81,14 +133,22 @@ public:
         jsn["arg1"] = title; //title of graph
         send(jsn);
     }
-    ; //Plots nplotqam of data. plt.plot(r, i, '.b', alpha=0.6)
 
-    template<typename T> void conv_real_int(const CircularBuffer<T> &obj, Json::Value& t1)
+    template<typename T> void conv_real_int(const CircularBuffer<T> &obj, Json::Value& t1) const
     {
-        for (int i = 0; i < obj.size(); i++)
+        for (unsigned i = 0; i < obj.size(); i++)
+        {
             t1["arg0"]["r"][i] = obj[i]; //Adds each element in CircularBuffer to dictionary arg0
+        }
     }
-    ;
+
+    template<typename T> void conv_real_int(const vector<T> &obj, Json::Value& t1) const
+    {
+        for (unsigned i = 0; i < obj.size(); i++)
+        {
+            t1["arg0"]["r"][i] = obj[i]; //Adds each element in CircularBuffer to dictionary arg0
+        }
+    }
 
     void conv_real_int(const CircularBuffer<filter_io_t > &obj, Json::Value& t1) const
     {
@@ -100,14 +160,28 @@ public:
         }
     }
 
-    void conv_real_int(const CircularBuffer<complex<double> > &obj, Json::Value& t1)
+    void conv_real_int(const CircularBuffer<int> &obj, Json::Value& t1) const
+    {
+        for (unsigned i = 0; i < obj.size(); i++) {
+            t1["arg0"]["r"][i] = obj[i];
+        } //Adds each element in CircularBuffer to dictionary arg0
+    }
+
+    void conv_real_int(const CircularBuffer<complex<double> > &obj, Json::Value& t1) const
     {
         for (unsigned int i = 0; i < obj.size(); i++) {
             t1["arg0"]["r"][i] = std::real(obj[i]);
-            t1["arg0"]["i"][i] = std::imag(obj[i]);//obj[i].imag.to_int();
+            t1["arg0"]["i"][i] = std::imag(obj[i]);
         }    		//Adds each element in CircularBuffer to dictionary arg0
     }
-    ;
+
+    void conv_real_int(const vector<complex<double> > &obj, Json::Value& t1) const
+    {
+        for (unsigned int i = 0; i < obj.size(); i++) {
+            t1["arg0"]["r"][i] = std::real(obj[i]);
+            t1["arg0"]["i"][i] = std::imag(obj[i]);
+        }           //Adds each element in CircularBuffer to dictionary arg0
+    }
 
 };
 

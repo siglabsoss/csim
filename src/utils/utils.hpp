@@ -27,3 +27,6 @@ size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values);
 };
 
 #endif
+
+
+#define _UNUSED_     __attribute__ ((unused))

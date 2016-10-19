@@ -2,11 +2,13 @@
 
 #include <core/filter_chain_element.hpp>
 #include <filters/mapper.hpp>
+#include <utils/plotter.hpp>
 
 class HardDemod : public FilterChainElement
 {
 public:
     HardDemod(Mapper::constellation_set_t scheme, double theta);
+    ~HardDemod();
 
     bool input(const filter_io_t &data) override;
 
@@ -14,7 +16,7 @@ public:
 
     void tick(void) override;
 
-private:
+protected:
     void    queueSymbol(symbol_t symbol);
     bool    dequeueByte(uint8_t &byte);
     static double angleDiff(double a, double b);
@@ -25,4 +27,5 @@ private:
     double                      m_theta;
     constellation_map_t         m_constellations; //mapping of symbol -> constellation vector
     size_t                      m_bitsPerSymbol;
+    std::vector<ComplexDouble>         m_points;
 };

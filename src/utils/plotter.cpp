@@ -27,8 +27,15 @@ void plotter::send(const Json::Value &jsn) const
     zmq::message_t request(message.size()); //Size of message
     memcpy(request.data(), (message.c_str()), (message.size())); //Copies data into request
     socket->send(request); //Sends off data
-    //lock.unlock();
+
 } //Sends data off to server
+
+void plotter::hello()
+{
+    Json::Value jsn;
+    jsn["method"] = "boot";
+    send(jsn);
+}
 
 const plotter &plotter::get()
 {
