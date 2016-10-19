@@ -18,12 +18,12 @@
 
 typedef boost::tokenizer<boost::escaped_list_separator<char> > Tokenizer;
 
-class CSVMatrix
+class CSVBitMatrix
 {
 
 public:
-    CSVMatrix(){};
-    ~CSVMatrix(){};
+    CSVBitMatrix(){};
+    ~CSVBitMatrix(){};
 
     std::vector<char> loadCSVFile(std::string filename) const
     {
@@ -39,7 +39,7 @@ public:
         return result;
     }
 
-    void parseCSV(uint32_t& rows, uint32_t& cols, const std::vector<char>& input, std::vector<std::vector<uint8_t> >& out) const
+    void parseCSV(uint32_t& rows, uint32_t& cols, const std::vector<char>& input, std::vector<std::vector<bool> >& out) const
     {
         std::vector<char>::const_iterator eol = input.begin();  // end of previous line
 
@@ -66,7 +66,7 @@ public:
 //                cout << "vec size " << vec.size() << endl;
 //                cout << "vec contents:" << endl;
 
-                out.push_back(std::vector<uint8_t>());
+                out.push_back(std::vector<bool>());
 
                 for(auto it2 = vec.begin(); it2 != vec.end(); ++it2)
                 {

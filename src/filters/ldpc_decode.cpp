@@ -42,7 +42,7 @@ void LDPCDecode::tick(void)
 
 
 
-LDPCDecode::LDPCDecode(std::vector<std::vector<uint8_t> > H, uint32_t rows, uint32_t cols):
+LDPCDecode::LDPCDecode(std::vector<std::vector<bool> > H, uint32_t rows, uint32_t cols):
 FilterChainElement(std::string("LDPCDecode")),
 m_hrows(rows),
 m_hcols(cols),
@@ -249,9 +249,9 @@ void LDPCDecode::iteration()
 }
 
 
-std::vector<uint8_t> LDPCDecode::get_message()
+std::vector<bool> LDPCDecode::get_message()
 {
-    std::vector<uint8_t> message;
+    std::vector<bool> message;
 //    std::cout << "Assuming that the syndrome is 0, the message is: " << std::endl;
 
     unsigned degreek = m_hcols - m_hrows;
@@ -333,95 +333,6 @@ void LDPCDecode::decode(std::vector<int> cw, size_t iterations, bool& solved, si
     }
 }
 
-void LDPCDecode::run()
-{
-    /*
-    print_h();
-
-    // Load data in step (This is Channel to bit message "L")
-
-    // positive is 0
-    // negative represents a 1
-
-    // example 1 from slides
-//  n[0].llr = -9;
-//  n[1].llr = +7;
-//  n[2].llr = -12;
-//  n[3].llr = +4;
-//  n[4].llr = +7;
-//  n[5].llr = +10;
-//  n[6].llr = -11;
-//
-//  // example 2 from slides
-//  n[0].llr = -9;
-//  n[1].llr = -7;
-//  n[2].llr = -12;
-//  n[3].llr = -4;
-//  n[4].llr = +7;
-//  n[5].llr = +10;
-//  n[6].llr = -11;
-
-    n[0].llr = 4161 * -1;
-    n[1].llr = 5953 * -1;
-    n[2].llr = -9328 * -1;
-    n[3].llr = 0 * -1;
-    n[4].llr = -1188 * -1;
-    n[5].llr = 0 * -1;
-    n[6].llr = -1144 * -1;
-    n[7].llr = 0 * -1;
-    n[8].llr = -3925 * -1;
-    n[9].llr = 0 * -1;
-    n[10].llr = -6833 * -1;
-    n[11].llr = 9005 * -1;
-    n[12].llr = -4161 * -1;
-    n[13].llr = 7449 * -1;
-    n[14].llr = 965 * -1;
-    n[15].llr = -7030 * -1;
-    n[16].llr = 0 * -1;
-    n[17].llr = 0 * -1;
-    n[18].llr = 0 * -1;
-    n[19].llr = -1967 * -1;
-    n[20].llr = 0 * -1;
-    n[21].llr = 0 * -1;
-    n[22].llr = -9328 * -1;
-    n[23].llr = -3154 * -1;
-
-    print_cw();
-
-    // Do check
-    calc_syndrome();
-    get_syndrome();
-    std::cout << std::endl;
-
-
-    // iteration
-    iteration();
-
-    // Do check
-    calc_syndrome();
-    get_syndrome();
-    std::cout << std::endl;
-
-
-    // iteration
-    iteration();
-
-    // Do check
-    calc_syndrome();
-    get_syndrome();
-    std::cout << std::endl;
-
-    iteration();
-
-    calc_syndrome();
-    get_syndrome();
-
-    print_cw();
-
-    get_message();
-
-*/
-}
 
 
 

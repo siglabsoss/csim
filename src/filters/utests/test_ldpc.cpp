@@ -10,10 +10,10 @@ CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 
 CSIM_TESX_CASE(LDPC_Basic)
 {
-    CSVMatrix* p = new CSVMatrix();
+    CSVBitMatrix* p = new CSVBitMatrix();
     std::vector<char> bytes = p->loadCSVFile("data/ldpc/code1_h.txt");
 
-    std::vector<std::vector<uint8_t> > H;
+    std::vector<std::vector<bool> > H;
     uint32_t rows, cols;
 
     p->parseCSV(rows, cols, bytes, H);
@@ -39,10 +39,10 @@ CSIM_TESX_CASE(LDPC_Basic)
 
 CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
 {
-    CSVMatrix* p = new CSVMatrix();
+    CSVBitMatrix* p = new CSVBitMatrix();
     std::vector<char> bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
 
-    std::vector<std::vector<uint8_t> > H;
+    std::vector<std::vector<bool> > H;
     uint32_t rows, cols;
 
     p->parseCSV(rows, cols, bytes, H);
@@ -52,7 +52,7 @@ CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
     LDPCDecode decode(H, rows, cols);
 
     //                    0,1,1,0,1,1,0,1,0
-    std::vector<uint8_t> rx = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
+    std::vector<bool> rx = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
     std::vector<int> llr = std::vector<int>(rx.size());
 
     for(size_t i = 0; i < rx.size(); i++) {
@@ -67,7 +67,7 @@ CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
 
     BOOST_CHECK_EQUAL(solved, true);
 
-    std::vector<uint8_t> decoded = decode.get_message();
+    std::vector<bool> decoded = decode.get_message();
 
     for(size_t i = 0; i < (cols-rows); i++) {
         BOOST_CHECK_EQUAL(rx[i], decoded[i]);
@@ -77,27 +77,27 @@ CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
 
 CSIM_TEST_CASE(LDPC_ENCODE)
 {
-    CSVMatrix* p = new CSVMatrix();
+    CSVBitMatrix* p = new CSVBitMatrix();
     std::vector<char> g_bytes = p->loadCSVFile("data/ldpc/code2_g.txt");
     std::vector<char> h_bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
 
 
-    std::vector<std::vector<uint8_t> > G;
+    std::vector<std::vector<bool> > G;
     uint32_t g_rows, g_cols;
     p->parseCSV(g_rows, g_cols, g_bytes, G);
 
-    std::vector<std::vector<uint8_t> > H;
+    std::vector<std::vector<bool> > H;
     uint32_t h_rows, h_cols;
     p->parseCSV(h_rows, h_cols, h_bytes, H);
 
 
 
 
-    std::vector<uint8_t> u = {0,1,1,0,1,1,0,1,0};
-    std::vector<uint8_t> cw;
-    std::vector<uint8_t> expected = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
+    std::vector<bool> u = {0,1,1,0,1,1,0,1,0};
+    std::vector<bool> cw;
+    std::vector<bool> expected = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
 
-    LDPCEncode encode(G, g_rows, g_cols);
+    LDPCEncode encode(G);
 
     cw = encode.encode(u);
 
@@ -119,19 +119,19 @@ CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
     std::string gstring( "1,1,1,1,1\n0,1,0,0,0\n0,1,1,0,0\n" );
     std::vector<char> g_bytes( gstring.begin(), gstring.end() );
 
-    std::vector<std::vector<uint8_t> > G;
+    std::vector<std::vector<bool> > G;
     uint32_t g_rows, g_cols;
-    CSVMatrix* p = new CSVMatrix();
+    CSVBitMatrix* p = new CSVBitMatrix();
     p->parseCSV(g_rows, g_cols, g_bytes, G);
 
     std::cout << "Loaded G with rows, cols" << std::endl << g_rows << ", " << g_cols << std::endl;
 
-    std::vector<uint8_t> u = {1,0,1};
+    std::vector<bool> u = {1,0,1};
 
-    LDPCEncode encode(G, g_rows, g_cols);
+    LDPCEncode encode(G);
 
-    std::vector<uint8_t> cw;
-    std::vector<uint8_t> expected = {1,0,0,1,1};
+    std::vector<bool> cw;
+    std::vector<bool> expected = {1,0,0,1,1};
 
     cw = encode.encode(u);
 
@@ -145,14 +145,14 @@ CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
 
 //CSIM_TEST_CASE(CSV_Parse)
 //{
-//    CSVMatrix* p = new CSVMatrix();
+//    CSVBitMatrix* p = new CSVBitMatrix();
 //
 //    std::vector<char> bytes;
 //    bytes = p->loadCSVFile("data/ldpc/mat1.txt");
 //
 //    uint32_t rows, cols;
 //
-//    std::vector<std::vector<uint8_t> > H;
+//    std::vector<std::vector<bool> > H;
 //
 //    p->parseCSV(rows, cols, bytes, H);
 //
