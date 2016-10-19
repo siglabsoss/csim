@@ -1,7 +1,6 @@
 set(SIGUTILS_SOURCES
     plotter.cpp
     radio_utils.cpp
-    shift_register.cpp
     scrambler.cpp
     utils.cpp)
 

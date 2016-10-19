@@ -13,7 +13,7 @@ CSIM_TEST_CASE(SCRAMBLER_BIT_SEQUENCE)
     for (size_t i = 127; i < 254; i++) {
         dummyData[i] = 1; //second half is all ones
     }
-    std::vector<bool> initState(7, 1);
+    std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> initState(0b1111111);
     Scrambler s(initState);
     s.scramble(dummyData);
     for (size_t i = 0; i < dummyData.size(); i++) {
@@ -31,7 +31,7 @@ CSIM_TEST_CASE(SCRAMBLER_BIT_SEQUENCE)
 CSIM_TEST_CASE(SCRAMBLER_RESET)
 {
     std::vector<bool> dummyData(10, 0);
-    std::vector<bool> initState(7, 1);
+    std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> initState(0b1111111);
     Scrambler s(initState);
     s.scramble(dummyData);
     for (size_t i = 0; i < 10; i++) {

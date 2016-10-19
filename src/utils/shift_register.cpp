@@ -1,36 +1,38 @@
-#include <utils/shift_register.hpp>
+#include <cstdlib>
+#include <iostream>
 
-ShiftRegister::ShiftRegister(size_t regSize) :
-        m_bits(regSize)
+template <size_t regSize>
+ShiftRegister<regSize>::ShiftRegister() :
+        m_bits()
 {
 }
 
-bool ShiftRegister::shiftRight(bool bitIn)
+template <size_t regSize>
+bool ShiftRegister<regSize>::shiftRight(bool bitIn)
 {
-    bool bitOut = m_bits[m_bits.size() - 1];
-    for (size_t i = m_bits.size() - 1; i > 0; i--) {
-        m_bits[i] = m_bits[i - 1];
-    }
+    bool bitOut = m_bits[0];
+    m_bits >>= 1;
+    m_bits[regSize - 1] = bitIn;
+    return bitOut;
+}
+
+template <size_t regSize>
+bool ShiftRegister<regSize>::shiftLeft(bool bitIn)
+{
+    bool bitOut = m_bits[regSize - 1];
+    m_bits <<= 1;
     m_bits[0] = bitIn;
     return bitOut;
 }
 
-bool ShiftRegister::shiftLeft(bool bitIn)
-{
-    bool bitOut = m_bits[0];
-    for (size_t i = 0; i < m_bits.size()-1; i++) {
-        m_bits[i] = m_bits[i + 1];
-    }
-    m_bits[m_bits.size()-1] = bitIn;
-    return bitOut;
-}
-
-bool ShiftRegister::operator[](size_t idx) const
+template <size_t regSize>
+bool ShiftRegister<regSize>::operator[](size_t idx) const
 {
     return m_bits[idx];
 }
 
-ShiftRegister & ShiftRegister::operator=(const std::vector<bool> &newVal)
+template <size_t regSize>
+ShiftRegister<regSize> & ShiftRegister<regSize>::operator=(const std::bitset<regSize> &newVal)
 {
     m_bits = newVal;
     return *this;
