@@ -42,7 +42,7 @@ void LDPCDecode::tick(void)
 
 
 
-LDPCDecode::LDPCDecode(vector<vector<uint8_t> > H, uint32_t rows, uint32_t cols):
+LDPCDecode::LDPCDecode(std::vector<std::vector<uint8_t> > H, uint32_t rows, uint32_t cols):
 FilterChainElement(std::string("LDPCDecode")),
 m_hrows(rows),
 m_hcols(cols),
@@ -65,16 +65,16 @@ LDPCDecode::~LDPCDecode()
 
 void LDPCDecode::print_h()
 {
-    cout << "H = " << endl;
+    std::cout << "H = " << std::endl;
     for( unsigned i = 0; i < m_hrows; ++i )
     {
         for( unsigned j = 0; j < m_hcols; ++j)
         {
-            cout << m_H[i][j] << ",";
+            std::cout << m_H[i][j] << ",";
         }
-        cout << endl;
+        std::cout << std::endl;
     }
-    cout << endl;
+    std::cout << std::endl;
 }
 
 void LDPCDecode::prep_once()
@@ -93,7 +93,7 @@ void LDPCDecode::prep_once()
             }
         }
 
-//        cout << "Check node " << i << " has degree " << m_m[i].degree << endl;
+//        std::cout << "Check node " << i << " has degree " << m_m[i].degree << std::endl;
     }
 }
 
@@ -103,7 +103,7 @@ void LDPCDecode::calc_syndrome(unsigned print = 1)
 
     for( unsigned i = 0; i < m_hrows; ++i )
     {
-        if( print ) cout << "equation (" << i << ") = ";
+        if( print ) std::cout << "equation (" << i << ") = ";
         LDPC_M *mi = &(m_m[i]);
 
         mi->parity = 0;
@@ -115,13 +115,13 @@ void LDPCDecode::calc_syndrome(unsigned print = 1)
 
             short val = ( ni->llr < 0 ) ? 1 : 0;
 
-            if( print && j != 0 ) cout << " ^ ";
-            if( print ) cout << val;
+            if( print && j != 0 ) std::cout << " ^ ";
+            if( print ) std::cout << val;
 
             mi->parity = val ^ mi->parity;
         }
 
-        if( print ) cout << " = " << mi->parity << endl;
+        if( print ) std::cout << " = " << mi->parity << std::endl;
     }
 }
 
@@ -249,10 +249,10 @@ void LDPCDecode::iteration()
 }
 
 
-vector<uint8_t> LDPCDecode::get_message()
+std::vector<uint8_t> LDPCDecode::get_message()
 {
-    vector<uint8_t> message;
-//    cout << "Assuming that the syndrome is 0, the message is: " << endl;
+    std::vector<uint8_t> message;
+//    std::cout << "Assuming that the syndrome is 0, the message is: " << std::endl;
 
     unsigned degreek = m_hcols - m_hrows;
 
@@ -272,7 +272,7 @@ vector<uint8_t> LDPCDecode::get_message()
 
         message.push_back(val);
 
-//        cout << val << endl;
+//        std::cout << val << std::endl;
 
     }
 
@@ -282,21 +282,21 @@ vector<uint8_t> LDPCDecode::get_message()
 
 void LDPCDecode::print_cw()
 {
-    cout << "Code word at this stage: " << endl;
+    std::cout << "Code word at this stage: " << std::endl;
     unsigned i;
     for(i = 0; i < 24; i++)
     {
         char c;
         c = m_n[i].llr < 0 ? '1' : '0';
-        cout << c << endl;
+        std::cout << c << std::endl;
     }
 
-    cout << endl;
+    std::cout << std::endl;
 }
 
 
 
-void LDPCDecode::decode(vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations)
+void LDPCDecode::decode(std::vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations)
 {
     assert(cw.size() == m_n.size());
     assert(m_n.size() == m_hcols);
@@ -319,11 +319,11 @@ void LDPCDecode::decode(vector<int> cw, size_t iterations, bool& solved, size_t&
         calc_syndrome(0);
         syn = get_syndrome();
 
-        cout << "Syndrome starting at iteration " << i << " is " << syn << endl;
+        std::cout << "Syndrome starting at iteration " << i << " is " << syn << std::endl;
 
         if(syn == 0)
         {
-           cout << "Breaking after " << (signed)i-1 << " iteration" << endl;
+           std::cout << "Breaking after " << (signed)i-1 << " iteration" << std::endl;
            solved = true;
            solved_iterations = i;
            return;
@@ -391,7 +391,7 @@ void LDPCDecode::run()
     // Do check
     calc_syndrome();
     get_syndrome();
-    cout << endl;
+    std::cout << std::endl;
 
 
     // iteration
@@ -400,7 +400,7 @@ void LDPCDecode::run()
     // Do check
     calc_syndrome();
     get_syndrome();
-    cout << endl;
+    std::cout << std::endl;
 
 
     // iteration
@@ -409,7 +409,7 @@ void LDPCDecode::run()
     // Do check
     calc_syndrome();
     get_syndrome();
-    cout << endl;
+    std::cout << std::endl;
 
     iteration();
 

@@ -25,21 +25,21 @@ public:
     CSVMatrix(){};
     ~CSVMatrix(){};
 
-    std::vector<char> loadCSVFile(string filename) const
+    std::vector<char> loadCSVFile(std::string filename) const
     {
-        ifstream ifs(filename, ios::binary|ios::ate);
-        ifstream::pos_type bytecount = ifs.tellg();
+        std::ifstream ifs(filename, std::ios::binary| std::ios::ate);
+        std::ifstream::pos_type bytecount = ifs.tellg();
 
         assert(ifs && "file does not exist");
         assert(bytecount > 0 && "file is empty");
 
         std::vector<char> result(bytecount);
-        ifs.seekg(0, ios::beg);
+        ifs.seekg(0, std::ios::beg);
         ifs.read(&result[0], bytecount);
         return result;
     }
 
-    void parseCSV(uint32_t& rows, uint32_t& cols, const std::vector<char>& input, vector<vector<uint8_t> >& out) const
+    void parseCSV(uint32_t& rows, uint32_t& cols, const std::vector<char>& input, std::vector<std::vector<uint8_t> >& out) const
     {
         std::vector<char>::const_iterator eol = input.begin();  // end of previous line
 
@@ -50,7 +50,7 @@ public:
         {
             if(*it == '\n')
             {
-                string line;
+                std::string line;
                 line.assign(eol, it);
 //                cout << "line was " << line << endl;
                 std::vector<std::string> vec;
@@ -66,7 +66,7 @@ public:
 //                cout << "vec size " << vec.size() << endl;
 //                cout << "vec contents:" << endl;
 
-                out.push_back(vector<uint8_t>());
+                out.push_back(std::vector<uint8_t>());
 
                 for(auto it2 = vec.begin(); it2 != vec.end(); ++it2)
                 {

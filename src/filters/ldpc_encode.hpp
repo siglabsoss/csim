@@ -25,7 +25,7 @@
 //    float min_index[2];
 //
 //    // static defined for now
-//    vector<unsigned> node_index;
+//    std::vector<unsigned> node_index;
 //
 //    // 0 means that this check node is satisfied
 //    short parity;
@@ -36,7 +36,7 @@ class LDPCEncode : public FilterChainElement
 {
 public:
     virtual ~LDPCEncode();
-    LDPCEncode(vector<vector<uint8_t> > G, uint32_t rows, uint32_t cols);
+    LDPCEncode(std::vector<std::vector<uint8_t> > G, uint32_t rows, uint32_t cols);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
@@ -46,10 +46,10 @@ public:
 //    unsigned get_syndrome(void);
 //    void calc_syndrome(unsigned print);
 //    void run();
-//    vector<uint8_t> get_message();
+//    std::vector<uint8_t> get_message();
 //    void print_cw();
-//    void decode(vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations);
-    vector<uint8_t> encode(vector<uint8_t> u);
+//    void decode(std::vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations);
+    std::vector<uint8_t> encode(std::vector<uint8_t> u);
 private:
 
     void prep_once();
@@ -59,9 +59,9 @@ private:
 
     uint32_t m_hrows;
     uint32_t m_hcols;
-    vector<vector<uint8_t> > m_G;
-//    vector<LDPC_N> m_n;
-//    vector<LDPC_M> m_m;
+    std::vector<std::vector<uint8_t> > m_G;
+//    std::vector<LDPC_N> m_n;
+//    std::vector<LDPC_M> m_m;
 
 
 private:

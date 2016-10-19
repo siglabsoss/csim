@@ -42,7 +42,7 @@ void LDPCEncode::tick(void)
 
 
 
-LDPCEncode::LDPCEncode(vector<vector<uint8_t> > G, uint32_t rows, uint32_t cols):
+LDPCEncode::LDPCEncode(std::vector<std::vector<uint8_t> > G, uint32_t rows, uint32_t cols):
 FilterChainElement(std::string("LDPCEncode")),
 m_hrows(rows),
 m_hcols(cols),
@@ -63,14 +63,14 @@ LDPCEncode::~LDPCEncode()
 }
 
 
-vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
+std::vector<uint8_t> LDPCEncode::encode(std::vector<uint8_t> u)
 {
 
     assert(u.size() == m_hrows);
-    vector<uint8_t> cw;
+    std::vector<uint8_t> cw;
 
-//    cout << "m_hcols " << m_hcols <<
-//    cout << "encode: " << endl << endl;
+//    std::cout << "m_hcols " << m_hcols <<
+//    std::cout << "encode: " << endl << endl;
 
     for(size_t i = 0; i < m_hcols; i++)
     {
@@ -87,13 +87,13 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
             }
             res ^= bit;
         }
-//        cout << (int)res << " ";
+//        std::cout << (int)res << " ";
 
         cw.push_back(res);
 
     }
 
-//    cout << endl;
+//    std::cout << endl;
     return cw;
 }
 
@@ -101,16 +101,16 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 
 //void LDPCDecode::print_h()
 //{
-//    cout << "H = " << endl;
+//    std::cout << "H = " << endl;
 //    for( unsigned i = 0; i < m_hrows; ++i )
 //    {
 //        for( unsigned j = 0; j < m_hcols; ++j)
 //        {
-//            cout << m_H[i][j] << ",";
+//            std::cout << m_H[i][j] << ",";
 //        }
-//        cout << endl;
+//        std::cout << endl;
 //    }
-//    cout << endl;
+//    std::cout << endl;
 //}
 //
 //void LDPCDecode::prep_once()
@@ -129,7 +129,7 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 //            }
 //        }
 //
-////        cout << "Check node " << i << " has degree " << m_m[i].degree << endl;
+////        std::cout << "Check node " << i << " has degree " << m_m[i].degree << endl;
 //    }
 //}
 
@@ -139,7 +139,7 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 //
 //    for( unsigned i = 0; i < m_hrows; ++i )
 //    {
-//        if( print ) cout << "equation (" << i << ") = ";
+//        if( print ) std::cout << "equation (" << i << ") = ";
 //        LDPC_M *mi = &(m_m[i]);
 //
 //        mi->parity = 0;
@@ -151,13 +151,13 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 //
 //            short val = ( ni->llr < 0 ) ? 1 : 0;
 //
-//            if( print && j != 0 ) cout << " ^ ";
-//            if( print ) cout << val;
+//            if( print && j != 0 ) std::cout << " ^ ";
+//            if( print ) std::cout << val;
 //
 //            mi->parity = val ^ mi->parity;
 //        }
 //
-//        if( print ) cout << " = " << mi->parity << endl;
+//        if( print ) std::cout << " = " << mi->parity << endl;
 //    }
 //}
 //
@@ -285,10 +285,10 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 //}
 //
 //
-//vector<uint8_t> LDPCDecode::get_message()
+//std::vector<uint8_t> LDPCDecode::get_message()
 //{
-//    vector<uint8_t> message;
-////    cout << "Assuming that the syndrome is 0, the message is: " << endl;
+//    std::vector<uint8_t> message;
+////    std::cout << "Assuming that the syndrome is 0, the message is: " << endl;
 //
 //    unsigned degreek = m_hcols - m_hrows;
 //
@@ -308,7 +308,7 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 //
 //        message.push_back(val);
 //
-////        cout << val << endl;
+////        std::cout << val << endl;
 //
 //    }
 //
@@ -318,21 +318,21 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 //
 //void LDPCDecode::print_cw()
 //{
-//    cout << "Code word at this stage: " << endl;
+//    std::cout << "Code word at this stage: " << endl;
 //    unsigned i;
 //    for(i = 0; i < 24; i++)
 //    {
 //        char c;
 //        c = m_n[i].llr < 0 ? '1' : '0';
-//        cout << c << endl;
+//        std::cout << c << endl;
 //    }
 //
-//    cout << endl;
+//    std::cout << endl;
 //}
 //
 //
 //
-//void LDPCDecode::decode(vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations)
+//void LDPCDecode::decode(std::vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations)
 //{
 //    assert(cw.size() == m_n.size());
 //    assert(m_n.size() == m_hcols);
@@ -355,11 +355,11 @@ vector<uint8_t> LDPCEncode::encode(vector<uint8_t> u)
 //        calc_syndrome(0);
 //        syn = get_syndrome();
 //
-//        cout << "Syndrome starting at iteration " << i << " is " << syn << endl;
+//        std::cout << "Syndrome starting at iteration " << i << " is " << syn << endl;
 //
 //        if(syn == 0)
 //        {
-//           cout << "Breaking after " << (signed)i-1 << " iteration" << endl;
+//           std::cout << "Breaking after " << (signed)i-1 << " iteration" << endl;
 //           solved = true;
 //           solved_iterations = i;
 //           return;

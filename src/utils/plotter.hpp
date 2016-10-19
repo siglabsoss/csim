@@ -19,8 +19,6 @@
 #ifndef PLOTTER_H_
 #define PLOTTER_H_
 
-using namespace std;
-
 class plotter
 {
 private:
@@ -41,7 +39,7 @@ private:
         this->socket->setsockopt(ZMQ_LINGER, &val, sizeof(val));
 
         socket->connect("tcp://localhost:5556"); //Port number
-        cout << "Plotter Connecting" << endl;
+        std::cout << "Plotter Connecting" << std::endl;
         usleep(1000000.0 / 4.0);
         hello();
     }
@@ -60,7 +58,7 @@ public:
 
 
 
-//    static CircularBuffer<int> cb(const vector<int> &ivector)
+//    static CircularBuffer<int> cb(const std::vector<int> &ivector)
 //    {
 //
 //        CircularBuffer<int> conv(ivector.size());
@@ -73,7 +71,7 @@ public:
 //    }
 
 
-    void nplotber(const std::vector<std::vector<double> > &bers, const std::vector<std::vector<double> > &ebnos, const std::vector<string> &titles, const std::string title = std::string("")) const
+    void nplotber(const std::vector<std::vector<double> > &bers, const std::vector<std::vector<double> > &ebnos, const std::vector<std::string> &titles, const std::string title = std::string("")) const
     {
         Json::Value jsn;
         jsn["method"] = "nplotber";
@@ -105,7 +103,7 @@ public:
 
 
     // Normal 2D plot, may plot imag() only if data is complex
-    template<typename T> void nplot(const T &obj, const string &title) const
+    template<typename T> void nplot(const T &obj, const std::string &title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplot";
@@ -115,7 +113,7 @@ public:
     }
 
     // Plots the FFT of the data.  the FFT is performed by Python's using numpy's floating point FFT
-    template<typename T> void nplotfft(const T &obj, const string &title) const
+    template<typename T> void nplotfft(const T &obj, const std::string &title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplotfft";
@@ -125,7 +123,7 @@ public:
     }
 
     // Constellation plot with transparent blobs (good for QAM)
-    template<typename T> void nplotqam(const T &obj, string title) const
+    template<typename T> void nplotqam(const T &obj, std::string title) const
     {
         Json::Value jsn;
         jsn["method"] = "nplotqam";
@@ -142,7 +140,7 @@ public:
         }
     }
 
-    template<typename T> void conv_real_int(const vector<T> &obj, Json::Value& t1) const
+    template<typename T> void conv_real_int(const std::vector<T> &obj, Json::Value& t1) const
     {
         for (unsigned i = 0; i < obj.size(); i++)
         {
@@ -167,7 +165,7 @@ public:
         } //Adds each element in CircularBuffer to dictionary arg0
     }
 
-    void conv_real_int(const CircularBuffer<complex<double> > &obj, Json::Value& t1) const
+    void conv_real_int(const CircularBuffer<std::complex<double> > &obj, Json::Value& t1) const
     {
         for (unsigned int i = 0; i < obj.size(); i++) {
             t1["arg0"]["r"][i] = std::real(obj[i]);
@@ -175,7 +173,7 @@ public:
         }    		//Adds each element in CircularBuffer to dictionary arg0
     }
 
-    void conv_real_int(const vector<complex<double> > &obj, Json::Value& t1) const
+    void conv_real_int(const std::vector<std::complex<double> > &obj, Json::Value& t1) const
     {
         for (unsigned int i = 0; i < obj.size(); i++) {
             t1["arg0"]["r"][i] = std::real(obj[i]);
