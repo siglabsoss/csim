@@ -39,13 +39,14 @@ public:
         return result;
     }
 
-    void parseCSV(uint32_t& rows, uint32_t& cols, const std::vector<char>& input, std::vector<std::vector<bool> >& out) const
+    void parseCSV(const std::vector<char>& input, std::vector<std::vector<bool> >& out) const
     {
         std::vector<char>::const_iterator eol = input.begin();  // end of previous line
 
 
         size_t count = 0;
         size_t linecount = 0;
+        size_t cols = 0;
         for(auto it = input.begin(); it != input.end(); ++it)
         {
             if(*it == '\n')
@@ -86,6 +87,7 @@ public:
                 }
                 else
                 {
+                    //we expect the number of columns to stay consistent across rows
                     assert((uint32_t) out[linecount].size() == cols);
                 }
 
@@ -95,8 +97,6 @@ public:
 //            cout << *it;
             count ++;
         }
-
-        rows = out.size();
     }
 
 //    template<int R, int C> void parseString(uint8_t H[R][C], const  std::vector<char>& input) const

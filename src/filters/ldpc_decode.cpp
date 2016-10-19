@@ -42,17 +42,14 @@ void LDPCDecode::tick(void)
 
 
 
-LDPCDecode::LDPCDecode(std::vector<std::vector<bool> > H, uint32_t rows, uint32_t cols):
+LDPCDecode::LDPCDecode(std::vector<std::vector<bool> > H):
 FilterChainElement(std::string("LDPCDecode")),
-m_hrows(rows),
-m_hcols(cols),
+m_hrows(m_H.size()),
+m_hcols(m_H[0].size()), //will crash if hrows == 0
 m_H(H),
-m_n(cols),
-m_m(rows)
+m_n(m_hcols),
+m_m(m_hrows)
 {
-    assert(m_H.size() == rows);
-    assert(m_H[0].size() == cols);
-
     // calculate stuff about H
     prep_once();
 }

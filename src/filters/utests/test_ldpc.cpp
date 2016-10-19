@@ -14,13 +14,14 @@ CSIM_TESX_CASE(LDPC_Basic)
     std::vector<char> bytes = p->loadCSVFile("data/ldpc/code1_h.txt");
 
     std::vector<std::vector<bool> > H;
-    uint32_t rows, cols;
 
-    p->parseCSV(rows, cols, bytes, H);
+    p->parseCSV(bytes, H);
 
+    size_t rows = H.size();
+    size_t cols = H[0].size();
     std::cout << "Loaded H with rows, cols" << std::endl << rows << ", " << cols << std::endl;
 
-    LDPCDecode decode(H, rows, cols);
+    LDPCDecode decode(H);
 
 
     std::vector<int> rx = {4161 * -1, 5953 * -1, -9328 * -1, 0 * -1, -1188 * -1, 0 * -1, -1144 * -1, 0 * -1, -3925 * -1, 0 * -1, -6833 * -1, 9005 * -1, -4161 * -1, 7449 * -1, 965 * -1, -7030 * -1, 0 * -1, 0 * -1, 0 * -1, -1967 * -1, 0 * -1, 0 * -1, -9328 * -1, -3154 * -1};
@@ -43,13 +44,14 @@ CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
     std::vector<char> bytes = p->loadCSVFile("data/ldpc/code2_h.txt");
 
     std::vector<std::vector<bool> > H;
-    uint32_t rows, cols;
 
-    p->parseCSV(rows, cols, bytes, H);
+    p->parseCSV(bytes, H);
 
+    size_t rows = H.size();
+    size_t cols = H[0].size();
     std::cout << "Loaded H with rows, cols" << std::endl << rows << ", " << cols << std::endl;
 
-    LDPCDecode decode(H, rows, cols);
+    LDPCDecode decode(H);
 
     //                    0,1,1,0,1,1,0,1,0
     std::vector<bool> rx = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
@@ -83,15 +85,10 @@ CSIM_TEST_CASE(LDPC_ENCODE)
 
 
     std::vector<std::vector<bool> > G;
-    uint32_t g_rows, g_cols;
-    p->parseCSV(g_rows, g_cols, g_bytes, G);
+    p->parseCSV(g_bytes, G);
 
     std::vector<std::vector<bool> > H;
-    uint32_t h_rows, h_cols;
-    p->parseCSV(h_rows, h_cols, h_bytes, H);
-
-
-
+    p->parseCSV(h_bytes, H);
 
     std::vector<bool> u = {0,1,1,0,1,1,0,1,0};
     std::vector<bool> cw;
@@ -120,10 +117,11 @@ CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
     std::vector<char> g_bytes( gstring.begin(), gstring.end() );
 
     std::vector<std::vector<bool> > G;
-    uint32_t g_rows, g_cols;
     CSVBitMatrix* p = new CSVBitMatrix();
-    p->parseCSV(g_rows, g_cols, g_bytes, G);
+    p->parseCSV(g_bytes, G);
 
+    size_t g_rows = G.size();
+    size_t g_cols = G[0].size();
     std::cout << "Loaded G with rows, cols" << std::endl << g_rows << ", " << g_cols << std::endl;
 
     std::vector<bool> u = {1,0,1};
