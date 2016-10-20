@@ -8,47 +8,30 @@
 
 bool LDPCDecode::input(const filter_io_t &data)
 {
-//    assert(data.type == IO_TYPE_FIXED_COMPLEX_32_NEW || data.type == IO_TYPE_COMPLEX_DOUBLE);
-//    m_inputValid = true;
-//    m_input = data.toComplexDouble();
+
     return true;
 }
 
 bool LDPCDecode::output(filter_io_t &data)
 {
-//    m_inputValid = false;
-//    data = m_carrier * m_input;
+
     return true;
 }
 
 void LDPCDecode::tick(void)
 {
-//    double theta = (((2 * M_PI) / m_ticksPerPeriod) * m_count);
-//
-//    m_carrier = ComplexDouble(cos(theta), sin(theta));
-//
-//    if (m_upMix) {
-//        m_count++;
-//        if (m_count >= m_ticksPerPeriod) {
-//            m_count -= m_ticksPerPeriod;
-//        }
-//    } else {
-//        m_count--;
-//        if (m_count <= 0) {
-//            m_count += m_ticksPerPeriod;
-//        }
-//    }
+
 }
 
 
 
-LDPCDecode::LDPCDecode(std::vector<std::vector<bool> > H):
+LDPCDecode::LDPCDecode(const std::vector<std::vector<bool> > &H):
 FilterChainElement(std::string("LDPCDecode")),
-m_hrows(m_H.size()),
-m_hcols(m_H[0].size()), //will crash if hrows == 0
+m_hrows(H.size()),
+m_hcols(H[0].size()), //will crash if hrows == 0
 m_H(H),
-m_n(m_hcols),
-m_m(m_hrows)
+m_n(H[0].size()),
+m_m(H.size())
 {
     // calculate stuff about H
     prep_once();

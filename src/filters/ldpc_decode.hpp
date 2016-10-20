@@ -33,7 +33,7 @@ class LDPCDecode : public FilterChainElement
 {
 public:
     virtual ~LDPCDecode();
-    LDPCDecode(std::vector<std::vector<bool> > H);
+    LDPCDecode(const std::vector<std::vector<bool> > &H);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
