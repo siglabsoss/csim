@@ -8,7 +8,7 @@
 
 CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 
-CSIM_TESX_CASE(LDPC_Basic)
+CSIM_TEST_CASE(LDPC_Basic)
 {
     CSVBitMatrix p;
     std::vector<char> bytes = p.loadCSVFile("data/ldpc/code1_h.txt");
@@ -37,7 +37,7 @@ CSIM_TESX_CASE(LDPC_Basic)
 
 }
 
-CSIM_TESX_CASE(LDPC_HARD_CODED_MESSAGE)
+CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
 {
     CSVBitMatrix p;
     std::vector<char> bytes = p.loadCSVFile("data/ldpc/code2_h.txt");
@@ -115,7 +115,7 @@ CSIM_TEST_CASE(LDPC_ENCODE)
     }
 }
 
-CSIM_TESX_CASE(LDPC_ENCODE_COOKED)
+CSIM_TEST_CASE(LDPC_ENCODE_COOKED)
 {
     std::string gstring( "1,1,1,1,1\n0,1,0,0,0\n0,1,1,0,0\n" );
     std::vector<char> g_bytes( gstring.begin(), gstring.end() );
