@@ -18,4 +18,4 @@ set(SIGFILTERS_SOURCES
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
 add_library(sigfilters $<TARGET_OBJECTS:sigfiltersobj>)
-target_link_libraries(sigfilters sigutils)
+target_link_libraries(sigfilters sigutils sigcore)

@@ -1,4 +1,4 @@
-########################### Simulator ###########################
+########################### Analysis Tools ###########################
 add_executable(retrosim retrosim.cpp)
 target_link_libraries(retrosim sigcore sigtypes sigmath sigutils sigfilters jsoncpp rt zmq)
 
@@ -13,3 +13,7 @@ target_link_libraries(bertester2 ${Boost_LIBRARIES} sigcore sigtypes sigmath sig
 
 add_executable(bertester3 ber_tester3.cpp)
 target_link_libraries(bertester3 ${Boost_LIBRARIES} sigcore sigtypes sigmath sigutils sigfilters sigprobes jsoncpp ${SystemC_LIBRARIES} pthread rt zmq)
+
+
+add_executable(twiddles print_twiddle.cpp)
+target_link_libraries(twiddles sigfilters sigtypes)
