@@ -9,7 +9,7 @@
 #include <types/fixedcomplex.hpp>
 #include <vector>
 
-#define FFT_TWIDDLE_FORMAT            16, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define FFT_TWIDDLE_FORMAT            18, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 class BFPFFT : public FilterChainElement
 {
@@ -18,6 +18,8 @@ public:
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
+
+    void printTwiddleFactors() const;
 private:
     SLFixComplex getTwiddleFactor(size_t stage, size_t n) const;
     void dit();

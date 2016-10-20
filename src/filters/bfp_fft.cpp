@@ -220,3 +220,13 @@ SLFixComplex BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
     A1 = utils::reverseBits(1 << temp, A1);
     return m_twiddleFactors[A1];
 }
+
+void BFPFFT::printTwiddleFactors() const
+{
+    size_t N = m_twiddleFactors.size();
+    std::cout << "theta, real (scaled), imag (scaled), real, imag" << std::endl;
+    for (size_t i = 0; i < m_twiddleFactors.size(); i++) {
+        double theta = (-2 * M_PI * i) / N;
+        std::cout << theta << ", " << m_twiddleFactors[i].real().to_uint64() << ", " << m_twiddleFactors[i].imag().to_uint64() << ", " << m_twiddleFactors[i].real().to_double() << ", " << m_twiddleFactors[i].imag().to_double() << std::endl;
+    }
+}
