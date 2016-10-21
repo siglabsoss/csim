@@ -12,7 +12,7 @@ set(SIGFILTERS_SOURCES
     nco.cpp
     soft_demod.cpp
     noise_element.cpp
-    ldpc_decode.cpp
+    ldpc_decoder.cpp
     ldpc_encode.cpp
     )
 

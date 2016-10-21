@@ -4,6 +4,8 @@
 #include <bitset>
 #include <utils/plotter.hpp>
 
+#define SD_LLR_FORMAT             18, 3,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+
 //
 SoftDemod::SoftDemod(Mapper::constellation_set_t scheme, double noise_variance) :
 HardDemod(scheme, 0),
@@ -19,9 +21,10 @@ bool SoftDemod::output(filter_io_t &data)
     if (m_llrs.size() > 0) {
         haveByte = true;
 
-        data = ComplexDouble(m_llrs.front(),0);
-        m_llrs.pop();
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
+        data.fc.setFormat(SD_LLR_FORMAT);
+        data.fc.set(m_llrs.front(), 0.0);
+        m_llrs.pop();
     }
 
     return haveByte;
