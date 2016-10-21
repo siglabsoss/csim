@@ -93,7 +93,7 @@ void LDPCDecode::calc_syndrome(unsigned print = 1)
             int node_index = mi->node_index[j];
             LDPC_N *ni = &(m_n[node_index]);
 
-            short val = ( ni->llr < 0 ) ? 1 : 0;
+            short val = ( ni->llr.to_double() < 0 ) ? 1 : 0;
 
             if( print && j != 0 ) std::cout << " ^ ";
             if( print ) std::cout << val;
@@ -131,7 +131,7 @@ void LDPCDecode::iteration()
         LDPC_N *ni_next = &(m_n[mi->node_index[1]]);
 
         // cook first two iterations of loop below
-        if( std::abs(ni->llr) < abs(ni_next->llr) )
+        if( std::abs(ni->llr.to_double()) < std::abs(ni_next->llr.to_double()) )
         {
             mi->min[0]       = ni->llr;
             mi->min_index[0] = mi->node_index[0];
@@ -151,10 +151,10 @@ void LDPCDecode::iteration()
         // start at 2
         for( unsigned j = 2; j < mi->degree; ++j)
         {
-            int node_index = mi->node_index[j];
+            unsigned node_index = mi->node_index[j];
             ni = &(m_n[node_index]);
 
-            if( abs(ni->llr) < abs(mi->min[0]) )
+            if( std::abs(ni->llr.to_double()) < std::abs(mi->min[0].to_double()) )
             {
                 // this is the smallest yet.  bump the previous smallest to 2nd smallest
                 mi->min[1] = mi->min[0];
@@ -164,7 +164,7 @@ void LDPCDecode::iteration()
                 mi->min[0] = ni->llr;
                 mi->min_index[0] = node_index;
             }
-            else if( abs(ni->llr) < abs(mi->min[1]) )
+            else if( std::abs(ni->llr.to_double()) < std::abs(mi->min[1].to_double()) )
             {
                 // this is only smaller than the 2nd smallest, simply assign
                 mi->min[1] = ni->llr;
@@ -175,10 +175,11 @@ void LDPCDecode::iteration()
 
 
     // we can't modify n array directly because we assume the sign of llr on variable nodes stays the same throughout the whole loop
-    float additions[m_hcols];
+    SLFixedPoint<LDPC_LLR_FORMAT> additions[m_hcols];
 
-    for( unsigned j = 0; j < m_hcols; ++j )
-        additions[j] = 0;
+    for( unsigned j = 0; j < m_hcols; ++j ) {
+        additions[j] = 0.0;
+    }
 
     // Pass R messages
     for( unsigned i = 0; i < m_hrows; ++i )
@@ -187,22 +188,22 @@ void LDPCDecode::iteration()
 
         for( unsigned j = 0; j < mi->degree; ++j)
         {
-            int node_index = mi->node_index[j];
+            unsigned node_index = mi->node_index[j];
             LDPC_N *ni = &(m_n[node_index]);
 
-            int val;
+            double val;
 
             // due to the exclusive property, check nodes alter the llr of variable nodes using all connected variable nodes except for the one being modified
             if( node_index == mi->min_index[0] )
             {
-                val = abs(mi->min[1]);
+                val = std::abs(mi->min[1].to_double());
             }
             else
             {
-                val = abs(mi->min[0]);
+                val = std::abs(mi->min[0].to_double());
             }
 
-            int sign = ( ni->llr < 0 ) ? -1 : 1;
+            int sign = ( ni->llr.to_double() < 0 ) ? -1 : 1;
 
             if( mi->parity )
             {
@@ -214,8 +215,8 @@ void LDPCDecode::iteration()
                 // parity is ok, push the variable node stronger in it's current direction
                 // don't flip sign
             }
-
-            additions[node_index] += sign*val;
+            SLFixedPoint<LDPC_LLR_FORMAT> tmpVal(sign*val);
+            additions[node_index] += tmpVal;
         }
     }
 
@@ -241,7 +242,7 @@ std::vector<bool> LDPCDecode::get_message()
         LDPC_N *ni = &(m_n[j]);
 
         uint8_t val;
-        if( ni->llr < 0 )
+        if( ni->llr.to_double() < 0 )
         {
             val = 1;
         }
@@ -267,7 +268,7 @@ void LDPCDecode::print_cw()
     for(i = 0; i < 24; i++)
     {
         char c;
-        c = m_n[i].llr < 0 ? '1' : '0';
+        c = m_n[i].llr.to_double() < 0 ? '1' : '0';
         std::cout << c << std::endl;
     }
 
@@ -276,7 +277,7 @@ void LDPCDecode::print_cw()
 
 
 
-void LDPCDecode::decode(std::vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations)
+void LDPCDecode::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations)
 {
     assert(cw.size() == m_n.size());
     assert(m_n.size() == m_hcols);
@@ -299,14 +300,23 @@ void LDPCDecode::decode(std::vector<int> cw, size_t iterations, bool& solved, si
         calc_syndrome(0);
         syn = get_syndrome();
 
-        std::cout << "Syndrome starting at iteration " << i << " is " << syn << std::endl;
+//        for (size_t j = 0; j < m_n.size(); j++) {
+//            std::cout << m_n[j].llr << ", ";
+//        }
+//        std::cout << std::endl;
+
+//        std::cout << "Syndrome starting at iteration " << i << " is " << syn << std::endl;
 
         if(syn == 0)
         {
-           std::cout << "Breaking after " << (signed)i-1 << " iteration" << std::endl;
+           //std::cout << "Breaking after " << (signed)i-1 << " iteration" << std::endl;
+           if (!solved) {
+               solved_iterations = i;
+           }
            solved = true;
-           solved_iterations = i;
-           return;
+           //return;
+        } else {
+            assert(!solved);
         }
 
         iteration();

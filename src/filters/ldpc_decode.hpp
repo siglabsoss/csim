@@ -7,19 +7,21 @@
 #include <core/filter_chain_element.hpp>
 #include <utils/plotter.hpp>
 
+#define LDPC_LLR_FORMAT 16, 4, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+
 typedef struct
 {
-    float llr;
+    SLFixedPoint<LDPC_LLR_FORMAT> llr;
 } LDPC_N;
 
 typedef struct
 {
-    float llr;
+    SLFixedPoint<LDPC_LLR_FORMAT> llr;
     unsigned degree;
 
     // index 0 is the smallest, 1 is the 2nd smallest
-    float min[2];
-    float min_index[2];
+    SLFixedPoint<LDPC_LLR_FORMAT> min[2];
+    unsigned min_index[2];
 
     // static defined for now
     std::vector<unsigned> node_index;
@@ -45,7 +47,7 @@ public:
     void run();
     std::vector<bool> get_message();
     void print_cw();
-    void decode(std::vector<int> cw, size_t iterations, bool& solved, size_t& solved_iterations);
+    void decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations);
 private:
 
     void prep_once();
