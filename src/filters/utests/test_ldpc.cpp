@@ -37,6 +37,54 @@ CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 //
 //}
 
+
+CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE_SIMPLE)
+{
+    CSVBitMatrix p;
+    std::vector<char> bytes = p.loadCSVFile("data/ldpc/code3_h.txt");
+
+    std::vector<std::vector<bool> > H;
+
+    p.parseCSV(bytes, H);
+
+    size_t rows = H.size();
+    size_t cols = H[0].size();
+    std::cout << "Loaded H with rows, cols" << std::endl << rows << ", " << cols << std::endl;
+    for (size_t i = 0; i < rows; i++) {
+        for (size_t j = 0; j < cols; j++) {
+            std::cout << H[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
+
+    LDPCDecoder decode(H);
+
+    std::vector<bool> rx = {1,1,1,1,0,0,1}; //valid codeword is 10110001
+    std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > llr(rx.size());
+    llr[0] = -9.0;
+    llr[1] = -7.0;
+    llr[2] = -12.0;
+    llr[3] = -4.0;
+    llr[4] =  7.0;
+    llr[5] =  10.0;
+    llr[6] = -11.0;
+
+    bool solved;
+    size_t solved_in;
+
+    decode.decode(llr, 10, solved, solved_in);
+    std::cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << std::endl;
+
+    BOOST_CHECK_EQUAL(solved, true);
+
+    std::vector<bool> decoded = decode.get_message();
+
+    for(size_t i = 0; i < (cols-rows); i++) {
+        BOOST_CHECK_EQUAL(rx[i], decoded[i]);
+    }
+
+}
+
 CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
 {
     CSVBitMatrix p;
@@ -68,14 +116,14 @@ CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
         if (rx[i] == 1) {
             llr[i] = -5.0;
         } else {
-            llr[i] = 0.0;
+            llr[i] = 1.0;
         }
     }
     llr[10] = llr[10].to_double() * -1;
     bool solved;
     size_t solved_in;
 
-    decode.decode(llr, 5000, solved, solved_in);
+    decode.decode(llr, 10, solved, solved_in);
     std::cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << std::endl;
 
     BOOST_CHECK_EQUAL(solved, true);

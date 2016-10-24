@@ -44,93 +44,120 @@ void LDPCDecoder::parse_H_matrix()
 {
     //Each row represents a parity check node, which in turn represents a parity check equation.
     //Each column represents a code bit
-    // calculate degree for each check node, fill in node_index
     for( unsigned i = 0; i < m_hrows; ++i )
     {
         for( unsigned j = 0; j < m_hcols; ++j)
         {
             if( m_H[i][j] )
             {
-                //For each parity check node, build an adjacency list of code bits involved in the
-                //parity check equation
+                //Build adjacency lists for both check and bit nodes involved in each connection
+                CheckNode *check = &m_checkNodes[i];
                 BitNode *bit = &m_codeBits[j];
+                check->checkNum = i;
                 bit->bitNum = j;
-                m_checkNodes[i].bits.push_back(bit);
+                check->bits.push_back(bit);
+                bit->checks.push_back(check);
+
+                //Store an LLR value for each edge connection to represent the bit-to-check and check-to-bit messages
+                GraphEdgeKey key = {
+                        .checkNum = i,
+                        .bitNum = j
+                };
+//                std::cout << "LDPC graph edge (" << i << "," << j << ")" << std::endl;
+                m_messages[key] = 0.0;
+                m_tmpMsgs[key] = 0.0;
             }
         }
 
-        std::cout << "Check node " << i << " has degree " << m_checkNodes[i].bits.size() << std::endl;
+//        std::cout << "Check node " << i << " has degree " << m_checkNodes[i].bits.size() << std::endl;
     }
 }
 
 void LDPCDecoder::iteration()
 {
-    //For every check node, scan the connected code bits and store the one with the minimum LLR magnitude.
-    //Also track odd or even parity by, in this case, multiplying sign bits.
-    for (size_t i = 0; i < m_checkNodes.size(); i++) {
-        assert(m_checkNodes[i].bits.size() >= 2);
-//        double minMag = std::min(std::abs(m_checkNodes[i].bits[0]->llr.to_double()), std::abs(m_checkNodes[i].bits[1]->llr.to_double()));
-//        double sign = (m_checkNodes[i].bits[0]->llr.to_double() < 0.0) ? -1 : 1;
-//        sign *= (m_checkNodes[i].bits[1]->llr.to_double() < 0.0) ? -1 : 1;
 
-//        for (size_t j = 2; j < m_checkNodes[i].bits.size(); j++) {
-//            minMag = std::min(minMag, std::abs(m_checkNodes[i].bits[j]->llr.to_double()));
-//            sign *= (m_checkNodes[i].bits[j]->llr.to_double() < 0.0) ? -1 : 1;
-//        }
-        CheckNode &currentCheckNode = m_checkNodes[i];
-        std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > interimLLR(m_codeBits.size());
-        for (size_t j = 0; j < currentCheckNode.bits.size(); j++) {
-            double minMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
-            double sign = 1.0;
-//            std::cout << "finding min of ";
-            for (size_t k = 0; k < currentCheckNode.bits.size(); k++) {
-                if (j == k) {
+    //Bits-to-checks pass: Create messages for each edge by taking the bit's LLR given by the channel, summing
+    //it with the estimates from the previous checks-to-bits pass, excluding the information that was given from the target node
+    for (size_t bit = 0; bit < m_codeBits.size(); ++bit) {
+        for (size_t i = 0; i < m_codeBits[bit].checks.size(); ++i) {
+            CheckNode *targetCheck = m_codeBits[bit].checks[i];
+            SLFixedPoint<LDPC_LLR_FORMAT> llr = m_codeBits[bit].llr;
+            for (size_t j = 0; j < m_codeBits[bit].checks.size(); ++j) {
+                if (i == j) { //skip the check node we're calculating an updated value for
                     continue;
                 }
-//                std::cout << m_checkNodes[i].bits[k]->llr.to_double() << " ";
-                minMag = std::min(minMag, std::abs(currentCheckNode.bits[k]->llr.to_double()));
-                sign *= (currentCheckNode.bits[k]->llr.to_double() < 0.0) ? -1.0 : 1.0;
-            }
-//            std::cout << std::endl;
-//            std::cout << "minMag for check node " << i << " being sent back to bit " << currentCheckNode.bits[j]->bitNum << " is " << minMag << std::endl;
-            SLFixedPoint<LDPC_LLR_FORMAT> val(sign * minMag);
-            interimLLR[currentCheckNode.bits[j]->bitNum] += val;
-            //currentCheckNode.bits[j]->llr += (val);
-        }
+                CheckNode *otherCheck = m_codeBits[bit].checks[j];
+                GraphEdgeKey key = {
+                    .checkNum = otherCheck->checkNum,
+                    .bitNum = bit
+                };
+                //std::cout << m_messages[key] << std::endl;
+//                std::cout << llr.to_double() << " + " << m_messages[key].to_double();
+                llr = llr.to_double() + m_messages[key].to_double();
+//                std::cout << " = " << llr.to_double() << std::endl;
 
-        for (size_t i = 0; i < m_codeBits.size(); i++) {
-            m_codeBits[i].llr += interimLLR[i];
+            }
+            GraphEdgeKey key = {
+                    .checkNum = targetCheck->checkNum,
+                    .bitNum = bit
+            };
+//            std::cout << "Bits to Checks (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << llr.to_double() << std::endl;
+            m_tmpMsgs[key] = llr;
         }
+        m_messages = m_tmpMsgs;
+    }
+    //Checks-to-bits pass: Create messages for each edge by taking the minimum...
+    for (size_t check = 0; check < m_checkNodes.size(); ++check) {
+        for (size_t i = 0; i < m_checkNodes[check].bits.size(); ++i) {
+            BitNode *targetBit = m_checkNodes[check].bits[i];
+            double minMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
+            double sign = 1.0;
+            for (size_t j = 0; j < m_checkNodes[check].bits.size(); ++j) {
+                if (i == j) {
+                    continue;
+                }
+                BitNode *otherBit = m_checkNodes[check].bits[j];
+                GraphEdgeKey key = {
+                        .checkNum = check,
+                        .bitNum = otherBit->bitNum
+                };
+                minMag = std::min(minMag, std::abs(m_messages[key].to_double()));
+                sign *= (m_messages[key].to_double() < 0.0) ? -1.0 : 1.0;
+            }
+            GraphEdgeKey key = {
+                    .checkNum = check,
+                    .bitNum = targetBit->bitNum
+            };
+            SLFixedPoint<LDPC_LLR_FORMAT> val(sign * minMag);
+//            std::cout << "Checks to Bits (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << val.to_double() << std::endl;
+            m_tmpMsgs[key] = val;
+        }
+        m_messages = m_tmpMsgs;
     }
 
-    //Update each code bit's LLR with the sum of all of the LLRs from connected check nodes
-//    for (size_t i = 0; i < m_checkNodes.size(); i++) {
-//        for (size_t j = 0; j < m_checkNodes[i].bits.size(); j++) {
-//            size_t bitNum = m_checkNodes[i].bits[j]->bitNum;
-//            m_codeBits[bitNum].llr += m_checkNodes[i].llr;
-//        }
-//    }
 }
 
 size_t LDPCDecoder::parityCheck() const
 {
+    std::vector<double> cwLLR;
+    calculate_llr(cwLLR);
     size_t result = 0;
     for (size_t i = 0; i < m_checkNodes.size(); i++) {
-        size_t numOnes = 0;
+        size_t parity = 0;
         for (size_t j = 0; j < m_checkNodes[i].bits.size(); j++) {
             size_t bitNum = m_checkNodes[i].bits[j]->bitNum;
-            bool val = (LLRToBit(m_codeBits[bitNum].llr.to_double()));
+            parity ^= LLRToBit(cwLLR[bitNum]);
 //            if (i == 0) {
 //                std::cout << "bit #" << bitNum << " = " << (int)val << std::endl;
 //            }
-            if (val) {
-                numOnes++;
-            }
         }
-        if (numOnes & 1) { //odd number of ones
-            std::cout << "equation #" << i << " has an odd number of ones (" << numOnes << ")" << std::endl;
+        if (parity) { //odd number of ones
+            std::cout << "equation #" << i << " does not meet parity!" << std::endl;
             ++result;
         }
+    }
+    if (result > 0) {
+        std::cout << "Syndrome weight is " << result << std::endl;
     }
     return result;
 }
@@ -150,7 +177,6 @@ void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, 
 
     for(size_t i = 0; i < iterations; ++i)
     {
-        print_cw_llr();
         bool justSolved = (parityCheck()== 0);
         if (justSolved && !solved) {
             solved = true;
@@ -196,9 +222,38 @@ void LDPCDecoder::print_H_matrix() const
 
 void LDPCDecoder::print_cw_llr() const
 {
-    for (size_t i = 0; i < m_codeBits.size(); i++) {
-        std::cout << m_codeBits[i].llr << ", ";
+    std::vector<double> cwLLR;
+    calculate_llr(cwLLR);
+    std::cout << "CW LLR: ";
+    for (size_t i = 0; i < cwLLR.size(); i++) {
+        std::cout << cwLLR[i] << ", ";
     }
     std::cout << std::endl;
+}
+
+void LDPCDecoder::calculate_llr(std::vector<double> &cwLLR) const
+{
+    cwLLR.resize(m_codeBits.size());
+    for (size_t i = 0; i < m_codeBits.size(); i++) {
+        double llr = 0.0;// = m_codeBits[i].llr.to_double();
+        for (size_t j = 0; j < m_codeBits[i].checks.size(); ++j) {
+            CheckNode *check = m_codeBits[i].checks[j];
+            GraphEdgeKey key;
+            key.bitNum = i;
+            key.checkNum = check->checkNum;
+            SLFixedPoint<LDPC_LLR_FORMAT> val = m_messages.at(key);
+            llr += (val).to_double();
+        }
+        cwLLR[i] = llr + m_codeBits[i].llr.to_double();
+    }
+}
+
+bool operator<(const LDPCDecoder::GraphEdgeKey &lhs, const LDPCDecoder::GraphEdgeKey &rhs)
+{
+    if (lhs.checkNum == rhs.checkNum) {
+        return (lhs.bitNum < rhs.bitNum);
+    } else {
+        return lhs.checkNum < rhs.checkNum;
+    }
 }
 
