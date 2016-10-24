@@ -31,7 +31,7 @@ m_H(H),
 m_codeBits(m_hcols),
 m_checkNodes(m_hrows)
 {
-    parse_H_matrix();
+    parseH();
 }
 
 LDPCDecoder::~LDPCDecoder()
@@ -40,7 +40,7 @@ LDPCDecoder::~LDPCDecoder()
 }
 
 
-void LDPCDecoder::parse_H_matrix()
+void LDPCDecoder::parseH()
 {
     //Each row represents a parity check node, which in turn represents a parity check equation.
     //Each column represents a code bit
@@ -81,9 +81,9 @@ void LDPCDecoder::iteration()
     for (size_t bit = 0; bit < m_codeBits.size(); ++bit) {
         for (size_t i = 0; i < m_codeBits[bit].checks.size(); ++i) {
             CheckNode *targetCheck = m_codeBits[bit].checks[i];
-            SLFixedPoint<LDPC_LLR_FORMAT> llr = m_codeBits[bit].llr;
+            SLFixedPoint<LDPC_LLR_FORMAT> llr = m_codeBits[bit].softChannelEstimate;
             for (size_t j = 0; j < m_codeBits[bit].checks.size(); ++j) {
-                if (i == j) { //skip the check node we're calculating an updated value for
+                if (i == j) { //skip the check node we're targetting our message towards
                     continue;
                 }
                 CheckNode *otherCheck = m_codeBits[bit].checks[j];
@@ -113,7 +113,7 @@ void LDPCDecoder::iteration()
             double minMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
             double sign = 1.0;
             for (size_t j = 0; j < m_checkNodes[check].bits.size(); ++j) {
-                if (i == j) {
+                if (i == j) { //skip the bit node we're targetting our message towards
                     continue;
                 }
                 BitNode *otherBit = m_checkNodes[check].bits[j];
@@ -139,17 +139,12 @@ void LDPCDecoder::iteration()
 
 size_t LDPCDecoder::parityCheck() const
 {
-    std::vector<double> cwLLR;
-    calculate_llr(cwLLR);
     size_t result = 0;
     for (size_t i = 0; i < m_checkNodes.size(); i++) {
         size_t parity = 0;
         for (size_t j = 0; j < m_checkNodes[i].bits.size(); j++) {
             size_t bitNum = m_checkNodes[i].bits[j]->bitNum;
-            parity ^= LLRToBit(cwLLR[bitNum]);
-//            if (i == 0) {
-//                std::cout << "bit #" << bitNum << " = " << (int)val << std::endl;
-//            }
+            parity ^= LLRToBit(m_codeBits[bitNum].LLR.to_double());
         }
         if (parity) { //odd number of ones
             std::cout << "equation #" << i << " does not meet parity!" << std::endl;
@@ -168,7 +163,7 @@ void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, 
     assert(m_codeBits.size() == m_hcols);
 
     for (size_t i = 0; i < m_codeBits.size(); i++) {
-        m_codeBits[i].llr = cw[i];
+        m_codeBits[i].softChannelEstimate = cw[i];
     }
 
     // These stay here if code is unsolved
@@ -177,6 +172,7 @@ void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, 
 
     for(size_t i = 0; i < iterations; ++i)
     {
+        updateLLR();
         bool justSolved = (parityCheck()== 0);
         if (justSolved && !solved) {
             solved = true;
@@ -187,7 +183,6 @@ void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, 
             assert(true);
         }
         iteration();
-
     }
 }
 
@@ -195,18 +190,18 @@ bool LDPCDecoder::LLRToBit(double llr) {
     return (llr < 0.0);
 }
 
-std::vector<bool> LDPCDecoder::get_message() const
+std::vector<bool> LDPCDecoder::getHardCodeWord() const
 {
     std::vector<bool> message;
 //    std::cout << "Assuming that the syndrome is 0, the message is: " << std::endl;
 
     for (size_t i = 0; i < m_codeBits.size(); i++) {
-        message.push_back(LLRToBit(m_codeBits[i].llr.to_double()));
+        message.push_back(LLRToBit(m_codeBits[i].softChannelEstimate.to_double()));
     }
     return  message;
 }
 
-void LDPCDecoder::print_H_matrix() const
+void LDPCDecoder::printH() const
 {
     std::cout << "H = " << std::endl;
     for( unsigned i = 0; i < m_hrows; ++i )
@@ -220,22 +215,19 @@ void LDPCDecoder::print_H_matrix() const
     std::cout << std::endl;
 }
 
-void LDPCDecoder::print_cw_llr() const
+void LDPCDecoder::printSoftCodeWord() const
 {
-    std::vector<double> cwLLR;
-    calculate_llr(cwLLR);
     std::cout << "CW LLR: ";
-    for (size_t i = 0; i < cwLLR.size(); i++) {
-        std::cout << cwLLR[i] << ", ";
+    for (size_t i = 0; i < m_codeBits.size(); i++) {
+        std::cout << m_codeBits[i].LLR.to_double() << ", ";
     }
     std::cout << std::endl;
 }
 
-void LDPCDecoder::calculate_llr(std::vector<double> &cwLLR) const
+void LDPCDecoder::updateLLR()
 {
-    cwLLR.resize(m_codeBits.size());
     for (size_t i = 0; i < m_codeBits.size(); i++) {
-        double llr = 0.0;// = m_codeBits[i].llr.to_double();
+        double llr = m_codeBits[i].softChannelEstimate.to_double();
         for (size_t j = 0; j < m_codeBits[i].checks.size(); ++j) {
             CheckNode *check = m_codeBits[i].checks[j];
             GraphEdgeKey key;
@@ -244,10 +236,11 @@ void LDPCDecoder::calculate_llr(std::vector<double> &cwLLR) const
             SLFixedPoint<LDPC_LLR_FORMAT> val = m_messages.at(key);
             llr += (val).to_double();
         }
-        cwLLR[i] = llr + m_codeBits[i].llr.to_double();
+        m_codeBits[i].LLR = llr;
     }
 }
 
+//This operator is defined so that GraphEdgeKey can be used as a std::map key
 bool operator<(const LDPCDecoder::GraphEdgeKey &lhs, const LDPCDecoder::GraphEdgeKey &rhs)
 {
     if (lhs.checkNum == rhs.checkNum) {

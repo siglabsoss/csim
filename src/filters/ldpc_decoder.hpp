@@ -19,9 +19,9 @@ public:
     bool output(filter_io_t &data) override;
     void tick(void) override;
 
-    void print_H_matrix()           const;
-    void print_cw_llr()             const;
-    std::vector<bool> get_message() const;
+    void printH()           const;
+    void printSoftCodeWord()             const;
+    std::vector<bool> getHardCodeWord() const;
     void decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations);
 public:
     struct GraphEdgeKey
@@ -33,7 +33,8 @@ private:
     struct CheckNode;
     struct BitNode
     {
-        SLFixedPoint<LDPC_LLR_FORMAT> llr;
+        SLFixedPoint<LDPC_LLR_FORMAT> softChannelEstimate;
+        SLFixedPoint<LDPC_LLR_FORMAT> LLR;
         size_t                        bitNum;
         std::vector<CheckNode *>      checks;
     };
@@ -45,9 +46,9 @@ private:
 
     };
 
-    void parse_H_matrix();
+    void parseH();
     size_t parityCheck() const;
-    void calculate_llr(std::vector<double> &cwLLR) const;
+    void updateLLR();
     void iteration();
     static bool LLRToBit(double llr);
 

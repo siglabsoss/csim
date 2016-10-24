@@ -77,7 +77,7 @@ CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE_SIMPLE)
 
     BOOST_CHECK_EQUAL(solved, true);
 
-    std::vector<bool> decoded = decode.get_message();
+    std::vector<bool> decoded = decode.getHardCodeWord();
 
     for(size_t i = 0; i < (cols-rows); i++) {
         BOOST_CHECK_EQUAL(rx[i], decoded[i]);
@@ -128,7 +128,7 @@ CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
 
     BOOST_CHECK_EQUAL(solved, true);
 
-    std::vector<bool> decoded = decode.get_message();
+    std::vector<bool> decoded = decode.getHardCodeWord();
 
     for(size_t i = 0; i < (cols-rows); i++) {
         BOOST_CHECK_EQUAL(rx[i], decoded[i]);
