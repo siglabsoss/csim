@@ -114,12 +114,12 @@ int main(int argc, char *argv[])
     const plotter &plot = plotter::get();
 
 
-    vector<vector<double> > bers;
-    vector<vector<double> > ebn0s;
-    vector<string> titles;
+    std::vector<std::vector<double> > bers;
+    std::vector<std::vector<double> > ebn0s;
+    std::vector<std::string> titles;
 
-    vector<double> ber1;
-    vector<double> ebn1;
+    std::vector<double> ber1;
+    std::vector<double> ebn1;
 
 
 
@@ -143,8 +143,8 @@ int main(int argc, char *argv[])
     ebn0s.push_back(ebn1);
     titles.push_back("QPSK");
 
-    vector<double> theoryber;
-    vector<double> theoryebn;
+    std::vector<double> theoryber;
+    std::vector<double> theoryebn;
 
 
     for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
