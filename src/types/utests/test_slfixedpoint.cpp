@@ -207,7 +207,7 @@ CSIM_TEST_CASE(OVERFLOW_ON_ASSIGNMENT_TO_LESSER_FRACTION_LENGTH)
 
     a = -32.5;
     b = a;
-    BOOST_CHECK_EQUAL(b.to_int64(), static_cast<int64_t>(~0));
+    BOOST_CHECK_EQUAL(b.to_int64(), static_cast<int64_t>(-0x7f));
 
     a = -2.5;
     b = a;
@@ -224,7 +224,7 @@ CSIM_TEST_CASE(OVERFLOW_ON_ASSIGNMENT_TO_GREATER_FRACTION_LENGTH)
 
     a = -2.5;
     b = a;
-    BOOST_CHECK_EQUAL(b.to_int64(), static_cast<int64_t>(~0));
+    BOOST_CHECK_EQUAL(b.to_int64(), static_cast<int64_t>(-0x7f));
 
     a = 4.5;
     b = a;
@@ -239,7 +239,7 @@ CSIM_TEST_CASE(OVERFLOW_ON_DOUBLE_ASSIGNMENT)
     BOOST_CHECK_EQUAL(a.to_int64(), 0x7f);
 
     a = -2.5;
-    BOOST_CHECK_EQUAL(a.to_int64(), static_cast<int64_t>(~0));
+    BOOST_CHECK_EQUAL(a.to_int64(), static_cast<int64_t>(-0x7f));
 }
 
 CSIM_TEST_CASE(SLICING_BITS)
@@ -291,6 +291,16 @@ CSIM_TEST_CASE(COPYING_OBJECTS)
     BOOST_CHECK_EQUAL(b.m_quantMode, SLFixPoint::QUANT_RND_HALF_UP);
     BOOST_CHECK_EQUAL(b.m_fl, 4);
     BOOST_CHECK_EQUAL(b.m_wl, 8);
+}
+
+CSIM_TEST_CASE(SATURATION)
+{
+    SLFixPoint a(8, 3, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    a = 5.0;
+    BOOST_CHECK_EQUAL(a.to_uint64(), 0x7f);
+
+    a = -5.0;
+    BOOST_CHECK_EQUAL(a.to_uint64(), 0x81);
 }
 
 CSIM_TEST_SUITE_END()

@@ -343,10 +343,9 @@ long long SLFixPoint::getSaturatedValue(bool negative) const
 {
     long long value;
     unsigned long long mask = ~(0ull) >> (sizeof(m_value) * 8 - m_wl);
-    if (!negative) {
-        value = (mask >> 1);
-    } else {
-        value = mask;
+    value = (mask >> 1);
+    if (negative) {
+        value = -value;
     }
     return value;
 }
