@@ -135,7 +135,7 @@ bool test_mod_soft_demod(Mapper& mod, SoftDemod& demod, size_t ticks, uint8_t by
 
             if( worked2 )
             {
-                llr = std::real(demod_output.rf);
+                llr = demod_output.fc.real().to_double();
 
                 if( llr < 0 )
                 {
