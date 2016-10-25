@@ -26,6 +26,10 @@ public:
 public:
     struct GraphEdgeKey
     {
+        GraphEdgeKey(size_t checkNodeNum, size_t bitNodeNum) :
+            checkNum(checkNodeNum),
+            bitNum(bitNodeNum)
+        {}
         size_t checkNum;
         size_t bitNum;
     };

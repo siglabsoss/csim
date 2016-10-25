@@ -59,10 +59,7 @@ void LDPCDecoder::parseH()
                 bit->checks.push_back(check);
 
                 //Store an LLR value for each edge connection to represent the bit-to-check and check-to-bit messages
-                GraphEdgeKey key = {
-                        .checkNum = i,
-                        .bitNum = j
-                };
+                GraphEdgeKey key(i, j);
 //                std::cout << "LDPC graph edge (" << i << "," << j << ")" << std::endl;
                 m_messages[key] = 0.0;
                 m_tmpMsgs[key] = 0.0;
@@ -87,22 +84,14 @@ void LDPCDecoder::iteration()
                     continue;
                 }
                 CheckNode *otherCheck = m_codeBits[bit].checks[j];
-                GraphEdgeKey key = {
-                    .checkNum = otherCheck->checkNum,
-                    .bitNum = bit
-                };
                 //std::cout << m_messages[key] << std::endl;
 //                std::cout << llr.to_double() << " + " << m_messages[key].to_double();
-                llr = llr.to_double() + m_messages[key].to_double();
+                llr = llr.to_double() + m_messages[GraphEdgeKey(otherCheck->checkNum, bit)].to_double();
 //                std::cout << " = " << llr.to_double() << std::endl;
 
             }
-            GraphEdgeKey key = {
-                    .checkNum = targetCheck->checkNum,
-                    .bitNum = bit
-            };
 //            std::cout << "Bits to Checks (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << llr.to_double() << std::endl;
-            m_tmpMsgs[key] = llr;
+            m_tmpMsgs[GraphEdgeKey(targetCheck->checkNum, bit)] = llr;
         }
         m_messages = m_tmpMsgs;
     }
@@ -117,20 +106,14 @@ void LDPCDecoder::iteration()
                     continue;
                 }
                 BitNode *otherBit = m_checkNodes[check].bits[j];
-                GraphEdgeKey key = {
-                        .checkNum = check,
-                        .bitNum = otherBit->bitNum
-                };
-                minMag = std::min(minMag, std::abs(m_messages[key].to_double()));
-                sign *= (m_messages[key].to_double() < 0.0) ? -1.0 : 1.0;
+
+                double msgVal = m_messages[GraphEdgeKey(check, otherBit->bitNum)].to_double();
+                minMag = std::min(minMag, std::abs(msgVal));
+                sign *= (msgVal < 0.0) ? -1.0 : 1.0;
             }
-            GraphEdgeKey key = {
-                    .checkNum = check,
-                    .bitNum = targetBit->bitNum
-            };
             SLFixedPoint<LDPC_LLR_FORMAT> val(sign * minMag);
 //            std::cout << "Checks to Bits (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << val.to_double() << std::endl;
-            m_tmpMsgs[key] = val;
+            m_tmpMsgs[GraphEdgeKey(check, targetBit->bitNum)] = val;
         }
         m_messages = m_tmpMsgs;
     }
@@ -230,10 +213,7 @@ void LDPCDecoder::updateLLR()
         double llr = m_codeBits[i].softChannelEstimate.to_double();
         for (size_t j = 0; j < m_codeBits[i].checks.size(); ++j) {
             CheckNode *check = m_codeBits[i].checks[j];
-            GraphEdgeKey key;
-            key.bitNum = i;
-            key.checkNum = check->checkNum;
-            SLFixedPoint<LDPC_LLR_FORMAT> val = m_messages.at(key);
+            SLFixedPoint<LDPC_LLR_FORMAT> val = m_messages.at(GraphEdgeKey(check->checkNum, i));
             llr += (val).to_double();
         }
         m_codeBits[i].LLR = llr;
