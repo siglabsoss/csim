@@ -23,6 +23,7 @@
 
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
+static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 72;
 
 static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 {
@@ -36,30 +37,41 @@ static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 static unsigned int runTrial(SigWorld &world, size_t numIterations)
 {
     bool didReceive = true;
+    size_t totalRxCount = 0;
     size_t rxCount = 0;
-    uint8_t lastSent = 0;
     unsigned int bitDiff = 0;
-    world.didReceiveByte([&didReceive, &rxCount, &lastSent, &bitDiff](radio_id_t id, uint8_t rxByte)
+    std::queue<bool> expectedBits;
+    world.didReceiveByte([&didReceive, &totalRxCount, &rxCount, &expectedBits, &bitDiff](radio_id_t id, bool rxBit)
             {
                 if (id == RECEIVING_RADIO_ID) {
-                    didReceive = true;
                     rxCount++;
-                    bitDiff += utils::calculateHammingDistance(lastSent, rxByte);
-                    std::cout << "radio #" << id << " received " << (int)rxByte << " bitDiff = " << bitDiff << std::endl;
+                    if (rxCount == NUM_BITS_PER_TRANSMISSION) {
+                        didReceive = true;
+                        totalRxCount++;
+                        rxCount = 0;
+                    }
+                    bool expectedBit = expectedBits.front();
+                    expectedBits.pop();
+                    bitDiff += (rxBit == expectedBit) ? 0 : 1;
+                    //std::cout << "radio #" << id << " received " << (int)rxBit << " bitDiff = " << bitDiff << std::endl;
                 }
             });
 
     while(true) {
-        if (rxCount >= numIterations) {
-            std::cout << "Transmitted and received " << rxCount << " bytes. Exiting..." << std::endl;
+        if (totalRxCount >= numIterations) {
+            std::cout << "Transmitted and received " << totalRxCount * NUM_BITS_PER_TRANSMISSION / 8 << " bytes." << std::endl;
+            std::cout << "Total bit errors = " << bitDiff << std::endl;
             break;
         }
-        uint8_t byte1 = std::rand() % 256;
-        uint8_t byte2 = std::rand() % 256;
+
         if (didReceive) {
-            world.sendByte(SENDING_RADIO_ID, byte1);
-            world.sendByte(SENDING_RADIO_ID, byte2);
-            lastSent = byte2; //FIXME
+            std::vector<bool> bits(NUM_BITS_PER_TRANSMISSION);
+            for (size_t i = 0; i < NUM_BITS_PER_TRANSMISSION; ++i) {
+                bool bit = static_cast<bool>(std::rand() & 1);
+                bits[bits.size() - 1 - i] = bit;
+                expectedBits.push(bit);
+            }
+            world.sendBits(SENDING_RADIO_ID, bits);
             didReceive = false;
         }
 
@@ -70,7 +82,7 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
 
 int main(int argc, char *argv[])
 {
-    static constexpr size_t NUM_BYTES_TX_RX_DESIRED = 2000;
+    static constexpr size_t NUM_BYTES_TX_RX_DESIRED = 20;
     static constexpr double EBN_LOW = -3;
     static constexpr double EBN_HIGH = 10;
     log_info("Starting Bit Error Rate tester!");
