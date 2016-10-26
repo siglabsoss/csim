@@ -24,12 +24,13 @@
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
 
-static void constructRadiosForEbn0(RadioSet &rs, double distance, Mapper::constellation_set_t scheme, double ebn0)
+static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 {
     std::vector<std::pair<double, double> > positions(2);
-    positions[0] = std::pair<double, double>(0, 0);
-    positions[1] = std::pair<double, double>(0, distance);
-    construct_radio_set_ebn0(rs, positions, ebn0, scheme);
+    //Positions are irrelevant, noise is generated in rx chain per ebn0 param
+    positions[0] = std::pair<double, double>(0.0, 0.0);
+    positions[1] = std::pair<double, double>(0.0, 0.0);
+    construct_radio_set_ldpc_ebn0(rs, positions, 30);
 }
 
 static unsigned int runTrial(SigWorld &world, size_t numIterations)
@@ -44,7 +45,7 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
                     didReceive = true;
                     rxCount++;
                     bitDiff += utils::calculateHammingDistance(lastSent, rxByte);
-                    //std::cout << "radio #" << id << " received " << (int)rxByte << " bitDiff = " << bitDiff << std::endl;
+                    std::cout << "radio #" << id << " received " << (int)rxByte << " bitDiff = " << bitDiff << std::endl;
                 }
             });
 
@@ -53,51 +54,18 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
             std::cout << "Transmitted and received " << rxCount << " bytes. Exiting..." << std::endl;
             break;
         }
-        int random_variable = std::rand();
-        uint8_t byte = random_variable % 256;
-        if (didReceive && world.sendByte(SENDING_RADIO_ID, byte)) {
-            lastSent = byte;
-            //std::cout << "radio #" << SENDING_RADIO_ID << " sent     " << (int)byte << std::endl;
+        uint8_t byte1 = std::rand() % 256;
+        uint8_t byte2 = std::rand() % 256;
+        if (didReceive) {
+            world.sendByte(SENDING_RADIO_ID, byte1);
+            world.sendByte(SENDING_RADIO_ID, byte2);
+            lastSent = byte2; //FIXME
             didReceive = false;
         }
 
         world.tick();
     }
     return bitDiff;
-}
-
-_UNUSED_ static std::string modSchemeToString(Mapper::constellation_set_t scheme)
-{
-    switch(scheme) {
-        default:
-        case Mapper::CONST_SET_NULL:
-            return "*(NULL)";
-        case Mapper::CONST_SET_BPSK:
-            return "*BPSK";
-        case Mapper::CONST_SET_QPSK:
-            return "*QPSK";
-        case Mapper::CONST_SET_8PSK:
-            return "*8PSK";
-        case Mapper::CONST_SET_QAM16:
-            return "*QAM16";
-    }
-}
-
-_UNUSED_ static Mapper::constellation_set_t getNextScheme(Mapper::constellation_set_t scheme)
-{
-    switch(scheme) {
-        default:
-        case Mapper::CONST_SET_NULL:
-            return Mapper::CONST_SET_NULL;
-        case Mapper::CONST_SET_BPSK:
-            return Mapper::CONST_SET_QPSK;
-        case Mapper::CONST_SET_QPSK:
-            return Mapper::CONST_SET_QAM16; //skipping 8PSK
-        case Mapper::CONST_SET_8PSK:
-            return Mapper::CONST_SET_QAM16;
-        case Mapper::CONST_SET_QAM16:
-            return Mapper::CONST_SET_NULL;
-    }
 }
 
 int main(int argc, char *argv[])
@@ -121,15 +89,10 @@ int main(int argc, char *argv[])
     std::vector<double> ber1;
     std::vector<double> ebn1;
 
-
-
-    //Sweep through modulation schemes
-    Mapper::constellation_set_t scheme = Mapper::CONST_SET_BPSK;
-
     //For each modulation scheme, sweep through distances from 0 - 15km
     for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
-        constructRadiosForEbn0(rs, 0, scheme, ebn0); //construct 2 radios, 'distance' meters apart
-        world.init(&rs); // include noise, no delay, and no phase rotation
+        constructRadiosForLDPC(rs, 0, ebn0); //construct 2 radios, 'distance' meters apart
+        world.init(&rs);
         unsigned int bitDiff = runTrial(world, NUM_BYTES_TX_RX_DESIRED); //send / receive NUM_BYTES_TX_RX_DESIRED bytes
         world.reset();
         double ber = (double)bitDiff / (double)(NUM_BYTES_TX_RX_DESIRED * 8);// << ", " << NUM_BYTES_TX_RX_DESIRED * 8;
