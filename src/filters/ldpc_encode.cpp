@@ -10,32 +10,26 @@ static constexpr size_t INPUT_BUFFER_BITS_MAX = 512 * 8;
 
 bool LDPCEncode::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_BYTE);
+    assert(data.type == IO_TYPE_BIT);
     //make sure we have enough space left to store the next symbol
-    if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < sizeof(data.byte) * 8) {
+    if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < 1) {
         return false;
     }
-    //push the MSB onto the FIFO first so that we output MSB first
-    for (ssize_t i = 7; i >= 0 ; i--) {
-        bool bit = data.byte & (1 << i);
-        m_inputBuffer.push(bit);
-    }
-    std::cout << "enc in: " << (int) data.byte << std::endl;
+
+    m_inputBuffer.push(data.bit);
+
+//    std::cout << "enc in: " << (int) data.bit << std::endl;
     return true;
 }
 
 bool LDPCEncode::output(filter_io_t &data)
 {
-    if (m_outputBuffer.size() >= 8) {
-        uint8_t byte = 0;
-        for (size_t i = 0; i < 8; ++i) {
-            uint8_t nextBit = !!m_outputBuffer.front(); //we're popping out LSB first
-            m_outputBuffer.pop();
-            byte |= (nextBit << i);
-        }
-        data.type = IO_TYPE_BYTE;
-        data.byte = byte;
-        std::cout << "enc out: " << (int)byte << std::endl;
+    if (m_outputBuffer.size() > 0) {
+        bool nextBit = !!m_outputBuffer.front(); //we're popping out LSB first
+        m_outputBuffer.pop();
+        data.type = IO_TYPE_BIT;
+        data.bit = nextBit;
+        //std::cout << "enc out: " << (int)nextBit << std::endl;
         return true;
     }
     return false;
@@ -47,8 +41,8 @@ void LDPCEncode::tick(void)
     if (m_inputBuffer.size() >= msgLen) {
         //we've queued up enough bits
         std::vector<bool> msg(msgLen);
-        //we're popping off MSB first and storing MSB in msg[0]
-        for (size_t i = 0; i < msgLen; ++i) {
+        //we're popping off LSB first and storing MSB in msg[0]
+        for (ssize_t i = msgLen - 1; i >= 0; --i) {
             bool nextBit = !!m_inputBuffer.front();
             m_inputBuffer.pop();
             msg[i] = nextBit;

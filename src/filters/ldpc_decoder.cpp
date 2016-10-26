@@ -8,23 +8,19 @@
 
 bool LDPCDecoder::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
+    assert(data.type == IO_TYPE_FIXPOINT);
     //Receiving LSB first
-    m_softInputBits.push(data.fc.real());
+    m_softInputBits.push(data.fp);
     return true;
 }
 
 bool LDPCDecoder::output(filter_io_t &data)
 {
-    if (m_hardOutputBits.size() >= 8) {
-        uint8_t byte = 0;
-        for (ssize_t i = 7; i >= 0; --i) {
-            unsigned val = static_cast<unsigned>(m_hardOutputBits.front());
-            byte |= (val << i);
-            m_hardOutputBits.pop();
-        }
-        data.type = IO_TYPE_BYTE;
-        data.byte = byte;
+    if (m_hardOutputBits.size() > 0) {
+        bool bit = m_hardOutputBits.front();
+        m_hardOutputBits.pop();
+        data.type = IO_TYPE_BIT;
+        data.bit = bit;
         return true;
     }
     return false;
@@ -39,21 +35,13 @@ void LDPCDecoder::tick(void)
             m_softInputBits.pop();
         }
 
-//        std::cout << "dec msg: ";
-//        for (size_t i = 0; i < m_hcols; i++) {
-//            std::cout << cw[i] << " ";
-//        }
-//        std::cout << std::endl;
-
         bool didSolve = false;
         size_t solvedIterationNumber = 0;
         decode(cw, 10, didSolve, solvedIterationNumber);
-        std::cout << "dec msg: ";
-        for (size_t i = 0; i < 9; i++) { //XXX don't hardcode message length
-            m_hardOutputBits.push(LLRToBit(cw[i].to_double()));
-            std::cout << LLRToBit(cw[i].to_double()) << " ";
+
+        for (size_t i = 0; i < m_hcols; i++) { //XXX output only the message (not codeword)
+            m_hardOutputBits.push(LLRToBit(m_codeBits[m_hcols - 1 - i].LLR.to_double()));
         }
-        std::cout << std::endl;
     }
 }
 
