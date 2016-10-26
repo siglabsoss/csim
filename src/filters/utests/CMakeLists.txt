@@ -14,11 +14,12 @@ target_link_libraries(test_ddc ${Boost_LIBRARIES} sigfilters sigcore sigtypes si
 add_executable(test_mapper ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_mapper.cpp)
 target_link_libraries(test_mapper ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils jsoncpp ${SystemC_LIBRARIES} zmq)
 
+add_executable(test_demapper ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_demapper.cpp)
+target_link_libraries(test_demapper ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils jsoncpp ${SystemC_LIBRARIES} zmq)
 
 #Disabling CIC tests until it can pass with the new quantization / overflow modes
 #add_executable(test_cic ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_cic.cpp)
 #target_link_libraries(test_cic ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)
-
 
 #add_executable(test_stitcher ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_stitcher.cpp)
 #target_link_libraries(test_stitcher ${Boost_LIBRARIES} pthread sigfilters sigcore sigtypes sigmath sigutils ${SystemC_LIBRARIES} zmq)

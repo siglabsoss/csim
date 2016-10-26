@@ -1,6 +1,8 @@
 #include <test/unit_test.hpp>
 
+#define private public
 #include <filters/soft_demapper.hpp>
+#undef private
 #include <filters/hard_demapper.hpp>
 #include <utils/plotter.hpp>
 
@@ -9,6 +11,20 @@
 using namespace std;
 
 CSIM_TEST_SUITE_BEGIN(DemapperFunctionality)
+
+CSIM_TEST_CASE(LLR_CALCULATION)
+{
+    //For a BPSK symbol received, the LLR is log(probability bit = 0 / probability bit = 1)
+    //equation is here: http://itpp.sourceforge.net/4.3.1/form_149.png
+    //positive LLR is more likely 0, negative LLR is more likely 1
+
+    //The example input/output was generated from a Simulink simulation (-0.9125, 0.0) -> 3.65 LLR
+    double awgnVar = 1.0;
+    double p0   = SoftDemapper::calcLLRIncrement(ComplexDouble(-0.9125, 0.0), ComplexDouble(-1.0, 0.0), awgnVar);
+    double p1   = SoftDemapper::calcLLRIncrement(ComplexDouble(-0.9125, 0.0), ComplexDouble( 1.0, 0.0), awgnVar);
+
+    BOOST_CHECK_CLOSE(log(p0/p1), 3.65, 0.001);
+}
 
 //bool test_mod_hard_demod(Mapper& mod, HardDemod& demod, size_t ticks, uint8_t byte, uint8_t& byte_out)
 //{

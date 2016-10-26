@@ -8,7 +8,8 @@
 
 //
 SoftDemapper::SoftDemapper(Mapper::constellation_set_t scheme) :
-HardDemapper(scheme, 0.0)
+    HardDemapper(scheme, 0.0),
+    m_awgnVariance(1.0) //XXX will need a way to adjust at runtime based on signal power / SNR = noise power
 {
 
 }
@@ -39,7 +40,7 @@ void SoftDemapper::tick(void)
         double llr_num = 0;
         double llr_den = 0;
         for (auto it = m_constellations.begin(); it != m_constellations.end(); ++it) {
-            double incr = calcLLRIncrement(value, it->second.toComplexDouble());
+            double incr = calcLLRIncrement(value, it->second.toComplexDouble(), m_awgnVariance);
             if(it->first & (1<<j)) {
                 llr_den += incr;
             } else {
@@ -59,9 +60,9 @@ void SoftDemapper::tick(void)
     }
 }
 
-double SoftDemapper::calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation)
+double SoftDemapper::calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation, double variance)
 {
     double distance = std::abs(rxSymbol - constellation);
-    return exp(-(distance*distance));
+    return exp(-(distance*distance) / variance);
 }
 

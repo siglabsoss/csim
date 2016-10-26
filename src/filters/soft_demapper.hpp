@@ -12,6 +12,8 @@ public:
     bool output(filter_io_t &data) override;
 
 private:
-    static double calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation);
+    static double calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation, double variance);
     std::queue<double>            m_llrs;
+
+    double m_awgnVariance;
 };
