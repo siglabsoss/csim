@@ -22,10 +22,10 @@ public:
 
     //Demodulation
     bool         rxWave(const ComplexDouble &sample_in) override;
-    bool         rxByte(uint8_t &byte) override;
+    bool         rxBit(bool &bit) override;
 
     //Modulation
-    bool         txByte(const uint8_t &byte) override;
+    bool         txBit(const bool &bit) override;
     bool         txWave(ComplexDouble &sample_out) override;
 
     //Other

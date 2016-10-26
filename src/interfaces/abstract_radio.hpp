@@ -18,10 +18,10 @@ public:
 
     //Demodulation
     virtual bool         rxWave(const ComplexDouble &sample_in) = 0;
-    virtual bool         rxByte(uint8_t &byte) = 0;
+    virtual bool         rxBit(bool &bit) = 0;
 
     //Modulation
-    virtual bool         txByte(const uint8_t &byte) = 0;
+    virtual bool         txBit(const bool &bit) = 0;
     virtual bool         txWave(ComplexDouble &sample_out) = 0;
 
     virtual Vector2d     getPosition() const = 0;

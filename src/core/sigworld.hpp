@@ -12,13 +12,14 @@ public:
     void tick();
     void reset();
 
-    bool sendByte(radio_id_t id, uint8_t byte);
-    void didReceiveByte(std::function< void(radio_id_t, uint8_t) > callback);
+    bool sendBit(radio_id_t id, bool byte);
+    bool sendBits(radio_id_t id, const std::vector<bool> &bits);
+    void didReceiveByte(std::function< void(radio_id_t, bool) > callback);
     void setExternalDataSource(std::function< void(const RadioS *current, ComplexDouble &data) > source);
     void setExternalDataDestination(std::function< void(const RadioS *current, const ComplexDouble &data) > destination);
 private:
     RadioSet *                                  m_radioSet;
-    std::function< void(radio_id_t, uint8_t) >  m_rxCallback;
+    std::function< void(radio_id_t, bool) >  m_rxCallback;
     std::function< void(const RadioS *current, ComplexDouble &data) > m_externalSampleSource;
     std::function< void(const RadioS *current, const ComplexDouble &data) > m_externalSampleDestination;
 };

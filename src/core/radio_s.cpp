@@ -21,22 +21,22 @@ radio_id_t RadioS::getId() const
     return m_id;
 }
 
-bool RadioS::rxByte(uint8_t &byte)
+bool RadioS::rxBit(bool &bit)
 {
     filter_io_t data;
     bool didRx = m_rxChain.output(data);
     if (didRx) {
-        assert(data.type == IO_TYPE_BYTE); //sanity check on the demodulation filter chain output
-        byte = data.byte;
+        assert(data.type == IO_TYPE_BIT); //sanity check on the demodulation filter chain output
+        bit = data.bit;
     }
     return didRx;
 }
 
-bool RadioS::txByte(const uint8_t &byte)
+bool RadioS::txBit(const bool &bit)
 {
     filter_io_t data;
-    data.type = IO_TYPE_BYTE;
-    data.byte = byte;
+    data.type = IO_TYPE_BIT;
+    data.bit = bit;
     return m_txChain.input(data);
 }
 

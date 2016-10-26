@@ -1,5 +1,6 @@
 #include <core/sigworld.hpp>
 #include <messages/rf_sample.hpp>
+#include <vector>
 
 SigWorld::SigWorld() :
     m_radioSet(nullptr),
@@ -56,12 +57,12 @@ void SigWorld::tick()
 
 
         /* Step 5 - Check for output bytes */
-        uint8_t outputByte;
-        if (current->rxByte(outputByte)) {
+        bool outputBit;
+        if (current->rxBit(outputBit)) {
             if (m_rxCallback) {
-                m_rxCallback(current->getId(), outputByte);
+                m_rxCallback(current->getId(), outputBit);
             } else {
-                std::cout << "receive " << (int)outputByte << " with no callback to call" << std::endl;
+                std::cout << "receive bit " << (int)outputBit << " with no callback to call" << std::endl;
             }
         }
 
@@ -77,12 +78,25 @@ void SigWorld::tick()
     }
 }
 
-bool SigWorld::sendByte(radio_id_t id, uint8_t byte)
+bool SigWorld::sendBit(radio_id_t id, bool bit)
 {
-    return m_radioSet->getRadioForId(id)->txByte(byte);
+    return m_radioSet->getRadioForId(id)->txBit(bit);
 }
 
-void SigWorld::didReceiveByte(std::function< void(radio_id_t, uint8_t) > callback)
+bool SigWorld::sendBits(radio_id_t id, const std::vector<bool> &bits)
+{
+    bool didSendAll = true;
+    //sending with reverse indexing so that LSB is sent first in time
+    for (ssize_t i = bits.size() - 1; i >= 0; --i) {
+        if (!sendBit(id, bits[i])) {
+            didSendAll = false;
+            break;
+        }
+    }
+    return didSendAll;
+}
+
+void SigWorld::didReceiveByte(std::function< void(radio_id_t, bool) > callback)
 {
     m_rxCallback = callback;
 }
