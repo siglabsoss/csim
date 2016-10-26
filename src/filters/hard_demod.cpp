@@ -32,26 +32,14 @@ HardDemod::HardDemod(Mapper::constellation_set_t scheme, double theta) :
     }
 }
 
-HardDemod::~HardDemod() {
-//    const plotter &plt = plotter::get();
-//
-//    std::stringstream oss;
-//    oss << "demod " << m_points.size();
-//
-//    plt.nplotqam(m_points, oss.str());
-//    cout << endl << endl << "decon" << endl << endl;
-//    for(size_t i = 0; i < m_points.size(); i++)
-//    {
-//        cout << m_points[i] << endl;
-//    }
+HardDemod::~HardDemod()
+{
 }
 
 bool HardDemod::input(const filter_io_t &data)
 {
     m_value = data;
     m_inputValid = true;
-
-//    m_points.push_back(m_value.toComplexDouble());
     return true;
 }
 
