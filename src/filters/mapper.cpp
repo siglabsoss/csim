@@ -43,15 +43,23 @@ bool Mapper::input(const filter_io_t &data)
     if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < sizeof(data.byte) * 8) {
         return false;
     }
+    //queuing up least significant bit first
+    std::cout << "mapper in: ";
     for (size_t i = 0; i < sizeof(data.byte) * 8; i++) {
-        m_inputBuffer.push(data.byte & (1 << i));
+        bool bit = (data.byte & (1 << i)) != 0;
+        std::cout << (int)bit << " ";
+        m_inputBuffer.push(bit);
     }
+    std::cout << std::endl;
     return true;
 }
 bool Mapper::output(filter_io_t &data)
 {
     if (m_tickCount == 1) {
         data = m_output;
+        if (std::abs(data.toComplexDouble()) > 0.01) {
+            std::cout << "mapper out: " << data.toComplexDouble() << std::endl;
+        }
         return true;
     }
     return false;
@@ -75,7 +83,7 @@ symbol_t Mapper::getNextSymbol()
 {
     symbol_t symbol = 0;
     for (size_t i = 0; i < m_bitsPerSymbol; i++) {
-        symbol_t nextBit = !!m_inputBuffer.front();
+        symbol_t nextBit = !!m_inputBuffer.front(); //lsb first
         m_inputBuffer.pop();
         symbol |= (nextBit << i);
     }
