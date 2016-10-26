@@ -4,11 +4,11 @@
 #include <filters/mapper.hpp>
 #include <utils/plotter.hpp>
 
-class HardDemod : public FilterChainElement
+class HardDemapper : public FilterChainElement
 {
 public:
-    HardDemod(Mapper::constellation_set_t scheme, double theta);
-    ~HardDemod();
+    HardDemapper(Mapper::constellation_set_t scheme, double theta);
+    ~HardDemapper();
 
     bool input(const filter_io_t &data) override;
 

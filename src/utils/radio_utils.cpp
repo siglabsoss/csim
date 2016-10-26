@@ -3,8 +3,8 @@
 
 #include <filters/mixer.hpp>
 #include <filters/decimator.hpp>
-#include <filters/hard_demod.hpp>
-#include <filters/soft_demod.hpp>
+#include <filters/hard_demapper.hpp>
+#include <filters/soft_demapper.hpp>
 #include <filters/noise_element.hpp>
 #include <filters/ldpc_encode.hpp>
 #include <filters/ldpc_decoder.hpp>
@@ -25,7 +25,7 @@ static void construct_rx_chain(FilterChain &rxChain, Mapper::constellation_set_t
 {
     Mixer *downmixer = new Mixer(MIXER_TICKS_PER_PERIOD, false /* downmix */);
     Decimator *decim = new Decimator(MOD_TICKS_PER_SYMBOL, 0);
-    HardDemod *demod = new HardDemod(scheme, 0.0);
+    HardDemapper *demod = new HardDemapper(scheme, 0.0);
     NoiseElement * ne = new NoiseElement(15);
     rxChain = *demod + *decim + *downmixer + *ne;
 }
@@ -34,7 +34,7 @@ static void construct_rx_chain_ebn0(FilterChain &rxChain, Mapper::constellation_
 {
     Mixer *downmixer = new Mixer(MIXER_TICKS_PER_PERIOD, false /* downmix */);
     Decimator *decim = new Decimator(MOD_TICKS_PER_SYMBOL, 0);
-    HardDemod *demod = new HardDemod(scheme, 0.0);
+    HardDemapper *demod = new HardDemapper(scheme, 0.0);
     NoiseElement * ne = new NoiseElement(ebn0);
 //    rxChain = *demod + *decim + *downmixer;
     rxChain = *demod + *decim + *downmixer + *ne;
@@ -63,7 +63,7 @@ static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
 
     p.parseCSV(bytes, H);
     LDPCDecoder * decode = new LDPCDecoder(H);
-    SoftDemod * demapper = new SoftDemod(Mapper::CONST_SET_BPSK);
+    SoftDemapper * demapper = new SoftDemapper(Mapper::CONST_SET_BPSK);
     //NoiseElement * ne    = new NoiseElement(ebn0);
 
     rxChain = *decode + *demapper;// + *ne;

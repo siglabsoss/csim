@@ -6,7 +6,6 @@
 #include <filters/automatic_gain.hpp>
 #include <filters/mixer.hpp>
 #include <filters/decimator.hpp>
-#include <filters/hard_demod.hpp>
 #include <filters/noise_element.hpp>
 
 #include <utils/utils.hpp>

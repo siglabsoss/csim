@@ -1,4 +1,4 @@
-#include <filters/soft_demod.hpp>
+#include <filters/soft_demapper.hpp>
 #include <cassert>
 #include <iomanip>
 #include <bitset>
@@ -7,13 +7,13 @@
 #define SD_LLR_FORMAT             18, 4,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 //
-SoftDemod::SoftDemod(Mapper::constellation_set_t scheme) :
-HardDemod(scheme, 0.0)
+SoftDemapper::SoftDemapper(Mapper::constellation_set_t scheme) :
+HardDemapper(scheme, 0.0)
 {
 
 }
 
-bool SoftDemod::output(filter_io_t &data)
+bool SoftDemapper::output(filter_io_t &data)
 {
     bool haveByte = false;
     if (m_llrs.size() > 0) {
@@ -27,7 +27,7 @@ bool SoftDemod::output(filter_io_t &data)
     return haveByte;
 }
 
-void SoftDemod::tick(void)
+void SoftDemapper::tick(void)
 {
     if (!m_inputValid) {
         return;
@@ -59,7 +59,7 @@ void SoftDemod::tick(void)
     }
 }
 
-double SoftDemod::calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation)
+double SoftDemapper::calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation)
 {
     double distance = std::abs(rxSymbol - constellation);
     return exp(-(distance*distance));

@@ -2,13 +2,13 @@
 
 #include <core/filter_chain_element.hpp>
 #include <filters/mapper.hpp>
-#include <filters/hard_demod.hpp>
+#include <filters/hard_demapper.hpp>
 
-class SoftDemod : public HardDemod
+class SoftDemapper : public HardDemapper
 {
 public:
     void tick(void) override;
-    SoftDemod(Mapper::constellation_set_t scheme);
+    SoftDemapper(Mapper::constellation_set_t scheme);
     bool output(filter_io_t &data) override;
 
 private:

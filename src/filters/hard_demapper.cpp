@@ -1,7 +1,7 @@
-#include <filters/hard_demod.hpp>
+#include <filters/hard_demapper.hpp>
 #include <cassert>
 
-HardDemod::HardDemod(Mapper::constellation_set_t scheme, double theta) :
+HardDemapper::HardDemapper(Mapper::constellation_set_t scheme, double theta) :
     m_bits(),
     m_value(),
     m_inputValid(false),
@@ -32,11 +32,11 @@ HardDemod::HardDemod(Mapper::constellation_set_t scheme, double theta) :
     }
 }
 
-HardDemod::~HardDemod()
+HardDemapper::~HardDemapper()
 {
 }
 
-bool HardDemod::input(const filter_io_t &data)
+bool HardDemapper::input(const filter_io_t &data)
 {
     m_value = data;
     //XXX what's the proper way to deal with "null" symbols
@@ -46,7 +46,7 @@ bool HardDemod::input(const filter_io_t &data)
     return true;
 }
 
-bool HardDemod::output(filter_io_t &data)
+bool HardDemapper::output(filter_io_t &data)
 {
     bool haveByte = dequeueByte(data.byte);
 
@@ -56,7 +56,7 @@ bool HardDemod::output(filter_io_t &data)
     return haveByte;
 }
 
-void HardDemod::tick(void)
+void HardDemapper::tick(void)
 {
     if (!m_inputValid) {
         return;
@@ -78,7 +78,7 @@ void HardDemod::tick(void)
     queueSymbol(symbol);
 }
 
-void HardDemod::queueSymbol(symbol_t symbol)
+void HardDemapper::queueSymbol(symbol_t symbol)
 {
     for (size_t i = 0; i < m_bitsPerSymbol; i++) {
         bool value = symbol & (1 << i);
@@ -86,7 +86,7 @@ void HardDemod::queueSymbol(symbol_t symbol)
     }
 }
 
-bool HardDemod::dequeueByte(uint8_t &byte)
+bool HardDemapper::dequeueByte(uint8_t &byte)
 {
     if (m_bits.size() < 8) {
         return false;
@@ -100,7 +100,7 @@ bool HardDemod::dequeueByte(uint8_t &byte)
     return true;
 }
 
-double HardDemod::angleDiff(double a, double b)
+double HardDemapper::angleDiff(double a, double b)
 {
     double diff = fabs(a - b);
     if (diff > M_PI) {
