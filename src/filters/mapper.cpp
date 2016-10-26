@@ -51,9 +51,9 @@ bool Mapper::output(filter_io_t &data)
 {
     if (m_tickCount == 1) {
         data = m_output;
-        if (std::abs(data.toComplexDouble()) > 0.01) {
-            std::cout << "mapper out: " << data.toComplexDouble() << std::endl;
-        }
+//        if (std::abs(data.toComplexDouble()) > 0.01) {
+//            std::cout << "mapper out: " << data.toComplexDouble() << std::endl;
+//        }
         return true;
     }
     return false;

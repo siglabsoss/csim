@@ -39,11 +39,11 @@ void SoftDemod::tick(void)
         double llr_num = 0;
         double llr_den = 0;
         for (auto it = m_constellations.begin(); it != m_constellations.end(); ++it) {
-            double distance = abs(it->second.toComplexDouble() - value);
+            double incr = calcLLRIncrement(value, it->second.toComplexDouble());
             if(it->first & (1<<j)) {
-                llr_num += distance;
+                llr_den += incr;
             } else {
-                llr_den += distance;
+                llr_num += incr;
            }
 
         }
@@ -55,7 +55,13 @@ void SoftDemod::tick(void)
             llr_num = 0.000000001;
         }
 
-        m_llrs.push( log2(llr_num/llr_den) );
+        m_llrs.push( log(llr_num/llr_den) );
     }
+}
+
+double SoftDemod::calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation)
+{
+    double distance = std::abs(rxSymbol - constellation);
+    return exp(-(distance*distance));
 }
 

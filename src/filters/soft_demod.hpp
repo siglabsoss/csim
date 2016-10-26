@@ -12,5 +12,6 @@ public:
     bool output(filter_io_t &data) override;
 
 private:
+    static double calcLLRIncrement(const ComplexDouble &rxSymbol, const ComplexDouble &constellation);
     std::queue<double>            m_llrs;
 };
