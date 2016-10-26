@@ -30,7 +30,7 @@ void LDPCDecoder::tick(void)
 {
     if (m_softInputBits.size() >= m_hcols) { //we have enough bits to represent a codeword
         std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > cw(m_hcols);
-        for (ssize_t i = m_hcols - 1; i >=0; --i) {
+        for (ssize_t i = m_hcols - 1; i >= 0; --i) {
             cw[i] = m_softInputBits.front(); //LSBs are popped off first
             m_softInputBits.pop();
         }
@@ -39,8 +39,8 @@ void LDPCDecoder::tick(void)
         size_t solvedIterationNumber = 0;
         decode(cw, 10, didSolve, solvedIterationNumber);
 
-        for (size_t i = 0; i < m_hcols; i++) { //XXX output only the message (not codeword)
-            m_hardOutputBits.push(LLRToBit(m_codeBits[m_hcols - 1 - i].LLR.to_double()));
+        for (size_t i = 0; i < 9; i++) { //XXX output only the message (not codeword)
+            m_hardOutputBits.push(LLRToBit(m_codeBits[9 - 1 - i].LLR.to_double()));
         }
     }
 }
