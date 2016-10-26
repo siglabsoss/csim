@@ -18,18 +18,10 @@ public:
     void tick(void) override;
 
 private:
-//    ComplexDouble m_carrier;
     filter_io_t m_input;
-    ComplexGaussianNoise m_noise;
-    std::vector<SLFixComplex> buf;
-    std::vector<double> buf2;
-//
-//    size_t m_count;
-//    uint32_t m_ticksPerPeriod;
+    ComplexGaussianNoise m_noiseGenerator;
     bool    m_inputValid;
-    double m_ebn0;
     double m_scalar;
-//    bool    m_upMix;
 };
 
 
