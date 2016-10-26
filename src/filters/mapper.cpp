@@ -38,19 +38,13 @@ Mapper::Mapper(unsigned int ticksPerSymbol, constellation_set_t scheme = CONST_S
 
 bool Mapper::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_BYTE);
+    assert(data.type == IO_TYPE_BIT);
     //make sure we have enough space left to store the next symbol
-    if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < sizeof(data.byte) * 8) {
+    if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < 1) {
         return false;
     }
     //queuing up least significant bit first
-    std::cout << "mapper in: ";
-    for (size_t i = 0; i < sizeof(data.byte) * 8; i++) {
-        bool bit = (data.byte & (1 << i)) != 0;
-        std::cout << (int)bit << " ";
-        m_inputBuffer.push(bit);
-    }
-    std::cout << std::endl;
+    m_inputBuffer.push(data.bit);
     return true;
 }
 bool Mapper::output(filter_io_t &data)
