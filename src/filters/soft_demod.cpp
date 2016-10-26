@@ -18,10 +18,9 @@ bool SoftDemod::output(filter_io_t &data)
     bool haveByte = false;
     if (m_llrs.size() > 0) {
         haveByte = true;
-
-        data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(SD_LLR_FORMAT);
-        data.fc.set(m_llrs.front(), 0.0);
+        data.type = IO_TYPE_FIXPOINT;
+        data.fp.setFormat(SD_LLR_FORMAT);
+        data.fp = m_llrs.front();
         m_llrs.pop();
     }
 
@@ -35,7 +34,6 @@ void SoftDemod::tick(void)
     }
     m_inputValid = false;
     ComplexDouble value = m_value.toComplexDouble(); // FIXME
-
 
     for(size_t j = 0; j < m_bitsPerSymbol; j++) {
         double llr_num = 0;
