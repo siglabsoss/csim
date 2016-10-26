@@ -43,13 +43,13 @@ private:
     int         m_counter;
 };
 
-class RFNormToInteger : public FilterChainElement
+class RFNormToBit : public FilterChainElement
 {
 public:
-    virtual ~RFNormToInteger() {}
-    RFNormToInteger() :
+    virtual ~RFNormToBit() {}
+    RFNormToBit() :
         m_input(),
-        m_byte(0),
+        m_bit(0),
         m_didReceiveInput(false)
     {}
     bool input(const filter_io_t &data) override
@@ -63,8 +63,8 @@ public:
     {
         if (m_didReceiveInput) {
             m_didReceiveInput = false;
-            data.type = IO_TYPE_BYTE;
-            data.byte = m_byte;
+            data.type = IO_TYPE_BIT;
+            data.byte = m_bit;
             return true;
         }
         return false;
@@ -73,12 +73,12 @@ public:
     void tick(void) override
     {
         if (m_didReceiveInput) {
-            m_byte = static_cast<uint8_t>(sqrt(m_input.rf.real()*m_input.rf.real() + m_input.rf.imag()*m_input.rf.imag()));
+            m_bit = static_cast<bool>(sqrt(m_input.rf.real()*m_input.rf.real() + m_input.rf.imag()*m_input.rf.imag()) > 0.5);
         }
     }
 private:
     filter_io_t m_input;
-    uint8_t     m_byte;
+    bool        m_bit;
     bool        m_didReceiveInput;
 };
 
@@ -88,12 +88,13 @@ public:
     virtual ~IntegerToRF() {}
     IntegerToRF() :
         m_output(),
-        m_byte(0),
+        m_bit(0),
         m_didReceiveInput(false)
     {}
     bool input(const filter_io_t &data) override
     {
-        m_byte = data.byte;
+        assert(data.type == IO_TYPE_BIT);
+        m_bit = data.byte;
         m_didReceiveInput = true;
         return true;
     }
@@ -112,12 +113,12 @@ public:
     {
         if (m_didReceiveInput) {
             m_output.type = IO_TYPE_COMPLEX_DOUBLE;
-            m_output.rf = ComplexDouble(static_cast<double>(m_byte / 2), static_cast<double>(m_byte / 2));
+            m_output.rf = ComplexDouble(static_cast<double>(m_bit), static_cast<double>(m_bit));
         }
     }
 private:
     filter_io_t m_output;
-    uint8_t     m_byte;
+    bool        m_bit;
     bool        m_didReceiveInput;
 };
 
@@ -131,7 +132,7 @@ CSIM_TEST_CASE(FILTER_CHAIN_IS_PROPERLY_CHAINED)
     config.position = Vector2d(0,0);
     config.id = 100;
 
-    RFNormToInteger *rfnti = new RFNormToInteger();
+    RFNormToBit *rfnti = new RFNormToBit();
     DoubleEveryOther *deo1 = new DoubleEveryOther();
     DoubleEveryOther *deo2 = new DoubleEveryOther();
 
@@ -146,54 +147,54 @@ CSIM_TEST_CASE(FILTER_CHAIN_IS_PROPERLY_CHAINED)
     modulation_chain = *deo2 + *deo1 + *itrf;
 
     RadioS *radio = new RadioS(config, modulation_chain, demodulation_chain);
-    uint8_t byte = 0;
+    bool bit = 0;
     ComplexDouble sample(0.5, 0.5);
     bool didOutput = true;
 
     /* Demodulation */
     radio->rxWave(sample);
     radio->tick();
-    didOutput = radio->rxByte(byte);
+    didOutput = radio->rxBit(bit);
     BOOST_CHECK_EQUAL(didOutput, false);
 
     radio->rxWave(sample);
     radio->tick();
-    didOutput = radio->rxByte(byte);
+    didOutput = radio->rxBit(bit);
     BOOST_CHECK_EQUAL(didOutput, false);
 
     radio->rxWave(sample);
     radio->tick();
-    didOutput = radio->rxByte(byte);
+    didOutput = radio->rxBit(bit);
     BOOST_CHECK_EQUAL(didOutput, false);
 
     radio->rxWave(sample);
     radio->tick();
-    didOutput = radio->rxByte(byte);
+    didOutput = radio->rxBit(bit);
     BOOST_CHECK_EQUAL(didOutput, true);
-    BOOST_CHECK_EQUAL(byte, 2);
+    BOOST_CHECK_EQUAL(bit, 1);
 
     /* Modulation */
-    radio->txByte(10);
+    radio->txBit(1);
     radio->tick();
     didOutput = radio->txWave(sample);
     BOOST_CHECK_EQUAL(didOutput, false);
 
-    radio->txByte(10);
+    radio->txBit(1);
     radio->tick();
     didOutput = radio->txWave(sample);
     BOOST_CHECK_EQUAL(didOutput, false);
 
-    radio->txByte(10);
+    radio->txBit(1);
     radio->tick();
     didOutput = radio->txWave(sample);
     BOOST_CHECK_EQUAL(didOutput, false);
 
-    radio->txByte(10);
+    radio->txBit(1);
     radio->tick();
     didOutput = radio->txWave(sample);
     BOOST_CHECK_EQUAL(didOutput, true);
-    BOOST_CHECK_CLOSE(sample.real(), 20.0, DBL_EPSILON);
-    BOOST_CHECK_CLOSE(sample.imag(), 20.0, DBL_EPSILON);
+    BOOST_CHECK_CLOSE(sample.real(), 4.0, DBL_EPSILON);
+    BOOST_CHECK_CLOSE(sample.imag(), 4.0, DBL_EPSILON);
 
 }
 
