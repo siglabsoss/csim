@@ -16,6 +16,9 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
         case IO_TYPE_BYTE:
             os << "[0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(obj.byte) << "]";
             break;
+        case IO_TYPE_BIT:
+            os << "[0b" << static_cast<int>(obj.bit) << "]";
+            break;
         case IO_TYPE_NULL:
             os << "(NULL DATA)";
             break;
@@ -42,6 +45,9 @@ filter_io_t::filter_io_t(const filter_io_t &other) :
             case IO_TYPE_BYTE:
                 this->byte = other.byte;
                 break;
+            case IO_TYPE_BIT:
+                this->bit = other.bit;
+                break;
             case IO_TYPE_NULL:
                 break;
         }
@@ -62,6 +68,9 @@ filter_io_t & filter_io_t::operator=(const filter_io_t &rhs)
                 break;
             case IO_TYPE_BYTE:
                 this->byte = rhs.byte;
+                break;
+            case IO_TYPE_BIT:
+                this->bit = rhs.bit;
                 break;
             case IO_TYPE_NULL:
                 break;
@@ -92,6 +101,13 @@ filter_io_t & filter_io_t::operator=(const uint8_t &rhs)
     return *this;
 }
 
+filter_io_t & filter_io_t::operator=(const bool &rhs)
+{
+    this->type = IO_TYPE_BIT;
+    this->bit = rhs;
+    return *this;
+}
+
 ComplexDouble filter_io_t::toComplexDouble() const
 {
     double real = 0, imag = 0;
@@ -106,6 +122,8 @@ ComplexDouble filter_io_t::toComplexDouble() const
             return this->fc.toComplexDouble();
             break;
         case IO_TYPE_BYTE:
+            break;
+        case IO_TYPE_BIT:
             break;
     }
     return ComplexDouble(real, imag);
@@ -147,6 +165,12 @@ size_t filter_io_t::serialize(uint8_t *data) const
         {
             memcpy(data + numBytes, &byte, sizeof(byte));
             numBytes += sizeof(byte);
+            break;
+        }
+        case IO_TYPE_BIT:
+        {
+            memcpy(data + numBytes, &bit, sizeof(bit));
+            numBytes += sizeof(bit);
             break;
         }
         case IO_TYPE_NULL:
