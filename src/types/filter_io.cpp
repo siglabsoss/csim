@@ -13,6 +13,9 @@ std::ostream& operator<<(std::ostream& os, const filter_io_t& obj)
         case IO_TYPE_COMPLEX_FIXPOINT:
             os << obj.fc;
             break;
+        case IO_TYPE_FIXPOINT:
+            os << obj.fp;
+            break;
         case IO_TYPE_BYTE:
             os << "[0x" << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(obj.byte) << "]";
             break;
@@ -42,6 +45,10 @@ filter_io_t::filter_io_t(const filter_io_t &other) :
                 this->fc.setFormat(other.fc);
                 this->fc = other.fc;
                 break;
+            case IO_TYPE_FIXPOINT:
+                this->fp.setFormat(other.fp);
+                this->fp = other.fp;
+                break;
             case IO_TYPE_BYTE:
                 this->byte = other.byte;
                 break;
@@ -65,6 +72,10 @@ filter_io_t & filter_io_t::operator=(const filter_io_t &rhs)
             case IO_TYPE_COMPLEX_FIXPOINT:
                 this->fc.setFormat(rhs.fc);
                 this->fc = rhs.fc;
+                break;
+            case IO_TYPE_FIXPOINT:
+                this->fp.setFormat(rhs.fp);
+                this->fp = rhs.fp;
                 break;
             case IO_TYPE_BYTE:
                 this->byte = rhs.byte;
@@ -94,6 +105,13 @@ filter_io_t & filter_io_t::operator=(const SLFixComplex &rhs)
     return *this;
 }
 
+filter_io_t & filter_io_t::operator=(const SLFixPoint &rhs)
+{
+    this->type = IO_TYPE_FIXPOINT;
+    this->fp.setFormat(rhs);
+    this->fp = rhs;
+    return *this;
+}
 filter_io_t & filter_io_t::operator=(const uint8_t &rhs)
 {
     this->type = IO_TYPE_BYTE;
@@ -120,6 +138,10 @@ ComplexDouble filter_io_t::toComplexDouble() const
             break;
         case IO_TYPE_COMPLEX_FIXPOINT:
             return this->fc.toComplexDouble();
+            break;
+        case IO_TYPE_FIXPOINT:
+            real = this->fp.to_double();
+            imag = 0.0;
             break;
         case IO_TYPE_BYTE:
             break;
@@ -157,6 +179,13 @@ size_t filter_io_t::serialize(uint8_t *data) const
             numBytes += sizeof(value);
 
             value = fc.imag().to_int64();
+            memcpy(data + numBytes, &value, sizeof(value));
+            numBytes += sizeof(value);
+            break;
+        }
+        case IO_TYPE_FIXPOINT:
+        {
+            int64_t value = fp.to_int64();
             memcpy(data + numBytes, &value, sizeof(value));
             numBytes += sizeof(value);
             break;
