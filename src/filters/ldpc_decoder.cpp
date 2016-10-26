@@ -8,19 +8,53 @@
 
 bool LDPCDecoder::input(const filter_io_t &data)
 {
-
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
+    //Receiving LSB first
+    m_softInputBits.push(data.fc.real());
     return true;
 }
 
 bool LDPCDecoder::output(filter_io_t &data)
 {
-
-    return true;
+    if (m_hardOutputBits.size() >= 8) {
+        uint8_t byte = 0;
+        for (ssize_t i = 7; i >= 0; --i) {
+            unsigned val = static_cast<unsigned>(m_hardOutputBits.front());
+            byte |= (val << i);
+            m_hardOutputBits.pop();
+        }
+        data.type = IO_TYPE_BYTE;
+        data.byte = byte;
+        return true;
+    }
+    return false;
 }
 
 void LDPCDecoder::tick(void)
 {
+    if (m_softInputBits.size() >= m_hcols) { //we have enough bits to represent a codeword
+        std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > cw(m_hcols);
+        for (ssize_t i = m_hcols - 1; i >=0; --i) {
+            cw[i] = m_softInputBits.front(); //LSBs are popped off first
+            m_softInputBits.pop();
+        }
 
+//        std::cout << "dec msg: ";
+//        for (size_t i = 0; i < m_hcols; i++) {
+//            std::cout << cw[i] << " ";
+//        }
+//        std::cout << std::endl;
+
+        bool didSolve = false;
+        size_t solvedIterationNumber = 0;
+        decode(cw, 10, didSolve, solvedIterationNumber);
+        std::cout << "dec msg: ";
+        for (size_t i = 0; i < 9; i++) { //XXX don't hardcode message length
+            m_hardOutputBits.push(LLRToBit(cw[i].to_double()));
+            std::cout << LLRToBit(cw[i].to_double()) << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 LDPCDecoder::LDPCDecoder(const std::vector<std::vector<bool> > &H):
@@ -29,7 +63,11 @@ m_hrows(H.size()),
 m_hcols(H[0].size()), //will crash if hrows == 0
 m_H(H),
 m_codeBits(m_hcols),
-m_checkNodes(m_hrows)
+m_checkNodes(m_hrows),
+m_messages(),
+m_tmpMsgs(),
+m_softInputBits(),
+m_hardOutputBits()
 {
     parseH();
 }
@@ -39,6 +77,34 @@ LDPCDecoder::~LDPCDecoder()
 
 }
 
+void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations)
+{
+    assert(cw.size() == m_codeBits.size());
+    assert(m_codeBits.size() == m_hcols);
+
+    for (size_t i = 0; i < m_codeBits.size(); i++) {
+        m_codeBits[i].softChannelEstimate = cw[i];
+    }
+
+    // These stay here if code is unsolved
+    solved = false;
+    solved_iterations = 0;
+
+    for(size_t i = 0; i < iterations; ++i)
+    {
+        updateLLR();
+        bool justSolved = (parityCheck()== 0);
+        if (justSolved && !solved) {
+            solved = true;
+            solved_iterations = i;
+        }
+
+        if (!justSolved && solved) {
+            assert(true);
+        }
+        iteration();
+    }
+}
 
 void LDPCDecoder::parseH()
 {
@@ -130,43 +196,14 @@ size_t LDPCDecoder::parityCheck() const
             parity ^= LLRToBit(m_codeBits[bitNum].LLR.to_double());
         }
         if (parity) { //odd number of ones
-            std::cout << "equation #" << i << " does not meet parity!" << std::endl;
+            //std::cout << "equation #" << i << " does not meet parity!" << std::endl;
             ++result;
         }
     }
-    if (result > 0) {
-        std::cout << "Syndrome weight is " << result << std::endl;
-    }
+//    if (result > 0) {
+//        std::cout << "Syndrome weight is " << result << std::endl;
+//    }
     return result;
-}
-
-void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations)
-{
-    assert(cw.size() == m_codeBits.size());
-    assert(m_codeBits.size() == m_hcols);
-
-    for (size_t i = 0; i < m_codeBits.size(); i++) {
-        m_codeBits[i].softChannelEstimate = cw[i];
-    }
-
-    // These stay here if code is unsolved
-    solved = false;
-    solved_iterations = 0;
-
-    for(size_t i = 0; i < iterations; ++i)
-    {
-        updateLLR();
-        bool justSolved = (parityCheck()== 0);
-        if (justSolved && !solved) {
-            solved = true;
-            solved_iterations = i;
-        }
-
-        if (!justSolved && solved) {
-            assert(true);
-        }
-        iteration();
-    }
 }
 
 bool LDPCDecoder::LLRToBit(double llr) {

@@ -5,6 +5,7 @@
 
 #include <vector>
 #include <map>
+#include <queue>
 
 #define LDPC_LLR_WL 16
 #define LDPC_LLR_IWL 8
@@ -19,10 +20,11 @@ public:
     bool output(filter_io_t &data) override;
     void tick(void) override;
 
-    void printH()           const;
-    void printSoftCodeWord()             const;
-    std::vector<bool> getHardCodeWord() const;
     void decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations);
+
+    void printH()                       const;
+    void printSoftCodeWord()            const;
+    std::vector<bool> getHardCodeWord() const;
 public:
     struct GraphEdgeKey
     {
@@ -63,6 +65,9 @@ private:
     std::vector<CheckNode> m_checkNodes;
     std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > m_messages; //store LLR messages per edge
     std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > m_tmpMsgs;   //store LLR messages per edge
+
+    std::queue< SLFixedPoint<LDPC_LLR_FORMAT> > m_softInputBits;
+    std::queue< bool >                          m_hardOutputBits;
 };
 
 bool operator<(const LDPCDecoder::GraphEdgeKey &lhs, const LDPCDecoder::GraphEdgeKey &rhs);
