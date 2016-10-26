@@ -58,11 +58,6 @@ void LDPCEncode::tick(void)
             m_outputBuffer.push(cw[i]);
 
         }
-        std::cout << "enc msg: ";
-        for (size_t i = 0; i < cw.size(); i++) {
-            std::cout << cw[i] << " ";
-        }
-        std::cout << std::endl;
     }
 }
 
