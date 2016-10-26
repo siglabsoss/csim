@@ -9,11 +9,11 @@
 RadioS::RadioS(const radio_config_t &config, FilterChain &modChain, FilterChain &demodChain) :
     m_id(config.id),
     m_position(config.position),
-    m_mod(std::move(modChain)),
-    m_demod(std::move(demodChain))
+    m_txChain(std::move(modChain)),
+    m_rxChain(std::move(demodChain))
 {
-    m_mod.init();
-    m_demod.init();
+    m_txChain.init();
+    m_rxChain.init();
 }
 
 radio_id_t RadioS::getId() const
@@ -24,7 +24,7 @@ radio_id_t RadioS::getId() const
 bool RadioS::rxByte(uint8_t &byte)
 {
     filter_io_t data;
-    bool didRx = m_demod.output(data);
+    bool didRx = m_rxChain.output(data);
     if (didRx) {
         assert(data.type == IO_TYPE_BYTE); //sanity check on the demodulation filter chain output
         byte = data.byte;
@@ -37,7 +37,7 @@ bool RadioS::txByte(const uint8_t &byte)
     filter_io_t data;
     data.type = IO_TYPE_BYTE;
     data.byte = byte;
-    return m_mod.input(data);
+    return m_txChain.input(data);
 }
 
 bool RadioS::rxWave(const ComplexDouble &sample_in)
@@ -45,7 +45,7 @@ bool RadioS::rxWave(const ComplexDouble &sample_in)
     filter_io_t data;
     data.type = IO_TYPE_COMPLEX_DOUBLE;
     data.rf = sample_in;
-    return m_demod.input(data);
+    return m_rxChain.input(data);
 }
 
 bool RadioS::txWave(ComplexDouble &sample_out)
@@ -53,10 +53,10 @@ bool RadioS::txWave(ComplexDouble &sample_out)
     filter_io_t data;
     //A properly formed modulation filter chain will always
     //have an output, but we check anyway since it's useful for testing
-    bool didTx = m_mod.output(data);
+    bool didTx = m_txChain.output(data);
     if (didTx) {
-        assert(data.type == IO_TYPE_COMPLEX_DOUBLE); //sanity check on the modulation filter chain output
-        sample_out = data.rf;
+        assert(data.type == IO_TYPE_COMPLEX_DOUBLE || data.type == IO_TYPE_COMPLEX_FIXPOINT); //sanity check on the modulation filter chain output
+        sample_out = data.toComplexDouble();
     }
     return didTx;
 }
@@ -68,6 +68,6 @@ Vector2d  RadioS::getPosition() const
 
 void RadioS::tick()
 {
-    m_mod.tick();
-    m_demod.tick();
+    m_txChain.tick();
+    m_rxChain.tick();
 }

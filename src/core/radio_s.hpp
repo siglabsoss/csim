@@ -38,6 +38,6 @@ public:
 private: //members
     radio_id_t              m_id;
     Vector2d                m_position;
-    FilterChain             m_mod;
-    FilterChain             m_demod;
+    FilterChain             m_txChain;
+    FilterChain             m_rxChain;
 };
