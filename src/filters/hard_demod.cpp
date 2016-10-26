@@ -39,7 +39,10 @@ HardDemod::~HardDemod()
 bool HardDemod::input(const filter_io_t &data)
 {
     m_value = data;
-    m_inputValid = true;
+    //XXX what's the proper way to deal with "null" symbols
+    if (std::abs(m_value.toComplexDouble()) > 0.01) {
+        m_inputValid = true;
+    }
     return true;
 }
 
