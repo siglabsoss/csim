@@ -4,15 +4,13 @@
 #include <bitset>
 #include <utils/plotter.hpp>
 
-#define SD_LLR_FORMAT             18, 3,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define SD_LLR_FORMAT             18, 4,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 //
-SoftDemod::SoftDemod(Mapper::constellation_set_t scheme, double noise_variance) :
-HardDemod(scheme, 0),
-m_noise_variance(noise_variance)
+SoftDemod::SoftDemod(Mapper::constellation_set_t scheme) :
+HardDemod(scheme, 0.0)
 {
-    assert(noise_variance > 0);
-//    cout << "SoftDemod with " << m_bitsPerSymbol << " m_bitsPerSymbol" << endl;
+
 }
 
 bool SoftDemod::output(filter_io_t &data)
@@ -44,7 +42,6 @@ void SoftDemod::tick(void)
         double llr_den = 0;
         for (auto it = m_constellations.begin(); it != m_constellations.end(); ++it) {
             double distance = abs(it->second.toComplexDouble() - value);
-//            cout << endl << endl << "value: " << value << " dist " << distance << endl;
             if(it->first & (1<<j)) {
                 llr_num += distance;
             } else {
@@ -52,7 +49,6 @@ void SoftDemod::tick(void)
            }
 
         }
-//        cout << endl << endl << "l " << log2(llr_num/llr_den) << endl;
 
         if( llr_den == 0.0 ) {
             llr_den = 0.000000001; // fudge to avoid infinity
@@ -60,8 +56,6 @@ void SoftDemod::tick(void)
         if( llr_num == 0.0 ) {
             llr_num = 0.000000001;
         }
-
-//        cout << "num: " << llr_num << " / " << llr_den << endl;
 
         m_llrs.push( log2(llr_num/llr_den) );
     }
