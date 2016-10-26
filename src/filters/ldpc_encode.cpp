@@ -15,11 +15,12 @@ bool LDPCEncode::input(const filter_io_t &data)
     if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < sizeof(data.byte) * 8) {
         return false;
     }
-    //we go from "left to right" taking the most significant bit first
+    //push the MSB onto the FIFO first so that we output MSB first
     for (ssize_t i = 7; i >= 0 ; i--) {
         bool bit = data.byte & (1 << i);
         m_inputBuffer.push(bit);
     }
+    std::cout << "enc in: " << (int) data.byte << std::endl;
     return true;
 }
 
@@ -27,14 +28,14 @@ bool LDPCEncode::output(filter_io_t &data)
 {
     if (m_outputBuffer.size() >= 8) {
         uint8_t byte = 0;
-        //we go from "left to right" taking the most significant bit first
-        for (ssize_t i = 7; i >= 0 ; i--) {
-            uint8_t nextBit = !!m_outputBuffer.front();
+        for (size_t i = 0; i < 8; ++i) {
+            uint8_t nextBit = !!m_outputBuffer.front(); //we're popping out LSB first
             m_outputBuffer.pop();
             byte |= (nextBit << i);
         }
         data.type = IO_TYPE_BYTE;
         data.byte = byte;
+        std::cout << "enc out: " << (int)byte << std::endl;
         return true;
     }
     return false;
@@ -46,15 +47,28 @@ void LDPCEncode::tick(void)
     if (m_inputBuffer.size() >= msgLen) {
         //we've queued up enough bits
         std::vector<bool> msg(msgLen);
-        for (size_t i = 0; i < msgLen; i++) { //XXX do we loop from start to end or vice versa?
+        //we're popping off MSB first and storing MSB in msg[0]
+        for (size_t i = 0; i < msgLen; ++i) {
             bool nextBit = !!m_inputBuffer.front();
             m_inputBuffer.pop();
             msg[i] = nextBit;
         }
+//        std::cout << "msg: ";
+//        for (size_t i = 0; i < msgLen; i++) {
+//            std::cout << (int)msg[i] << " ";
+//        }
+//        std::cout << std::endl;
         std::vector<bool> cw = encode(msg);
-        for (size_t i = 0; i < cw.size(); i++) {
+        for (ssize_t i = cw.size() - 1; i >= 0; --i) {
+            //we're pushing LSB onto the FIFO first so that we output LSB first
             m_outputBuffer.push(cw[i]);
+
         }
+        std::cout << "enc msg: ";
+        for (size_t i = 0; i < cw.size(); i++) {
+            std::cout << cw[i] << " ";
+        }
+        std::cout << std::endl;
     }
 }
 

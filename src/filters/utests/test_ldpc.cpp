@@ -136,44 +136,45 @@ CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
 
 }
 
-//CSIM_TEST_CASE(LDPC_ENCODE)
-//{
-//    //the message size is 9-bits, but the input is byte aligned.
-//    //inputting 16 bits but we will only get one 9-bit message encoded
-//    //using the first 9 bits
-//    std::vector<uint8_t> u = {0b01101101, 0b00000000};
-//
-//    //in this test the codeword size is 24-bits, so we can just make comparisons
-//    //in a byte-wise fashion
-//    std::vector<uint8_t> expectedCodeWord = {0b01101101, 0b01110111, 0b10100011};
-//
-//    CSVBitMatrix p;
-//    std::vector<char> g_bytes = p.loadCSVFile("data/ldpc/code2_g.txt");
-//
-//    std::vector<std::vector<bool> > G;
-//    p.parseCSV(g_bytes, G);
-//
-//    LDPCEncode encoder(G);
-//
-//
-//    filter_io_t data;
-//    for (size_t i = 0; i < u.size(); i++) {
-//        data.type = IO_TYPE_BYTE;
-//        data.byte = u[i];
-//        encoder.input(data);
-//        encoder.tick();
-//    }
-//
-//    std::vector<uint8_t> output;
-//    while (encoder.output(data)) {
-//        BOOST_CHECK_EQUAL(data.type, IO_TYPE_BYTE);
-//        output.push_back(data.byte);
-//    }
-//    BOOST_CHECK(output.size() == 3);
-//    for (size_t i = 0; i < output.size(); i++) {
-//        BOOST_CHECK_EQUAL(output[i], expectedCodeWord[i]);
-//    }
-//}
+CSIM_TEST_CASE(LDPC_ENCODE)
+{
+    //the message size is 9-bits, but the input is byte aligned.
+    //inputting 16 bits but we will only get one 9-bit message encoded
+    //using the first 9 bits
+    std::vector<uint8_t> u = {0b01101101, 0b00000000};
+
+    //in this test the codeword size is 24-bits, so we can just make comparisons
+    //in a byte-wise fashion
+    std::vector<uint8_t> expectedCodeWord = {0b01101101, 0b01110111, 0b10100011};
+
+    CSVBitMatrix p;
+    std::vector<char> g_bytes = p.loadCSVFile("data/ldpc/code2_g.txt");
+
+    std::vector<std::vector<bool> > G;
+    p.parseCSV(g_bytes, G);
+
+    LDPCEncode encoder(G);
+
+
+    filter_io_t data;
+
+    for (size_t i = 0; i < u.size(); i++) {
+        data.type = IO_TYPE_BYTE;
+        data.byte = u[i];
+        encoder.input(data);
+        encoder.tick();
+    }
+
+    std::vector<uint8_t> output;
+    while (encoder.output(data)) {
+        BOOST_CHECK_EQUAL(data.type, IO_TYPE_BYTE);
+        output.push_back(data.byte);
+    }
+    BOOST_CHECK(output.size() == 3);
+    for (size_t i = 0; i < output.size(); i++) {
+        BOOST_CHECK_EQUAL(output[i], expectedCodeWord[output.size() - 1 - i]); //least significant byte is output first
+    }
+}
 
 //CSIM_TEST_CASE(LDPC_ENCODE_COOKED)
 //{
