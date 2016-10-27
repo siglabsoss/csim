@@ -10,3 +10,6 @@ target_link_libraries(ldpc_analysis ${Boost_LIBRARIES} sigcore sigtypes sigmath 
 
 add_executable(twiddles print_twiddle.cpp)
 target_link_libraries(twiddles sigfilters sigtypes)
+
+add_executable(complex_gaussian complex_gaussian_generator.cpp)
+target_link_libraries(complex_gaussian sigmath)
