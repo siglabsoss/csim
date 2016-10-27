@@ -39,8 +39,10 @@ void LDPCDecoder::tick(void)
         size_t solvedIterationNumber = 0;
         decode(cw, 10, didSolve, solvedIterationNumber);
 
-        for (size_t i = 0; i < 9; i++) { //XXX output only the message (not codeword)
-            m_hardOutputBits.push(LLRToBit(m_codeBits[9 - 1 - i].LLR.to_double()));
+        //Message size is equal to rows for 80211n codes (XXX this is not a generic property!)
+        size_t msgLength = m_hrows;
+        for (size_t i = 0; i < msgLength; i++) {
+            m_hardOutputBits.push(LLRToBit(m_codeBits[msgLength - 1 - i].LLR.to_double()));
         }
     }
 }
@@ -85,6 +87,7 @@ void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, 
         if (justSolved && !solved) {
             solved = true;
             solved_iterations = i;
+//            std::cout << "Codeword was solved after " << i << " iterations!" << std::endl;
         }
 
         if (!justSolved && solved) {
@@ -126,7 +129,6 @@ void LDPCDecoder::parseH()
 
 void LDPCDecoder::iteration()
 {
-
     //Bits-to-checks pass: Create messages for each edge by taking the bit's LLR given by the channel, summing
     //it with the estimates from the previous checks-to-bits pass, excluding the information that was given from the target node
     for (size_t bit = 0; bit < m_codeBits.size(); ++bit) {
@@ -171,7 +173,6 @@ void LDPCDecoder::iteration()
         }
         m_messages = m_tmpMsgs;
     }
-
 }
 
 size_t LDPCDecoder::parityCheck() const

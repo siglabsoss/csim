@@ -8,40 +8,10 @@
 
 CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 
-//CSIM_TESX_CASE(LDPC_Basic)
-//{
-//    CSVBitMatrix p;
-//    std::vector<char> bytes = p.loadCSVFile("data/ldpc/code1_h.txt");
-//
-//    std::vector<std::vector<bool> > H;
-//
-//    p.parseCSV(bytes, H);
-//
-//    size_t rows = H.size();
-//    size_t cols = H[0].size();
-//    std::cout << "Loaded H with rows, cols" << std::endl << rows << ", " << cols << std::endl;
-//
-//    LDPCDecode decode(H);
-//
-//    std::vector<int> rx = {4161 * -1, 5953 * -1, -9328 * -1, 0 * -1, -1188 * -1, 0 * -1, -1144 * -1, 0 * -1, -3925 * -1, 0 * -1, -6833 * -1, 9005 * -1, -4161 * -1, 7449 * -1, 965 * -1, -7030 * -1, 0 * -1, 0 * -1, 0 * -1, -1967 * -1, 0 * -1, 0 * -1, -9328 * -1, -3154 * -1};
-//
-//
-//    bool solved;
-//    size_t solved_in;
-//
-//    decode.decode(rx, 10, solved, solved_in);
-//    std::cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << std::endl;
-//
-//    decode.decode(rx, 10, solved, solved_in);
-//    std::cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << std::endl;
-//
-//}
-
-
-CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE_SIMPLE)
+static void runLDPCDecodeTest(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &rxCodeWord, const std::vector<bool> &validMessage, const std::string &HFileName)
 {
     CSVBitMatrix p;
-    std::vector<char> bytes = p.loadCSVFile("data/ldpc/code3_h.txt");
+    std::vector<char> bytes = p.loadCSVFile(HFileName);
 
     std::vector<std::vector<bool> > H;
 
@@ -49,123 +19,47 @@ CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE_SIMPLE)
 
     size_t rows = H.size();
     size_t cols = H[0].size();
-    std::cout << "Loaded H with rows, cols" << std::endl << rows << ", " << cols << std::endl;
-    for (size_t i = 0; i < rows; i++) {
-        for (size_t j = 0; j < cols; j++) {
-            std::cout << H[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
+    std::cout << "Loaded H with rows, cols " << rows << ", " << cols << std::endl;
 
     LDPCDecoder decode(H);
 
-    std::vector<bool> validCodeword = {1,0,1,1,0,0,1};
-    std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > llr(validCodeword.size());
-    llr[0] = -9.0;
-    llr[1] = -7.0; //this bit is an error (1 instead of 0)
-    llr[2] = -12.0;
-    llr[3] = -4.0;
-    llr[4] =  7.0;
-    llr[5] =  10.0;
-    llr[6] = -11.0;
-
     filter_io_t sample;
-    for (size_t i = 0; i < llr.size(); i++) {
-        sample = llr[llr.size() - 1 - i];
+    for (size_t i = 0; i < rxCodeWord.size(); i++) {
+        sample = rxCodeWord[rxCodeWord.size() - 1 - i];
         decode.input(sample);
         decode.tick();
     }
-
-    for (size_t i = 0; i < validCodeword.size(); i++) {
+    for (size_t i = 0; i < validMessage.size(); ++i) {
         bool didOutput = decode.output(sample);
         BOOST_CHECK_EQUAL(didOutput, true);
+        std::cout << sample.bit << ",";
         BOOST_CHECK_EQUAL(sample.type, IO_TYPE_BIT);
-        BOOST_CHECK_EQUAL(sample.bit, validCodeword[validCodeword.size() - 1 - i]);
+        BOOST_CHECK_EQUAL(sample.bit, validMessage[validMessage.size() - 1 - i]);
     }
+    std::cout << std::endl;
 }
 
-//CSIM_TEST_CASE(LDPC_HARD_CODED_MESSAGE)
-//{
-//    CSVBitMatrix p;
-//    std::vector<char> bytes = p.loadCSVFile("data/ldpc/code2_h.txt");
-//
-//    std::vector<std::vector<bool> > H;
-//
-//    p.parseCSV(bytes, H);
-//
-//    size_t rows = H.size();
-//    size_t cols = H[0].size();
-//    std::cout << "Loaded H with rows, cols" << std::endl << rows << ", " << cols << std::endl;
-//    for (size_t i = 0; i < rows; i++) {
-//        for (size_t j = 0; j < cols; j++) {
-//            std::cout << H[i][j] << " ";
-//        }
-//        std::cout << std::endl;
-//    }
-//
-//    LDPCDecoder decode(H);
-//
-//    //                      0,1,1,0,1,1,0,1,0
-//                          //0 0 0 1 0 0 1 1 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-//    std::vector<bool> rx = {0,1,1,0,1,1,0,1,0,1,1,1,0,1,1,1,1,0,1,0,0,0,1,1};
-//    std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > llr(rx.size());
-//
-//    for(size_t i = 0; i < rx.size(); i++) {
-//        //llr[i] = rx[i] * -5.0; // convert to llr
-//        if (rx[i] == 1) {
-//            llr[i] = -5.0;
-//        } else {
-//            llr[i] = 1.0;
-//        }
-//    }
-//    llr[10] = llr[10].to_double() * -1;
-//    bool solved;
-//    size_t solved_in;
-//
-//    decode.decode(llr, 10, solved, solved_in);
-//    std::cout << "solved code: " << (solved?"true":"false") << " in " << solved_in << std::endl;
-//
-//    BOOST_CHECK_EQUAL(solved, true);
-//
-//    std::vector<bool> decoded = decode.getHardCodeWord();
-//
-//    for(size_t i = 0; i < (cols-rows); i++) {
-//        BOOST_CHECK_EQUAL(rx[i], decoded[i]);
-//    }
-//
-//}
-
-CSIM_TEST_CASE(LDPC_ENCODE)
+static void runLDPCEncodeTest(const std::vector<bool> &msg, const std::vector<bool> &cw, const std::string &GFileName)
 {
-    //the message size is 9-bits, but the input is byte aligned.
-    //inputting 16 bits but we will only get one 9-bit message encoded
-    //using the first 9 bits
-    std::vector<bool> u = {0,1,1,0,1,1,0,1,0};
-
-    //in this test the codeword size is 24-bits, so we can just make comparisons
-    //in a byte-wise fashion
-    std::vector<bool> expectedCodeWord = {0,1,1,0,1,1,0,1, 0,1,1,1,0,1,1,1, 1,0,1,0,0,0,1,1};
-
     CSVBitMatrix p;
-    std::vector<char> g_bytes = p.loadCSVFile("data/ldpc/code2_g.txt");
+    std::vector<char> g_bytes = p.loadCSVFile(GFileName);
 
     std::vector<std::vector<bool> > G;
     p.parseCSV(g_bytes, G);
 
     LDPCEncode encoder(G);
 
-
     filter_io_t data;
 
     //Feed in LSB first
-    for (ssize_t i = u.size() - 1; i >= 0; --i) {
+    for (ssize_t i = msg.size() - 1; i >= 0; --i) {
         data.type = IO_TYPE_BIT;
-        data.bit = u[i];
+        data.bit = msg[i];
         encoder.input(data);
         encoder.tick();
     }
 
-    std::vector<bool> output(expectedCodeWord.size());
+    std::vector<bool> output(cw.size());
     ssize_t idx = output.size() - 1;
     while (encoder.output(data)) {
         BOOST_CHECK_EQUAL(data.type, IO_TYPE_BIT);
@@ -175,63 +69,48 @@ CSIM_TEST_CASE(LDPC_ENCODE)
     }
     BOOST_CHECK(idx == -1);
     for (size_t i = 0; i < output.size(); i++) {
-        BOOST_CHECK_EQUAL(output[i], expectedCodeWord[i]);
+        BOOST_CHECK_EQUAL(output[i], cw[i]);
     }
 }
 
-//CSIM_TEST_CASE(LDPC_ENCODE_COOKED)
-//{
-//    std::string gstring( "1,1,1,1,1\n0,1,0,0,0\n0,1,1,0,0\n" );
-//    std::vector<char> g_bytes( gstring.begin(), gstring.end() );
-//
-//    std::vector<std::vector<bool> > G;
-//    CSVBitMatrix p;
-//    p.parseCSV(g_bytes, G);
-//
-//    size_t g_rows = G.size();
-//    size_t g_cols = G[0].size();
-//    std::cout << "Loaded G with rows, cols" << std::endl << g_rows << ", " << g_cols << std::endl;
-//
-//    std::vector<bool> u = {1,0,1};
-//
-//    LDPCEncode encode(G);
-//
-//    std::vector<bool> cw;
-//    std::vector<bool> expected = {1,0,0,1,1};
-//
-//    cw = encode.encode(u);
-//
-//    for(size_t i = 0; i < cw.size(); i++)
-//    {
-//        BOOST_CHECK_EQUAL(cw[i], expected[i]);
-//    }
-//
-//
-//}
+CSIM_TEST_CASE(LDPC_80211n_DECODE)
+{
+    std::vector<bool> message          = {0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,0,1,0,0,1,1,0,0,0,0,0,1,1,0,1,1,0,1,1,1,1,1,1,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1,1,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,1,1,0,0,1,1,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,0,0,1,0,0,1,0,0,1,1,0,1,0,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0};
+    std::vector<bool> expectedCodeWord = {0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,0,1,0,0,1,1,0,0,0,0,0,1,1,0,1,1,0,1,1,1,1,1,1,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1,1,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,1,1,0,0,1,1,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,0,0,1,0,0,1,0,0,1,1,0,1,0,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,0,0,0,0,1,0,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,0,0,0,0,1,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,1,1,0,0,1,0,0,0,0,0,1,0,0,1,0,1,1,0,0,1,1,1,0,1,0,1,0,0,0,0,0,1,1,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,0,0,1,1,1,1,1,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,0,1,0,0,1,0,1,0,0,0,1,1,1,0,0,0,0,0,0,1,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1,1,0,0,1,0,0,1,1,1,0,0,0,0,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,0,1,0,1,1,0,0,1,0,0,0,0,1,0,1,1,0,1,1,0,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,0,0,1,0,1,0,0,1,1,0,1,0,0,1,1,1,0,1,1,0,1,0,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,1,1};
+    std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > llr(expectedCodeWord.size());
 
-//CSIM_TEST_CASE(CSV_Parse)
-//{
-//    CSVBitMatrix p;
-//
-//    std::vector<char> bytes;
-//    bytes = p.loadCSVFile("data/ldpc/mat1.txt");
-//
-//    uint32_t rows, cols;
-//
-//    std::vector<std::vector<bool> > H;
-//
-//    p.parseCSV(rows, cols, bytes, H);
-//
-//    std::cout << "H rows " << H.size() << " H cols " << H[0].size() << std::endl;
-//
-//    std::cout << std::endl << std::endl;
-//
-//    for (auto it = H.begin(); it != H.end(); ++it) {
-//        for (auto it2 = it->begin(); it2 != it->end(); ++it2) {
-//            std::cout << (int) *it2 << ",";
-//        }
-//        std::cout << std::endl;
-//    }
-//}
+    std::default_random_engine randomEngine;
+    std::normal_distribution<double> distribution(2.5, 1.0);
+    for (size_t i = 0; i < llr.size(); i++) {
+        double randLLR = distribution(randomEngine);
+        if (randLLR < 0.0) { //don't allow negative values
+            randLLR = 0.0;
+        }
+        if (expectedCodeWord[i] == 0) {
+            llr[i] = randLLR;
+        } else {
+            llr[i] = -randLLR; //1's are represented with negative LLRs
+        }
+    }
+
+    //Flip the bits as the following indexes
+    std::vector<size_t> errorIdxs = {123, 357, 183, 235, 260, 042, 196, 613, 546, 640, 13, 155};
+    for (size_t i = 0; i < errorIdxs.size(); i++) {
+        size_t idx = errorIdxs[i];
+        llr[idx] = -llr[idx].to_double();
+    }
+
+    runLDPCDecodeTest(llr, message, "data/ldpc/80211n_H.csv");
+}
+
+CSIM_TEST_CASE(LDPC_80211N_ENCODE)
+{
+
+    std::vector<bool> u = {0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,0,1,0,0,1,1,0,0,0,0,0,1,1,0,1,1,0,1,1,1,1,1,1,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1,1,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,1,1,0,0,1,1,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,0,0,1,0,0,1,0,0,1,1,0,1,0,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0};
+
+    std::vector<bool> expectedCodeWord = {0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,0,1,0,0,1,1,0,0,0,0,0,1,1,0,1,1,0,1,1,1,1,1,1,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1,1,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,1,1,0,0,1,1,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,0,0,1,0,0,1,0,0,1,1,0,1,0,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0,1,1,1,1,0,1,1,1,0,1,1,1,1,0,0,0,0,1,0,1,0,0,1,0,1,1,0,1,1,1,0,1,0,1,1,1,0,0,0,0,0,1,0,1,1,0,0,0,1,1,1,0,0,1,0,1,1,1,0,1,0,1,0,0,0,0,1,1,1,0,0,1,0,0,0,0,0,1,0,0,1,0,1,1,0,0,1,1,1,0,1,0,1,0,0,0,0,0,1,1,1,0,0,1,1,0,0,0,0,0,0,1,0,1,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,1,0,0,1,0,0,1,1,0,0,0,0,1,0,0,1,1,1,1,1,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,0,1,0,0,1,0,1,0,0,0,1,1,1,0,0,0,0,0,0,1,0,1,0,0,1,1,1,1,0,0,1,0,1,0,1,1,0,0,1,0,0,1,1,1,0,0,0,0,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,0,1,0,1,1,0,0,1,0,0,0,0,1,0,1,1,0,1,1,0,1,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,1,1,1,1,0,1,0,0,0,1,0,1,0,0,1,1,0,1,0,0,1,1,1,0,1,1,0,1,0,1,0,0,0,0,0,1,1,0,0,0,0,0,0,1,0,0,0,0,1,1};
+
+    runLDPCEncodeTest(u, expectedCodeWord, "data/ldpc/80211n_G.csv");
+}
 
 CSIM_TEST_SUITE_END()
