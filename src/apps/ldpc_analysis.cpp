@@ -1,24 +1,10 @@
 #include <core/sigworld.hpp>
 #include <core/logger.hpp>
 
-#include <filters/mapper.hpp>
-#include <filters/sine_wave.hpp>
-#include <filters/automatic_gain.hpp>
-#include <filters/mixer.hpp>
-#include <filters/decimator.hpp>
-#include <filters/noise_element.hpp>
-
 #include <utils/utils.hpp>
 #include <utils/radio_utils.hpp>
 
-#include <probes/sample_count_trigger.hpp>
-#include <probes/tick_count_trigger.hpp>
-#include <probes/level_trigger.hpp>
-
-#include <sys/time.h>
-#include <utility>
-
-#include "retrosim_params.hpp"
+#include <utils/plotter.hpp>
 
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
