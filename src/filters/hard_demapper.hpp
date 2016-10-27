@@ -27,5 +27,5 @@ protected:
     double                      m_theta;
     constellation_map_t         m_constellations; //mapping of symbol -> constellation vector
     size_t                      m_bitsPerSymbol;
-    std::vector<ComplexDouble>         m_points;
+    std::vector<ComplexDouble>  m_points;
 };
