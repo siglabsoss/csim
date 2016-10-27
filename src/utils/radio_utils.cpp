@@ -64,9 +64,9 @@ static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
     p.parseCSV(bytes, H);
     LDPCDecoder * decode = new LDPCDecoder(H);
     SoftDemapper * demapper = new SoftDemapper(Mapper::CONST_SET_BPSK);
-    //NoiseElement * ne    = new NoiseElement(ebn0);
+    NoiseElement * ne    = new NoiseElement(ebn0);
 
-    rxChain = *decode + *demapper;// + *ne;
+    rxChain = *decode + *demapper + *ne;
 }
 
 void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, Mapper::constellation_set_t scheme)
