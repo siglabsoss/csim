@@ -5,19 +5,22 @@
 NoiseElement::~NoiseElement()
 {
 }
-
+//we want a gaussian distribution with mean = 0 and stddev = 10^(-ebn0.20)
 NoiseElement::NoiseElement(double ebn0) :
     FilterChainElement(std::string("NoiseElement")),
-    m_inputValid(false),
-    m_scalar(pow(10, -ebn0/20.0))   // 10^(-Eb_N0_dB/20)
+    m_noiseGenerator(pow(pow(10, -ebn0/20.0), 2)), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
+    m_inputValid(false)
 {
 }
 
 bool NoiseElement::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT || data.type == IO_TYPE_COMPLEX_DOUBLE);
-    m_inputValid = true;
-    m_input = data;
+
+    m_input = data.toComplexDouble();
+    if (std::abs(m_input) > 0.01) {
+        m_inputValid = true;
+    }
     return true;
 }
 
@@ -25,8 +28,7 @@ bool NoiseElement::output(filter_io_t &data)
 {
     if (m_inputValid) {
         m_inputValid = false;
-        ComplexDouble noise = m_noiseGenerator.getNext() * (m_scalar * M_SQRT1_2);  // scaled by 1/sqrt(2) to get to 0DB noise and then by enb0 term
-        data = m_input.toComplexDouble() + noise;
+        data = m_input + m_noiseGenerator.getNext();
         return true;
     }
     return false;

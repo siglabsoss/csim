@@ -18,10 +18,9 @@ public:
     void tick(void) override;
 
 private:
-    filter_io_t m_input;
+    ComplexDouble m_input;
     ComplexGaussianNoise m_noiseGenerator;
     bool    m_inputValid;
-    double m_scalar;
 };
 
 
