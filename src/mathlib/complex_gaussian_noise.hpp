@@ -9,7 +9,7 @@ class ComplexGaussianNoise
 {
 public:
     ComplexGaussianNoise();
-    ComplexGaussianNoise(double stddev);
+    ComplexGaussianNoise(double variance);
     ComplexDouble getNext();
 
 private:

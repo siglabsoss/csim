@@ -7,10 +7,10 @@ ComplexGaussianNoise::ComplexGaussianNoise() :
 {
 }
 
-ComplexGaussianNoise::ComplexGaussianNoise(double stddev) :
+ComplexGaussianNoise::ComplexGaussianNoise(double variance) :
     m_sampleGenerator(),
-    m_realDistribution(0.0, stddev),
-    m_imagDistribution(0.0, stddev)
+    m_realDistribution(0.0, sqrt(variance/2)), //set the variance of the individual components such that the user provided variance is the variances of the magnitude
+    m_imagDistribution(0.0, sqrt(variance/2))
 {
 }
 
