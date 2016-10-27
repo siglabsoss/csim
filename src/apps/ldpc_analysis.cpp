@@ -23,6 +23,7 @@
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
 static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 72;
+static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 2000;
 
 static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 {
@@ -30,7 +31,7 @@ static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
     //Positions are irrelevant, noise is generated in rx chain per ebn0 param
     positions[0] = std::pair<double, double>(0.0, 0.0);
     positions[1] = std::pair<double, double>(0.0, 0.0);
-    construct_radio_set_ldpc_ebn0(rs, positions, 30);
+    construct_radio_set_ldpc_ebn0(rs, positions, ebn0);
 }
 
 static unsigned int runTrial(SigWorld &world, size_t numIterations)
@@ -52,7 +53,7 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
                     bool expectedBit = expectedBits.front();
                     expectedBits.pop();
                     bitDiff += (rxBit == expectedBit) ? 0 : 1;
-                    //std::cout << "radio #" << id << " received " << (int)rxBit << " bitDiff = " << bitDiff << std::endl;
+//                    std::cout << "radio #" << id << " received " << (int)rxBit << " bitDiff = " << bitDiff << std::endl;
                 }
             });
 
@@ -81,9 +82,8 @@ static unsigned int runTrial(SigWorld &world, size_t numIterations)
 
 int main(int argc, char *argv[])
 {
-    static constexpr size_t NUM_BYTES_TX_RX_DESIRED = 20;
     static constexpr double EBN_LOW = -3;
-    static constexpr double EBN_HIGH = 10;
+    static constexpr double EBN_HIGH = 8;
     log_info("Starting Bit Error Rate tester!");
     std::srand(1473294057+1);
 
@@ -100,16 +100,15 @@ int main(int argc, char *argv[])
     std::vector<double> ber1;
     std::vector<double> ebn1;
 
-    //For each modulation scheme, sweep through distances from 0 - 15km
     for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
         constructRadiosForLDPC(rs, 0, ebn0); //construct 2 radios, 'distance' meters apart
         world.init(&rs);
-        unsigned int bitDiff = runTrial(world, NUM_BYTES_TX_RX_DESIRED); //send / receive NUM_BYTES_TX_RX_DESIRED bytes
+        unsigned int bitDiff = runTrial(world, NUM_TRANSMISSION_ITERATIONS); //send / receive NUM_BYTES_TX_RX_DESIRED bytes
         world.reset();
-        double ber = (double)bitDiff / (double)(NUM_BYTES_TX_RX_DESIRED * 8);// << ", " << NUM_BYTES_TX_RX_DESIRED * 8;
-        //Record results, CSV
-//        std::cout << modSchemeToString(scheme) << ", " << ebn0 << ", " << ber << std::endl;
+        double ber = (double)bitDiff / (double)(NUM_TRANSMISSION_ITERATIONS * NUM_BITS_PER_TRANSMISSION);// << ", " << NUM_BYTES_TX_RX_DESIRED * 8;
+
         ber1.push_back(ber);
+        std::cout << "BER @ Eb/N0 of " << ebn0 << " = " << ber << std::endl;
         ebn1.push_back(ebn0);
     }
 
@@ -122,7 +121,6 @@ int main(int argc, char *argv[])
 
 
     for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
-
         double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10)));
         theoryber.push_back(theory);
         theoryebn.push_back(ebn0);
