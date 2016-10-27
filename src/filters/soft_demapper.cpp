@@ -4,7 +4,7 @@
 #include <bitset>
 #include <utils/plotter.hpp>
 
-#define SD_LLR_FORMAT             18, 4,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define SD_LLR_FORMAT             18, 8,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 //
 SoftDemapper::SoftDemapper(Mapper::constellation_set_t scheme) :
@@ -56,7 +56,8 @@ void SoftDemapper::tick(void)
             llr_num = 0.000000001;
         }
 
-        m_llrs.push( log(llr_num/llr_den) );
+        double llr = log(llr_num/llr_den);
+        m_llrs.push( llr );
     }
 }
 
