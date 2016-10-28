@@ -32,11 +32,9 @@ static void runLDPCDecodeTest(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > 
     for (size_t i = 0; i < validMessage.size(); ++i) {
         bool didOutput = decode.output(sample);
         BOOST_CHECK_EQUAL(didOutput, true);
-        std::cout << sample.bit << ",";
         BOOST_CHECK_EQUAL(sample.type, IO_TYPE_BIT);
         BOOST_CHECK_EQUAL(sample.bit, validMessage[validMessage.size() - 1 - i]);
     }
-    std::cout << std::endl;
 }
 
 static void runLDPCEncodeTest(const std::vector<bool> &msg, const std::vector<bool> &cw, const std::string &GFileName)
