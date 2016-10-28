@@ -2,8 +2,8 @@
 add_executable(test_fir ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_fir.cpp)
 target_link_libraries(test_fir ${Boost_LIBRARIES} sigfilters sigcore sigtypes sigutils)
 
-add_executable(test_fixedfft ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_fixedfft.cpp)
-target_link_libraries(test_fixedfft ${Boost_LIBRARIES} sigfilters sigcore sigtypes sigutils)
+add_executable(test_fft ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_fft.cpp)
+target_link_libraries(test_fft ${Boost_LIBRARIES} sigfilters sigcore sigtypes sigutils)
 
 add_executable(test_biquad ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_biquad.cpp)
 target_link_libraries(test_biquad ${Boost_LIBRARIES} sigfilters sigcore sigtypes sigutils)
