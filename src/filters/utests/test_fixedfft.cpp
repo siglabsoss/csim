@@ -3,7 +3,7 @@
 #include <vector> //For storing parsed data from file
 #include <stdlib.h>
 #include <utils/utils.hpp> //reverseBits()
-#include <filters/bfp_fft.hpp>
+#include <filters/fft.hpp>
 
 using namespace std;
 
@@ -25,7 +25,7 @@ CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
     data.type = IO_TYPE_COMPLEX_FIXPOINT;
     data.fc.setFormat(32, 2);
     data.fc.set(M_SQRT1_2/3, M_SQRT1_2/3);
-    BFPFFT fft(NUM_SAMPLES, false);
+    FFT fft(NUM_SAMPLES, false);
     size_t outputCount = 0;
     size_t noOutputCount = 0;
 
@@ -72,7 +72,7 @@ CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
 CSIM_TEST_CASE(FFT_IO_PARITY)
 {
     constexpr size_t NUM_SAMPLES = 2;
-    BFPFFT fft(NUM_SAMPLES, false);
+    FFT fft(NUM_SAMPLES, false);
     std::vector<filter_io_t> samples(NUM_SAMPLES*4);
     for (size_t i = 0; i < samples.size(); i++) {
         samples[i].type = IO_TYPE_COMPLEX_FIXPOINT;
@@ -127,7 +127,7 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
     int points = inputs.size();
-    BFPFFT fft(points, inverse);
+    FFT fft(points, inverse);
     filter_io_t data;
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
@@ -162,8 +162,8 @@ void runFFTLoopbackTest(const std::string &infile)
     BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
 
     int points = inputs.size();
-    BFPFFT fft(points, false);
-    BFPFFT ifft(points, true);
+    FFT fft(points, false);
+    FFT ifft(points, true);
     filter_io_t data;
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {

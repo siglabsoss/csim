@@ -8,14 +8,14 @@
  *
  */
 
-#include <filters/bfp_fft.hpp>
+#include <filters/fft.hpp>
 #include <utils/utils.hpp>
 
 //NOTE: This is meant to match the input bit width (32-bits)
 static constexpr uint32_t SCALE_FACTOR = (1 << 31);
 
-BFPFFT::BFPFFT(size_t N, bool inverse) :
-    FilterChainElement(std::string("BFPFFT")),
+FFT::FFT(size_t N, bool inverse) :
+    FilterChainElement(std::string("FFT")),
     m_numStages(static_cast<uint64_t>(log2(N))),
     m_inputs(N),
     m_outputs(N),
@@ -43,7 +43,7 @@ BFPFFT::BFPFFT(size_t N, bool inverse) :
     }
 }
 
-bool BFPFFT::input(const filter_io_t &data)
+bool FFT::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
     size_t N = m_inputs.capacity();
@@ -59,7 +59,7 @@ bool BFPFFT::input(const filter_io_t &data)
     return true;
 }
 
-bool BFPFFT::output(filter_io_t &data)
+bool FFT::output(filter_io_t &data)
 {
     if (m_outputValid == true) {
         data = m_outputs[m_outputIdx++];
@@ -71,7 +71,7 @@ bool BFPFFT::output(filter_io_t &data)
     return false;
 }
 
-void BFPFFT::tick(void)
+void FFT::tick(void)
 {
     if (m_inputIdx != m_inputs.capacity()) {
         return;
@@ -98,7 +98,7 @@ void BFPFFT::tick(void)
     assert(m_outputIdx == 0);
 }
 
-void BFPFFT::dit()
+void FFT::dit()
 {
     /**
      * Block floating point scaling operates on a per-stage basis by executing the following steps
@@ -144,7 +144,7 @@ void BFPFFT::dit()
     } //end stage loop
 }
 
-void BFPFFT::shiftFixedComplex(SLFixComplex &val, ssize_t shiftBits)
+void FFT::shiftFixedComplex(SLFixComplex &val, ssize_t shiftBits)
 {
     if (shiftBits == 0) {
         return;
@@ -159,14 +159,14 @@ void BFPFFT::shiftFixedComplex(SLFixComplex &val, ssize_t shiftBits)
     }
 }
 
-void BFPFFT::shiftStage(ssize_t shiftAmount)
+void FFT::shiftStage(ssize_t shiftAmount)
 {
     for (size_t i = 0; i < m_inputs.size(); i++) {
         shiftFixedComplex(m_inputs[i], shiftAmount);
     }
 }
 
-ssize_t BFPFFT::calculateShiftAmountForStage(size_t stage)
+ssize_t FFT::calculateShiftAmountForStage(size_t stage)
 {
     ssize_t shiftCount = 0;
     size_t upper, lower;
@@ -198,7 +198,7 @@ ssize_t BFPFFT::calculateShiftAmountForStage(size_t stage)
     return shiftCount;
 }
 
-void BFPFFT::updateMaxValueForStage(size_t stage, const SLFixComplex &val)
+void FFT::updateMaxValueForStage(size_t stage, const SLFixComplex &val)
 {
     int64_t rawValue = val.real().to_int64();
     if (static_cast<uint64_t>(abs(rawValue)) > m_maxValuePerStage[stage - 1]) {
@@ -210,7 +210,7 @@ void BFPFFT::updateMaxValueForStage(size_t stage, const SLFixComplex &val)
     }
 }
 
-SLFixComplex BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
+SLFixComplex FFT::getTwiddleFactor(size_t stage, size_t n) const
 {
     //see https://www.dsprelated.com/showarticle/107.php
     size_t N = m_inputs.size();
@@ -221,7 +221,7 @@ SLFixComplex BFPFFT::getTwiddleFactor(size_t stage, size_t n) const
     return m_twiddleFactors[A1];
 }
 
-void BFPFFT::printTwiddleFactors() const
+void FFT::printTwiddleFactors() const
 {
     size_t N = m_twiddleFactors.size();
     std::cout << "theta, real (scaled), imag (scaled), real, imag" << std::endl;

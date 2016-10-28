@@ -11,10 +11,10 @@
 
 #define FFT_TWIDDLE_FORMAT            18, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
-class BFPFFT : public FilterChainElement
+class FFT : public FilterChainElement
 {
 public:
-    BFPFFT(size_t N, bool inverse);
+    FFT(size_t N, bool inverse);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;

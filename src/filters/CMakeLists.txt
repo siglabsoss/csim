@@ -2,7 +2,7 @@ set(SIGFILTERS_SOURCES
     fixed_fir.cpp
     biquad.cpp
     biquad_iir.cpp
-    bfp_fft.cpp
+    fft.cpp
     ddc.cpp
     duc.cpp
     mixer.cpp

@@ -1,9 +1,9 @@
-#include <filters/bfp_fft.hpp>
+#include <filters/fft.hpp>
 
 
 int main(int argc, char *argv[])
 {
-    BFPFFT fft(1024, false);
+    FFT fft(1024, false);
 
     fft.printTwiddleFactors();
     return 0;
