@@ -9,12 +9,28 @@
 #include <types/fixedcomplex.hpp>
 #include <vector>
 
-#define FFT_INPUT_WL    32
+
+//this macro enables block floating point algorithm, if undefined, a bit-growth scheme is used instead
+#undef FFT_DO_BLOCK_FLOATING_POINT
+
+#ifdef FFT_DO_BLOCK_FLOATING_POINT
+#  define FFT_INPUT_WL    32
+#else
+#  define FFT_INPUT_WL    18
+#endif
 #define FFT_INPUT_IWL   2
 
-#define FFT_TWIDDLE_FORMAT            18, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define FFT_INPUT_FORMAT              FFT_INPUT_WL, FFT_INPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define FFT_OUTPUT_FORMAT             FFT_INPUT_FORMAT
+#define FFT_OUTPUT_WL   32
+
+//The best value for the integer width of the output depends on the peak-to-average ratio of the
+//inputs. Based on that information and the desired tolerable clipping rate (frequency of saturation),
+//we can determine a proper value. We want the value as low as tolerable so that we maintain as much
+//precision as possible.
+#define FFT_OUTPUT_IWL  FFT_INPUT_IWL + 6
+
+#define FFT_TWIDDLE_FORMAT            18,            1,              SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define FFT_INPUT_FORMAT              FFT_INPUT_WL,  FFT_INPUT_IWL,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define FFT_OUTPUT_FORMAT             FFT_OUTPUT_WL, FFT_OUTPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 class FFT : public FilterChainElement
 {

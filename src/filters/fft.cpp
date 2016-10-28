@@ -11,8 +11,6 @@
 #include <filters/fft.hpp>
 #include <utils/utils.hpp>
 
-#define FFT_DO_BLOCK_FLOATING_POINT
-
 FFT::FFT(size_t N, bool inverse) :
     FilterChainElement(std::string("FFT")),
     m_numStages(static_cast<uint64_t>(log2(N))),
@@ -54,10 +52,8 @@ bool FFT::input(const filter_io_t &data)
     m_inputs[reverseIdx] = data.fc;
     SLFixPoint::throwOnOverflow = false;
 
-#ifdef FFT_DO_BLOCK_FLOATING_POINT
     //Track the maximum input value for proper scaling
     updateMaxValueForStage(1, m_inputs[reverseIdx]);
-#endif
 
     return true;
 }
@@ -88,10 +84,12 @@ void FFT::tick(void)
         if (m_inverse) {
             m_inputs[i].shiftRadixRight(m_numStages);
         }
-        m_outputs[i].setFormat(m_inputs[i]);
+        m_outputs[i].setFormat(FFT_OUTPUT_FORMAT);
+        SLFixPoint::throwOnOverflow = true;
         m_outputs[i] = m_inputs[i];
+        SLFixPoint::throwOnOverflow = false;
     }
-    std::cout << "Output format is " << m_outputs[0].wl() << "," << m_outputs[0].iwl() << std::endl;
+//    std::cout << "Output format is " << m_outputs[0].wl() << "," << m_outputs[0].iwl() << std::endl;
 
     //Reset some internal state for the next round
     m_inputIdx = 0;
@@ -113,9 +111,10 @@ void FFT::dit()
     size_t N = m_inputs.size() >> 1; //number of butterflies per block
     size_t numBlocks = 1; //number of blocks per stage
     for (size_t stage = 1; stage <= m_numStages; stage++) { //stage loop
-#ifdef FFT_DO_BLOCK_FLOATING_POINT
+
         //Step 1 - Calculate shift amount
         ssize_t shiftAmount = calculateShiftAmountForStage(stage);
+#ifdef FFT_DO_BLOCK_FLOATING_POINT
         //Step 2 - Shift the inputs
         shiftStage(shiftAmount);
         //std::cout << "stage " << stage << " shifted by " << shiftAmount << std::endl;
@@ -135,19 +134,18 @@ void FFT::dit()
                 //Step 3) Perform the Radix-2 butterflies
                 SLFixComplex top = m_inputs[topIdx];
                 SLFixComplex bot = m_inputs[botIdx] * twiddle;
+
 #ifndef FFT_DO_BLOCK_FLOATING_POINT
                 //We'll simulate growth of the buffer width at each stage by adjusting
                 //the fixed point format when we're not doing block floating point.
                 size_t wordLength = m_inputs[topIdx].wl();
                 size_t intWordLength = m_inputs[topIdx].iwl();
 
-                if (stage == 1) {
-                    ++wordLength;
-                    ++intWordLength;
-                } else {
-                    wordLength += 1;
-                    intWordLength += 1;
-                }
+                //Instead of blindly growing the width of each stage to ensure no overflow, reuse the calcShiftAmount
+                //routine from BFP, to understand whether growth is possible or not. This will help keep us under
+                //SLFixPoint's 64-bit limit without impacting results
+                wordLength    += shiftAmount;
+                intWordLength += shiftAmount;
 
                 m_inputs[topIdx].setFormat(wordLength, intWordLength);
                 m_inputs[botIdx].setFormat(wordLength, intWordLength);
@@ -157,13 +155,11 @@ void FFT::dit()
                 m_inputs[botIdx] = top - bot;
                 SLFixPoint::throwOnOverflow = false;
 
-#ifdef FFT_DO_BLOCK_FLOATING_POINT
                 //Track the max value to shift the next stage properly
                 if (stage != m_numStages) {
                     updateMaxValueForStage(stage+1, m_inputs[topIdx]);
                     updateMaxValueForStage(stage+1, m_inputs[botIdx]);
                 }
-#endif
             } //end butterfly loop
         } //end block loop
         N >>= 1;
@@ -207,13 +203,20 @@ ssize_t FFT::calculateShiftAmountForStage(size_t stage)
     //a radix-2 operation. The rest of the stages have the potential to
     //grow by 2 bits. Set the upper and lower thresholds to know how
     //much to shift to accommodate the potential growth
+
+    //Using runtime word length so that this routine returns correct results even
+    //if the fixed point format of the stage inputs is changing, which is the case
+    //if BFP is turned off
+    size_t wordLength = m_inputs[0].wl();
+
     if (stage == 1 || stage == 2) {
-        upper = (1 << (FFT_INPUT_WL - FFT_INPUT_IWL)) >> 1;
-        lower = (1 << (FFT_INPUT_WL - FFT_INPUT_IWL)) >> 2;
+        upper = (1ull << (wordLength - 2)) >> 1ull;
+        lower = (1ull << (wordLength - 2)) >> 2ull;
     } else {
-        upper = (1 << (FFT_INPUT_WL - FFT_INPUT_IWL)) >> 2;
-        lower = (1 << (FFT_INPUT_WL - FFT_INPUT_IWL)) >> 3;
+        upper = (1ull << (wordLength - 2)) >> 2ull;
+        lower = (1ull << (wordLength - 2)) >> 3ull;
     }
+
     while (value >= upper || value < lower) {
         if (value >= upper) {
             value >>= 1;
