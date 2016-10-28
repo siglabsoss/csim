@@ -34,12 +34,18 @@ void LDPCDecoder::tick(void)
             cw[i] = m_softInputBits.front(); //LSBs are popped off first
             m_softInputBits.pop();
         }
+        assert(cw.size() == m_codeBits.size());
+        assert(m_codeBits.size() == m_hcols);
+
+        for (size_t i = 0; i < m_codeBits.size(); i++) {
+            m_codeBits[i].softChannelEstimate = cw[i];
+        }
 
         bool didSolve = false;
         size_t solvedIterationNumber = 0;
-        decode(cw, 10, didSolve, solvedIterationNumber);
+        decode(10, didSolve, solvedIterationNumber);
 
-        //Message size is equal to rows for 80211n codes (XXX this is not a generic property!)
+        //Message size is equal to rows for 80211n codes and the msg is sitting in the first part of the codeword (XXX this is not a generic property!)
         size_t msgLength = m_hrows;
         for (size_t i = 0; i < msgLength; i++) {
             m_hardOutputBits.push(LLRToBit(m_codeBits[msgLength - 1 - i].LLR.to_double()));
@@ -67,15 +73,8 @@ LDPCDecoder::~LDPCDecoder()
 
 }
 
-void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations)
+void LDPCDecoder::decode(size_t iterations, bool& solved, size_t& solved_iterations)
 {
-    assert(cw.size() == m_codeBits.size());
-    assert(m_codeBits.size() == m_hcols);
-
-    for (size_t i = 0; i < m_codeBits.size(); i++) {
-        m_codeBits[i].softChannelEstimate = cw[i];
-    }
-
     // These stay here if code is unsolved
     solved = false;
     solved_iterations = 0;
@@ -87,12 +86,9 @@ void LDPCDecoder::decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, 
         if (justSolved && !solved) {
             solved = true;
             solved_iterations = i;
-//            std::cout << "Codeword was solved after " << i << " iterations!" << std::endl;
+            return; //in hardware we may always complete worst-case iterations, but we'll exit early in software to speed up simulation
         }
 
-        if (!justSolved && solved) {
-            assert(true);
-        }
         iteration();
     }
 }

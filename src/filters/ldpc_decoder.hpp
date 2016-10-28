@@ -20,7 +20,7 @@ public:
     bool output(filter_io_t &data) override;
     void tick(void) override;
 
-    void decode(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &cw, size_t iterations, bool& solved, size_t& solved_iterations);
+    void decode(size_t iterations, bool& solved, size_t& solved_iterations);
 
     void printH()                       const;
     void printSoftCodeWord()            const;
