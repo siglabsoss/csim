@@ -47,6 +47,8 @@ bool FFT::input(const filter_io_t &data)
     //using a bit-reversed index to decimate in time
     size_t reverseIdx = utils::reverseBits(N, m_inputIdx++);
 
+    //Rely on upstream to use expected input format so that
+    //this module can be slightly more flexible
     m_inputs[reverseIdx].setFormat(data.fc);
     SLFixPoint::throwOnOverflow = true;
     m_inputs[reverseIdx] = data.fc;
@@ -85,6 +87,9 @@ void FFT::tick(void)
             m_inputs[i].shiftRadixRight(m_numStages);
         }
         m_outputs[i].setFormat(FFT_OUTPUT_FORMAT);
+
+        //XXX eventually remove throwOnOverflow here because we will actually
+        //allow clipping (saturation) as long as it's below an acceptable rate
         SLFixPoint::throwOnOverflow = true;
         m_outputs[i] = m_inputs[i];
         SLFixPoint::throwOnOverflow = false;
