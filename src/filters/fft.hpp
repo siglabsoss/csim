@@ -9,7 +9,12 @@
 #include <types/fixedcomplex.hpp>
 #include <vector>
 
+#define FFT_INPUT_WL    32
+#define FFT_INPUT_IWL   2
+
 #define FFT_TWIDDLE_FORMAT            18, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define FFT_INPUT_FORMAT              FFT_INPUT_WL, FFT_INPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define FFT_OUTPUT_FORMAT             FFT_INPUT_FORMAT
 
 class FFT : public FilterChainElement
 {

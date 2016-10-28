@@ -23,7 +23,7 @@ CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
     constexpr size_t NUM_SAMPLE_SETS = 10;
     filter_io_t data, output;
     data.type = IO_TYPE_COMPLEX_FIXPOINT;
-    data.fc.setFormat(32, 2);
+    data.fc.setFormat(FFT_INPUT_FORMAT);
     data.fc.set(M_SQRT1_2/3, M_SQRT1_2/3);
     FFT fft(NUM_SAMPLES, false);
     size_t outputCount = 0;
@@ -133,7 +133,7 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
         for (int j = 0; j < points; j++) {
             //std::cout << j << ": " << inputs[j] << std::endl;
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(32, 2);
+            data.fc.setFormat(FFT_INPUT_FORMAT);
             data.fc.set(inputs[j].real(), inputs[j].imag());
             //std::cout << inputs[j] << " = " << data << std::endl;
             fft.input(data);
@@ -156,7 +156,7 @@ void runFFTLoopbackTest(const std::string &infile)
 
     std::vector<ComplexDouble>          inputs;
     std::vector< SLFixComplex >         fftoutputs;
-    std::vector< ComplexDouble >         ifftoutputs;
+    std::vector< ComplexDouble >        ifftoutputs;
 
     inputs = utils::readComplexFromCSV<ComplexDouble>(inFile);
     BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
@@ -168,7 +168,7 @@ void runFFTLoopbackTest(const std::string &infile)
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(32, 2);
+            data.fc.setFormat(FFT_INPUT_FORMAT);
             data.fc.set(inputs[j].real(), inputs[j].imag());
             fft.input(data);
             fft.tick();
