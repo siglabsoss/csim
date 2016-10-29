@@ -15,7 +15,7 @@ class LDPCDecoder : public FilterChainElement
 {
 public:
     virtual ~LDPCDecoder();
-    LDPCDecoder(const std::vector<std::vector<bool> > &H);
+    LDPCDecoder(const std::vector<std::vector<bool> > &H, int16_t ldpc_rounds);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
@@ -68,6 +68,7 @@ private:
 
     std::queue< SLFixedPoint<LDPC_LLR_FORMAT> > m_softInputBits;
     std::queue< bool >                          m_hardOutputBits;
+    int16_t m_rounds;
 };
 
 bool operator<(const LDPCDecoder::GraphEdgeKey &lhs, const LDPCDecoder::GraphEdgeKey &rhs);

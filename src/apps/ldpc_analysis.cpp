@@ -9,15 +9,15 @@
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
 static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 324;
-static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 2000;
+static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 100;
 
-static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
+static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0, int16_t ldpc_rounds)
 {
     std::vector<std::pair<double, double> > positions(2);
     //Positions are irrelevant, noise is generated in rx chain per ebn0 param
     positions[0] = std::pair<double, double>(0.0, 0.0);
     positions[1] = std::pair<double, double>(0.0, 0.0);
-    construct_radio_set_ldpc_ebn0(rs, positions, ebn0);
+    construct_radio_set_ldpc_ebn0(rs, positions, ebn0, ldpc_rounds);
 }
 
 static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErrors, unsigned int &txBits)
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     static constexpr double EBN_LOW = 5;
     static constexpr double EBN_HIGH = 10;
     log_info("Starting Bit Error Rate tester!");
-    std::srand(1473294057+1);
+
 
     SigWorld world;
     RadioSet rs;
@@ -88,25 +88,32 @@ int main(int argc, char *argv[])
     std::vector<std::vector<double> > ebn0s;
     std::vector<std::string> titles;
 
-    std::vector<double> ber1;
-    std::vector<double> ebn1;
+    for(size_t rounds = 0; rounds < 3; rounds++)
+    {
+        std::srand(1473294057+1); // seed goes here so all versions of tests are operating on the same symbols
 
-    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
-        constructRadiosForLDPC(rs, 0, ebn0); //construct 2 radios, 'distance' meters apart
-        world.init(&rs);
-        unsigned int bitErrors, totalBits;
-        runTrial(world, NUM_TRANSMISSION_ITERATIONS, bitErrors, totalBits); //send / receive NUM_BYTES_TX_RX_DESIRED bytes
-        world.reset();
-        double ber = (double)bitErrors / (double)totalBits;
+        std::vector<double> ber1;
+        std::vector<double> ebn1;
 
-        ber1.push_back(ber);
-        std::cout << "BER @ Eb/N0 of " << ebn0 << " = " << ber << std::endl;
-        ebn1.push_back(ebn0);
+        for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
+            constructRadiosForLDPC(rs, 0, ebn0, rounds); //construct 2 radios, 'distance' meters apart
+            world.init(&rs);
+            unsigned int bitErrors, totalBits;
+            runTrial(world, NUM_TRANSMISSION_ITERATIONS, bitErrors, totalBits); //send / receive NUM_BYTES_TX_RX_DESIRED bytes
+            world.reset();
+            double ber = (double)bitErrors / (double)totalBits;
+
+            ber1.push_back(ber);
+            std::cout << "BER @ Eb/N0 of " << ebn0 << " = " << ber << std::endl;
+            ebn1.push_back(ebn0);
+        }
+
+        bers.push_back(ber1);
+        ebn0s.push_back(ebn1);
+        std::ostringstream oss;
+        oss << "BPSK with " << rounds << " ldpc rounds";
+        titles.push_back(oss.str());
     }
-
-    bers.push_back(ber1);
-    ebn0s.push_back(ebn1);
-    titles.push_back("BPSK");
 
     std::vector<double> theoryber;
     std::vector<double> theoryebn;

@@ -54,7 +54,7 @@ static void construct_ldpc_ebn0_tx(FilterChain &txChain)
     txChain = *bpsk + *encode;
 }
 
-static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
+static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0, int16_t ldpc_rounds)
 {
     CSVBitMatrix p;
     std::vector<char> bytes = p.loadCSVFile("data/ldpc/80211n_H.csv");
@@ -62,7 +62,7 @@ static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
     std::vector<std::vector<bool> > H;
 
     p.parseCSV(bytes, H);
-    LDPCDecoder * decode = new LDPCDecoder(H);
+    LDPCDecoder * decode = new LDPCDecoder(H, ldpc_rounds);
     SoftDemapper * demapper = new SoftDemapper(Mapper::CONST_SET_BPSK);
     NoiseElement * ne    = new NoiseElement(ebn0);
 
@@ -119,23 +119,23 @@ void construct_radio_set_ebn0(RadioSet &rs, const std::vector <std::pair<double,
     rs.init(false, true, true);
 }
 
-void construct_radio_set_ldpc_ebn0(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, double ebn0)
+void construct_radio_set_ldpc_ebn0(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, double ebn0, int16_t ldpc_rounds)
 {
     size_t count = 0;
     for (auto it = coords.begin(); it != coords.end(); it++) {
-        rs.addRadio([it, count, ebn0]()
+        rs.addRadio([it, count, ebn0, ldpc_rounds]()
                 {
                     radio_config_t config {
                         .position = Vector2d(it->first, it->second),
                         .id = static_cast<radio_id_t>(count)
                     };
-                    std::cout << "Adding radio with id = " << count << std::endl;
+//                    std::cout << "Adding radio with id = " << count << std::endl;
 
                     FilterChain modulation_chain;
                     construct_ldpc_ebn0_tx(modulation_chain);
 
                     FilterChain demodulation_chain;
-                    construct_ldpc_enb0_rx(demodulation_chain, ebn0);
+                    construct_ldpc_enb0_rx(demodulation_chain, ebn0, ldpc_rounds);
 
                     return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
                 });

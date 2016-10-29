@@ -43,7 +43,13 @@ void LDPCDecoder::tick(void)
 
         bool didSolve = false;
         size_t solvedIterationNumber = 0;
-        decode(10, didSolve, solvedIterationNumber);
+
+        if(m_rounds == 0) {
+            updateLLR();
+        } else {
+            decode(m_rounds, didSolve, solvedIterationNumber);
+        }
+
 
         //Message size is equal to rows for 80211n codes and the msg is sitting in the first part of the codeword (XXX this is not a generic property!)
         size_t msgLength = m_hrows;
@@ -53,7 +59,7 @@ void LDPCDecoder::tick(void)
     }
 }
 
-LDPCDecoder::LDPCDecoder(const std::vector<std::vector<bool> > &H):
+LDPCDecoder::LDPCDecoder(const std::vector<std::vector<bool> > &H, int16_t ldpc_rounds):
 FilterChainElement(std::string("LDPCDecoder")),
 m_hrows(H.size()),
 m_hcols(H[0].size()), //will crash if hrows == 0
@@ -63,7 +69,8 @@ m_checkNodes(m_hrows),
 m_messages(),
 m_tmpMsgs(),
 m_softInputBits(),
-m_hardOutputBits()
+m_hardOutputBits(),
+m_rounds(ldpc_rounds)
 {
     parseH();
 }
