@@ -7,19 +7,21 @@ static constexpr size_t N_FFT_POINTS = 1024;
 int main(int argc, char *argv[])
 {
     int c;
-    int gotInputFile = 0;
+    bool gotInputFile = false, shouldScale = false;
     std::string inputFile;
-    while ((c = getopt(argc, argv, "f:")) != -1) {
+    while ((c = getopt(argc, argv, "f:s")) != -1) {
         switch(c) {
         case 'f':
             inputFile = std::string(optarg);
-            gotInputFile = 1;
+            gotInputFile = true;
             break;
+        case 's':
+            shouldScale = true;
         }
     }
 
-    if (gotInputFile != 1) {
-        std::cout << "Usage: " << argv[0] << " -f <input filename>" << std::endl;
+    if (gotInputFile != true) {
+        std::cout << "Usage: " << argv[0] << " -f <input filename>" << "[-s (scaled output)]" << std::endl;
         return 1;
     }
 
@@ -61,7 +63,11 @@ int main(int argc, char *argv[])
 
     std::cout << "InReal,InImag,OutReal,OutImag" << std::endl;
     for (size_t j = 0; j < N_FFT_POINTS; j++) {
-        std::cout << inputsFP[j].real().to_double() << "," << inputsFP[j].imag().to_double() << "," << outputs[j].real().to_double() << "," << outputs[j].imag().to_double() << std::endl;
+        if (shouldScale == false) {
+            std::cout << inputsFP[j].real().to_double() << "," << inputsFP[j].imag().to_double() << "," << outputs[j].real().to_double() << "," << outputs[j].imag().to_double() << std::endl;
+        } else {
+            std::cout << inputsFP[j].real().to_int64() << "," << inputsFP[j].imag().to_int64() << "," << outputs[j].real().to_int64() << "," << outputs[j].imag().to_int64() << std::endl;
+        }
     }
 
     return 0;
