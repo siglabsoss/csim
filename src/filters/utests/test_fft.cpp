@@ -1,9 +1,12 @@
+
 #include <test/unit_test.hpp>
 
 #include <vector> //For storing parsed data from file
 #include <stdlib.h>
-#include <utils/utils.hpp> //reverseBits()
+#include <utils/utils.hpp>
+
 #include <filters/fft.hpp>
+
 
 using namespace std;
 
@@ -194,7 +197,7 @@ void runFFTLoopbackTest(const std::string &infile)
             }//If output is ready
         }
     }
-    checkErrorComplexDouble (ifftoutputs, inputs, 0.00018);
+    checkErrorComplexDouble (ifftoutputs, inputs, 0.00036);
 }
 
 template <typename T>
