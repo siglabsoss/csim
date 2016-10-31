@@ -197,7 +197,15 @@ void runFFTLoopbackTest(const std::string &infile)
             }//If output is ready
         }
     }
-    checkErrorComplexDouble (ifftoutputs, inputs, 0.00036);
+
+    //Block floating point algorithm loses precision in between stages, thus it's expected that
+    //the performance will not be as good.
+#ifdef FFT_DO_BLOCK_FLOATING_POINT
+    double threshold = 0.0032;
+#else
+    double threshold = 0.00036;
+#endif
+    checkErrorComplexDouble (ifftoutputs, inputs, threshold);
 }
 
 template <typename T>
