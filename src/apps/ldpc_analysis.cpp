@@ -9,7 +9,8 @@
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
 static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 324;
-static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 2000;
+static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 30000;
+static constexpr size_t     NUM_BIT_ERRORS_PER_EBN0 = 100;
 
 static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 {
@@ -20,50 +21,70 @@ static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
     construct_radio_set_ldpc_ebn0(rs, positions, ebn0);
 }
 
-static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErrors, unsigned int &txBits)
+static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErrors, unsigned int &numTxBits)
 {
     bool didFinishIteration = true;
     size_t rxIterations = 0;
     size_t rxCount = 0;
-    std::queue<bool> expectedBits;
-    txBits = 0;
+    numTxBits = 0;
     bitErrors = 0;
-    world.didReceiveByte([&didFinishIteration, &rxIterations, &rxCount, &expectedBits, &bitErrors, &txBits](radio_id_t id, bool rxBit)
+    std::vector<bool> txBits(NUM_BITS_PER_TRANSMISSION);
+    std::vector<bool> rxBits(NUM_BITS_PER_TRANSMISSION);
+    world.didReceiveByte([&didFinishIteration, &rxIterations, &rxCount, &rxBits, &txBits, &bitErrors, &numTxBits](radio_id_t id, bool rxBit)
             {
                 if (id == RECEIVING_RADIO_ID) {
+                    rxBits[NUM_BITS_PER_TRANSMISSION - 1 - rxCount] = rxBit;
                     ++rxCount;
                     if (rxCount == NUM_BITS_PER_TRANSMISSION) {
                         didFinishIteration = true;
                         ++rxIterations;
                         rxCount = 0;
-                    }
-                    bool expectedBit = expectedBits.front();
-                    expectedBits.pop();
-                    if (rxBit != expectedBit) {
-                        ++bitErrors;
-//                        std::cout << "bitErrors = " << bitErrors << std::endl;
+                        for (size_t i = 0; i < NUM_BITS_PER_TRANSMISSION; i++) {
+                            if (txBits[i] != rxBits[i]) {
+                                bitErrors++;
+                            }
+
+                        }
+                        if (bitErrors > 0) {
+                            std::cout << "tx:";
+                            for (size_t i = 0; i < NUM_BITS_PER_TRANSMISSION; ++i) {
+                                if ((i % 8) == 0) {
+                                    std::cout << " ";
+                                }
+                                std::cout << txBits[i] << ",";
+                            }
+                            std::cout << std::endl;
+                            std::cout << "rx:";
+                            for (size_t i = 0; i < NUM_BITS_PER_TRANSMISSION; i++) {
+                                if (i % 8 == 0) {
+                                    std::cout << " ";
+                                }
+                                std::cout << rxBits[i] << ",";
+                            }
+                            std::cout << std::endl;
+                            std::cout << "NUMBER OF BIT ERRORS = " << bitErrors << std::endl;
+                        }
                     }
 //                    bitErrors += (rxBit == expectedBit) ? 0 : 1;
-                    ++txBits;
+                    ++numTxBits;
 //                    std::cout << "radio #" << id << " received " << (int)rxBit << " bitDiff = " << bitDiff << std::endl;
                 }
             });
 
     while(true) {
-        if (rxIterations >= numIterations || bitErrors >= 100) {
-            std::cout << "Transmitted and received " << txBits / 8 << " bytes." << std::endl;
+        if (rxIterations >= numIterations || bitErrors >= NUM_BIT_ERRORS_PER_EBN0) {
+            std::cout << "Transmitted and received " << numTxBits / 8 << " bytes." << std::endl;
             std::cout << "Total bit errors = " << bitErrors << std::endl;
             break;
         }
 
         if (didFinishIteration) {
-            std::vector<bool> bits(NUM_BITS_PER_TRANSMISSION);
             for (size_t i = 0; i < NUM_BITS_PER_TRANSMISSION; ++i) {
                 bool bit = static_cast<bool>(std::rand() & 1);
-                bits[bits.size() - 1 - i] = bit;
-                expectedBits.push(bit);
+                txBits[txBits.size() - 1 - i] = bit;
             }
-            world.sendBits(SENDING_RADIO_ID, bits);
+
+            world.sendBits(SENDING_RADIO_ID, txBits);
             didFinishIteration = false;
         }
 
@@ -73,8 +94,8 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
 
 int main(int argc, char *argv[])
 {
-    static constexpr double EBN_LOW = 5;
-    static constexpr double EBN_HIGH = 10;
+    static constexpr double EBN_LOW = -3.0;
+    static constexpr double EBN_HIGH = 20.0;
     log_info("Starting Bit Error Rate tester!");
     std::srand(1473294057+1);
 
@@ -91,7 +112,7 @@ int main(int argc, char *argv[])
     std::vector<double> ber1;
     std::vector<double> ebn1;
 
-    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
+    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1.0) {
         constructRadiosForLDPC(rs, 0, ebn0); //construct 2 radios, 'distance' meters apart
         world.init(&rs);
         unsigned int bitErrors, totalBits;
@@ -112,8 +133,8 @@ int main(int argc, char *argv[])
     std::vector<double> theoryebn;
 
 
-    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1) {
-        double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10)));
+    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1.0) {
+        double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10.0)));
         theoryber.push_back(theory);
         theoryebn.push_back(ebn0);
     }
