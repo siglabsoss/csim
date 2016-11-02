@@ -65,6 +65,7 @@ private:
     std::vector<BitNode>   m_codeBits;
     std::vector<CheckNode> m_checkNodes;
     std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > m_messages; //store LLR messages per edge
+    std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > m_tmpMsgs; //store LLR messages per edge
 
     std::queue< SLFixedPoint<LDPC_LLR_FORMAT> > m_softInputBits;
     std::queue< bool >                          m_hardOutputBits;

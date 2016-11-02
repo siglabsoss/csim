@@ -52,7 +52,6 @@ void LDPCDecoder::tick(void)
             bool bit = LLRToBit(m_codeBits[msgLength - 1 - i].LLR.to_double());
             m_hardOutputBits.push(bit);
         }
-
         resetDecoderState();
     }
 }
@@ -87,6 +86,10 @@ void LDPCDecoder::resetDecoderState()
     for (auto it = m_messages.begin(); it != m_messages.end(); ++it) {
         it->second = 0.0;
     }
+
+    for (auto it = m_tmpMsgs.begin(); it != m_tmpMsgs.end(); ++it) {
+        it->second = 0.0;
+    }
 }
 
 void LDPCDecoder::decode(size_t iterations, bool& solved, size_t& solved_iterations)
@@ -102,7 +105,9 @@ void LDPCDecoder::decode(size_t iterations, bool& solved, size_t& solved_iterati
         if (justSolved && !solved) {
             solved = true;
             solved_iterations = i;
-//            std::cout << "LDPC decode success after " << i << " iterations" << std::endl;
+            if (solved_iterations != 0) { //don't want to flood the console if no decoding had to be done
+                std::cout << "LDPC decode success after " << i << " iterations" << std::endl;
+            }
             return; //in hardware we may always complete worst-case iterations, but we'll exit early in software to speed up simulation
         }
         iteration();
@@ -132,6 +137,7 @@ void LDPCDecoder::parseH()
                 GraphEdgeKey key(i, j);
 //                std::cout << "LDPC graph edge (" << i << "," << j << ")" << std::endl;
                 m_messages[key] = 0.0;
+                m_tmpMsgs[key] = 0.0;
             }
         }
 
@@ -141,7 +147,6 @@ void LDPCDecoder::parseH()
 
 void LDPCDecoder::iteration()
 {
-    std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > tmpMsgs = m_messages;   //store LLR messages per edge
     //Bits-to-checks pass: Create messages for each edge by taking the bit's LLR given by the channel, summing
     //it with the estimates from the previous checks-to-bits pass, excluding the information that was given from the target node
     for (size_t bit = 0; bit < m_codeBits.size(); ++bit) {
@@ -160,9 +165,9 @@ void LDPCDecoder::iteration()
 
             }
 //            std::cout << "Bits to Checks (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << llr.to_double() << std::endl;
-            tmpMsgs[GraphEdgeKey(targetCheck->checkNum, bit)] = llr;
+            m_tmpMsgs[GraphEdgeKey(targetCheck->checkNum, bit)] = llr;
         }
-        m_messages = tmpMsgs;
+        m_messages = m_tmpMsgs;
     }
     //Checks-to-bits pass: Create messages for each edge by taking the minimum...
     for (size_t check = 0; check < m_checkNodes.size(); ++check) {
@@ -182,9 +187,9 @@ void LDPCDecoder::iteration()
             }
             SLFixedPoint<LDPC_LLR_FORMAT> val(sign * minMag);
 //            std::cout << "Checks to Bits (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << val.to_double() << std::endl;
-            tmpMsgs[GraphEdgeKey(check, targetBit->bitNum)] = val;
+            m_tmpMsgs[GraphEdgeKey(check, targetBit->bitNum)] = val;
         }
-        m_messages = tmpMsgs;
+        m_messages = m_tmpMsgs;
     }
 }
 
