@@ -29,6 +29,7 @@ bool LDPCDecoder::output(filter_io_t &data)
 void LDPCDecoder::tick(void)
 {
     if (m_softInputBits.size() >= m_hcols) { //we have enough bits to represent a codeword
+        assert(m_hardOutputBits.size() == 0);
         std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > cw(m_hcols);
         for (ssize_t i = m_hcols - 1; i >= 0; --i) {
             cw[i] = m_softInputBits.front(); //LSBs are popped off first
@@ -48,8 +49,11 @@ void LDPCDecoder::tick(void)
         //Message size is equal to rows for 80211n codes and the msg is sitting in the first part of the codeword (XXX this is not a generic property!)
         size_t msgLength = m_hrows;
         for (size_t i = 0; i < msgLength; i++) {
-            m_hardOutputBits.push(LLRToBit(m_codeBits[msgLength - 1 - i].LLR.to_double()));
+            bool bit = LLRToBit(m_codeBits[msgLength - 1 - i].LLR.to_double());
+            m_hardOutputBits.push(bit);
         }
+
+        resetDecoderState();
     }
 }
 
@@ -61,7 +65,6 @@ m_H(H),
 m_codeBits(m_hcols),
 m_checkNodes(m_hrows),
 m_messages(),
-m_tmpMsgs(),
 m_softInputBits(),
 m_hardOutputBits()
 {
@@ -71,6 +74,19 @@ m_hardOutputBits()
 LDPCDecoder::~LDPCDecoder()
 {
 
+}
+
+void LDPCDecoder::resetDecoderState()
+{
+    //reset all memories related to decoding (this excludes IO buffers)
+    for (size_t i = 0; i < m_codeBits.size(); ++i) {
+        m_codeBits[i].LLR = 0.0;
+        m_codeBits[i].softChannelEstimate = 0.0;
+    }
+
+    for (auto it = m_messages.begin(); it != m_messages.end(); ++it) {
+        it->second = 0.0;
+    }
 }
 
 void LDPCDecoder::decode(size_t iterations, bool& solved, size_t& solved_iterations)
@@ -86,11 +102,12 @@ void LDPCDecoder::decode(size_t iterations, bool& solved, size_t& solved_iterati
         if (justSolved && !solved) {
             solved = true;
             solved_iterations = i;
+//            std::cout << "LDPC decode success after " << i << " iterations" << std::endl;
             return; //in hardware we may always complete worst-case iterations, but we'll exit early in software to speed up simulation
         }
-
         iteration();
     }
+    std::cout << "LDPC decode failed" << std::endl;
 }
 
 void LDPCDecoder::parseH()
@@ -115,7 +132,6 @@ void LDPCDecoder::parseH()
                 GraphEdgeKey key(i, j);
 //                std::cout << "LDPC graph edge (" << i << "," << j << ")" << std::endl;
                 m_messages[key] = 0.0;
-                m_tmpMsgs[key] = 0.0;
             }
         }
 
@@ -125,6 +141,7 @@ void LDPCDecoder::parseH()
 
 void LDPCDecoder::iteration()
 {
+    std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > tmpMsgs = m_messages;   //store LLR messages per edge
     //Bits-to-checks pass: Create messages for each edge by taking the bit's LLR given by the channel, summing
     //it with the estimates from the previous checks-to-bits pass, excluding the information that was given from the target node
     for (size_t bit = 0; bit < m_codeBits.size(); ++bit) {
@@ -143,9 +160,9 @@ void LDPCDecoder::iteration()
 
             }
 //            std::cout << "Bits to Checks (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << llr.to_double() << std::endl;
-            m_tmpMsgs[GraphEdgeKey(targetCheck->checkNum, bit)] = llr;
+            tmpMsgs[GraphEdgeKey(targetCheck->checkNum, bit)] = llr;
         }
-        m_messages = m_tmpMsgs;
+        m_messages = tmpMsgs;
     }
     //Checks-to-bits pass: Create messages for each edge by taking the minimum...
     for (size_t check = 0; check < m_checkNodes.size(); ++check) {
@@ -165,9 +182,9 @@ void LDPCDecoder::iteration()
             }
             SLFixedPoint<LDPC_LLR_FORMAT> val(sign * minMag);
 //            std::cout << "Checks to Bits (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << val.to_double() << std::endl;
-            m_tmpMsgs[GraphEdgeKey(check, targetBit->bitNum)] = val;
+            tmpMsgs[GraphEdgeKey(check, targetBit->bitNum)] = val;
         }
-        m_messages = m_tmpMsgs;
+        m_messages = tmpMsgs;
     }
 }
 
@@ -181,7 +198,7 @@ size_t LDPCDecoder::parityCheck() const
             parity ^= LLRToBit(m_codeBits[bitNum].LLR.to_double());
         }
         if (parity) { //odd number of ones
-            //std::cout << "equation #" << i << " does not meet parity!" << std::endl;
+//            std::cout << "equation #" << i << " does not meet parity!" << std::endl;
             ++result;
         }
     }
