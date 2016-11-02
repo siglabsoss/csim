@@ -8,9 +8,9 @@
 
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
+static constexpr size_t     NUM_ITERATIONS_PER_EBN0 = 10e7 / 324;
 static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 324;
-static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 30;
-static constexpr size_t     NUM_BIT_ERRORS_PER_EBN0 = 100;
+static constexpr size_t     NUM_BIT_ERRORS_PER_EBN0 = NUM_BITS_PER_TRANSMISSION * 10;
 
 static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 {
@@ -97,7 +97,8 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
 int main(int argc, char *argv[])
 {
     static constexpr double EBN_LOW = -3.0;
-    static constexpr double EBN_HIGH = 20.0;
+    static constexpr double EBN_HIGH = 0.0;
+    static constexpr double EBN_INCR = 0.25;
     log_info("Starting Bit Error Rate tester!");
     std::srand(1473294057+1);
 
@@ -114,11 +115,15 @@ int main(int argc, char *argv[])
     std::vector<double> ber1;
     std::vector<double> ebn1;
 
-    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1.0) {
+    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += EBN_INCR) {
+        double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10.0)));
+
+        std::cout << "Running Eb/N0 of " << ebn0 << " with theoretical BER of " << theory << std::endl;
+
         constructRadiosForLDPC(rs, 0, ebn0); //construct 2 radios, 'distance' meters apart
         world.init(&rs);
         unsigned int bitErrors, totalBits;
-        runTrial(world, NUM_TRANSMISSION_ITERATIONS, bitErrors, totalBits); //send / receive NUM_BYTES_TX_RX_DESIRED bytes
+        runTrial(world, NUM_ITERATIONS_PER_EBN0, bitErrors, totalBits); //send / receive NUM_BYTES_TX_RX_DESIRED bytes
         world.reset();
         double ber = (double)bitErrors / (double)totalBits;
 
@@ -134,8 +139,10 @@ int main(int argc, char *argv[])
     std::vector<double> theoryber;
     std::vector<double> theoryebn;
 
+    static constexpr double EBN_THEORY_LOW = -3.0;
+    static constexpr double EBN_THEORY_HIGH = 20;
 
-    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += 1.0) {
+    for (double ebn0 = EBN_THEORY_LOW; ebn0 <= EBN_THEORY_HIGH; ebn0 += EBN_INCR) {
         double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10.0)));
         theoryber.push_back(theory);
         theoryebn.push_back(ebn0);
