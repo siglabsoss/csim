@@ -5,6 +5,24 @@
 
 #include <cassert>
 
+LDPCDecoder::LDPCDecoder(const std::vector<std::vector<bool> > &H):
+FilterChainElement(std::string("LDPCDecoder")),
+m_hrows(H.size()),
+m_hcols(H[0].size()), //will crash if hrows == 0
+m_H(H),
+m_codeBits(m_hcols),
+m_checkNodes(m_hrows),
+m_messages(),
+m_softInputBits(),
+m_hardOutputBits()
+{
+    parseH();
+}
+
+LDPCDecoder::~LDPCDecoder()
+{
+
+}
 
 bool LDPCDecoder::input(const filter_io_t &data)
 {
@@ -44,7 +62,33 @@ void LDPCDecoder::tick(void)
 
         bool didSolve = false;
         size_t solvedIterationNumber = 0;
-        decode(10, didSolve, solvedIterationNumber);
+        decode(20, didSolve, solvedIterationNumber);
+
+        if (didSolve) {
+            if (solvedIterationNumber != 0) {
+                std::cout << "LDPC decode success after " << solvedIterationNumber << " iterations" << std::endl;
+            }
+        } else {
+            std::cout << "LDPC decode failed" << std::endl;
+            std::cout << "Before Decode: ";
+            for (size_t i = 0; i < cw.size(); ++i) {
+                std::cout << LLRToBit(cw[i].to_double());
+                if (i != cw.size() - 1) {
+                    std::cout << ",";
+                } else {
+                    std::cout << std::endl;
+                }
+            }
+            std::cout << "After Decode: ";
+            for (size_t i = 0; i < m_codeBits.size(); ++i) {
+                std::cout << LLRToBit(m_codeBits[i].LLR.to_double());
+                if (i != m_codeBits.size() - 1) {
+                    std::cout << ",";
+                } else {
+                    std::cout << std::endl;
+                }
+            }
+        }
 
         //Message size is equal to rows for 80211n codes and the msg is sitting in the first part of the codeword (XXX this is not a generic property!)
         size_t msgLength = m_hrows;
@@ -56,23 +100,23 @@ void LDPCDecoder::tick(void)
     }
 }
 
-LDPCDecoder::LDPCDecoder(const std::vector<std::vector<bool> > &H):
-FilterChainElement(std::string("LDPCDecoder")),
-m_hrows(H.size()),
-m_hcols(H[0].size()), //will crash if hrows == 0
-m_H(H),
-m_codeBits(m_hcols),
-m_checkNodes(m_hrows),
-m_messages(),
-m_softInputBits(),
-m_hardOutputBits()
+void LDPCDecoder::decode(size_t iterations, bool& solved, size_t& solved_iterations)
 {
-    parseH();
-}
+    // These stay here if code is unsolved
+    solved = false;
+    solved_iterations = 0;
 
-LDPCDecoder::~LDPCDecoder()
-{
-
+    for(size_t i = 0; i < iterations; ++i)
+    {
+        updateLLR();
+        bool justSolved = (parityCheck()== 0);
+        if (justSolved && !solved) {
+            solved = true;
+            solved_iterations = i;
+            return; //in hardware we may always complete worst-case iterations, but we'll exit early in software to speed up simulation
+        }
+        iteration();
+    }
 }
 
 void LDPCDecoder::resetDecoderState()
@@ -90,29 +134,6 @@ void LDPCDecoder::resetDecoderState()
     for (auto it = m_tmpMsgs.begin(); it != m_tmpMsgs.end(); ++it) {
         it->second = 0.0;
     }
-}
-
-void LDPCDecoder::decode(size_t iterations, bool& solved, size_t& solved_iterations)
-{
-    // These stay here if code is unsolved
-    solved = false;
-    solved_iterations = 0;
-
-    for(size_t i = 0; i < iterations; ++i)
-    {
-        updateLLR();
-        bool justSolved = (parityCheck()== 0);
-        if (justSolved && !solved) {
-            solved = true;
-            solved_iterations = i;
-            if (solved_iterations != 0) { //don't want to flood the console if no decoding had to be done
-                std::cout << "LDPC decode success after " << i << " iterations" << std::endl;
-            }
-            return; //in hardware we may always complete worst-case iterations, but we'll exit early in software to speed up simulation
-        }
-        iteration();
-    }
-    std::cout << "LDPC decode failed" << std::endl;
 }
 
 void LDPCDecoder::parseH()
