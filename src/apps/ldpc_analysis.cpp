@@ -9,7 +9,7 @@
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
 static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 324;
-static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 30000;
+static constexpr size_t     NUM_TRANSMISSION_ITERATIONS = 30;
 static constexpr size_t     NUM_BIT_ERRORS_PER_EBN0 = 100;
 
 static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
@@ -39,13 +39,15 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
                         didFinishIteration = true;
                         ++rxIterations;
                         rxCount = 0;
+                        size_t additionalBitErrors = 0;
                         for (size_t i = 0; i < NUM_BITS_PER_TRANSMISSION; i++) {
                             if (txBits[i] != rxBits[i]) {
-                                bitErrors++;
+                                additionalBitErrors++;
                             }
 
                         }
-                        if (bitErrors > 0) {
+                        bitErrors += additionalBitErrors;
+                        if (additionalBitErrors > 0) {
                             std::cout << "tx:";
                             for (size_t i = 0; i < NUM_BITS_PER_TRANSMISSION; ++i) {
                                 if ((i % 8) == 0) {
@@ -62,7 +64,7 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
                                 std::cout << rxBits[i] << ",";
                             }
                             std::cout << std::endl;
-                            std::cout << "NUMBER OF BIT ERRORS = " << bitErrors << std::endl;
+                            std::cout << "NUMBER OF BIT ERRORS = " << bitErrors << " (+" << additionalBitErrors << ")" << std::endl;
                         }
                     }
 //                    bitErrors += (rxBit == expectedBit) ? 0 : 1;
