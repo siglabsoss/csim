@@ -10,7 +10,7 @@ static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
 static constexpr size_t     NUM_ITERATIONS_PER_EBN0 = 10e7 / 324;
 static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 324;
-static constexpr size_t     NUM_BIT_ERRORS_PER_EBN0 = NUM_BITS_PER_TRANSMISSION * 10;
+static constexpr size_t     NUM_BIT_ERRORS_PER_EBN0 = 400; //400 was recommended in (http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf)
 
 static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 {
@@ -97,7 +97,7 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
 int main(int argc, char *argv[])
 {
     static constexpr double EBN_LOW = -3.0;
-    static constexpr double EBN_HIGH = 0.0;
+    static constexpr double EBN_HIGH = 1.0;
     static constexpr double EBN_INCR = 0.25;
     log_info("Starting Bit Error Rate tester!");
     std::srand(1473294057+1);
