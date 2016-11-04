@@ -303,4 +303,14 @@ CSIM_TEST_CASE(SATURATION)
     BOOST_CHECK_EQUAL(a.to_uint64(), 0x81);
 }
 
+CSIM_TEST_CASE(BASIC_SUBTRACTION)
+{
+    SLFixPoint a(8, 3, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    SLFixPoint b(16, 4, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    a = 0.5;
+    b = 1.0;
+    SLFixPoint c = a - b;
+    BOOST_CHECK_EQUAL(c.to_int64(), -0x10);
+}
+
 CSIM_TEST_SUITE_END()
