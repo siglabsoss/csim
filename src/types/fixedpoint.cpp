@@ -67,7 +67,7 @@ SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs) const
     tempLHS = *this;
 
     assert(tempLHS.m_fl == tempRHS.m_fl);
-    SLFixPoint result(resultWordLength, resultIntLength);
+    SLFixPoint result(resultWordLength, resultIntLength, this->m_quantMode, this->m_overflowMode);
     result.m_value = tempLHS.m_value + tempRHS.m_value;
 
     bool sameSign = (tempLHS.m_value >= 0 && tempRHS.m_value >= 0) || (tempLHS.m_value < 0 && tempRHS.m_value < 0);
@@ -125,7 +125,7 @@ SLFixPoint SLFixPoint::operator*(const SLFixPoint &rhs) const
 {
     assert(this->m_wl + rhs.m_wl <= sizeof(this->m_value)*8);
     ssize_t intWidth = (this->m_wl - this->m_fl) + (rhs.m_wl - rhs.m_fl);
-    SLFixPoint result(this->m_wl + rhs.m_wl, intWidth);
+    SLFixPoint result(this->m_wl + rhs.m_wl, intWidth, this->m_quantMode, this->m_overflowMode);
     result.m_value = (this->m_value * rhs.m_value);
     result.maskAndSignExtend();
     return result;
