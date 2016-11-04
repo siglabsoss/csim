@@ -11,6 +11,8 @@
 #include <filters/fft.hpp>
 #include <utils/utils.hpp>
 
+#define FFT_DO_DECIMATE_IN_FREQUENCY
+
 FFT::FFT(size_t N, bool inverse) :
     FilterChainElement(std::string("FFT")),
     m_numStages(static_cast<uint64_t>(log2(N))),
@@ -43,19 +45,24 @@ FFT::FFT(size_t N, bool inverse) :
 bool FFT::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-    size_t N = m_inputs.capacity();
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+    size_t inputIdx = m_inputIdx++;
+#else
     //using a bit-reversed index to decimate in time
-    size_t reverseIdx = utils::reverseBits(N, m_inputIdx++);
+    size_t N = m_inputs.capacity();
+    size_t inputIdx = utils::reverseBits(N, m_inputIdx++);
+#endif
 
     //Rely on upstream to use expected input format so that
     //this module can be slightly more flexible
-    m_inputs[reverseIdx].setFormat(data.fc);
+    m_inputs[inputIdx].setFormat(data.fc);
+
     SLFixPoint::throwOnOverflow = true;
-    m_inputs[reverseIdx] = data.fc;
+    m_inputs[inputIdx] = data.fc;
     SLFixPoint::throwOnOverflow = false;
 
     //Track the maximum input value for proper scaling
-    updateMaxValueForStage(1, m_inputs[reverseIdx]);
+    updateMaxValueForStage(1, m_inputs[inputIdx]);
 
     return true;
 }
@@ -74,24 +81,30 @@ bool FFT::output(filter_io_t &data)
 
 void FFT::tick(void)
 {
-    if (m_inputIdx != m_inputs.capacity()) {
+    if (m_inputIdx != m_inputs.size()) {
         return;
     }
 
     //We're good to go...
-    dit();
+    execute();
 
     for (size_t i = 0; i < m_inputs.size(); i++) {
         //For IIFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
         if (m_inverse) {
             m_inputs[i].shiftRadixRight(m_numStages);
         }
-        m_outputs[i].setFormat(FFT_OUTPUT_FORMAT);
 
         //XXX eventually remove throwOnOverflow here because we will actually
         //allow clipping (saturation) as long as it's below an acceptable rate
         SLFixPoint::throwOnOverflow = true;
-        m_outputs[i] = m_inputs[i];
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+        size_t outIdx = utils::reverseBits(m_inputs.size(), i);
+#else
+        size_t outIdx = i;
+#endif
+
+        m_outputs[outIdx].setFormat(FFT_OUTPUT_FORMAT);
+        m_outputs[outIdx] = m_inputs[i];
         SLFixPoint::throwOnOverflow = false;
     }
 //    std::cout << "Output format is " << m_outputs[0].wl() << "," << m_outputs[0].iwl() << std::endl;
@@ -105,7 +118,7 @@ void FFT::tick(void)
     assert(m_outputIdx == 0);
 }
 
-void FFT::dit()
+void FFT::execute()
 {
     /**
      * Block floating point scaling operates on a per-stage basis by executing the following steps
@@ -114,11 +127,11 @@ void FFT::dit()
      * 3) Perform the radix-2 butterflies
      */
     size_t N = m_inputs.size() >> 1; //number of butterflies per block
-    size_t numBlocks = 1; //number of blocks per stage
+    size_t numBlocks = 1; //number of blocks in the current stage
     for (size_t stage = 1; stage <= m_numStages; stage++) { //stage loop
-
         //Step 1 - Calculate shift amount
         ssize_t shiftAmount = calculateShiftAmountForStage(stage);
+
 #ifdef FFT_DO_BLOCK_FLOATING_POINT
         //Step 2 - Shift the inputs
         shiftStage(shiftAmount);
@@ -131,14 +144,30 @@ void FFT::dit()
             size_t baseB = baseT + N;
             for (size_t n = 0; n < N; n++) { //butterfly loop
 
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+                size_t topIdx = baseT + n;//utils::reverseBits(m_inputs.size(), baseT + n);
+                size_t botIdx = baseB + n;//utils::reverseBits(m_inputs.size(), baseB + n);
+#else
                 size_t topIdx = utils::reverseBits(m_inputs.size(), baseT + n);
                 size_t botIdx = utils::reverseBits(m_inputs.size(), baseB + n);
+#endif
 
-                SLFixComplex twiddle = getTwiddleFactor(stage, n + baseT/2);
+//                std::cout << topIdx << " & " << botIdx << std::endl;
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+                size_t k = n;
+#else
+                size_t k = n + block * N;
+#endif
+                SLFixComplex twiddle = getTwiddleFactor(stage, k);
 
                 //Step 3) Perform the Radix-2 butterflies
                 SLFixComplex top = m_inputs[topIdx];
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+                SLFixComplex bot = m_inputs[botIdx];
+#else
                 SLFixComplex bot = m_inputs[botIdx] * twiddle;
+#endif
+
 
 #ifndef FFT_DO_BLOCK_FLOATING_POINT
                 //We'll simulate growth of the buffer width at each stage by adjusting
@@ -151,13 +180,22 @@ void FFT::dit()
                 //SLFixPoint's 64-bit limit without impacting results
                 wordLength    += shiftAmount;
                 intWordLength += shiftAmount;
-
                 m_inputs[topIdx].setFormat(wordLength, intWordLength);
+
+
+                wordLength = m_inputs[botIdx].wl();
+                intWordLength = m_inputs[botIdx].iwl();
+                wordLength += shiftAmount;
+                intWordLength += shiftAmount;
                 m_inputs[botIdx].setFormat(wordLength, intWordLength);
 #endif
                 SLFixPoint::throwOnOverflow = true;
                 m_inputs[topIdx] = top + bot;
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+                m_inputs[botIdx] = (top - bot) * twiddle;
+#else
                 m_inputs[botIdx] = top - bot;
+#endif
                 SLFixPoint::throwOnOverflow = false;
 
                 //Track the max value to shift the next stage properly
@@ -249,11 +287,16 @@ void FFT::updateMaxValueForStage(size_t stage, const SLFixComplex &val)
 SLFixComplex FFT::getTwiddleFactor(size_t stage, size_t n) const
 {
     //see https://www.dsprelated.com/showarticle/107.php
-    size_t N = m_inputs.size();
     size_t stageSize = (1 << stage);
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+    size_t A1 = (stageSize * n) / 2;
+#else
+    size_t N = m_inputs.size();
     size_t A1 = (stageSize * n) / N;
     int temp = m_numStages - 1;
     A1 = utils::reverseBits(1 << temp, A1);
+#endif
+//    std::cout << "stage " << stage << " twiddle: " << n << " -> " << A1 << std::endl;
     return m_twiddleFactors[A1];
 }
 

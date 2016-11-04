@@ -18,7 +18,7 @@
 #else
 #  define FFT_INPUT_WL    18
 #endif
-#define FFT_INPUT_IWL   2
+#define FFT_INPUT_IWL   3
 
 #define FFT_OUTPUT_WL   18
 
@@ -28,7 +28,7 @@
 //precision as possible.
 #define FFT_OUTPUT_IWL  FFT_INPUT_IWL + 5
 
-#define FFT_TWIDDLE_FORMAT            18,            1,              SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define FFT_TWIDDLE_FORMAT            16,            1,              SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define FFT_INPUT_FORMAT              FFT_INPUT_WL,  FFT_INPUT_IWL,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define FFT_OUTPUT_FORMAT             FFT_OUTPUT_WL, FFT_OUTPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
@@ -43,7 +43,7 @@ public:
     void printTwiddleFactors() const;
 private:
     SLFixComplex getTwiddleFactor(size_t stage, size_t n) const;
-    void dit();
+    void execute();
 
     void shiftFixedComplex(SLFixComplex &val, ssize_t shiftBits);
     void shiftOutput(ssize_t shiftAmount);
