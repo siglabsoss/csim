@@ -61,8 +61,11 @@ SLFixPoint SLFixPoint::addition(const SLFixPoint &rhs) const
 {
     size_t resultWordLength = std::max(this->m_wl, rhs.m_wl);
     ssize_t resultIntLength = resultWordLength - std::min(this->m_fl, rhs.m_fl);
-    SLFixPoint tempRHS(resultWordLength, resultIntLength);
-    SLFixPoint tempLHS(resultWordLength, resultIntLength);
+    //Adding one integer bit to prevent overflow
+    resultIntLength++;
+    resultWordLength++;
+    SLFixPoint tempRHS(resultWordLength, resultIntLength, rhs.m_quantMode, rhs.m_overflowMode);
+    SLFixPoint tempLHS(resultWordLength, resultIntLength, this->m_quantMode, this->m_overflowMode);
     tempRHS = rhs;
     tempLHS = *this;
 
