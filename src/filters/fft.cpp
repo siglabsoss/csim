@@ -145,8 +145,8 @@ void FFT::execute()
             for (size_t n = 0; n < N; n++) { //butterfly loop
 
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
-                size_t topIdx = baseT + n;//utils::reverseBits(m_inputs.size(), baseT + n);
-                size_t botIdx = baseB + n;//utils::reverseBits(m_inputs.size(), baseB + n);
+                size_t topIdx = baseT + n;
+                size_t botIdx = baseB + n;
 #else
                 size_t topIdx = utils::reverseBits(m_inputs.size(), baseT + n);
                 size_t botIdx = utils::reverseBits(m_inputs.size(), baseB + n);
@@ -161,13 +161,24 @@ void FFT::execute()
                 SLFixComplex twiddle = getTwiddleFactor(stage, k);
 
                 //Step 3) Perform the Radix-2 butterflies
-                SLFixComplex top = m_inputs[topIdx];
-#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
-                SLFixComplex bot = m_inputs[botIdx];
-#else
-                SLFixComplex bot = m_inputs[botIdx] * twiddle;
+                SLFixComplex top, bot;
+                top.setFormat(m_inputs[topIdx]);
+                bot.setFormat(m_inputs[botIdx]);
+#ifndef FFT_DO_BLOCK_FLOATING_POINT
+                //Make sure our intermediate values have their widths increased, not just the input buffer
+                top.setFormat(shiftAmount + top.wl(), shiftAmount + top.iwl());
+                bot.setFormat(shiftAmount + bot.wl(), shiftAmount + bot.iwl());
 #endif
-
+                top = m_inputs[topIdx];
+#ifdef FFT_DO_DECIMATE_IN_FREQUENCY
+                bot = m_inputs[botIdx];
+                if (stage == 1) {
+                    std::cout << "top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
+                    std::cout << "bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
+                }
+#else
+                bot = m_inputs[botIdx] * twiddle;
+#endif
 
 #ifndef FFT_DO_BLOCK_FLOATING_POINT
                 //We'll simulate growth of the buffer width at each stage by adjusting
@@ -193,6 +204,10 @@ void FFT::execute()
                 m_inputs[topIdx] = top + bot;
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 m_inputs[botIdx] = (top - bot) * twiddle;
+                if (stage == 1) {
+                    std::cout << "m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
+                    std::cout << "m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
+                }
 #else
                 m_inputs[botIdx] = top - bot;
 #endif

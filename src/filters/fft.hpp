@@ -18,7 +18,7 @@
 #else
 #  define FFT_INPUT_WL    18
 #endif
-#define FFT_INPUT_IWL   3
+#define FFT_INPUT_IWL   2
 
 #define FFT_OUTPUT_WL   18
 
