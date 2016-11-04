@@ -165,17 +165,17 @@ void FFT::execute()
                 top.setFormat(m_inputs[topIdx]);
                 bot.setFormat(m_inputs[botIdx]);
 #ifndef FFT_DO_BLOCK_FLOATING_POINT
-                //Make sure our intermediate values have their widths increased, not just the input buffer
-                top.setFormat(shiftAmount + top.wl(), shiftAmount + top.iwl());
-                bot.setFormat(shiftAmount + bot.wl(), shiftAmount + bot.iwl());
+                //Make sure our intermediate values have their widths increased if necessary, not just the input buffer
+                top.setFormat(1 + top.wl(), 1 + top.iwl());
+                bot.setFormat(1 + bot.wl(), 1 + bot.iwl());
 #endif
                 top = m_inputs[topIdx];
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 bot = m_inputs[botIdx];
-                if (stage == 1) {
-                    std::cout << "top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
-                    std::cout << "bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
-                }
+//                if (stage == 1) {
+//                    std::cout << "top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
+//                    std::cout << "bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
+//                }
 #else
                 bot = m_inputs[botIdx] * twiddle;
 #endif
@@ -204,10 +204,10 @@ void FFT::execute()
                 m_inputs[topIdx] = top + bot;
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 m_inputs[botIdx] = (top - bot) * twiddle;
-                if (stage == 1) {
-                    std::cout << "m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
-                    std::cout << "m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
-                }
+//                if (stage == 1) {
+//                    std::cout << "m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
+//                    std::cout << "m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
+//                }
 #else
                 m_inputs[botIdx] = top - bot;
 #endif

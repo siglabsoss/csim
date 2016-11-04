@@ -18,9 +18,9 @@
 #else
 #  define FFT_INPUT_WL    18
 #endif
-#define FFT_INPUT_IWL   2
+#define FFT_INPUT_IWL   3
 
-#define FFT_OUTPUT_WL   18
+#define FFT_OUTPUT_WL   19
 
 //The best value for the integer width of the output depends on the peak-to-average ratio of the
 //inputs. Based on that information and the desired tolerable clipping rate (frequency of saturation),
