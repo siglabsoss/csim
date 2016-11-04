@@ -5,10 +5,11 @@
 NoiseElement::~NoiseElement()
 {
 }
-//we want a gaussian distribution with mean = 0 and stddev = 10^(-ebn0.20)
+//we want a gaussian distribution with mean = 0 and stddev = 10^(-ebn0/20)
 NoiseElement::NoiseElement(double ebn0) :
     FilterChainElement(std::string("NoiseElement")),
-    m_noiseGenerator(pow(pow(10, -ebn0/20.0), 2)), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
+    //XXX this is the noise variance for BPSK + 1/2 rate code. this shouldn't be hardcoded
+    m_noiseGenerator(pow(pow(10, -ebn0/20.0) * 2, 2)), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
     m_inputValid(false)
 {
 }
