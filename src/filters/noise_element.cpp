@@ -9,7 +9,7 @@ NoiseElement::~NoiseElement()
 NoiseElement::NoiseElement(double ebn0) :
     FilterChainElement(std::string("NoiseElement")),
     //XXX this is the noise variance for BPSK + 1/2 rate code. this shouldn't be hardcoded
-    m_noiseGenerator(pow(pow(10, -ebn0/20.0) * 2, 2)), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
+    m_noiseGenerator(1.0 / (pow(10, ebn0/10.0))), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
     m_inputValid(false)
 {
 }
