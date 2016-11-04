@@ -161,23 +161,16 @@ void FFT::execute()
                 SLFixComplex twiddle = getTwiddleFactor(stage, k);
 
                 //Step 3) Perform the Radix-2 butterflies
-                SLFixComplex top, bot;
-                top.setFormat(m_inputs[topIdx]);
-                bot.setFormat(m_inputs[botIdx]);
-#ifndef FFT_DO_BLOCK_FLOATING_POINT
-                //Make sure our intermediate values have their widths increased if necessary, not just the input buffer
-                top.setFormat(1 + top.wl(), 1 + top.iwl());
-                bot.setFormat(1 + bot.wl(), 1 + bot.iwl());
-#endif
-                top = m_inputs[topIdx];
+
+                SLFixComplex top = m_inputs[topIdx];
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
-                bot = m_inputs[botIdx];
+                SLFixComplex bot = m_inputs[botIdx];
 //                if (stage == 1) {
 //                    std::cout << "top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
 //                    std::cout << "bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
 //                }
 #else
-                bot = m_inputs[botIdx] * twiddle;
+                SLFixComplex bot = m_inputs[botIdx] * twiddle;
 #endif
 
 #ifndef FFT_DO_BLOCK_FLOATING_POINT
