@@ -399,7 +399,7 @@ void SLFixPoint::setFormat(size_t wordLength, ssize_t intLength, quant_mode_t qu
 
 void SLFixPoint::setFormat(const SLFixPoint &other)
 {
-    setFormat(other.m_wl, other.m_fl, other.m_quantMode, other.m_overflowMode);
+    setFormat(other.m_wl, other.m_wl - other.m_fl, other.m_quantMode, other.m_overflowMode);
 }
 
 std::ostream& operator<<(std::ostream& os, const SLFixPoint& obj)

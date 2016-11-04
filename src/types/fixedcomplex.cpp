@@ -136,14 +136,14 @@ void SLFixComplex::setFormat(size_t wordLength, size_t intLength, SLFixPoint::qu
 
 void SLFixComplex::setFormat(const SLFixComplex &other)
 {
-    m_real.setFormat(other.real().wl(), other.real().iwl());
-    m_imag.setFormat(other.imag().wl(), other.real().iwl());
+    m_real.setFormat(other.real());
+    m_imag.setFormat(other.imag());
 }
 
 void SLFixComplex::setFormat(const SLFixPoint &other)
 {
-    m_real.setFormat(other.wl(), other.iwl());
-    m_imag.setFormat(other.wl(), other.iwl());
+    m_real.setFormat(other);
+    m_imag.setFormat(other);
 }
 
 SLFixPoint  SLFixComplex::real() const
