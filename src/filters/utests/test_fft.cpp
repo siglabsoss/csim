@@ -20,58 +20,6 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
 void runFFTLoopbackTest(const std::string &infile);
 void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const vector<std::complex<int32_t> > &expected, uint32_t threshold);
 
-CSIM_TEST_CASE(FFT_CONSTANT_INPUTS)
-{
-    constexpr size_t NUM_SAMPLES = 8;
-    constexpr size_t NUM_SAMPLE_SETS = 10;
-    filter_io_t data, output;
-    data.type = IO_TYPE_COMPLEX_FIXPOINT;
-    data.fc.setFormat(FFT_INPUT_FORMAT);
-    data.fc.set(M_SQRT1_2/3, M_SQRT1_2/3);
-    FFT fft(NUM_SAMPLES, false);
-    size_t outputCount = 0;
-    size_t noOutputCount = 0;
-
-    for (unsigned int i = 0; i < NUM_SAMPLE_SETS; i++) {
-        for (unsigned int j = 0; j < NUM_SAMPLES; j++) {
-            fft.input(data);
-            fft.tick();
-            if (fft.output(output)) {
-                //double outputReal = output.toComplexDouble().real();
-                //double outputImag = output.toComplexDouble().imag();
-                double outputReal = output.fc.real().to_double();
-                double outputImag = output.fc.imag().to_double();
-
-                double realDiff = 1.0;
-                double imagDiff = 1.0;
-                double answersReal = 0.0;
-                double answersImag = 0.0;
-
-                if (outputCount % NUM_SAMPLES == 0) {
-                    answersReal = NUM_SAMPLES * M_SQRT1_2 / 3;
-                    answersImag = NUM_SAMPLES * M_SQRT1_2 / 3;
-                    realDiff = fabs(outputReal - answersReal);
-                    imagDiff = fabs(outputImag - answersImag);
-                } else {
-                    realDiff = fabs(outputReal - answersReal);
-                    imagDiff = fabs(outputImag - answersImag);
-                }
-                double difference = 0.001;
-                BOOST_CHECK_MESSAGE(realDiff < difference,
-                "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
-                BOOST_CHECK_MESSAGE(imagDiff < difference,
-                "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
-                //std::cout << outputCount << ": " << output << " " << output.toComplexDouble() << std::endl;
-                outputCount++;
-            } else {
-               noOutputCount++;
-            }
-        }
-    }
-    //std::cout << "No outputs for " << noOutputCount << " counts" << std::endl;
-    BOOST_CHECK_EQUAL(outputCount, NUM_SAMPLES * (NUM_SAMPLE_SETS - 1) + 1 );
-}
-
 CSIM_TEST_CASE(FFT_IO_PARITY)
 {
     constexpr size_t NUM_SAMPLES = 2;
@@ -99,6 +47,11 @@ CSIM_TEST_CASE(FFT_IO_PARITY)
 
     assert( count == samples.size() - (NUM_SAMPLES - 1) );
 }
+
+//CSIM_TEST_CASE(FFT_MATLAB_8PT)
+//{
+//    runFFTTest("./data/fft/input/input_8pt.csv", "./data/fft/answers/output_8pt.csv", false);
+//}
 
 CSIM_TEST_CASE(FFT_MATLAB)
 {
