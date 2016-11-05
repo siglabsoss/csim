@@ -108,12 +108,32 @@ int main(int argc, char *argv[])
     const plotter &plot = plotter::get();
 
 
-    std::vector<std::vector<double> > bers;
-    std::vector<std::vector<double> > ebn0s;
+    std::vector<std::vector<double> > bers(2);
+    std::vector<std::vector<double> > ebn0s(2);
     std::vector<std::string> titles;
 
-    std::vector<double> ber1;
-    std::vector<double> ebn1;
+    std::vector<double> berSim;
+    std::vector<double> ebn0Sim;
+
+    std::vector<double> theoryber;
+    std::vector<double> theoryebn;
+
+    static constexpr double EBN_THEORY_LOW = -3.0;
+    static constexpr double EBN_THEORY_HIGH = 20;
+
+    for (double ebn0 = EBN_THEORY_LOW; ebn0 <= EBN_THEORY_HIGH; ebn0 += EBN_INCR) {
+        //Probability of bit error is 1/2 * erfc(sqrt(Eb/N0))
+        double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10.0)));
+        theoryber.push_back(theory);
+        theoryebn.push_back(ebn0);
+    }
+
+//    bers.push_back(theoryber);
+    bers[0] = theoryber;
+    ebn0s[0] = theoryebn;
+//    ebn0s.push_back(theoryebn);
+    titles.push_back("BPSK Theory");
+    titles.push_back("LDPC 1/2 Rate BPSK Simulation");
 
     for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += EBN_INCR) {
         double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10.0)));
@@ -127,34 +147,14 @@ int main(int argc, char *argv[])
         world.reset();
         double ber = (double)bitErrors / (double)totalBits;
 
-        ber1.push_back(ber);
+        berSim.push_back(ber);
         std::cout << "BER @ Eb/N0 of " << ebn0 << " = " << ber << std::endl;
-        ebn1.push_back(ebn0);
+        ebn0Sim.push_back(ebn0);
+
+        bers[1] = berSim;
+        ebn0s[1] = ebn0Sim;
+        plot.nplotber(bers, ebn0s, titles, "first");
     }
-
-    bers.push_back(ber1);
-    ebn0s.push_back(ebn1);
-    titles.push_back("BPSK");
-
-    std::vector<double> theoryber;
-    std::vector<double> theoryebn;
-
-    static constexpr double EBN_THEORY_LOW = -3.0;
-    static constexpr double EBN_THEORY_HIGH = 20;
-
-    for (double ebn0 = EBN_THEORY_LOW; ebn0 <= EBN_THEORY_HIGH; ebn0 += EBN_INCR) {
-        double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10.0)));
-        theoryber.push_back(theory);
-        theoryebn.push_back(ebn0);
-    }
-
-    bers.push_back(theoryber);
-    ebn0s.push_back(theoryebn);
-    titles.push_back("BPSK Theory");
-
-
-
-    plot.nplotber(bers, ebn0s, titles, "first");
 
     usleep(1000000.0); // move this into plotter somehow
 
