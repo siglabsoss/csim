@@ -166,6 +166,13 @@ void LDPCDecoder::parseH()
     }
 }
 
+void LDPCDecoder::printEdges() const
+{
+    for (auto it = m_messages.begin(); it != m_messages.end(); ++it) {
+        std::cout << "(" << it->first.checkNum << "," << it->first.bitNum << ") = " << it->second.to_double() << std::endl;
+    }
+}
+
 void LDPCDecoder::iteration()
 {
     //Bits-to-checks pass: Create messages for each edge by taking the bit's LLR given by the channel, summing
@@ -185,6 +192,8 @@ void LDPCDecoder::iteration()
         }
     }
     m_messages = m_tmpMsgs;
+//    std::cout << "Bits-to-checks" << std::endl;
+//    printEdges();
     //Checks-to-bits pass: Create messages for each edge by taking the minimum...
     for (size_t check = 0; check < m_checkNodes.size(); ++check) {
         double minMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
@@ -195,12 +204,14 @@ void LDPCDecoder::iteration()
 
             double msgVal = m_messages[GraphEdgeKey(check, currentBit->bitNum)].to_double();
             if (std::abs(msgVal) < minMag) {
+                secondMinMag = minMag;
                 minMag = std::abs(msgVal);
             } else if (std::abs(msgVal) < secondMinMag) {
                 secondMinMag = std::abs(msgVal);
             }
             sign *= (msgVal < 0.0) ? -1.0 : 1.0;
         }
+
         for (size_t i = 0; i < m_checkNodes[check].bits.size(); ++i) {
             BitNode *currentBit = m_checkNodes[check].bits[i];
             double msgVal = m_messages[GraphEdgeKey(check, currentBit->bitNum)].to_double();
@@ -219,6 +230,8 @@ void LDPCDecoder::iteration()
         }
     }
     m_messages = m_tmpMsgs;
+//    std::cout << "Checks-to-bits" << std::endl;
+//    printEdges();
 }
 
 size_t LDPCDecoder::parityCheck() const

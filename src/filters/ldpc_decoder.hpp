@@ -58,6 +58,7 @@ private:
     void iteration();
     static bool LLRToBit(double llr);
     void resetDecoderState();
+    void printEdges() const;
 
     uint32_t m_hrows;
     uint32_t m_hcols;
