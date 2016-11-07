@@ -189,23 +189,32 @@ void LDPCDecoder::iteration()
     m_messages = m_tmpMsgs;
     //Checks-to-bits pass: Create messages for each edge by taking the minimum...
     for (size_t check = 0; check < m_checkNodes.size(); ++check) {
+        double minMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
+        double secondMinMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
+        double sign = 1.0;
         for (size_t i = 0; i < m_checkNodes[check].bits.size(); ++i) {
-            BitNode *targetBit = m_checkNodes[check].bits[i];
-            double minMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
-            double sign = 1.0;
-            for (size_t j = 0; j < m_checkNodes[check].bits.size(); ++j) {
-                if (i == j) { //skip the bit node we're targetting our message towards
-                    continue;
-                }
-                BitNode *otherBit = m_checkNodes[check].bits[j];
+            BitNode *currentBit = m_checkNodes[check].bits[i];
 
-                double msgVal = m_messages[GraphEdgeKey(check, otherBit->bitNum)].to_double();
-                minMag = std::min(minMag, std::abs(msgVal));
-                sign *= (msgVal < 0.0) ? -1.0 : 1.0;
+            double msgVal = m_messages[GraphEdgeKey(check, currentBit->bitNum)].to_double();
+            if (std::abs(msgVal) < minMag) {
+                minMag = std::abs(msgVal);
+            } else if (std::abs(msgVal) < secondMinMag) {
+                secondMinMag = std::abs(msgVal);
             }
-            SLFixedPoint<LDPC_LLR_FORMAT> val(sign * minMag);
-//            std::cout << "Checks to Bits (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << val.to_double() << std::endl;
-            m_tmpMsgs[GraphEdgeKey(check, targetBit->bitNum)] = val;
+            sign *= (msgVal < 0.0) ? -1.0 : 1.0;
+        }
+        for (size_t i = 0; i < m_checkNodes[check].bits.size(); ++i) {
+            BitNode *currentBit = m_checkNodes[check].bits[i];
+            double msgVal = m_messages[GraphEdgeKey(check, currentBit->bitNum)].to_double();
+            double finalSign = sign;
+            finalSign *= (msgVal < 0.0) ? -1.0 : 1.0;
+            if (std::abs(msgVal) == minMag) {
+                SLFixedPoint<LDPC_LLR_FORMAT> val(finalSign * secondMinMag);
+                m_tmpMsgs[GraphEdgeKey(check, currentBit->bitNum)] = val;
+            } else {
+                SLFixedPoint<LDPC_LLR_FORMAT> val(finalSign * minMag);
+                m_tmpMsgs[GraphEdgeKey(check, currentBit->bitNum)] = val;
+            }
         }
     }
     m_messages = m_tmpMsgs;
