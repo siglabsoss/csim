@@ -139,6 +139,17 @@ static void runLDPCLoopbackTest(const std::vector<bool> &msg, const std::string 
     }
 }
 
+CSIM_TEST_CASE(LDPC_DECODE_FLASH_SUMMIT_EXAMPLE)
+{
+    //This is the example parity matrix and codeword from
+    //https://dl.dropboxusercontent.com/content_link/w8n7SI6nL2TSa8R5kABYL32eBYpGzACL8g8DTxGmTNukqbENnzoelQkIQQpls0xp/file
+
+    std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > llrs = {-9.0, -7.0, -12.0, -4.0, 7.0, 10.0, -11.0};
+    std::vector<bool> message = {1, 0, 1};
+
+    runLDPCDecodeTest(llrs, message, "data/ldpc/code3_h.txt");
+}
+
 CSIM_TEST_CASE(LDPC_80211n_DECODE_MATLAB_GENERATED_CODEWORD)
 {
     std::vector<bool> message          = {0,0,0,0,0,1,1,1,1,0,0,0,1,1,1,1,0,0,0,1,1,0,1,0,0,1,1,0,0,0,0,0,1,1,0,1,1,0,1,1,1,1,1,1,1,0,0,1,0,1,1,0,1,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,1,0,0,0,0,1,1,0,0,1,1,1,1,0,1,0,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,1,1,0,0,1,1,1,0,0,1,0,0,0,1,1,0,0,1,0,0,0,0,0,1,1,0,1,0,0,0,0,1,1,1,1,0,1,1,1,0,0,1,0,0,0,0,1,0,0,0,0,1,1,0,1,1,0,0,1,1,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1,0,1,0,0,1,0,1,1,1,0,1,1,1,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,0,1,1,0,0,1,0,1,0,0,0,1,0,0,1,0,0,1,1,0,1,0,1,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,1,0,0,0,0,1,0,0,1,1,0,1,1,0,1,1,1,0,0,0,0,0,0,0,1,1,0,1,1,1,1,0};
