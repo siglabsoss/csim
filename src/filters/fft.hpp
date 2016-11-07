@@ -28,7 +28,7 @@
 //precision as possible.
 #define FFT_OUTPUT_IWL  FFT_INPUT_IWL + 5
 
-#define FFT_TWIDDLE_FORMAT            16,            1,              SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define FFT_TWIDDLE_FORMAT            18,            1,              SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define FFT_INPUT_FORMAT              FFT_INPUT_WL,  FFT_INPUT_IWL,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define FFT_OUTPUT_FORMAT             FFT_OUTPUT_WL, FFT_OUTPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
