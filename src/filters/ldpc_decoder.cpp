@@ -174,13 +174,11 @@ void LDPCDecoder::iteration()
         SLFixedPoint<LDPC_LLR_FORMAT> llr = m_codeBits[bit].softChannelEstimate;
         for (size_t i = 0; i < m_codeBits[bit].checks.size(); ++i) {
             CheckNode *currentCheckNode = m_codeBits[bit].checks[i];
-            //std::cout << m_messages[key] << std::endl;
-//            std::cout << llr.to_double() << " + " << m_messages[key].to_double();
             llr = llr.to_double() + m_messages[GraphEdgeKey(currentCheckNode->checkNum, bit)].to_double();
-//            std::cout << " = " << llr.to_double() << std::endl;
-//            std::cout << "Bits to Checks (" << key.bitNum << "," << key.checkNum << ") " << m_messages[key].to_double() << " -> " << llr.to_double() << std::endl;
-
         }
+
+        //We need to disregard the information given by the particular node we're updating. In the case of bits-to-checks, where we're summing up the LLRs,
+        //we can simply take the sum of all of the LLRs (from the loop above) and subtract the value given by the particular check node.
         for (size_t i = 0; i < m_codeBits[bit].checks.size(); ++i) {
             CheckNode *currentCheckNode = m_codeBits[bit].checks[i];
             m_tmpMsgs[GraphEdgeKey(currentCheckNode->checkNum, bit)] = llr.to_double() - m_messages[GraphEdgeKey(currentCheckNode->checkNum, bit)].to_double();
@@ -207,6 +205,9 @@ void LDPCDecoder::iteration()
             BitNode *currentBit = m_checkNodes[check].bits[i];
             double msgVal = m_messages[GraphEdgeKey(check, currentBit->bitNum)].to_double();
             double finalSign = sign;
+            //We need to disregard the information given by the particular node we're updating. In the case of checks-to-bits, where we're finding the minimum magnitude,
+            //we can simply keep track of the second minimum magnitude and use that only for the node which was responsible for the minimum magnitude. The effect of the current
+            //nodes sign can be undone by multiplying it again.
             finalSign *= (msgVal < 0.0) ? -1.0 : 1.0;
             if (std::abs(msgVal) == minMag) {
                 SLFixedPoint<LDPC_LLR_FORMAT> val(finalSign * secondMinMag);
