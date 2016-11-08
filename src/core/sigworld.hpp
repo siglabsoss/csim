@@ -14,7 +14,7 @@ public:
 
     bool sendBit(radio_id_t id, bool byte);
     bool sendBits(radio_id_t id, const std::vector<bool> &bits);
-    void didReceiveByte(std::function< void(radio_id_t, bool) > callback);
+    void didReceiveBit(std::function< void(radio_id_t, bool) > callback);
     void setExternalDataSource(std::function< void(const RadioS *current, ComplexDouble &data) > source);
     void setExternalDataDestination(std::function< void(const RadioS *current, const ComplexDouble &data) > destination);
 private:

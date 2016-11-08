@@ -96,7 +96,7 @@ bool SigWorld::sendBits(radio_id_t id, const std::vector<bool> &bits)
     return didSendAll;
 }
 
-void SigWorld::didReceiveByte(std::function< void(radio_id_t, bool) > callback)
+void SigWorld::didReceiveBit(std::function< void(radio_id_t, bool) > callback)
 {
     m_rxCallback = callback;
 }
