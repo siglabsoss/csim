@@ -8,9 +8,10 @@
 
 static constexpr radio_id_t SENDING_RADIO_ID = 0;
 static constexpr radio_id_t RECEIVING_RADIO_ID = 1;
-static constexpr size_t     NUM_ITERATIONS_PER_EBN0 = 10e7 / 324;
+static constexpr size_t     NUM_ITERATIONS_PER_EBN0 = (10e9 / 324);
 static constexpr size_t     NUM_BITS_PER_TRANSMISSION = 324;
 static constexpr size_t     NUM_BIT_ERRORS_PER_EBN0 = 400; //400 was recommended in (http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf)
+static constexpr size_t     NUM_RX_BIT_PER_PRINT = (8 * 1024 * 10);
 
 static void constructRadiosForLDPC(RadioSet &rs, double distance, double ebn0)
 {
@@ -26,11 +27,12 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
     bool didFinishIteration = true;
     size_t rxIterations = 0;
     size_t rxCount = 0;
+    size_t rxPrintCount = 0;
     numTxBits = 0;
     bitErrors = 0;
     std::vector<bool> txBits(NUM_BITS_PER_TRANSMISSION);
     std::vector<bool> rxBits(NUM_BITS_PER_TRANSMISSION);
-    world.didReceiveByte([&didFinishIteration, &rxIterations, &rxCount, &rxBits, &txBits, &bitErrors, &numTxBits](radio_id_t id, bool rxBit)
+    world.didReceiveBit([&didFinishIteration, &rxIterations, &rxCount, &rxBits, &txBits, &bitErrors, &numTxBits, &rxPrintCount](radio_id_t id, bool rxBit)
             {
                 if (id == RECEIVING_RADIO_ID) {
                     rxBits[NUM_BITS_PER_TRANSMISSION - 1 - rxCount] = rxBit;
@@ -69,6 +71,11 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
                     }
 //                    bitErrors += (rxBit == expectedBit) ? 0 : 1;
                     ++numTxBits;
+                    ++rxPrintCount;
+                    if (rxPrintCount == NUM_RX_BIT_PER_PRINT) {
+                        rxPrintCount = 0;
+                        std::cout << "Transmitted " << numTxBits << " bits" << " with " << bitErrors << " errors" << std::endl;
+                    }
 //                    std::cout << "radio #" << id << " received " << (int)rxBit << " bitDiff = " << bitDiff << std::endl;
                 }
             });
@@ -96,7 +103,7 @@ static void runTrial(SigWorld &world, size_t numIterations, unsigned int &bitErr
 
 int main(int argc, char *argv[])
 {
-    static constexpr double EBN_LOW = -3.0;
+    static constexpr double EBN_LOW =  1.0;
     static constexpr double EBN_HIGH = 1.0;
     static constexpr double EBN_INCR = 0.25;
     log_info("Starting Bit Error Rate tester!");
@@ -128,16 +135,13 @@ int main(int argc, char *argv[])
         theoryebn.push_back(ebn0);
     }
 
-//    bers.push_back(theoryber);
     bers[0] = theoryber;
     ebn0s[0] = theoryebn;
-//    ebn0s.push_back(theoryebn);
     titles.push_back("BPSK Theory");
     titles.push_back("LDPC 1/2 Rate BPSK Simulation");
 
-    for (double ebn0 = EBN_LOW; ebn0 <= EBN_HIGH; ebn0 += EBN_INCR) {
+    for (double ebn0 = EBN_HIGH; ebn0 >= EBN_LOW; ebn0 -= EBN_INCR) {
         double theory = 0.5 * erfc(sqrt(pow(10, ebn0/10.0)));
-
         std::cout << "Running Eb/N0 of " << ebn0 << " with theoretical BER of " << theory << std::endl;
 
         constructRadiosForLDPC(rs, 0, ebn0); //construct 2 radios, 'distance' meters apart
