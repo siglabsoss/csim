@@ -65,9 +65,9 @@ void LDPCDecoder::tick(void)
         decode(20, didSolve, solvedIterationNumber);
 
         if (didSolve) {
-            if (solvedIterationNumber != 0) {
-                std::cout << "LDPC decode success after " << solvedIterationNumber << " iterations" << std::endl;
-            }
+//            if (solvedIterationNumber != 0) {
+//                std::cout << "LDPC decode success after " << solvedIterationNumber << " iterations" << std::endl;
+//            }
         } else {
             std::cout << "LDPC decode failed" << std::endl;
             std::cout << "Before Decode: ";
