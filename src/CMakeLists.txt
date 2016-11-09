@@ -43,13 +43,6 @@ endif( ZEROMQ_FOUND )
 # --- End 0MQ ---
 
 
-find_package(SystemC)
-if(SystemC_FOUND)
-    include_directories(${SystemC_INCLUDE_DIRS})
-    link_directories(${SystemC_LIBRARIES})
-else()
-    message( FATAL_ERROR "SystemC library not found." )
-endif()
 add_definitions(-DSC_DISABLE_API_VERSION_CHECK)
 add_definitions(-DSC_INCLUDE_DYNAMIC_PROCESSES)
 
