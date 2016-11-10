@@ -182,15 +182,14 @@ static void runLoopbackTest(const std::string &halfbandCoeffFile, const std::str
             if (duc.output(output)) {
 //                std::cout << "duc: " << data << std::endl;
                 ddc.input(output);
-                ddc.tick();
-                if (ddc.output(output)) {
-//                    std::cout << "out " << outputCount << ": " << output << std::endl;
-                    outputCount++;
-                    //XXX compare magnitude/phase
-                    if (outputCount > 100) {
-                        BOOST_CHECK(std::abs(input.fc.real().to_double() - output.fc.real().to_double()) < 0.1);
-                        BOOST_CHECK(std::abs(input.fc.imag().to_double() - output.fc.imag().to_double()) < 0.1);
-                    }
+            }
+            ddc.tick();
+            if (ddc.output(output)) {
+                outputCount++;
+                //XXX compare magnitude/phase
+                if (outputCount > 100) {
+                    BOOST_CHECK(std::abs(input.fc.real().to_double() - output.fc.real().to_double()) < 0.1);
+                    BOOST_CHECK(std::abs(input.fc.imag().to_double() - output.fc.imag().to_double()) < 0.1);
                 }
             }
         }
