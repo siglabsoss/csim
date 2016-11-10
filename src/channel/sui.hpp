@@ -10,11 +10,12 @@
  */
 namespace SUI
 {
-    std::vector<double> getDelays(unsigned int channelNumber);
-    std::vector<double> getPowers(unsigned int channelNumber);
-    std::vector<double> getKFactors(unsigned int channelNumber);
-    std::vector<double> getDopplers(unsigned int channelNumber);
+    const std::vector<double> &getDelays(unsigned int channelNumber);
+    const std::vector<double> &getPowers(unsigned int channelNumber);
+    const std::vector<double> &getKFactors(unsigned int channelNumber);
+    const std::vector<double> &getDopplers(unsigned int channelNumber);
     double              getAntennaCorr(unsigned int channelNumber);
     double              getNormFactor(unsigned int channelNumber);
+//    std::vector< std::vector<double> > fading(unsigned int channelNumber, size_t N, size_t Nfading, size_t Nfosf);
 }
 
