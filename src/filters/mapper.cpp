@@ -1,4 +1,5 @@
 #include <filters/mapper.hpp>
+#include <filters/fft.hpp>
 
 #include <core/parameters.hpp>
 
@@ -66,7 +67,8 @@ void Mapper::tick(void)
             symbol = getNextSymbol();
             m_output = m_constellations.at(symbol);
         } else {
-            m_output = constellation_t(0.0, 0.0);
+            m_output = constellation_t(FFT_INPUT_FORMAT);
+            m_output.set(0.0, 0.0);
         }
         m_tickCount = 0;
     }
@@ -89,8 +91,8 @@ symbol_t Mapper::getNextSymbol()
 constellation_map_t Mapper::getBPSKConstellations()
 {
     constellation_map_t constellations;
-    constellations[0b0] = constellation_t(32, 2);
-    constellations[0b1] = constellation_t(32, 2);
+    constellations[0b0] = constellation_t(FFT_INPUT_FORMAT);
+    constellations[0b1] = constellation_t(FFT_INPUT_FORMAT);
 
     constellations[0b0].set(-1.0, 0.0);
     constellations[0b1].set(1.0, 0.0);
@@ -100,10 +102,10 @@ constellation_map_t Mapper::getBPSKConstellations()
 constellation_map_t Mapper::getQPSKConstellations()
 {
     constellation_map_t constellations;
-    constellations[0b00] = constellation_t(32, 2);
-    constellations[0b01] = constellation_t(32, 2);
-    constellations[0b11] = constellation_t(32, 2);
-    constellations[0b10] = constellation_t(32, 2);
+    constellations[0b00] = constellation_t(FFT_INPUT_FORMAT);
+    constellations[0b01] = constellation_t(FFT_INPUT_FORMAT);
+    constellations[0b11] = constellation_t(FFT_INPUT_FORMAT);
+    constellations[0b10] = constellation_t(FFT_INPUT_FORMAT);
 
     constellations[0b00].set(-M_SQRT1_2, -M_SQRT1_2);
     constellations[0b01].set(-M_SQRT1_2,  M_SQRT1_2);
@@ -116,7 +118,7 @@ constellation_map_t Mapper::get8PSKConstellations()
 {
     constellation_map_t constellations;
     for (size_t i = 0; i < 8; i++) {
-        constellations[i] = constellation_t(32, 2);
+        constellations[i] = constellation_t(FFT_INPUT_FORMAT);
     }
     constellations[0b000].set(-M_SQRT1_2, -M_SQRT1_2);
     constellations[0b001].set(-1.0,  0.0);
@@ -135,7 +137,7 @@ constellation_map_t Mapper::getQAM16Constellations()
     constellation_map_t constellations;
     //Top Right
     for (size_t i = 0; i < 16; i++) {
-            constellations[i] = constellation_t(32, 2);
+            constellations[i] = constellation_t(FFT_INPUT_FORMAT);
     }
     constellations[0b0000].set( M_SQRT1_2/3,  M_SQRT1_2/3);
     constellations[0b0001].set( M_SQRT1_2  ,  M_SQRT1_2/3);
