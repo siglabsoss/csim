@@ -56,7 +56,7 @@ void SigWorld::tick()
         }
 
 
-        /* Step 5 - Check for output bytes */
+        /* Step 5 - Check for output bits */
         bool outputBit;
         if (current->rxBit(outputBit)) {
             if (m_rxCallback) {
