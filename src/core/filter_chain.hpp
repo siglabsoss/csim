@@ -10,6 +10,7 @@ class FilterChain : public AbstractSISO < filter_io_t, filter_io_t >
 public:
     FilterChain();
     FilterChain(FilterChain &&other);
+    FilterChain(const FilterChainElement &other);
     virtual ~FilterChain() {}
 
     void init();

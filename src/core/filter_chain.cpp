@@ -17,6 +17,14 @@ FilterChain::FilterChain(FilterChain &&other) :
 {
 }
 
+FilterChain::FilterChain(const FilterChainElement &other) :
+        m_head(nullptr),
+        m_output(),
+        m_outputReady(false)
+{
+    (void)this->operator=(other);
+}
+
 void FilterChain::init()
 {
 
