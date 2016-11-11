@@ -1,5 +1,6 @@
 
 #include <filters/noise_element.hpp>
+#include <filters/fft.hpp>
 #include <utils/plotter.hpp>
 
 NoiseElement::~NoiseElement()
@@ -29,7 +30,11 @@ bool NoiseElement::output(filter_io_t &data)
 {
     if (m_inputValid) {
         m_inputValid = false;
-        data = m_input + m_noiseGenerator.getNext();
+        ComplexDouble output = m_input + m_noiseGenerator.getNext();
+        data.type = IO_TYPE_COMPLEX_FIXPOINT;
+        data.fc.setFormat(FFT_INPUT_FORMAT);
+        data.fc.real(output.real());
+        data.fc.imag(output.imag());
         return true;
     }
     return false;
