@@ -1,9 +1,8 @@
 #include <test/unit_test.hpp>
 
 #define private public
-#include <filters/soft_demapper.hpp>
+#include <filters/demapper.hpp>
 #undef private
-#include <filters/hard_demapper.hpp>
 #include <utils/plotter.hpp>
 
 
@@ -20,8 +19,8 @@ CSIM_TEST_CASE(LLR_CALCULATION)
 
     //The example input/output was generated from a Simulink simulation (-0.9125, 0.0) -> 3.65 LLR
     double awgnVar = 1.0;
-    double p0   = SoftDemapper::calcLLRIncrement(ComplexDouble(-0.9125, 0.0), ComplexDouble(-1.0, 0.0), awgnVar);
-    double p1   = SoftDemapper::calcLLRIncrement(ComplexDouble(-0.9125, 0.0), ComplexDouble( 1.0, 0.0), awgnVar);
+    double p0   = Demapper::calcLLRIncrement(ComplexDouble(-0.9125, 0.0), ComplexDouble(-1.0, 0.0), awgnVar);
+    double p1   = Demapper::calcLLRIncrement(ComplexDouble(-0.9125, 0.0), ComplexDouble( 1.0, 0.0), awgnVar);
 
     BOOST_CHECK_CLOSE(log(p0/p1), 3.65, 0.001);
 }

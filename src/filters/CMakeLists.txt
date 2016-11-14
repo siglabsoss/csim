@@ -8,9 +8,8 @@ set(SIGFILTERS_SOURCES
     mixer.cpp
     decimator.cpp
     mapper.cpp
-    hard_demapper.cpp
+    demapper.cpp
     nco.cpp
-    soft_demapper.cpp
     noise_element.cpp
     ldpc_decoder.cpp
     ldpc_encode.cpp
