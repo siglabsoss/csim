@@ -6,6 +6,4 @@
 
 
 void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, Mapper::constellation_set_t scheme = Mapper::CONST_SET_BPSK);
-void construct_radio_set_ebn0(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, double ebn0, Mapper::constellation_set_t scheme = Mapper::CONST_SET_BPSK);
 void construct_radio_set_ldpc_ebn0(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, double ebn0);
-void construct_radio_set_loopback_ebn0(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, double ebn0);
