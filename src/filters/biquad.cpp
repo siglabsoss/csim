@@ -6,8 +6,8 @@
 
 Biquad::Biquad(size_t coeffBitWidth) :
     FilterChainElement("Biquad"),
-    m_x(3, SLFixComplex(0.0, 0.0)),
-    m_y(3, SLFixComplex(0.0, 0.0)),
+    m_x(3),
+    m_y(3),
     m_b(3),
     m_a(2),
     m_newInput(false),
@@ -18,8 +18,8 @@ Biquad::Biquad(size_t coeffBitWidth) :
 
 Biquad::Biquad(const Biquad &other) :
         FilterChainElement("Biquad"),
-        m_x(3, SLFixComplex(0.0, 0.0)),
-        m_y(3, SLFixComplex(0.0, 0.0)),
+        m_x(3),
+        m_y(3),
         m_b(3),
         m_a(2),
         m_newInput(false),
@@ -67,8 +67,8 @@ void Biquad::init(const SOSCoeffs &coeffs)
     m_a[1] = a2;
 
     for (size_t i = 0; i < m_x.size(); i++) {
-       m_x[i].setFormat(16, 1);
-       m_y[i].setFormat(16, 1);
+       m_x[i].setFormat(BIQUAD_INPUT_FORMAT);
+       m_y[i].setFormat(BIQUAD_INPUT_FORMAT);
     }
 
     log_debug("Coefficient format is Q(%d.%d)", maxIntLength, m_coeffWidth - maxIntLength);

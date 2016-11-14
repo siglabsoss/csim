@@ -3,6 +3,8 @@
 #include <core/filter_chain_element.hpp>
 #include <vector>
 
+#define BIQUAD_INPUT_FORMAT     16, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+
 class Biquad : public FilterChainElement
 {
 public:

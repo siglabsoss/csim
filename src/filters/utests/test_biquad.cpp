@@ -23,7 +23,7 @@ static void runFilter(const std::string &inputFile, const std::string &outputFil
     double imagErrAccum = 0.0;
     for (size_t i = 0; i < inputs.size(); i++) {
         input.type = IO_TYPE_COMPLEX_FIXPOINT;
-        input.fc.setFormat(16, 1);
+        input.fc.setFormat(BIQUAD_INPUT_FORMAT);
         input.fc.real(inputs[i].real());
         input.fc.imag(inputs[i].imag());
         bi.input(input);
