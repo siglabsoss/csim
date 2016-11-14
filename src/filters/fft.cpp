@@ -57,12 +57,18 @@ bool FFT::input(const filter_io_t &data)
     //this module can be slightly more flexible
     m_inputs[inputIdx].setFormat(data.fc);
 
+//    std::cout << "FFT " << data.fc.wl() << " " << data.fc.iwl() << std::endl;
+
     SLFixPoint::throwOnOverflow = true;
     m_inputs[inputIdx] = data.fc;
     SLFixPoint::throwOnOverflow = false;
 
     //Track the maximum input value for proper scaling
     updateMaxValueForStage(1, m_inputs[inputIdx]);
+
+//    if (m_inverse == true) {
+//        std::cout << "ifft input #" << inputIdx << " = " << data << std::endl;
+//    }
 
     return true;
 }
@@ -71,8 +77,12 @@ bool FFT::output(filter_io_t &data)
 {
     if (m_outputValid == true) {
         data = m_outputs[m_outputIdx++];
+//        if (m_inverse == false) {
+//            std::cout << "fft output #" << m_outputIdx << " = " << data << std::endl;
+//        }
         if (m_outputIdx >= m_outputs.size()) {
             m_outputIdx = 0;
+            m_outputValid = false;
         }
         return true;
     }
@@ -105,6 +115,8 @@ void FFT::tick(void)
 
         m_outputs[outIdx].setFormat(FFT_OUTPUT_FORMAT);
         m_outputs[outIdx] = m_inputs[i];
+
+//        std::cout << "m_outputs[" << outIdx << "] = m_inputs[" << i << "]  (" << m_outputs[outIdx].real().to_int64() << "," << m_outputs[outIdx].imag().to_int64() << " = " << m_inputs[i].real().to_int64() << "," << m_inputs[i].imag().to_int64() << std::endl;
         SLFixPoint::throwOnOverflow = false;
     }
 //    std::cout << "Output format is " << m_outputs[0].wl() << "," << m_outputs[0].iwl() << std::endl;
@@ -165,10 +177,8 @@ void FFT::execute()
                 SLFixComplex top = m_inputs[topIdx];
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 SLFixComplex bot = m_inputs[botIdx];
-//                if (stage == 1) {
-//                    std::cout << "top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
-//                    std::cout << "bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
-//                }
+//                std::cout << stage << ": top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
+//                std::cout << stage << ": bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
 #else
                 SLFixComplex bot = m_inputs[botIdx] * twiddle;
 #endif
@@ -197,10 +207,8 @@ void FFT::execute()
                 m_inputs[topIdx] = top + bot;
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 m_inputs[botIdx] = (top - bot) * twiddle;
-//                if (stage == 1) {
-//                    std::cout << "m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
-//                    std::cout << "m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
-//                }
+//                std::cout << stage << ": m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
+//                std::cout << stage << ": m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
 #else
                 m_inputs[botIdx] = top - bot;
 #endif
