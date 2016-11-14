@@ -5,6 +5,7 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
     _nco(freq),
     _halfbandFIR(nullptr),
     _by5FIR(nullptr),
+    _input(0.0),
     _output_ready(false),
     _output_inph(0.0),
     _output_quad(0.0)
@@ -51,9 +52,9 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
 
 bool DigitalDownConverter::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-    SLFixedPoint<DDC_INPUT_FP_FORMAT> input = data.fc.real();
-    _output_ready = push(input, _output_inph, _output_quad);
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT || data.type == IO_TYPE_COMPLEX_DOUBLE);
+    _input = data.toComplexDouble().real();
+    _did_receive_input = true;
     return true;
 }
 
@@ -62,8 +63,9 @@ bool DigitalDownConverter::output(filter_io_t &data)
     if (_output_ready) {
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
         data.fc.setFormat(_output_inph.wl(), _output_inph.iwl());
-        data.fc.real(static_cast<SLFixPoint>(_output_inph));
-        data.fc.imag(static_cast<SLFixPoint>(_output_quad));
+        //XXX should the coefficients be changed so that the 5x gain isn't needed?
+        data.fc.real(_output_inph.to_double() * 5);
+        data.fc.imag(_output_quad.to_double() * 5);
     }
 
     return _output_ready;
@@ -71,7 +73,15 @@ bool DigitalDownConverter::output(filter_io_t &data)
 
 void DigitalDownConverter::tick(void)
 {
-
+    //This logic shouldn't be needed because the down converter should be receiving a sample
+    //on every tick, and we need to call push on every tick so that the NCO is not jittering.
+    //If we really didn't receive a sample, then clear the input and call push anyway.
+    //This may happen if there's an upstream block doing some kind of filtering.
+    if (!_did_receive_input) {
+        _input = 0.0;
+        _did_receive_input = false;
+    }
+    _output_ready = push(_input, _output_inph, _output_quad);
 }
 
 bool DigitalDownConverter::push(
@@ -112,6 +122,8 @@ bool DigitalDownConverter::push(
             output_ready = true;
         }
     }
+
+//    std::cout << "ddc in: " << input_sample.to_double() << " * " << cosine.to_double() << std::endl;
 
     return output_ready;
 }

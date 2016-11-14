@@ -40,6 +40,8 @@ private: //members
     NCO                                                    _nco;
     FixedFIR *                                             _halfbandFIR;
     FixedFIR *                                             _by5FIR;
+    SLFixedPoint<DDC_INPUT_FP_FORMAT>                      _input;
+    bool                                                   _did_receive_input;
 
     // Output variables
     bool                                                   _output_ready;
