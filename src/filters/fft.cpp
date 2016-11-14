@@ -40,6 +40,8 @@ FFT::FFT(size_t N, bool inverse) :
             m_twiddleFactors[i].imag(sin(theta));
         }
     }
+    //Default output format (may be changed)
+    setOutputFormat(FFT_OUTPUT_FORMAT);
 }
 
 bool FFT::input(const filter_io_t &data)
@@ -113,7 +115,6 @@ void FFT::tick(void)
         size_t outIdx = i;
 #endif
 
-        m_outputs[outIdx].setFormat(FFT_OUTPUT_FORMAT);
         m_outputs[outIdx] = m_inputs[i];
 
 //        std::cout << "m_outputs[" << outIdx << "] = m_inputs[" << i << "]  (" << m_outputs[outIdx].real().to_int64() << "," << m_outputs[outIdx].imag().to_int64() << " = " << m_inputs[i].real().to_int64() << "," << m_inputs[i].imag().to_int64() << std::endl;
@@ -128,6 +129,13 @@ void FFT::tick(void)
 
     m_outputValid = true;
     assert(m_outputIdx == 0);
+}
+
+void FFT::setOutputFormat(size_t wordLength, ssize_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode)
+{
+    for (size_t i = 0; i < m_outputs.size(); i++) {
+        m_outputs[i].setFormat(wordLength, intLength, quantMode, overflowMode);
+    }
 }
 
 void FFT::execute()

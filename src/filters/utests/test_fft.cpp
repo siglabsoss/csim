@@ -16,59 +16,65 @@ template <typename T>
 void checkError(const vector<T> &outputs, const vector<T> &answers, double difference);
 
 void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<ComplexDouble> &answers, double difference);
-void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse);
-void runFFTLoopbackTest(const std::string &infile);
+void runFFTTest(const std::string &infile, const std::string &outfile, size_t outputIWL, bool inverse, double threshold);
+void runFFTLoopbackTest(const std::string &infile, double threshold);
+void runIFFTLoopbackTest(const std::string &infile, double threshold);
 void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const vector<std::complex<int32_t> > &expected, uint32_t threshold);
 
-CSIM_TEST_CASE(FFT_IO_PARITY)
-{
-    constexpr size_t NUM_SAMPLES = 2;
-    FFT fft(NUM_SAMPLES, false);
-    std::vector<filter_io_t> samples(NUM_SAMPLES*4);
-    for (size_t i = 0; i < samples.size(); i++) {
-        samples[i].type = IO_TYPE_COMPLEX_FIXPOINT;
-        samples[i].fc.setFormat(32, 2);
-        samples[i].fc.set(1,1);
-    }
-
-    filter_io_t output;
-    bool isOutput = false;
-    unsigned int count = 0;
-    for (size_t j = 0; j < samples.size(); j++) {
-        BOOST_CHECK(fft.input(samples[j]) == true);
-        fft.tick();
-        if (fft.output(output)) {
-        	count++;
-        	isOutput = true;
-        }
-        BOOST_CHECK_MESSAGE(isOutput == ((j + 1 >= NUM_SAMPLES)), "isOutput = " << isOutput << " but j = " << j );
-        isOutput = false;
-    }
-
-    assert( count == samples.size() - (NUM_SAMPLES - 1) );
-}
-
-//CSIM_TEST_CASE(FFT_MATLAB_8PT)
+//CSIM_TEST_CASE(FFT_IO_PARITY)
 //{
-//    runFFTTest("./data/fft/input/input_8pt.csv", "./data/fft/answers/output_8pt.csv", false);
+//    constexpr size_t NUM_SAMPLES = 2;
+//    FFT fft(NUM_SAMPLES, false);
+//    std::vector<filter_io_t> samples(NUM_SAMPLES*4);
+//    for (size_t i = 0; i < samples.size(); i++) {
+//        samples[i].type = IO_TYPE_COMPLEX_FIXPOINT;
+//        samples[i].fc.setFormat(32, 2);
+//        samples[i].fc.set(1,1);
+//    }
+//
+//    filter_io_t output;
+//    bool isOutput = false;
+//    unsigned int count = 0;
+//    for (size_t j = 0; j < samples.size(); j++) {
+//        BOOST_CHECK(fft.input(samples[j]) == true);
+//        fft.tick();
+//        if (fft.output(output)) {
+//        	count++;
+//        	isOutput = true;
+//        }
+//        BOOST_CHECK_MESSAGE(isOutput == ((j + 1 >= NUM_SAMPLES)), "isOutput = " << isOutput << " but j = " << j );
+//        isOutput = false;
+//    }
+//
+//    assert( count == samples.size() - (NUM_SAMPLES - 1) );
 //}
+
+CSIM_TEST_CASE(FFT_MATLAB_8PT)
+{
+    runFFTTest("./data/fft/input/input_8pt.csv", "./data/fft/answers/output_8pt.csv", 4, false, 0.1);
+}
 
 CSIM_TEST_CASE(FFT_MATLAB)
 {
-    runFFTTest("./data/fft/input/fft_input1.csv", "./data/fft/answers/fft_output1.csv", false);
+    runFFTTest("./data/fft/input/fft_input1.csv", "./data/fft/answers/fft_output1.csv", 5, false, 1.5e-3);
 }
 
 CSIM_TEST_CASE(IFFT_MATLAB)
 {
-    runFFTTest("./data/fft/input/ifft_input1.csv", "./data/fft/answers/ifft_output1.csv", true);
+    runFFTTest("./data/fft/input/ifft_input1.csv", "./data/fft/answers/ifft_output1.csv", -5, true, 2.0e-6);
 }
 
 CSIM_TEST_CASE(FFT_IFFT)
 {
-    runFFTLoopbackTest("./data/fft/input/ifft_input1.csv");
+    runFFTLoopbackTest("./data/fft/input/ifft_input1.csv", 5.0e-5);
 }
 
-void runFFTTest(const std::string &infile, const std::string &outfile, bool inverse)
+CSIM_TEST_CASE(IFFT_FFT)
+{
+    runIFFTLoopbackTest("./data/fft/input/bpsk_rand.csv", 1.0e-6);
+}
+
+void runFFTTest(const std::string &infile, const std::string &outfile, size_t outputIWL, bool inverse, double threshold)
 {
     string inFile(infile);
     string answersFile(outfile);
@@ -84,6 +90,7 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
 
     int points = inputs.size();
     FFT fft(points, inverse);
+    fft.setOutputFormat(FFT_OUTPUT_WL, outputIWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     filter_io_t data;
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
@@ -103,10 +110,60 @@ void runFFTTest(const std::string &infile, const std::string &outfile, bool inve
     }//Insert input again to get output
 
     //This threshold is arbitrary and can be refined based on some kind of analysis
-    checkErrorComplexDouble(outputs, answers, 0.007);
+    checkErrorComplexDouble(outputs, answers, threshold);
 }
 
-void runFFTLoopbackTest(const std::string &infile)
+void runIFFTLoopbackTest(const std::string &infile, double threshold)
+{
+    string inFile(infile);
+
+    std::vector<ComplexDouble>          inputs;
+    std::vector< SLFixComplex >         ifftoutputs;
+    std::vector< ComplexDouble >        fftoutputs;
+
+    inputs = utils::readComplexFromCSV<ComplexDouble>(inFile);
+    BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
+
+    int points = inputs.size();
+    FFT fft(points, false);
+    FFT ifft(points, true);
+    ifft.setOutputFormat(FFT_OUTPUT_WL, -2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    fft.setOutputFormat(FFT_OUTPUT_WL, 6, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    filter_io_t data;
+    for (unsigned int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(FFT_INPUT_FORMAT);
+            data.fc.set(inputs[j].real(), inputs[j].imag());
+            ifft.input(data);
+            ifft.tick();
+            bool didGetOutput = ifft.output(data);
+            bool lastInput = (i == 1 && j == points - 1);
+            if (didGetOutput && !lastInput) {
+                ifftoutputs.push_back(data.fc);
+            }//If output is ready
+        }//Insert all input
+    }//Insert input again to get output
+
+    for (unsigned int i = 0; i < 2; i++) {
+        for (int j = 0; j < points; j++) {
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(ifftoutputs[j]);
+            data.fc = ifftoutputs[j];
+            fft.input(data);
+            fft.tick();
+            bool didGetOutput = fft.output(data);
+            bool lastInput = (i == 1 && j == points - 1);
+            if (didGetOutput && !lastInput) {
+                fftoutputs.push_back(data.fc.toComplexDouble());
+            }//If output is ready
+        }
+    }
+
+    checkErrorComplexDouble (fftoutputs, inputs, threshold);
+}
+
+void runFFTLoopbackTest(const std::string &infile, double threshold)
 {
     string inFile(infile);
 
@@ -120,6 +177,8 @@ void runFFTLoopbackTest(const std::string &infile)
     int points = inputs.size();
     FFT fft(points, false);
     FFT ifft(points, true);
+    fft.setOutputFormat(FFT_OUTPUT_WL, 5, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    ifft.setOutputFormat(FFT_OUTPUT_WL, 0, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     filter_io_t data;
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
@@ -151,13 +210,6 @@ void runFFTLoopbackTest(const std::string &infile)
         }
     }
 
-    //Block floating point algorithm loses precision in between stages, thus it's expected that
-    //the performance will not be as good.
-#ifdef FFT_DO_BLOCK_FLOATING_POINT
-    double threshold = 0.0032;
-#else
-    double threshold = 0.00036;
-#endif
     checkErrorComplexDouble (ifftoutputs, inputs, threshold);
 }
 

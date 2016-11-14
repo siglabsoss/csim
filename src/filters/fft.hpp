@@ -41,6 +41,7 @@ public:
     void tick(void) override;
 
     void printTwiddleFactors() const;
+    void setOutputFormat(size_t wordLength, ssize_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode);
 private:
     SLFixComplex getTwiddleFactor(size_t stage, size_t n) const;
     void execute();
