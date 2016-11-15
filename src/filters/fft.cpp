@@ -225,10 +225,10 @@ void FFT::execute()
                 } else {
                     m_inputs[botIdx] = (top - bot) * twiddle;
                 }
-                if (stage == 10) {
-                    std::cout << stage << ": m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
-                    std::cout << stage << ": m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
-                }
+//                if (stage == 10) {
+//                    std::cout << stage << ": m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
+//                    std::cout << stage << ": m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
+//                }
 #else
                 m_inputs[botIdx] = top - bot;
 #endif
