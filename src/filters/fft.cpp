@@ -101,7 +101,7 @@ void FFT::tick(void)
     execute();
 
     for (size_t i = 0; i < m_inputs.size(); i++) {
-        //For IIFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
+        //For IFFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
         if (m_inverse) {
             m_inputs[i].shiftRadixRight(m_numStages);
         }
@@ -188,7 +188,13 @@ void FFT::execute()
 //                std::cout << stage << ": top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
 //                std::cout << stage << ": bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
 #else
-                SLFixComplex bot = m_inputs[botIdx] * twiddle;
+                SLFixComplex bot;
+                if (stage == 0) {
+                    bot = m_inputs[botIdx]; //the twiddle is always 1 in the first stage, skip the multiplication
+                } else {
+                    bot = m_inputs[botIdx] * twiddle;
+                }
+
 #endif
 
 #ifndef FFT_DO_BLOCK_FLOATING_POINT
@@ -214,9 +220,15 @@ void FFT::execute()
                 SLFixPoint::throwOnOverflow = true;
                 m_inputs[topIdx] = top + bot;
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
-                m_inputs[botIdx] = (top - bot) * twiddle;
-//                std::cout << stage << ": m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
-//                std::cout << stage << ": m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
+                if (stage == m_numStages) {
+                    m_inputs[botIdx] = (top - bot); //the twiddle is always 1 in the final stage, skip the multiplication
+                } else {
+                    m_inputs[botIdx] = (top - bot) * twiddle;
+                }
+                if (stage == 10) {
+                    std::cout << stage << ": m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
+                    std::cout << stage << ": m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
+                }
 #else
                 m_inputs[botIdx] = top - bot;
 #endif
