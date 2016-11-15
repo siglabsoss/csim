@@ -8,20 +8,30 @@ int main(int argc, char *argv[])
 {
     int c;
     bool gotInputFile = false, shouldScale = false;
+    size_t outputIWL = FFT_OUTPUT_IWL;
+    size_t outputWL = FFT_OUTPUT_WL;
+
     std::string inputFile;
-    while ((c = getopt(argc, argv, "f:s")) != -1) {
+    while ((c = getopt(argc, argv, "f:i:w:s")) != -1) {
         switch(c) {
         case 'f':
             inputFile = std::string(optarg);
             gotInputFile = true;
             break;
+        case 'i':
+            outputIWL = atoi(optarg);
+            break;
+        case 'w':
+            outputWL = atoi(optarg);
+            break;
         case 's':
             shouldScale = true;
+            break;
         }
     }
 
     if (gotInputFile != true) {
-        std::cout << "Usage: " << argv[0] << " -f <input filename>" << "[-s (scaled output)]" << std::endl;
+        std::cout << "Usage: " << argv[0] << " -f <input filename> [-s (scaled output)] [-i outputIntWidth] [-w outputWordLength]" << std::endl;
         return 1;
     }
 
@@ -31,6 +41,8 @@ int main(int argc, char *argv[])
     std::vector<SLFixComplex> inputsFP(inputs.size());
 
     FFT fft(N_FFT_POINTS, false);
+
+    fft.setOutputFormat(outputWL, outputIWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     filter_io_t data;
     size_t outputCount = 0;
     size_t inWl = 0;
