@@ -1,4 +1,4 @@
-#include <filters/ddc.hpp>
+#include <filters/ddc_duc/ddc.hpp>
 
 DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double> &halfbandCoeffs, const std::vector<double> &by5Coeffs) :
     FilterChainElement("DDC"),
@@ -63,9 +63,8 @@ bool DigitalDownConverter::output(filter_io_t &data)
     if (_output_ready) {
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
         data.fc.setFormat(_output_inph.wl(), _output_inph.iwl());
-        //XXX should the coefficients be changed so that the 5x gain isn't needed?
-        data.fc.real(_output_inph.to_double() * 5);
-        data.fc.imag(_output_quad.to_double() * 5);
+        data.fc.real(_output_inph.to_double());
+        data.fc.imag(_output_quad.to_double());
     }
 
     return _output_ready;

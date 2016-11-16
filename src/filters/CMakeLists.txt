@@ -3,8 +3,9 @@ set(SIGFILTERS_SOURCES
     biquad.cpp
     biquad_iir.cpp
     fft.cpp
-    ddc.cpp
-    duc.cpp
+    ddc_duc/ddc.cpp
+    ddc_duc/duc.cpp
+    ddc_duc/ddc_utils.cpp
     mixer.cpp
     decimator.cpp
     mapper.cpp

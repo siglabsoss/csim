@@ -1,7 +1,10 @@
 #include <test/unit_test.hpp>
 
-#include <filters/ddc.hpp>
-#include <filters/duc.hpp>
+#include <types/circularbuffer.hpp>
+
+#include <filters/ddc_duc/ddc.hpp>
+#include <filters/ddc_duc/duc.hpp>
+#include <filters/ddc_duc/ddc_utils.hpp>
 #include <utils/utils.hpp>
 
 #include <fstream>
@@ -127,88 +130,35 @@ static void runDUC(const std::string &up2CoeffFile, const std::string &up5CoeffF
     }
 }
 
-static void runLoopbackTest(const std::string &halfbandCoeffFile, const std::string &by5CoeffFile, const std::string &up2CoeffFile, const std::string &up5CoeffFile)
-{
-    std::vector<ComplexDouble> halfbandComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(halfbandCoeffFile);
-    std::vector<ComplexDouble> by5ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(by5CoeffFile);
-    std::vector<ComplexDouble> up2ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(up2CoeffFile);
-    std::vector<ComplexDouble> up5ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(up5CoeffFile);
-    assert(halfbandComplexCoeffs.size() != 0 && by5ComplexCoeffs.size() != 0);
-    assert(up2CoeffFile.size() != 0 && up5CoeffFile.size() != 0);
-
-    std::vector<double> halfbandCoeffs(halfbandComplexCoeffs.size());
-    std::vector<double> by5Coeffs(by5ComplexCoeffs.size());
-    std::vector<double> up2Coeffs(up2ComplexCoeffs.size());
-    std::vector<double> up5Coeffs(up5ComplexCoeffs.size());
-
-    for (size_t i = 0; i < halfbandComplexCoeffs.size(); i++) {
-        halfbandCoeffs[i] = halfbandComplexCoeffs[i].real();
-    }
-
-    for (size_t i = 0; i < by5ComplexCoeffs.size(); i++) {
-        by5Coeffs[i] = by5ComplexCoeffs[i].real();
-    }
-
-    for (size_t i = 0; i < up2ComplexCoeffs.size(); i++) {
-        up2Coeffs[i] = up2ComplexCoeffs[i].real();
-    }
-
-    for (size_t i = 0; i < up5ComplexCoeffs.size(); i++) {
-        up5Coeffs[i] = up5ComplexCoeffs[i].real();
-    }
-
-    DigitalDownConverter ddc(MIXER_FREQ, halfbandCoeffs, by5Coeffs);
-    DigitalUpConverter   duc(-MIXER_FREQ, up2Coeffs, up5Coeffs);
-
-    size_t numInputs = 1000;
-    SLFixedPoint<DUC_INPUT_FP_FORMAT> inph_in;
-    SLFixedPoint<DUC_INPUT_FP_FORMAT> quad_in;
-    filter_io_t input, output;
-    size_t outputCount = 0;
-    for (size_t ii = 0; ii < numInputs; ii++) {
-        inph_in = (ii & 1) ? 1.0 : -1.0;
-        quad_in = 0.0;
-
-        input.type = IO_TYPE_COMPLEX_FIXPOINT;
-        input.fc.setFormat(inph_in.wl(), inph_in.iwl());
-        input.fc.real(inph_in);
-        input.fc.imag(quad_in);
-
-//        std::cout << "in " << outputCount << ": " << input << std::endl;
-        duc.input(input);
-
-        for (size_t i = 0; i < 10; i++) {
-            duc.tick();
-            if (duc.output(output)) {
-//                std::cout << "duc: " << data << std::endl;
-                ddc.input(output);
-            }
-            ddc.tick();
-            if (ddc.output(output)) {
-                outputCount++;
-                //XXX compare magnitude/phase
-                if (outputCount > 100) {
-                    BOOST_CHECK(std::abs(input.fc.real().to_double() - output.fc.real().to_double()) < 0.1);
-                    BOOST_CHECK(std::abs(input.fc.imag().to_double() - output.fc.imag().to_double()) < 0.1);
-                }
-            }
-        }
-    }
-}
-
+//XXX shorten these tests to decrease runtime and then reenable them
 CSIM_TEST_CASE(BASIC_DDC_FUNCTIONALITY)
 {
-    //runDDC("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/ddc_out.csv");
+//    runDDC("./data/ddc/coeffs/down2.txt", "./data/ddc/coeffs/down5.txt", "./data/ddc/ddc_out.csv");
 }
 
 CSIM_TEST_CASE(BASIC_DUC_FUNCTIONALITY)
 {
-    //runDUC("./data/ddc/coeffs/halfband_interp.txt", "./data/ddc/coeffs/by5_interp.txt", "./data/ddc/ddc_out.csv", "./data/ddc/duc_out.csv");
+//    runDUC("./data/ddc/coeffs/up2.txt", "./data/ddc/coeffs/up5.txt", "./data/ddc/ddc_out.csv", "./data/ddc/duc_out.csv");
 }
 
-CSIM_TEST_CASE(LOOPBACK_TEST)
+CSIM_TEST_CASE(DDC_DUC_LOOPBACK)
 {
-    runLoopbackTest("./data/ddc/coeffs/halfband.txt", "./data/ddc/coeffs/downby5.txt", "./data/ddc/coeffs/halfband_interp.txt", "./data/ddc/coeffs/by5_interp.txt");
+    std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>("./data/ddc/duc_loopback_in.csv");
+    std::vector<ComplexDouble> outputs;
+
+    DDCUtils::runLoopbackTest("./data/ddc/coeffs/down2.txt", "./data/ddc/coeffs/down5.txt", "./data/ddc/coeffs/up2.txt", "./data/ddc/coeffs/up5.txt", inputs, outputs);
+
+    constexpr size_t TIME_DOMAIN_DELAY = 64;
+    for (size_t i = 0; i < outputs.size(); i++) {
+        if (i >= TIME_DOMAIN_DELAY) {
+            double phaseOut = atan2(outputs[i].imag(), outputs[i].real());
+            double phaseIn = atan2(inputs[i-TIME_DOMAIN_DELAY].imag(), inputs[i - TIME_DOMAIN_DELAY].real());
+//            std::cout << phaseOut << " = " << phaseIn << std::endl;
+            double phaseDiff = utils::angleDiff(phaseIn, phaseOut);
+            BOOST_CHECK_MESSAGE(std::abs(phaseDiff) < 0.1, "Phase diff " << phaseDiff << " is too large!");
+            //XXX add magnitude check
+        }
+    }
 }
 
 CSIM_TEST_SUITE_END()

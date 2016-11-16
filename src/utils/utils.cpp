@@ -151,4 +151,13 @@ size_t calculateInt32ScaleExponent(const std::vector<ComplexDouble> &values)
     return 31 + getShiftAmount(max);
 }
 
+double angleDiff(double a, double b)
+{
+    double result = a - b;
+    if (result > M_PI) {
+        result = 2*M_PI - result;
+    }
+    return result;
+}
+
 };

@@ -7,8 +7,8 @@
 #include <filters/noise_element.hpp>
 #include <filters/ldpc_encode.hpp>
 #include <filters/ldpc_decoder.hpp>
-#include <filters/ddc.hpp>
-#include <filters/duc.hpp>
+#include <filters/ddc_duc/ddc.hpp>
+#include <filters/ddc_duc/duc.hpp>
 #include <filters/fft.hpp>
 #include <utils/utils.hpp>
 

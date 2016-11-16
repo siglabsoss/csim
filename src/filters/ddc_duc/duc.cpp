@@ -1,4 +1,4 @@
-#include <filters/duc.hpp>
+#include <filters/ddc_duc/duc.hpp>
 
 DigitalUpConverter::DigitalUpConverter(double freq, const std::vector<double> &up2Coeffs, const std::vector<double> &up5Coeffs) :
     FilterChainElement("DDC"),
@@ -113,7 +113,7 @@ bool DigitalUpConverter::push(
     sample.fc.setFormat(inph_in);
     sample.fc.real(inph_in);
     sample.fc.imag(quad_in);
-
+//    std::cout << sample.fc.real().to_double() << "," << sample.fc.imag().to_double() << ",";
     bool up2_has_input = _got_input;
     bool up5_has_input = false;
 
@@ -130,6 +130,7 @@ bool DigitalUpConverter::push(
     }
     _up5FIR->tick();
     assert(_up5FIR->output(sample));
+//    std::cout << sample.fc.real().to_double() << "," << sample.fc.imag().to_double() << std::endl;
 
     _nco.pullNextSample(cosine, sine);
     inph_out = (sample.fc.real() * cosine) - (sample.fc.imag() * sine);
