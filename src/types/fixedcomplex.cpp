@@ -8,12 +8,6 @@ SLFixComplex::SLFixComplex() :
 
 }
 
-SLFixComplex::SLFixComplex(size_t wordLength, size_t intLength) :
-    m_real(wordLength, intLength),
-    m_imag(wordLength, intLength)
-{
-
-}
 SLFixComplex::SLFixComplex(size_t wordLength, size_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode) :
     m_real(wordLength, intLength, quantMode, overflowMode),
     m_imag(wordLength, intLength, quantMode, overflowMode)
@@ -95,7 +89,7 @@ SLFixComplex SLFixComplex::operator*(const SLFixPoint &rhs)
 SLFixComplex SLFixComplex::operator/(const SLFixComplex &rhs)
 {
     //XXX implement
-    SLFixComplex result(0, 0);
+    SLFixComplex result(0, 0, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND);
     return result;
 }
 
