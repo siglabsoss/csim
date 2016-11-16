@@ -1,6 +1,7 @@
 #include <types/fixedpoint.hpp>
 #include <cassert>
 #include <algorithm>
+#include <climits>
 
 bool     SLFixPoint::throwOnOverflow = false;
 size_t   SLFixPoint::overflowCount = 0;
@@ -265,7 +266,7 @@ SLFixPoint &SLFixPoint::operator=(double val)
 SLFixPoint &SLFixPoint::operator=(uint64_t val)
 {
     assert(m_formatSet);
-    unsigned long long mask = ~(~(0ull) >> (sizeof(m_value) * 8 - m_wl));
+    unsigned long long mask = ~(~(0ull) >> (sizeof(m_value) * CHAR_BIT - m_wl));
     bool excessBits = (val & mask);
     assert(!excessBits);
     this->m_value = val;
