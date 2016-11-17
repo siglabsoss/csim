@@ -4,13 +4,13 @@
 #include <utils/utils.hpp>
 
 static constexpr double MIXER_FREQ = 0.16;
-void DDCUtils::runLoopbackTest(const std::string &halfbandCoeffFile, const std::string &by5CoeffFile,
+void DDCUtils::runLoopbackTest(const std::string &down2CoeffFile, const std::string &down5CoeffFile,
         const std::string &up2CoeffFile, const std::string &up5CoeffFile,
         const std::vector<ComplexDouble> &inputs, std::vector<ComplexDouble> &outputs)
 {
     // Prepare coefficients
-    std::vector<ComplexDouble> halfbandComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(halfbandCoeffFile);
-    std::vector<ComplexDouble> by5ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(by5CoeffFile);
+    std::vector<ComplexDouble> halfbandComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(down2CoeffFile);
+    std::vector<ComplexDouble> by5ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(down5CoeffFile);
     std::vector<ComplexDouble> up2ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(up2CoeffFile);
     std::vector<ComplexDouble> up5ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(up5CoeffFile);
     assert(halfbandComplexCoeffs.size() != 0 && by5ComplexCoeffs.size() != 0);
