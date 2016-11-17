@@ -41,7 +41,7 @@ public:
             title << m_triggers + 1;
             trigger(title.str());
             m_triggers++;
-            std::cout << "Sample count probe trigger #" << m_triggers << std::endl;
+            std::cout << m_name << ": Sample count probe trigger #" << m_triggers << std::endl;
         }
     }
 
