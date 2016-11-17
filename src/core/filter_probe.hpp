@@ -7,14 +7,15 @@
 class FilterProbe : public FilterChainElement
 {
 public:
-    enum plot_type_t {
-        PLOT_TYPE_NPLOT = 0,
-        PLOT_TYPE_NPLOTFFT,
-        PLOT_TYPE_NPLOTQAM
+    enum data_dump_t {
+        NPLOT = 0,
+        NPLOTFFT,
+        NPLOTQAM,
+        CSV
     };
     virtual ~FilterProbe();
     FilterProbe(const std::string &name, size_t numElements);
-    FilterProbe(const std::string &name, size_t numElements, plot_type_t plot);
+    FilterProbe(const std::string &name, size_t numElements, data_dump_t outType);
 
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
@@ -32,14 +33,15 @@ protected: //methods
     const plotter &                 m_p;
 
 private: //methods
-    void                            plot();
+    void                            dump();
     void                            nplot();
     void                            nplotfft();
     void                            nplotqam();
+    void                            csv();
 
 private: //members
     bool                            m_didTrigger;
-    plot_type_t                     m_plotType;
+    data_dump_t                     m_outType;
     size_t                          m_samplesSinceTrigger;
     std::string                     m_triggerName;
 };

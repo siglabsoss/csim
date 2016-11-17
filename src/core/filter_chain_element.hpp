@@ -31,7 +31,7 @@ public:
     void shouldPublish(bool desired);
 
     std::unique_ptr<FilterChainElement> m_next;
-private:
+protected:
     std::string         m_name;
     bool                m_shouldPublish;
 

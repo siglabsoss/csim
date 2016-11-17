@@ -1,13 +1,14 @@
 
 #include <core/filter_probe.hpp>
+#include <fstream>
 
-FilterProbe::FilterProbe(const std::string &name, size_t numElements, plot_type_t plot) :
+FilterProbe::FilterProbe(const std::string &name, size_t numElements, data_dump_t outType) :
     FilterChainElement(name),
     m_validInput(false),
     m_history(numElements),
     m_p(plotter::get()),
     m_didTrigger(false),
-    m_plotType(plot),
+    m_outType(outType),
     m_samplesSinceTrigger(0)
 {
 }
@@ -18,7 +19,7 @@ FilterProbe::FilterProbe(const std::string &name, size_t numElements) :
     m_history(numElements),
     m_p(plotter::get()),
     m_didTrigger(false),
-    m_plotType(PLOT_TYPE_NPLOT),
+    m_outType(NPLOT),
     m_samplesSinceTrigger(0)
 {
 }
@@ -31,11 +32,11 @@ FilterProbe::~FilterProbe()
 bool FilterProbe::input(const filter_io_t &data)
 {
     m_validInput = true;
-    m_history.push_front(data);
+    m_history.push_back(data);
     if (m_didTrigger) {
         m_samplesSinceTrigger++;
         if ( (m_samplesSinceTrigger >= m_history.capacity()/2) && (m_history.size() == m_history.capacity()) ) {
-            plot();
+            dump();
             m_didTrigger = false;
             m_samplesSinceTrigger = 0;
         }
@@ -46,7 +47,7 @@ bool FilterProbe::input(const filter_io_t &data)
 bool FilterProbe::output(filter_io_t &data)
 {
     if (m_validInput) {
-        data = m_history[0];
+        data = getLatest();
         m_validInput = false;
         return true;
     }
@@ -54,23 +55,26 @@ bool FilterProbe::output(filter_io_t &data)
     return false;
 }
 
-void FilterProbe::plot()
+void FilterProbe::dump()
 {
-    switch (m_plotType) {
-        case PLOT_TYPE_NPLOT:
+    switch (m_outType) {
+        case NPLOT:
             return nplot();
-        case PLOT_TYPE_NPLOTFFT:
+        case NPLOTFFT:
             nplotfft();
             break;
-        case PLOT_TYPE_NPLOTQAM:
+        case NPLOTQAM:
             nplotqam();
+            break;
+        case CSV:
+            csv();
             break;
     }
 }
 
 const filter_io_t& FilterProbe::getLatest() const
 {
-    return m_history[0];
+    return m_history[m_history.size()-1];
 }
 
 size_t FilterProbe::getSize() const
@@ -80,7 +84,9 @@ size_t FilterProbe::getSize() const
 
 void FilterProbe::trigger(const std::string &title)
 {
-    m_triggerName = title;
+    std::stringstream ss;
+    ss << m_name << "_" << title;
+    m_triggerName = ss.str();
     m_didTrigger = true;
 }
 
@@ -95,4 +101,26 @@ void FilterProbe::nplotfft()
 void FilterProbe::nplotqam()
 {
     m_p.nplotqam(m_history, getName() + " - " + m_triggerName);
+}
+void FilterProbe::csv()
+{
+    std::ofstream ofs;
+    ofs.open(m_triggerName.c_str(), std::ofstream::out | std::ofstream::trunc);
+    for (auto it = m_history.begin(); it != m_history.end(); ++it) {
+        switch(it->type) {
+            case IO_TYPE_COMPLEX_DOUBLE:
+            case IO_TYPE_COMPLEX_FIXPOINT:
+            {
+                ComplexDouble val = it->toComplexDouble();
+                ofs << val.real() << "," << val.imag() << std::endl;
+                break;
+            }
+            case IO_TYPE_NULL:
+            case IO_TYPE_FIXPOINT:
+            case IO_TYPE_BYTE:
+            case IO_TYPE_BIT:
+            default:
+                ofs << *it;
+        }
+    }
 }
