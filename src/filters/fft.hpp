@@ -35,7 +35,7 @@
 class FFT : public FilterChainElement
 {
 public:
-    FFT(size_t N, bool inverse);
+    FFT(size_t N, bool inverse, size_t ticksPerOutput = 1);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
@@ -59,6 +59,8 @@ private:
     bool                             m_outputValid;
     size_t                           m_outputIdx;
     size_t                           m_inputIdx;
+    size_t                           m_outputCount;
+    size_t                           m_ticksPerOutput;
 
     std::vector<uint64_t>            m_maxValuePerStage;
     ssize_t                          m_scaleExp;
