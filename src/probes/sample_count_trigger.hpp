@@ -9,8 +9,8 @@ class SampleCountTrigger : public FilterProbe
 {
 public:
     virtual ~SampleCountTrigger() {}
-    SampleCountTrigger(const std::string &name, uint32_t sampleCount, uint32_t numTriggers, uint32_t sampleOffset) :
-        FilterProbe(name, sampleCount),
+    SampleCountTrigger(const std::string &name, data_dump_t outType, uint32_t sampleCount, uint32_t numTriggers, uint32_t sampleOffset) :
+        FilterProbe(name, sampleCount, outType),
         m_count(0),
         m_triggers(0),
         m_offsetReached(false),
@@ -37,11 +37,11 @@ public:
 
         if (m_triggers < m_numTriggers && m_count >= m_sampleCount) {
             m_count = 0;
-            std::cout << "SampleCountTriggered!" << std::endl;
             std::ostringstream title;
             title << m_triggers + 1;
             trigger(title.str());
             m_triggers++;
+            std::cout << "Sample count probe trigger #" << m_triggers << std::endl;
         }
     }
 
