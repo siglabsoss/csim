@@ -19,3 +19,6 @@ target_link_libraries(test_demapper sigfilters sigtypes)
 
 add_executable(test_ldpc ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_ldpc.cpp)
 target_link_libraries(test_ldpc sigfilters sigtypes)
+
+add_executable(test_cyclic_prefix ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_cyclic_prefix.cpp)
+target_link_libraries(test_cyclic_prefix sigfilters sigtypes)

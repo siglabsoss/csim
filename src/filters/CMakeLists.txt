@@ -14,6 +14,7 @@ set(SIGFILTERS_SOURCES
     noise_element.cpp
     ldpc_decoder.cpp
     ldpc_encode.cpp
+    cyclic_prefix.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
