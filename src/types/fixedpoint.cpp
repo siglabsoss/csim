@@ -349,7 +349,7 @@ long long SLFixPoint::getSaturatedValue(bool negative) const
     unsigned long long mask = ~(0ull) >> (sizeof(m_value) * 8 - m_wl);
     value = (mask >> 1);
     if (negative) {
-        value = -value;
+        value = ~value; //one's complement because max negative value is one less than max positive (~value == -value - 1)
     }
     return value;
 }
