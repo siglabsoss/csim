@@ -9,6 +9,7 @@ DigitalUpConverter::DigitalUpConverter(double freq, const std::vector<double> &u
     _output_inph(0.0),
     _output_quad(0.0),
     _got_input(false),
+    _never_received_input(true),
     _inph_in(),
     _quad_in(),
     _iteration(0)
@@ -60,6 +61,7 @@ bool DigitalUpConverter::input(const filter_io_t &data)
     _inph_in = data.fc.real();
     _quad_in = data.fc.imag();
     _got_input = true;
+    _never_received_input = false;
     return true;
 }
 
@@ -77,6 +79,9 @@ bool DigitalUpConverter::output(filter_io_t &data)
 
 void DigitalUpConverter::tick(void)
 {
+    if (_never_received_input) {
+        return;
+    }
     SLFixedPoint<DUC_INPUT_FP_FORMAT> temp_inph_out;
     SLFixedPoint<DUC_INPUT_FP_FORMAT> temp_quad_out;
     _output_ready = push(_inph_in, _quad_in, temp_inph_out, temp_quad_out);
@@ -130,12 +135,14 @@ bool DigitalUpConverter::push(
     }
     _up5FIR->tick();
     assert(_up5FIR->output(sample));
-//    std::cout << sample.fc.real().to_double() << "," << sample.fc.imag().to_double() << std::endl;
+//    std::cout << sample.fc.real().to_double() << "," << sample.fc.imag().to_double();
 
     _nco.pullNextSample(cosine, sine);
     inph_out = (sample.fc.real() * cosine) - (sample.fc.imag() * sine);
     quad_out = 0.0;
     output_ready = true;
+
+//    std::cout << "," << inph_out << std::endl;
 
     return output_ready;
 }

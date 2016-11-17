@@ -48,6 +48,7 @@ private: //members
     SLFixedPoint<DUC_OUTPUT_FP_FORMAT>                     _output_quad;
 
     bool                                                   _got_input;
+    bool                                                   _never_received_input;
     SLFixedPoint<DUC_INPUT_FP_FORMAT>                      _inph_in;
     SLFixedPoint<DUC_INPUT_FP_FORMAT>                      _quad_in;
     unsigned long                                          _iteration;
