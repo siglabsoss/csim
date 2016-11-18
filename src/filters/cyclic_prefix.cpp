@@ -56,9 +56,7 @@ void CyclicPrefix::tick()
     if (m_inputIdx == m_inputs.size()) {
         m_inputIdx = 0;
         m_outputIdx = 0;
-        //If there is a fractional component between the input/output rates, we'll see a jitter of one sample in
-        //the number of outputs sent for every 'input size' number of inputs received.
-        assert((m_outputIdx == 0) || (m_outputIdx == m_outputs.size() - 1));
+        assert((m_outputIdx == 0)); //we should not be in the middle of outputting
         //Fill up the prefix
         for (size_t i = m_inputs.size() - m_len; i < m_inputs.size(); i++) {
             size_t outIdx = i - (m_inputs.size() - m_len);
