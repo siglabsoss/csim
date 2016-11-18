@@ -23,7 +23,7 @@ public:
 
     void tick(void) override
     {
-        if (m_validInput) {
+        if (m_validInput && m_didReceiveNonzero) {
             m_count++;
         }
 

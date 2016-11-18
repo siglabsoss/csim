@@ -5,6 +5,7 @@
 FilterProbe::FilterProbe(const std::string &name, size_t numElements, data_dump_t outType) :
     FilterChainElement(name),
     m_validInput(false),
+    m_didReceiveNonzero(false),
     m_history(numElements),
     m_p(plotter::get()),
     m_didTrigger(false),
@@ -16,6 +17,7 @@ FilterProbe::FilterProbe(const std::string &name, size_t numElements, data_dump_
 FilterProbe::FilterProbe(const std::string &name, size_t numElements) :
     FilterChainElement(name),
     m_validInput(false),
+    m_didReceiveNonzero(false),
     m_history(numElements),
     m_p(plotter::get()),
     m_didTrigger(false),
@@ -31,6 +33,27 @@ FilterProbe::~FilterProbe()
 
 bool FilterProbe::input(const filter_io_t &data)
 {
+    if (!m_didReceiveNonzero) {
+        switch(data.type) {
+            case IO_TYPE_COMPLEX_DOUBLE:
+                m_didReceiveNonzero =  (std::abs(data.rf) > 0.0);
+                break;
+            case IO_TYPE_COMPLEX_FIXPOINT:
+                m_didReceiveNonzero = (data.fc.real().to_int64() != 0) || (data.fc.imag().to_int64() != 0);
+                break;
+            case IO_TYPE_FIXPOINT:
+                m_didReceiveNonzero = (data.fp.to_int64() != 0);
+                break;
+            case IO_TYPE_BYTE:
+                m_didReceiveNonzero = (data.byte != 0);
+                break;
+            case IO_TYPE_BIT:
+                m_didReceiveNonzero = (data.bit != 0);
+                break;
+            case IO_TYPE_NULL:
+                break;
+        }
+    }
     m_validInput = true;
     m_history.push_back(data);
     return true;
@@ -101,7 +124,9 @@ void FilterProbe::nplotqam()
 void FilterProbe::csv()
 {
     std::ofstream ofs;
-    ofs.open(m_triggerName.c_str(), std::ofstream::out | std::ofstream::trunc);
+    std::stringstream filename;
+    filename << m_triggerName << ".csv";
+    ofs.open(filename.str().c_str(), std::ofstream::out | std::ofstream::trunc);
     for (auto it = m_history.begin(); it != m_history.end(); ++it) {
         switch(it->type) {
             case IO_TYPE_COMPLEX_DOUBLE:

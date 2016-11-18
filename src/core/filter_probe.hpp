@@ -29,6 +29,7 @@ protected: //methods
 
 
     bool                            m_validInput;
+    bool                            m_didReceiveNonzero;
     CircularBuffer<filter_io_t>     m_history;
     const plotter &                 m_p;
 
