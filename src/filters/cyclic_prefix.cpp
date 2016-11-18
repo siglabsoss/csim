@@ -1,4 +1,5 @@
 #include <filters/cyclic_prefix.hpp>
+#include <filters/fft.hpp>
 #include <cassert>
 
 CyclicPrefix::CyclicPrefix(size_t N, size_t cpLen, size_t ticksPerOutput) :
@@ -24,28 +25,40 @@ bool CyclicPrefix::input(const filter_io_t &data)
 
 bool CyclicPrefix::output(filter_io_t &data)
 {
-    if (m_outputIdx >= m_outputs.size()) {
-        m_outputIdx = 0;
-        m_outputReady = false;
-    }
-    if (m_outputReady) {
-        if (m_ticksSinceOutput >= m_ticksPerOutput) {
+    bool shouldOutput = (m_ticksSinceOutput >= m_ticksPerOutput);
+
+    if (shouldOutput) {
+        if (m_outputReady) {
             m_ticksSinceOutput = 0;
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
             data.fc.setFormat(m_outputs[m_outputIdx]);
             data.fc = m_outputs[m_outputIdx];
-            m_outputIdx++;
-            return true;
+            if (++m_outputIdx >= m_outputs.size()) {
+                m_outputIdx = 0;
+                m_outputReady = false;
+            }
+        } else {
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(FFT_OUTPUT_FORMAT);
+            data.fc.set(0.0, 0.0);
         }
     }
-    return false;
+
+    if (shouldOutput) {
+        m_ticksSinceOutput = 0;
+    }
+
+    return shouldOutput;
 }
 
 void CyclicPrefix::tick()
 {
     if (m_inputIdx == m_inputs.size()) {
         m_inputIdx = 0;
-        assert(m_outputIdx == 0);
+        m_outputIdx = 0;
+        //If there is a fractional component between the input/output rates, we'll see a jitter of one sample in
+        //the number of outputs sent for every 'input size' number of inputs received.
+        assert((m_outputIdx == 0) || (m_outputIdx == m_outputs.size() - 1));
         //Fill up the prefix
         for (size_t i = m_inputs.size() - m_len; i < m_inputs.size(); i++) {
             size_t outIdx = i - (m_inputs.size() - m_len);
