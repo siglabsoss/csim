@@ -33,19 +33,15 @@ bool FilterProbe::input(const filter_io_t &data)
 {
     m_validInput = true;
     m_history.push_back(data);
-    if (m_didTrigger) {
-        m_samplesSinceTrigger++;
-        if ( (m_samplesSinceTrigger >= m_history.capacity()/2) && (m_history.size() == m_history.capacity()) ) {
-            dump();
-            m_didTrigger = false;
-            m_samplesSinceTrigger = 0;
-        }
-    }
     return true;
 }
 
 bool FilterProbe::output(filter_io_t &data)
 {
+    if (m_didTrigger) {
+        dump();
+        m_didTrigger = false;
+    }
     if (m_validInput) {
         data = getLatest();
         m_validInput = false;
