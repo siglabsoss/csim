@@ -4,12 +4,9 @@
 
 CSIM_TEST_SUITE_BEGIN(CyclicPrefixVerification)
 
-CSIM_TEST_CASE(CYCLIC_PREFIX_IS_APPENDED)
+static void runCyclicPrefixValidation(size_t Nfft, size_t Ncp, size_t ticksPerOutput)
 {
-    constexpr size_t Nfft = 32;
-    constexpr size_t Ncp  = 8;
-    constexpr size_t TICKS_PER_OUTPUT = 10;
-    CyclicPrefix cp(Nfft, Ncp, TICKS_PER_OUTPUT);
+    CyclicPrefix cp(Nfft, Ncp, ticksPerOutput);
 
     std::vector< SLFixComplex> inputs(Nfft, SLFixComplex(18, 6, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE));
 
@@ -30,7 +27,7 @@ CSIM_TEST_CASE(CYCLIC_PREFIX_IS_APPENDED)
     }
 
     //Call through until we're about to output again
-    for (size_t i = 0; i < TICKS_PER_OUTPUT - (inputs.size() % TICKS_PER_OUTPUT) + 1; i++) {
+    for (size_t i = 0; i < ticksPerOutput - (inputs.size() % ticksPerOutput) + 1; i++) {
         filter_io_t data;
         BOOST_CHECK(cp.output(data) == false);
         cp.tick();
@@ -38,13 +35,13 @@ CSIM_TEST_CASE(CYCLIC_PREFIX_IS_APPENDED)
 
     //Call through until we've gotten enough outputs (Nfft + Ncp)
     std::vector< SLFixComplex > outputs(Nfft + Ncp);
-    for (size_t i = 0; i < (outputs.size() * TICKS_PER_OUTPUT); i++) {
+    for (size_t i = 0; i < (outputs.size() * ticksPerOutput); i++) {
         filter_io_t data;
-        bool expectOutput = (i % TICKS_PER_OUTPUT) == 0;
+        bool expectOutput = (i % ticksPerOutput) == 0;
         BOOST_REQUIRE_MESSAGE(cp.output(data) == expectOutput, "Did not get output when expected or vice versa on iteration number " << i);
         if (expectOutput) {
             BOOST_REQUIRE(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-            size_t outIdx = i / TICKS_PER_OUTPUT;
+            size_t outIdx = i / ticksPerOutput;
             outputs[outIdx].setFormat(data.fc);
             outputs[outIdx] = data.fc;
         }
@@ -52,7 +49,7 @@ CSIM_TEST_CASE(CYCLIC_PREFIX_IS_APPENDED)
     }
 
     //Confirm that output is input with a cyclic prefix prepended
-    size_t inputIdx = inputs.size() - Ncp;
+    size_t inputIdx = (inputs.size() - Ncp) % inputs.size();
     for (size_t i = 0; i < outputs.size(); i++) {
         BOOST_CHECK_EQUAL(outputs[i].real().to_int64(), inputs[inputIdx].real().to_int64());
         BOOST_CHECK_EQUAL(outputs[i].imag().to_int64(), inputs[inputIdx].imag().to_int64());
@@ -60,9 +57,9 @@ CSIM_TEST_CASE(CYCLIC_PREFIX_IS_APPENDED)
     }
 
     //Check for several more outputs. They should come at the same frequency, but be zero
-    for (size_t i = 0; i < 10 * TICKS_PER_OUTPUT; i++) {
+    for (size_t i = 0; i < 10 * ticksPerOutput; i++) {
         filter_io_t data;
-        bool expectOutput = (i % TICKS_PER_OUTPUT) == 0;
+        bool expectOutput = (i % ticksPerOutput) == 0;
         BOOST_REQUIRE_MESSAGE(cp.output(data) == expectOutput, "Did not get output when expected or vice versa on iteration number " << i);
         if (expectOutput) {
             BOOST_REQUIRE(data.type == IO_TYPE_COMPLEX_FIXPOINT);
@@ -71,6 +68,16 @@ CSIM_TEST_CASE(CYCLIC_PREFIX_IS_APPENDED)
         }
         cp.tick();
     }
+}
+
+CSIM_TEST_CASE(CYCLIC_PREFIX_IS_APPENDED)
+{
+    runCyclicPrefixValidation(32, 8, 10);
+}
+
+CSIM_TEST_CASE(CYCLIC_PREFIX_0_LENGTH)
+{
+    runCyclicPrefixValidation(32, 0, 10);
 }
 
 CSIM_TEST_SUITE_END()
