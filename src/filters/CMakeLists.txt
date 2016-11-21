@@ -15,6 +15,7 @@ set(SIGFILTERS_SOURCES
     ldpc_decoder.cpp
     ldpc_encode.cpp
     cyclic_prefix.cpp
+    frame_sync.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
