@@ -4,8 +4,11 @@
 #include <filters/fft.hpp>
 #include <filters/demapper.hpp>
 #include <filters/mapper.hpp>
+#include <filters/noise_element.hpp>
 #include <filters/ddc_duc/duc.hpp>
 #include <filters/ddc_duc/ddc.hpp>
+#include <filters/cyclic_prefix.hpp>
+#include <filters/frame_sync.hpp>
 
 #include <utils/utils.hpp>
 
@@ -13,7 +16,8 @@
 
 static constexpr double MIXER_FREQ = 0.16;
 static constexpr size_t FFT_SIZE = 1024;
-static constexpr size_t NUM_INPUT_BITS = FFT_SIZE * 4;
+static constexpr size_t CP_SIZE = 100;
+static constexpr size_t NUM_INPUT_BITS = FFT_SIZE * 20;
 static constexpr size_t UPSAMPLE_FACTOR = 10;
 
 static void loadInput(std::vector<bool> &inputs)
@@ -24,41 +28,50 @@ static void loadInput(std::vector<bool> &inputs)
     }
 }
 
-static void checkOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs, size_t outputLag, size_t inputUpsample)
-{
-    assert(inputUpsample > 0);
-    size_t numCorrect = 0;
-    size_t numIncorrect = 0;
-    for (size_t i = 0; i < outputs.size(); i++) {
-        if (i >= outputLag) {
-            if (inputs[(i-outputLag)/inputUpsample] != outputs[i]) {
-                std::cout << "#" << i << " " << inputs[(i-outputLag)/inputUpsample] << " != " << outputs[i] << std::endl;
-                numIncorrect++;
-            } else {
-                numCorrect++;
-            }
-            std::cout << inputs[(i-outputLag)/inputUpsample] << "," << outputs[i] << std::endl;
-        }
-    }
+//static void checkOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs, size_t outputLag, size_t inputUpsample)
+//{
+//    assert(inputUpsample > 0);
+//    size_t numCorrect = 0;
+//    size_t numIncorrect = 0;
+//    for (size_t i = 0; i < outputs.size(); i++) {
+//        if (i >= outputLag) {
+//            if (inputs[(i-outputLag)/inputUpsample] != outputs[i]) {
+//                std::cout << "#" << i << " " << inputs[(i-outputLag)/inputUpsample] << " != " << outputs[i] << std::endl;
+//                numIncorrect++;
+//            } else {
+//                numCorrect++;
+//            }
+//            std::cout << inputs[(i-outputLag)/inputUpsample] << "," << outputs[i] << std::endl;
+//        }
+//    }
+//
+//    std::cout << "Bit error rate = " << static_cast<double>(numIncorrect) / static_cast<double>(numIncorrect + numCorrect) << std::endl;
+//}
 
-    std::cout << "Bit error rate = " << static_cast<double>(numIncorrect) / static_cast<double>(numIncorrect + numCorrect) << std::endl;
-}
+//static void printInputsAndOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs)
+//{
+//    assert(inputs.size() == outputs.size());
+//    for (size_t i = 0; i < inputs.size(); i++) {
+//        std::cout << inputs[i] << "," << outputs[i] << std::endl;
+//    }
+//}
 
 static size_t runFilters(FilterChain &chain, const std::vector<bool> &inputs, std::vector<bool> &outputs, size_t inputUpsample)
 {
     assert(inputUpsample > 0);
     filter_io_t sample;
-    for (size_t i = 0; i < inputs.size(); ++i) {
+    size_t inputCount = 0;
+    while (outputs.size() < inputs.size()) {
         sample.type = IO_TYPE_BIT;
         for (size_t k = 0; k < inputUpsample; k++) {
-            sample.bit = inputs[i];
-            assert(chain.input(sample));
-            for (size_t j = 0; j < UPSAMPLE_FACTOR; ++j) {
-                chain.tick();
-                if (chain.output(sample)) {
-                    assert(sample.type == IO_TYPE_BIT);
-                    outputs.push_back(sample.bit);
-                }
+            sample.bit = inputs[inputCount];
+            if (chain.input(sample)) {
+                inputCount++;//only move on to the next sample if our sample was accepted
+            }
+            chain.tick();
+            if (chain.output(sample)) {
+                assert(sample.type == IO_TYPE_BIT);
+                outputs.push_back(sample.bit);
             }
         }
     }
@@ -131,9 +144,10 @@ static void symbolMappingFFTDUCLoopback(const std::string &down2CoeffFile, const
     }
 
     //Initialize blocks
-    Mapper * mapper             = new Mapper(UPSAMPLE_FACTOR, Mapper::CONST_SET_BPSK);
-    FFT * ifft                  = new FFT(FFT_SIZE, true, UPSAMPLE_FACTOR);
-    ifft->setOutputFormat(FFT_OUTPUT_WL, -2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    Mapper * mapper             = new Mapper(UPSAMPLE_FACTOR*2, Mapper::CONST_SET_BPSK);
+    FFT * ifft                  = new FFT(FFT_SIZE, true, UPSAMPLE_FACTOR*2);
+    ifft->setOutputFormat(FFT_OUTPUT_WL, -1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, UPSAMPLE_FACTOR);
     DigitalUpConverter * duc    = new DigitalUpConverter(-MIXER_FREQ, up2Coeffs, up5Coeffs);
 
 
@@ -141,25 +155,36 @@ static void symbolMappingFFTDUCLoopback(const std::string &down2CoeffFile, const
     FFT * fft                   = new FFT(FFT_SIZE, false, UPSAMPLE_FACTOR);
     fft->setOutputFormat(FFT_OUTPUT_WL, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     DigitalDownConverter *ddc   = new DigitalDownConverter(MIXER_FREQ, down2Coeffs, down5Coeffs);
+    FrameSync    *fs                = new FrameSync(FFT_SIZE, CP_SIZE);
 
     //Debug probes
-    std::string duc_in_probe_name = "DUC_INPUT";
-    std::string ddc_out_probe_name = "DDC_OUTPUT";
-    SampleCountTrigger *duc_in   = new SampleCountTrigger(duc_in_probe_name, FilterProbe::CSV, FFT_SIZE*2, 1, 0);
-    SampleCountTrigger *ddc_out  = new SampleCountTrigger(ddc_out_probe_name, FilterProbe::CSV, FFT_SIZE*2, 1, 0);
-
+    std::string duc_in_probe_name   = "DUC_INPUT";
+    std::string ddc_out_probe_name  = "DDC_OUTPUT";
+    std::string ifft_in_probe_name  = "IFFT_INPUT";
+    std::string ifft_out_probe_name = "IFFT_OUTPUT";
+    std::string fft_out_probe_name  = "FFT_OUTPUT";
+    std::string fft_in_probe_name  = "FFT_INPUT";
+    SampleCountTrigger *duc_in      = new SampleCountTrigger(duc_in_probe_name,   FilterProbe::CSV, FFT_SIZE*5 + CP_SIZE, 1, 0);
+    SampleCountTrigger *ddc_out     = new SampleCountTrigger(ddc_out_probe_name,  FilterProbe::CSV, FFT_SIZE*3 + CP_SIZE, 1, 0);
+    SampleCountTrigger *ifft_in     = new SampleCountTrigger(ifft_in_probe_name,  FilterProbe::CSV, FFT_SIZE, 1, 0);
+    SampleCountTrigger *ifft_out    = new SampleCountTrigger(ifft_out_probe_name, FilterProbe::CSV, FFT_SIZE, 1, 0);
+    SampleCountTrigger *fft_out     = new SampleCountTrigger(fft_out_probe_name,  FilterProbe::CSV, FFT_SIZE*2, 1, 0);
+    SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*2, 1, 0);
 
     //Test symbol mapping + FFT + DUC
-//    FilterChain testChain =  *demapper + *fft + *ddc_out + *ddc + *duc + *duc_in + *ifft + *mapper;
-    FilterChain testChain =  *demapper + *ddc_out + *ddc + *duc + *duc_in + *mapper;
+    FilterChain testChain =  *demapper + *fft_out + *fft + *fft_in + *fs + *ddc_out + *ddc + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper;
+//    FilterChain testChain =  *demapper + *ddc_out + *ddc + *duc + *duc_in + *mapper;
+//    FilterChain testChain =  *demapper + *fft_out + *fft + *ifft + *ifft_in + *mapper;
 
     constexpr size_t INPUT_UPSAMPLE_FACTOR = 1;
     size_t numOutputs = runFilters(testChain, inputs, outputs, INPUT_UPSAMPLE_FACTOR);
     std::cout << "FFT/DUC Loopback has " << numOutputs << " outputs" << std::endl;
 
-    constexpr size_t TIME_DOMAIN_DELAY = 64; //delay from DDC/DUC filtering
+//    constexpr size_t TIME_DOMAIN_DELAY = 64; //delay from DDC/DUC filtering
 //    checkOutputs(inputs, outputs, TIME_DOMAIN_DELAY + FFT_SIZE, INPUT_UPSAMPLE_FACTOR);
-    checkOutputs(inputs, outputs, TIME_DOMAIN_DELAY, INPUT_UPSAMPLE_FACTOR);
+//    checkOutputs(inputs, outputs, TIME_DOMAIN_DELAY, INPUT_UPSAMPLE_FACTOR);
+//    checkOutputs(inputs, outputs, 1046, INPUT_UPSAMPLE_FACTOR);
+//    printInputsAndOutputs(inputs, outputs);
 }
 
 int main(int argc, char *argv[])
