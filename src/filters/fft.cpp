@@ -60,19 +60,10 @@ bool FFT::input(const filter_io_t &data)
     //Rely on upstream to use expected input format so that
     //this module can be slightly more flexible
     m_inputs[inputIdx].setFormat(data.fc);
-
-//    std::cout << "FFT " << data.fc.wl() << " " << data.fc.iwl() << std::endl;
-
-    SLFixPoint::throwOnOverflow = true;
     m_inputs[inputIdx] = data.fc;
-    SLFixPoint::throwOnOverflow = false;
 
     //Track the maximum input value for proper scaling
     updateMaxValueForStage(1, m_inputs[inputIdx]);
-
-//    if (m_inverse == true) {
-//        std::cout << "ifft input #" << inputIdx << " = " << data << std::endl;
-//    }
 
     return true;
 }
@@ -101,16 +92,12 @@ void FFT::tick(void)
 
     //We're good to go...
     execute();
-
     for (size_t i = 0; i < m_inputs.size(); i++) {
         //For IFFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
         if (m_inverse) {
             m_inputs[i].shiftRadixRight(m_numStages);
         }
 
-        //XXX eventually remove throwOnOverflow here because we will actually
-        //allow clipping (saturation) as long as it's below an acceptable rate
-        SLFixPoint::throwOnOverflow = true;
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
         size_t outIdx = utils::reverseBits(m_inputs.size(), i);
 #else
@@ -118,11 +105,7 @@ void FFT::tick(void)
 #endif
 
         m_outputs[outIdx] = m_inputs[i];
-
-//        std::cout << "m_outputs[" << outIdx << "] = m_inputs[" << i << "]  (" << m_outputs[outIdx].real().to_int64() << "," << m_outputs[outIdx].imag().to_int64() << " = " << m_inputs[i].real().to_int64() << "," << m_inputs[i].imag().to_int64() << std::endl;
-        SLFixPoint::throwOnOverflow = false;
     }
-//    std::cout << "Output format is " << m_outputs[0].wl() << "," << m_outputs[0].iwl() << std::endl;
 
     //Reset some internal state for the next round
     m_inputIdx = 0;
@@ -219,7 +202,6 @@ void FFT::execute()
                 intWordLength += shiftAmount;
                 m_inputs[botIdx].setFormat(wordLength, intWordLength);
 #endif
-                SLFixPoint::throwOnOverflow = true;
                 m_inputs[topIdx] = top + bot;
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 if (stage == m_numStages) {
@@ -234,7 +216,6 @@ void FFT::execute()
 #else
                 m_inputs[botIdx] = top - bot;
 #endif
-                SLFixPoint::throwOnOverflow = false;
 
                 //Track the max value to shift the next stage properly
                 if (stage != m_numStages) {
@@ -245,7 +226,6 @@ void FFT::execute()
         } //end block loop
         N >>= 1;
         numBlocks <<= 1;
-//        std::cout << "Stage " << stage << " format is " << m_inputs[0].wl() << "," << m_inputs[0].iwl() << std::endl;
     } //end stage loop
 }
 
@@ -334,7 +314,6 @@ SLFixComplex FFT::getTwiddleFactor(size_t stage, size_t n) const
     int temp = m_numStages - 1;
     A1 = utils::reverseBits(1 << temp, A1);
 #endif
-//    std::cout << "stage " << stage << " twiddle: " << n << " -> " << A1 << std::endl;
     return m_twiddleFactors[A1];
 }
 
