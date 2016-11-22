@@ -47,17 +47,22 @@ int main(int argc, char *argv[])
     size_t outputCount = 0;
     size_t inWl = 0;
     size_t inIwl = 0;
+    size_t saturationCount = 0;
+
+    for (size_t i = 0; i < N_FFT_POINTS; i++) {
+        inputsFP[i].setFormat(FFT_INPUT_FORMAT);
+        inputsFP[i].set(inputs[i].real(), inputs[i].imag());
+    }
+
     //First iteration primes the pump, second iteration pushes the outputs out
     for (size_t i = 0; i < 2; i++) {
+        saturationCount = SLFixPoint::overflowCount;
         for (size_t j = 0; j < N_FFT_POINTS; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            inputsFP[j].setFormat(FFT_INPUT_FORMAT);
-            inputsFP[j].set(inputs[j].real(), inputs[j].imag());
             data.fc.setFormat(inputsFP[j]);
             data.fc = inputsFP[j];
             inWl = data.fc.wl();
             inIwl = data.fc.iwl();
-
             fft.input(data);
             fft.tick();
             bool didGetOutput = fft.output(data);
@@ -68,10 +73,12 @@ int main(int argc, char *argv[])
                 ++outputCount;
             }//If output is ready
         }
+        saturationCount = SLFixPoint::overflowCount - saturationCount;
     }
 
     std::cerr << "Running " << N_FFT_POINTS << " FFT with inputs from file." << inputFile << std::endl;
     std::cerr << "Input format is Q" << inIwl << "." << (inWl - inIwl) << " Output format is Q" << outputs[0].iwl() << "." << outputs[0].wl() - outputs[0].iwl() << std::endl;
+    std::cerr << "There were " << saturationCount << " fixed point overflow/saturation events" << std::endl;
 
     std::cout << "InReal,InImag,OutReal,OutImag" << std::endl;
     for (size_t j = 0; j < N_FFT_POINTS; j++) {
