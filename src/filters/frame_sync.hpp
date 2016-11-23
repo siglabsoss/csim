@@ -11,7 +11,8 @@ public:
     void tick(void) override;
 private:
     enum sync_state_t {
-        STATE_WAIT_FOR_FRAME = 0,
+        STATE_WAIT_FOR_NONZERO = 0,
+        STATE_WAIT_FOR_FRAME,
         STATE_DROP_PREFIX,
         STATE_PASS_FRAME,
         STATE_POST_FRAME_DELAY

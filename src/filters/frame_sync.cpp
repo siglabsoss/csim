@@ -2,9 +2,10 @@
 #include <cassert>
 
 static size_t constexpr INTRA_FRAME_DELAY = 100;
+static size_t constexpr DDC_DUC_PHASE_DELAY = 40;
 
 FrameSync::FrameSync(size_t N, size_t cpLen) :
-        m_state(STATE_WAIT_FOR_FRAME),
+        m_state(STATE_WAIT_FOR_NONZERO),
         m_Nfft(N),
         m_cpLen(cpLen),
         m_sampleCount(0),
@@ -34,12 +35,18 @@ bool FrameSync::output(filter_io_t &data)
         m_sampleCount++;
     }
     switch (m_state) {
-        case STATE_WAIT_FOR_FRAME:
+        case STATE_WAIT_FOR_NONZERO:
             if (m_gotInput) {
-                if (std::abs(m_sample.toComplexDouble()) > 1.0e-5) { //XXX validate this threshold
-                    m_state = STATE_DROP_PREFIX;
+                if (std::abs(m_sample.toComplexDouble()) > 0.0) { //XXX validate this threshold
+                    m_state = STATE_WAIT_FOR_FRAME;
                     m_sampleCount = 1; //we'll reset and count this as our first sample
                 }
+            }
+            break;
+        case STATE_WAIT_FOR_FRAME:
+            if (m_sampleCount > DDC_DUC_PHASE_DELAY) {
+                m_sampleCount = 1;
+                m_state = STATE_DROP_PREFIX;
             }
             break;
         case STATE_DROP_PREFIX:
@@ -58,7 +65,7 @@ bool FrameSync::output(filter_io_t &data)
             break;
         case STATE_POST_FRAME_DELAY:
             if (m_sampleCount >= m_cpLen + m_Nfft + INTRA_FRAME_DELAY) {
-                  m_state = STATE_WAIT_FOR_FRAME;
+                  m_state = STATE_WAIT_FOR_NONZERO;
             }
     }
 
