@@ -92,18 +92,20 @@ void FFT::tick(void)
 
     //We're good to go...
     execute();
+
     for (size_t i = 0; i < m_inputs.size(); i++) {
         //For IFFT we need to divide results by N (e.g. shift right by log2(N) = numStages)
         if (m_inverse) {
             m_inputs[i].shiftRadixRight(m_numStages);
         }
+    }
 
+    for (size_t i = 0; i < m_inputs.size(); i++) {
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
         size_t outIdx = utils::reverseBits(m_inputs.size(), i);
 #else
         size_t outIdx = i;
 #endif
-
         m_outputs[outIdx] = m_inputs[i];
     }
 
@@ -170,7 +172,7 @@ void FFT::execute()
                 SLFixComplex top = m_inputs[topIdx];
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 SLFixComplex bot = m_inputs[botIdx];
-//                std::cout << stage << ": top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ")" << std::endl;
+//                std::cout << stage << ": top = m_inputs[" << topIdx << "] = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") Q" << top.iwl() << "." << top.wl() - top.iwl() << std::endl;
 //                std::cout << stage << ": bot = m_inputs[" << botIdx << "] = (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ")" << std::endl;
 #else
                 SLFixComplex bot;
@@ -209,10 +211,8 @@ void FFT::execute()
                 } else {
                     m_inputs[botIdx] = (top - bot) * twiddle;
                 }
-//                if (stage == 10) {
-//                    std::cout << stage << ": m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_int64() << "," << top.imag().to_int64() << ") + (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") = (" << m_inputs[topIdx].real().to_int64() << "," << m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
-//                    std::cout << stage << ": m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_int64() << "," << top.imag().to_int64() << ") - (" << bot.real().to_int64() << "," << bot.imag().to_int64() << ") ) * (" << twiddle.real().to_int64() << "," << twiddle.imag().to_int64() << ") = (" << m_inputs[botIdx].real().to_int64() << "," << m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
-//                }
+//                std::cout << stage << ": m_inputs[" << topIdx << "] = top + bot = (" << top.real().to_double() << "," << top.imag().to_double() << ") + (" << bot.real().to_double() << "," << bot.imag().to_double() << ") = (" << m_inputs[topIdx].real().to_double() << "," << m_inputs[topIdx].imag().to_double() << ")" << std::endl;
+//                std::cout << stage << ": m_inputs[" << botIdx << "] = (top - bot) * twiddle(" << k << ") = ( ("<< top.real().to_double() << "," << top.imag().to_double() << ") - (" << bot.real().to_double() << "," << bot.imag().to_double() << ") ) * (" << twiddle.real().to_double() << "," << twiddle.imag().to_double() << ") = (" << m_inputs[botIdx].real().to_double() << "," << m_inputs[botIdx].imag().to_double() << ")" << std::endl;
 #else
                 m_inputs[botIdx] = top - bot;
 #endif
