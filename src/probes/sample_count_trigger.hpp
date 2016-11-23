@@ -28,11 +28,12 @@ public:
         }
 
         if (!m_offsetReached) {
-            if (m_count >= m_sampleOffset) {
+            if (m_count > m_sampleOffset) {
                 m_offsetReached = true;
-                m_count = 0;
+                m_count = 1;
+            } else {
+                return;
             }
-            return;
         }
 
         if (m_triggers < m_numTriggers && m_count >= m_sampleCount) {
