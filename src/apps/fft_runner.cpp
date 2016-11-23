@@ -7,12 +7,12 @@ static constexpr size_t N_FFT_POINTS = 1024;
 int main(int argc, char *argv[])
 {
     int c;
-    bool gotInputFile = false, shouldScale = false;
+    bool gotInputFile = false, shouldScale = false, shouldInverseFFT = false;
     size_t outputIWL = FFT_OUTPUT_IWL;
     size_t outputWL = FFT_OUTPUT_WL;
 
     std::string inputFile;
-    while ((c = getopt(argc, argv, "f:i:w:s")) != -1) {
+    while ((c = getopt(argc, argv, "f:i:w:sx")) != -1) {
         switch(c) {
         case 'f':
             inputFile = std::string(optarg);
@@ -27,6 +27,9 @@ int main(int argc, char *argv[])
         case 's':
             shouldScale = true;
             break;
+        case 'x':
+            shouldInverseFFT = true;
+            break;
         }
     }
 
@@ -40,7 +43,7 @@ int main(int argc, char *argv[])
     std::vector<SLFixComplex> outputs(inputs.size());
     std::vector<SLFixComplex> inputsFP(inputs.size());
 
-    FFT fft(N_FFT_POINTS, false);
+    FFT fft(N_FFT_POINTS, shouldInverseFFT);
 
     fft.setOutputFormat(outputWL, outputIWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     filter_io_t data;
@@ -76,7 +79,13 @@ int main(int argc, char *argv[])
         saturationCount = SLFixPoint::overflowCount - saturationCount;
     }
 
-    std::cerr << "Running " << N_FFT_POINTS << " FFT with inputs from file." << inputFile << std::endl;
+    std::cerr << "Running " << N_FFT_POINTS;
+    if (shouldInverseFFT) {
+        std::cerr << " IFFT";
+    } else {
+        std::cerr << " FFT";
+    }
+    std::cerr << " with inputs from file." << inputFile << std::endl;
     std::cerr << "Input format is Q" << inIwl << "." << (inWl - inIwl) << " Output format is Q" << outputs[0].iwl() << "." << outputs[0].wl() - outputs[0].iwl() << std::endl;
     std::cerr << "There were " << saturationCount << " fixed point overflow/saturation events" << std::endl;
 
