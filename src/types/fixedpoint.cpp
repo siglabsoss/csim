@@ -172,6 +172,21 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
             value <<= 1;
         }
         this->m_value = value;
+        bool excessBits = hasExcessBits(this->m_value);
+        bool wasPositive = (this->m_value >= 0);
+        if (excessBits) {
+            handleOverflow();
+            switch(m_overflowMode) {
+                case OVERFLOW_SATURATE:
+                {
+                    this->m_value = getSaturatedValue(!wasPositive);
+                    break;
+                }
+                case OVERFLOW_WRAP_AROUND:
+                default:
+                    break;
+            }
+        }
     } else { //here we are losing precision
         precisionLossCount++;
         fracDiff = -fracDiff;
@@ -198,12 +213,7 @@ SLFixPoint &SLFixPoint::operator=(const SLFixPoint &rhs)
         }
         bool wasPositive = (value >= 0);
         bool isNegative = (this->m_value & (1ull << (this->m_wl - 1)));
-        unsigned long long mask = ~(~(0ull) >> (sizeof(m_value) * 8 - m_wl));
-        long long tempVal = this->m_value;
-        if (tempVal < 0) {
-            tempVal = -tempVal;
-        }
-        bool excessBits = (tempVal & mask);
+        bool excessBits = hasExcessBits(this->m_value);
         //either of these three conditions indicates overflow
         bool tooSmall = (value >= 0 && this->m_value == 0) || (value < 0 && (this->m_value == -1 || this->m_value == 0));
         if (!tooSmall) { //if our value was too small such that all sigbits were shifted away, we don't want to count it as overflow
@@ -233,18 +243,14 @@ SLFixPoint &SLFixPoint::operator=(double val)
 
     bool wasPositive = (val >= 0);
     bool isNegative = (this->m_value & (1ull << (this->m_wl - 1)));
-    unsigned long long mask = ~(~(0ull) >> (sizeof(m_value) * 8 - m_wl));
-    long long tempVal = this->m_value;
-    if (tempVal < 0) {
-        tempVal = -tempVal;
-    }
-    if (tempVal == 0 && val != 0.0) {
+
+    if (this->m_value == 0 && val != 0.0) {
         underflowCount++; //value was too small to represent with current scaling format
     }
-    bool excessBits = (tempVal & mask);
+    bool excessBits = hasExcessBits(m_value);
     //if the floating point value is too small, the scaled integer may be 0, in which case
     //a "sign change" is a red herring and not a real overflow
-    if (tempVal != 0) {
+    if (this->m_value != 0) {
         if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
             handleOverflow();
             switch(m_overflowMode) {
@@ -352,6 +358,16 @@ long long SLFixPoint::getSaturatedValue(bool negative) const
         value = ~value; //one's complement because max negative value is one less than max positive (~value == -value - 1)
     }
     return value;
+}
+
+bool SLFixPoint::hasExcessBits(long long value) const
+{
+    unsigned long long mask = ~(~(0ull) >> (sizeof(value) * 8 - m_wl));
+    long long tempVal = value;
+    if (tempVal < 0) {
+        tempVal = -tempVal;
+    }
+    return static_cast<bool>(tempVal & mask);
 }
 
 uint64_t SLFixPoint::slice(size_t end, size_t start) const

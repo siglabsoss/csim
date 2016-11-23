@@ -60,6 +60,7 @@ public:
 protected:
     long long           getMaskedValue() const;
     long long           getSaturatedValue(bool negative) const;
+    bool                hasExcessBits(long long value) const;
     void                extendSign();
     void                maskAndSignExtend();
     void                handleOverflow();
