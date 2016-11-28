@@ -61,6 +61,16 @@ void LDPCEncode::tick(void)
     }
 }
 
+size_t LDPCEncode::getMsgLen() const
+{
+    return m_G.size();
+}
+
+size_t LDPCEncode::getCwLen() const
+{
+    return m_G[0].size();
+}
+
 LDPCEncode::LDPCEncode(const std::vector<std::vector<bool> > &G):
     FilterChainElement(std::string("LDPCEncode")),
     m_G(G),

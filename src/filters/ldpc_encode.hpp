@@ -17,8 +17,12 @@ public:
     bool output(filter_io_t &data) override;
     void tick(void) override;
 
-    std::vector<bool> encode(const std::vector<bool> &u) const;
+    size_t getMsgLen() const;
+    size_t getCwLen() const;
+
 private:
+    std::vector<bool> encode(const std::vector<bool> &u) const;
+
     std::vector<std::vector<bool> >    m_G;
     std::queue<bool>                   m_inputBuffer;
     std::queue<bool>                   m_outputBuffer;
