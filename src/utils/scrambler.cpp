@@ -10,12 +10,17 @@ Scrambler::Scrambler(const std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> &initState
 
 void Scrambler::scramble(std::vector<bool> &data)
 {
-    bool shifterBit;
     for (size_t i = 0; i < data.size(); i++) {
-        shifterBit = (m_reg[3] ^ m_reg[6]); //XOR bit 4 and 7
-        data[i] = (shifterBit ^ data[i]);   //XOR result of previous XOR and current data bit
-        (void)m_reg.shiftLeft(shifterBit); //Feedback result of first XOR into shift register
+        data[i] = scramble(data[i]);
     }
+}
+
+bool Scrambler::scramble(bool bit)
+{
+    bool shifterBit = (m_reg[3] ^ m_reg[6]); //XOR bit 4 and 7
+    bit = (shifterBit ^ bit);
+    (void)m_reg.shiftLeft(shifterBit); //Feedback result of first XOR into shift register
+    return bit;
 }
 
 void Scrambler::reset(const std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> &initState)
