@@ -10,8 +10,11 @@ Mapper::Mapper(unsigned int ticksPerSymbol, constellation_set_t scheme = CONST_S
     m_constellations(),
     m_bitsPerSymbol(0),
     m_inputBuffer(),
+    m_output(),
+    m_scrambler(0b1111111),
     m_tickCount(0),
-    m_ticksPerSymbol(ticksPerSymbol)
+    m_ticksPerSymbol(ticksPerSymbol),
+    m_gotFirstSymbol(false)
 {
     m_tickCount = m_ticksPerSymbol; //set to trigger an output update on first iteration
     switch(scheme) {
@@ -46,11 +49,15 @@ bool Mapper::input(const filter_io_t &data)
     }
     //queuing up least significant bit first
     m_inputBuffer.push(data.bit);
+    if (!m_gotFirstSymbol && (m_inputBuffer.size() >= m_bitsPerSymbol)) {
+        m_gotFirstSymbol = true;
+    }
     return true;
 }
+
 bool Mapper::output(filter_io_t &data)
 {
-    if (m_tickCount == 1) {
+    if (m_gotFirstSymbol && m_tickCount == 1) {
         data = m_output;
 //        if (std::abs(data.toComplexDouble()) > 0.01) {
 //            std::cout << "mapper out: " << data.toComplexDouble() << std::endl;
@@ -59,17 +66,17 @@ bool Mapper::output(filter_io_t &data)
     }
     return false;
 }
+
 void Mapper::tick(void)
 {
     if (m_tickCount >= m_ticksPerSymbol) {
         symbol_t symbol = NULL_SYMBOL;
         if (m_inputBuffer.size() >= m_bitsPerSymbol) { //we have real input to modulate
-            symbol = getNextSymbol();
-            m_output = m_constellations.at(symbol);
+            symbol   = getNextSymbol();
         } else {
-            m_output = constellation_t(FFT_INPUT_FORMAT);
-            m_output.set(0.0, 0.0);
+            symbol   = generateRandomSymbol();
         }
+        m_output = m_constellations.at(symbol);
         m_tickCount = 0;
     }
     m_tickCount++;
@@ -79,8 +86,19 @@ symbol_t Mapper::getNextSymbol()
 {
     symbol_t symbol = 0;
     for (size_t i = 0; i < m_bitsPerSymbol; i++) {
-        symbol_t nextBit = !!m_inputBuffer.front(); //lsb first
+        symbol_t nextBit = m_scrambler.scramble(static_cast<bool>(!!m_inputBuffer.front())); //lsb first
+
         m_inputBuffer.pop();
+        symbol |= (nextBit << i);
+    }
+    return symbol;
+}
+
+symbol_t Mapper::generateRandomSymbol()
+{
+    symbol_t symbol = 0;
+    for (size_t i = 0; i < m_bitsPerSymbol; i++) {
+        symbol_t nextBit = m_scrambler.scramble(0); //scramble zeros to get 'random' pattern
         symbol |= (nextBit << i);
     }
     return symbol;
@@ -99,6 +117,7 @@ constellation_map_t Mapper::getBPSKConstellations()
 
     return constellations;
 }
+
 constellation_map_t Mapper::getQPSKConstellations()
 {
     constellation_map_t constellations;
@@ -114,6 +133,7 @@ constellation_map_t Mapper::getQPSKConstellations()
 
     return constellations;
 }
+
 constellation_map_t Mapper::get8PSKConstellations()
 {
     constellation_map_t constellations;
@@ -131,6 +151,7 @@ constellation_map_t Mapper::get8PSKConstellations()
 
     return constellations;
 }
+
 constellation_map_t Mapper::getQAM16Constellations()
 {
     //https://upload.wikimedia.org/wikipedia/commons/9/90/QAM16_Demonstration.gif

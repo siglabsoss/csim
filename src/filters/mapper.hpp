@@ -1,5 +1,6 @@
 #include <types/fixedcomplex.hpp>
 #include <core/filter_chain_element.hpp>
+#include <utils/scrambler.hpp>
 #include <map>
 #include <queue>
 
@@ -46,14 +47,16 @@ public: //static methods
 
 private: //methods
     symbol_t    getNextSymbol();
+    symbol_t    generateRandomSymbol();
 
 private:
     constellation_map_t     m_constellations; //mapping of symbol -> constellation vector
     size_t                  m_bitsPerSymbol;
     std::queue<bool>        m_inputBuffer;    //inefficient storage (8x inflated) but that's OK
     constellation_t         m_output;
+    Scrambler               m_scrambler;
 
     unsigned int            m_tickCount;
     unsigned int            m_ticksPerSymbol;
-
+    bool                    m_gotFirstSymbol;
 };
