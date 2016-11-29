@@ -34,10 +34,6 @@ CSIM_TEST_CASE(MAPPER_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
         BOOST_CHECK_EQUAL(mapper.input(data), true);
     }
 
-    //The mapper will scramble the inputs, so we scramble them as well here
-    Scrambler scr(0b1111111);
-    scr.scramble(byte);
-
     for (unsigned int i = 0; i < (8) * MAPPER_TICKS_PER_SYMBOL; i++) {
         mapper.tick();
         mapper.output(output);
@@ -84,7 +80,7 @@ CSIM_TEST_CASE(MAPPER_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
     constellation_map_t expectedConstellations =  Mapper::getQAM16Constellations();
 
     //These are the expected symbols for the test data.
-    std::vector<int> symbols = {2,0,5,15,2,0,1,2,13,8,2,9,9,3,8,14};
+    std::vector<int> symbols = {1,0,3,2,5,4,7,6,9,8,11,10,13,12,15,14};
 
     for (unsigned int i = 0; i < testData.size() / 4 * MAPPER_TICKS_PER_SYMBOL; i++) {
         mapper.tick();

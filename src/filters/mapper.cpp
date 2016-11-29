@@ -74,6 +74,9 @@ void Mapper::tick(void)
         if (m_inputBuffer.size() >= m_bitsPerSymbol) { //we have real input to modulate
             symbol   = getNextSymbol();
         } else {
+            //XXX For now we will assume our input buffer will never by starved after we've started getting symbols.
+            //Later we will have to decide how this block will handle this case
+            assert(!m_gotFirstSymbol);
             symbol   = generateRandomSymbol();
         }
         m_output = m_constellations.at(symbol);
@@ -86,8 +89,7 @@ symbol_t Mapper::getNextSymbol()
 {
     symbol_t symbol = 0;
     for (size_t i = 0; i < m_bitsPerSymbol; i++) {
-        symbol_t nextBit = m_scrambler.scramble(static_cast<bool>(!!m_inputBuffer.front())); //lsb first
-
+        symbol_t nextBit = static_cast<bool>(!!m_inputBuffer.front()); //first in, first out
         m_inputBuffer.pop();
         symbol |= (nextBit << i);
     }
