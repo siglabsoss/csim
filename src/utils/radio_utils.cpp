@@ -36,7 +36,7 @@ static void construct_rx_chain(FilterChain &rxChain, Mapper::constellation_set_t
 static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 {
     CSVBitMatrix p;
-    std::vector<char> g_bytes = p.loadCSVFile("data/ldpc/80211n_G.csv");
+    std::vector<char> g_bytes = p.loadCSVFile("data/ldpc/80211n_G_648_12.csv");
     std::vector<std::vector<bool> > G;
     p.parseCSV(g_bytes, G);
 
@@ -49,7 +49,7 @@ static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
 {
     CSVBitMatrix p;
-    std::vector<char> bytes = p.loadCSVFile("data/ldpc/80211n_H.csv");
+    std::vector<char> bytes = p.loadCSVFile("data/ldpc/80211n_H_648_12.csv");
     std::vector<std::vector<bool> > H;
     p.parseCSV(bytes, H);
 

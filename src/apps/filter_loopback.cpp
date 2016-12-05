@@ -72,7 +72,7 @@ static size_t runFilters(FilterChain &chain, const std::vector<bool> &inputs, st
     return outputs.size();
 }
 
-static void symbolMappingFFTDUCLoopback(const std::string &down2CoeffFile, const std::string &down5CoeffFile,
+static void filterLoopback(const std::string &down2CoeffFile, const std::string &down5CoeffFile,
         const std::string &up2CoeffFile, const std::string &up5CoeffFile,
         const std::vector<bool> &inputs, std::vector<bool> &outputs)
 {
@@ -125,7 +125,7 @@ static void symbolMappingFFTDUCLoopback(const std::string &down2CoeffFile, const
     std::string ifft_in_probe_name  = "IFFT_INPUT";
     std::string ifft_out_probe_name = "IFFT_OUTPUT";
     std::string fft_out_probe_name  = "FFT_OUTPUT";
-    std::string fft_in_probe_name  = "FFT_INPUT";
+    std::string fft_in_probe_name   = "FFT_INPUT";
     constexpr size_t PHASE_DELAY = 40; //found emperically
     SampleCountTrigger *duc_in      = new SampleCountTrigger(duc_in_probe_name,   FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*1, 1, 0);
     SampleCountTrigger *ddc_out     = new SampleCountTrigger(ddc_out_probe_name,  FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*1 + PHASE_DELAY, 1, 0);
@@ -163,7 +163,7 @@ int main(int argc, char *argv[])
     //Calculate random inputs
     loadInput(inputs);
 
-    symbolMappingFFTDUCLoopback(down2, down5, up2, up5, inputs, outputs);
+    filterLoopback(down2, down5, up2, up5, inputs, outputs);
 
     return 0;
 }
