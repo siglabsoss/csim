@@ -1,6 +1,7 @@
 #include <types/fixedcomplex.hpp>
 #include <core/filter_chain_element.hpp>
 #include <utils/scrambler.hpp>
+#include <utils/mcs.hpp>
 #include <map>
 #include <queue>
 
@@ -15,16 +16,9 @@ class Mapper : public FilterChainElement
 private: //constants
     static constexpr size_t INPUT_BUFFER_BITS_MAX = 8 * 512;
     static constexpr symbol_t NULL_SYMBOL = 0;
-public: //types
-    enum constellation_set_t {
-        CONST_SET_NULL = 0,
-        CONST_SET_BPSK,
-        CONST_SET_QPSK,
-        CONST_SET_8PSK,
-        CONST_SET_QAM16
-    };
+
 public:
-    Mapper(unsigned int ticksPerSymbol, constellation_set_t scheme);
+    Mapper(unsigned int ticksPerSymbol, MCS::modulation_t scheme);
 
     /**
      * Input is expected to be a digital bit stream (IO_TYPE_BYTE)
@@ -38,13 +32,11 @@ public:
     void tick(void) override;
 
 public: //static methods
-
     //obtain symbol/constellation mappings for various modulation schemes
     static constellation_map_t getBPSKConstellations();
     static constellation_map_t getQPSKConstellations();
     static constellation_map_t get8PSKConstellations();
     static constellation_map_t getQAM16Constellations();
-    static size_t              getBitsPerSymbol(Mapper::constellation_set_t scheme);
 
 private: //methods
     symbol_t    getNextSymbol();

@@ -3,7 +3,7 @@
 
 #define SD_LLR_FORMAT             18, 8,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
-Demapper::Demapper(Mapper::constellation_set_t scheme, bool hard) :
+Demapper::Demapper(MCS::modulation_t scheme, bool hard) :
     m_value(),
     m_inputValid(false),
     m_constellations(),
@@ -13,23 +13,23 @@ Demapper::Demapper(Mapper::constellation_set_t scheme, bool hard) :
     m_llrs()
 {
     switch(scheme) {
-        case Mapper::CONST_SET_BPSK:
+        case MCS::MOD_BPSK:
             m_constellations = Mapper::getBPSKConstellations();
             m_bitsPerSymbol = 1;
             break;
-        case Mapper::CONST_SET_QPSK:
+        case MCS::MOD_QPSK:
             m_constellations = Mapper::getQPSKConstellations();
             m_bitsPerSymbol = 2;
             break;
-        case Mapper::CONST_SET_8PSK:
+        case MCS::MOD_8PSK:
             m_constellations = Mapper::get8PSKConstellations();
             m_bitsPerSymbol = 3;
             break;
-        case Mapper::CONST_SET_QAM16:
+        case MCS::MOD_QAM16:
             m_constellations = Mapper::getQAM16Constellations();
             m_bitsPerSymbol = 4;
             break;
-        case Mapper::CONST_SET_NULL:
+        case MCS::MOD_NULL:
         default:
             break;
     }

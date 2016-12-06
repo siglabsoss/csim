@@ -17,14 +17,14 @@ static constexpr size_t MOD_TICKS_PER_SYMBOL = 3;
 //ticks per symbol needs to be greater than upsample factor in order to not saturate
 static constexpr size_t MIXER_TICKS_PER_PERIOD = (MOD_TICKS_PER_SYMBOL / UPSAMPLE_FACTOR) * 1;
 
-static void construct_tx_chain(FilterChain &txChain, Mapper::constellation_set_t scheme)
+static void construct_tx_chain(FilterChain &txChain, MCS::modulation_t scheme)
 {
     Mapper * qam16    = new Mapper(MOD_TICKS_PER_SYMBOL, scheme);
     Mixer *     upmixer  = new Mixer(MIXER_TICKS_PER_PERIOD, true /* upmix */);
     txChain = *upmixer + *qam16;
 }
 
-static void construct_rx_chain(FilterChain &rxChain, Mapper::constellation_set_t scheme)
+static void construct_rx_chain(FilterChain &rxChain, MCS::modulation_t scheme)
 {
     Mixer *downmixer = new Mixer(MIXER_TICKS_PER_PERIOD, false /* downmix */);
     Decimator *decim = new Decimator(MOD_TICKS_PER_SYMBOL, 0);
@@ -41,7 +41,7 @@ static void construct_ldpc_ebn0_tx(FilterChain &txChain)
     p.parseCSV(g_bytes, G);
 
     LDPCEncode * encode  = new LDPCEncode(G);
-    Mapper *     mapper    = new Mapper(1, Mapper::CONST_SET_BPSK);
+    Mapper *     mapper   = new Mapper(1, MCS::MOD_BPSK);
 
     txChain = *mapper + *encode;
 }
@@ -54,13 +54,13 @@ static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
     p.parseCSV(bytes, H);
 
     LDPCDecoder * decode = new LDPCDecoder(H);
-    Demapper * demapper = new Demapper(Mapper::CONST_SET_BPSK, false);
+    Demapper * demapper = new Demapper(MCS::MOD_BPSK, false);
     NoiseElement * ne    = new NoiseElement(ebn0);
 
     rxChain = *decode + *demapper + *ne;
 }
 
-void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, Mapper::constellation_set_t scheme)
+void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, MCS::modulation_t scheme)
 {
     size_t count = 0;
     for (auto it = coords.begin(); it != coords.end(); it++) {

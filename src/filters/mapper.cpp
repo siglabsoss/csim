@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-Mapper::Mapper(unsigned int ticksPerSymbol, constellation_set_t scheme = CONST_SET_BPSK) :
+Mapper::Mapper(unsigned int ticksPerSymbol, MCS::modulation_t scheme = MCS::MOD_BPSK) :
     FilterChainElement("Mapper"),
     m_constellations(),
     m_bitsPerSymbol(0),
@@ -17,21 +17,23 @@ Mapper::Mapper(unsigned int ticksPerSymbol, constellation_set_t scheme = CONST_S
     m_gotFirstSymbol(false)
 {
     m_tickCount = m_ticksPerSymbol; //set to trigger an output update on first iteration
+    assert(scheme != MCS::MOD_QAM64); //not implemented
     m_bitsPerSymbol = getBitsPerSymbol(scheme);
     switch(scheme) {
-        case CONST_SET_BPSK:
+        case MCS::MOD_BPSK:
             m_constellations = getBPSKConstellations();
             break;
-        case CONST_SET_QPSK:
+        case MCS::MOD_QPSK:
             m_constellations = getQPSKConstellations();
             break;
-        case CONST_SET_8PSK:
+        case MCS::MOD_8PSK:
             m_constellations = get8PSKConstellations();
             break;
-        case CONST_SET_QAM16:
+        case MCS::MOD_QAM16:
             m_constellations = getQAM16Constellations();
             break;
-        case CONST_SET_NULL:
+        case MCS::MOD_QAM64:
+        case MCS::MOD_NULL:
         default:
             break;
     }
@@ -185,19 +187,3 @@ constellation_map_t Mapper::getQAM16Constellations()
     return constellations;
 }
 
-size_t Mapper::getBitsPerSymbol(Mapper::constellation_set_t scheme)
-{
-    switch(scheme) {
-        case CONST_SET_BPSK:
-            return 1;
-        case CONST_SET_QPSK:
-            return 2;
-        case CONST_SET_8PSK:
-            return 3;
-        case CONST_SET_QAM16:
-            return 4;
-        case CONST_SET_NULL:
-        default:
-            return 0;
-    }
-}
