@@ -44,6 +44,7 @@ public: //static methods
     static constellation_map_t getQPSKConstellations();
     static constellation_map_t get8PSKConstellations();
     static constellation_map_t getQAM16Constellations();
+    static size_t              getBitsPerSymbol(Mapper::constellation_set_t scheme);
 
 private: //methods
     symbol_t    getNextSymbol();
