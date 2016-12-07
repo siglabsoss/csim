@@ -3,7 +3,7 @@
 
 #define SD_LLR_FORMAT             18, 8,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
-Demapper::Demapper(MCS::modulation_t scheme, bool hard) :
+Demapper::Demapper(MCS mcs, bool hard) :
     m_value(),
     m_inputValid(false),
     m_constellations(),
@@ -12,22 +12,19 @@ Demapper::Demapper(MCS::modulation_t scheme, bool hard) :
     m_awgnVariance(1.0), //XXX will need a way to adjust at runtime based on signal power / SNR = noise power
     m_llrs()
 {
-    switch(scheme) {
+    m_bitsPerSymbol = mcs.getNumBitsPerSubcarrier();
+    switch(mcs.getModulation()) {
         case MCS::MOD_BPSK:
             m_constellations = Mapper::getBPSKConstellations();
-            m_bitsPerSymbol = 1;
             break;
         case MCS::MOD_QPSK:
             m_constellations = Mapper::getQPSKConstellations();
-            m_bitsPerSymbol = 2;
             break;
         case MCS::MOD_8PSK:
             m_constellations = Mapper::get8PSKConstellations();
-            m_bitsPerSymbol = 3;
             break;
         case MCS::MOD_QAM16:
             m_constellations = Mapper::getQAM16Constellations();
-            m_bitsPerSymbol = 4;
             break;
         case MCS::MOD_NULL:
         default:

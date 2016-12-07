@@ -106,14 +106,15 @@ static void filterLoopback(const std::string &down2CoeffFile, const std::string 
     }
 
     //Initialize blocks
-    Mapper * mapper             = new Mapper(UPSAMPLE_FACTOR*2, Mapper::CONST_SET_BPSK);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_BPSK, 0, 1024);
+    Mapper * mapper             = new Mapper(UPSAMPLE_FACTOR*2, mcs);
     FFT * ifft                  = new FFT(FFT_SIZE, true, UPSAMPLE_FACTOR*2);
     ifft->setOutputFormat(FFT_OUTPUT_WL, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, UPSAMPLE_FACTOR);
     DigitalUpConverter * duc    = new DigitalUpConverter(-MIXER_FREQ, up2Coeffs, up5Coeffs);
 
 
-    Demapper * demapper         = new Demapper(Mapper::CONST_SET_BPSK, true);
+    Demapper * demapper         = new Demapper(mcs, true);
     FFT * fft                   = new FFT(FFT_SIZE, false, UPSAMPLE_FACTOR);
     fft->setOutputFormat(FFT_OUTPUT_WL, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     DigitalDownConverter *ddc   = new DigitalDownConverter(MIXER_FREQ, down2Coeffs, down5Coeffs);

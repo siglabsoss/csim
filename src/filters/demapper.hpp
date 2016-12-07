@@ -7,7 +7,7 @@
 class Demapper : public FilterChainElement
 {
 public:
-    Demapper(MCS::modulation_t scheme, bool hard);
+    Demapper(MCS mcs, bool hard);
     ~Demapper();
 
     bool input(const filter_io_t &data) override;

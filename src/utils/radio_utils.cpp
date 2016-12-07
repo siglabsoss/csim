@@ -27,9 +27,10 @@ static void construct_tx_chain(FilterChain &txChain, MCS::modulation_t scheme)
 
 static void construct_rx_chain(FilterChain &rxChain, MCS::modulation_t scheme)
 {
+    MCS mcs(MCS::ONE_HALF_RATE, scheme, 1024);
     Mixer *downmixer = new Mixer(MIXER_TICKS_PER_PERIOD, false /* downmix */);
     Decimator *decim = new Decimator(MOD_TICKS_PER_SYMBOL, 0);
-    Demapper *demod = new Demapper(scheme, true);
+    Demapper *demod = new Demapper(mcs, true);
     NoiseElement * ne = new NoiseElement(15);
     rxChain = *demod + *decim + *downmixer + *ne;
 }
@@ -56,7 +57,8 @@ static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
     p.parseCSV(bytes, H);
 
     LDPCDecoder * decode = new LDPCDecoder(H);
-    Demapper * demapper = new Demapper(MCS::MOD_BPSK, false);
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 1024);
+    Demapper * demapper = new Demapper(mcs, false);
     NoiseElement * ne    = new NoiseElement(ebn0);
 
     rxChain = *decode + *demapper + *ne;
