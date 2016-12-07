@@ -15,7 +15,8 @@ CSIM_TEST_SUITE_BEGIN(MapperFunctionality)
 
 CSIM_TEST_CASE(MAPPER_DOES_NOT_OUTPUT_BEFORE_FIRST_SYMBOL)
 {
-    Mapper mapper(MAPPER_TICKS_PER_SYMBOL, Mapper::CONST_SET_BPSK);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_BPSK, 0);
+    Mapper mapper(MAPPER_TICKS_PER_SYMBOL, mcs);
     filter_io_t output;
     for (int i = 0; i < 100; i++) {
         mapper.tick();
@@ -27,7 +28,8 @@ CSIM_TEST_CASE(MAPPER_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
 {
     std::vector<bool> byte = {0,1,0,1,0,1,0,1};
     filter_io_t data, output;
-    Mapper mapper(MAPPER_TICKS_PER_SYMBOL, Mapper::CONST_SET_BPSK);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_BPSK, 0);
+    Mapper mapper(MAPPER_TICKS_PER_SYMBOL, mcs);
     for (size_t i = 0; i < byte.size(); i++) {
         data.type = IO_TYPE_BIT;
         data.bit = byte[i];
@@ -50,7 +52,8 @@ CSIM_TEST_CASE(MAPPER_DOES_OUTPUT_CORRECT_BPSK_SYMBOLS)
 
 CSIM_TEST_CASE(MAPPER_DOES_OUTPUT_CORRECT_QAM16_SYMBOLS)
 {
-    Mapper mapper(MAPPER_TICKS_PER_SYMBOL, Mapper::CONST_SET_QAM16);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM16, 0, 104);
+    Mapper mapper(MAPPER_TICKS_PER_SYMBOL, mcs);
 
     std::vector<bool> testData = {
             0,0,0,1,

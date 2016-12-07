@@ -15,58 +15,61 @@ CSIM_TEST_CASE(MIN_OFDM_SYMBOLS_CALCULATION)
 {
     constexpr size_t length = 3000;
     constexpr size_t numInfoBits = 8 * length + 16;
-    BOOST_CHECK_EQUAL(MCS::getNumOFDMSymbols(numInfoBits, 1040, MCS::ONE_HALF_RATE), 47);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, numInfoBits, 104);
+    BOOST_CHECK_EQUAL(mcs.getNumOFDMSymbols(), 47);
 }
 
 CSIM_TEST_CASE(NUM_BITS_PER_SYMBOL)
 {
-    BOOST_CHECK_EQUAL(MCS::getNumBitsPerSymbol(MCS::MOD_BPSK, 52), 52);
-    BOOST_CHECK_EQUAL(MCS::getNumBitsPerSymbol(MCS::MOD_QAM16, 52), 208);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_BPSK, 0, 104);
+    MCS mcs2(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, 0, 104);
+    BOOST_CHECK_EQUAL(mcs.getNumBitsPerSymbol(), 104);
+    BOOST_CHECK_EQUAL(mcs2.getNumBitsPerSymbol(), 6*104);
 }
 
 CSIM_TEST_CASE(NUM_CODE_WORDS)
 {
     constexpr size_t length = 3000;
     constexpr size_t numInfoBits = 8 * length + 16;
-    BOOST_CHECK_EQUAL(MCS::getNumCodeWords(MCS::FIVE_SIXTHS_RATE, 29328, numInfoBits), 15);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, numInfoBits, 104);
+    BOOST_CHECK_EQUAL(mcs.getNumCodeWords(), 15);
 
     constexpr size_t length2 = 3053;
     constexpr size_t numInfoBits2 = 8 * length2 + 16;
-    BOOST_CHECK_EQUAL(MCS::getNumCodeWords(MCS::FIVE_SIXTHS_RATE, 29328, numInfoBits2), 16);
+    MCS mcs2(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, numInfoBits2, 104);
+    BOOST_CHECK_EQUAL(mcs2.getNumCodeWords(), 16);
 }
 
 CSIM_TEST_CASE(CODE_WORD_LENGTH)
 {
     constexpr size_t length = 3000;
     constexpr size_t numInfoBits = 8 * length + 16;
-    BOOST_CHECK_EQUAL(MCS::getCodeWordLength(MCS::FIVE_SIXTHS_RATE, 29328, numInfoBits), 1944);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, numInfoBits, 104);
+    BOOST_CHECK_EQUAL(mcs.getCodeWordLength(), 1944);
 }
 
 CSIM_TEST_CASE(NUM_SHORTENING_BITS)
 {
     constexpr size_t length = 3000;
     constexpr size_t numInfoBits = 8 * length + 16;
-    constexpr size_t numCodeWords = 15;
-    constexpr size_t codeWordLength = 1944;
-    BOOST_CHECK_EQUAL(MCS::getNumShorteningBits(numCodeWords, codeWordLength, MCS::FIVE_SIXTHS_RATE, numInfoBits), 284);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, numInfoBits, 104);
+    BOOST_CHECK_EQUAL(mcs.getNumShorteningBits(), 284);
 }
 
 CSIM_TEST_CASE(NUM_REPETITION_BITS)
 {
     constexpr size_t length = 3000;
     constexpr size_t numInfoBits = 8 * length + 16;
-    constexpr size_t numCodeWords = 15;
-    constexpr size_t codeWordLength = 1944;
-    BOOST_CHECK_EQUAL(MCS::getNumPuncOrRepBits(numInfoBits, 29328, numCodeWords, codeWordLength, MCS::FIVE_SIXTHS_RATE), -452);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, numInfoBits, 104);
+    BOOST_CHECK_EQUAL(mcs.getNumPuncOrRepBits(), -452);
 }
 
 CSIM_TEST_CASE(NUM_PUNCTURE_BITS)
 {
     constexpr size_t length = 3053;
     constexpr size_t numInfoBits = 8 * length + 16;
-    constexpr size_t numCodeWords = 16;
-    constexpr size_t codeWordLength = 1944;
-    BOOST_CHECK_EQUAL(MCS::getNumPuncOrRepBits(numInfoBits, 29328, numCodeWords, codeWordLength, MCS::FIVE_SIXTHS_RATE), 296);
+    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM64, numInfoBits, 104);
+    BOOST_CHECK_EQUAL(mcs.getNumPuncOrRepBits(), 296);
 }
 
 // CSIM_TEST_CASE(CODEWORD_PREPARATION)

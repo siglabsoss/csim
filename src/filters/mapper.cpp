@@ -5,7 +5,7 @@
 
 #include <cassert>
 
-Mapper::Mapper(unsigned int ticksPerSymbol, MCS::modulation_t scheme = MCS::MOD_BPSK) :
+Mapper::Mapper(unsigned int ticksPerSymbol, MCS mcs) :
     FilterChainElement("Mapper"),
     m_constellations(),
     m_bitsPerSymbol(0),
@@ -16,9 +16,10 @@ Mapper::Mapper(unsigned int ticksPerSymbol, MCS::modulation_t scheme = MCS::MOD_
     m_ticksPerSymbol(ticksPerSymbol),
     m_gotFirstSymbol(false)
 {
+    MCS::modulation_t scheme = mcs.getModulation();
     m_tickCount = m_ticksPerSymbol; //set to trigger an output update on first iteration
     assert(scheme != MCS::MOD_QAM64); //not implemented
-    m_bitsPerSymbol = getBitsPerSymbol(scheme);
+    m_bitsPerSymbol = mcs.getNumBitsPerSubcarrier();
     switch(scheme) {
         case MCS::MOD_BPSK:
             m_constellations = getBPSKConstellations();

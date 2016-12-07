@@ -19,7 +19,8 @@ static constexpr size_t MIXER_TICKS_PER_PERIOD = (MOD_TICKS_PER_SYMBOL / UPSAMPL
 
 static void construct_tx_chain(FilterChain &txChain, MCS::modulation_t scheme)
 {
-    Mapper * qam16    = new Mapper(MOD_TICKS_PER_SYMBOL, scheme);
+    MCS mcs(MCS::ONE_HALF_RATE, scheme, 1024);
+    Mapper * qam16    = new Mapper(MOD_TICKS_PER_SYMBOL, mcs);
     Mixer *     upmixer  = new Mixer(MIXER_TICKS_PER_PERIOD, true /* upmix */);
     txChain = *upmixer + *qam16;
 }
@@ -41,7 +42,8 @@ static void construct_ldpc_ebn0_tx(FilterChain &txChain)
     p.parseCSV(g_bytes, G);
 
     LDPCEncode * encode  = new LDPCEncode(G);
-    Mapper *     mapper   = new Mapper(1, MCS::MOD_BPSK);
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 1024);
+    Mapper *     mapper   = new Mapper(1, mcs);
 
     txChain = *mapper + *encode;
 }

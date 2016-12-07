@@ -18,7 +18,7 @@ private: //constants
     static constexpr symbol_t NULL_SYMBOL = 0;
 
 public:
-    Mapper(unsigned int ticksPerSymbol, MCS::modulation_t scheme);
+    Mapper(unsigned int ticksPerSymbol, MCS mcs);
 
     /**
      * Input is expected to be a digital bit stream (IO_TYPE_BYTE)

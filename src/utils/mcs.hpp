@@ -2,8 +2,9 @@
 
 #include <stdlib.h>
 
-namespace MCS
+class MCS
 {
+public:
     enum code_rate_t {
         ONE_HALF_RATE = 0,
         TWO_THIRDS_RATE,
@@ -18,15 +19,26 @@ namespace MCS
         MOD_QAM16,
         MOD_QAM64
     };
+
+    static constexpr size_t NUM_OFDM_CARRIERS = 1024;
+
+    MCS(code_rate_t rate, modulation_t mod, size_t frame, size_t subs = NUM_OFDM_CARRIERS);
+
     // std::vector<bool> generateOFDMFrames(const std::vector<bool> &data);
-    size_t     getBitsPerSymbol(MCS::modulation_t mod);
+    size_t  getNumBitsPerSubcarrier() const;
+    size_t  getNumBitsPerSymbol() const;
+    double  getCodeRateAsDouble() const;
+    size_t  getNumOFDMSymbols() const;
+    size_t  getNumCodeWords() const;
+    size_t  getCodeWordLength() const;
+    size_t  getNumShorteningBits() const;
+    ssize_t getNumPuncOrRepBits() const;
 
-    double getCodeRateAsDouble(code_rate_t rate);
-    size_t getNumBitsPerSymbol(MCS::modulation_t modulation, size_t numOFDMCarriers);
-    size_t getNumOFDMSymbols(size_t numInfoBits, size_t numBitsPerSymbol, code_rate_t rate);
-    size_t getNumCodeWords(code_rate_t rate, size_t totalCodedBits, size_t numInfoBits);
-    size_t getCodeWordLength(code_rate_t rate, size_t totalCodedBits, size_t numInfoBits);
-    size_t getNumShorteningBits(size_t numCodeWords, size_t codeWordLength, code_rate_t rate, size_t numInfoBits);
-    ssize_t getNumPuncOrRepBits(size_t numInfoBits, size_t totalCodedBits, size_t numCodeWords, size_t codeWordLength, code_rate_t rate);
+    modulation_t getModulation() const;
 
+private:
+    code_rate_t m_rate;
+    modulation_t m_mod;
+    size_t      m_frame;
+    size_t      m_subs;
 };
