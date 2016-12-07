@@ -14,5 +14,3 @@ target_link_libraries(fft_runner sigfilters sigtypes sigutils)
 add_executable(filter_loopback filter_loopback.cpp)
 target_link_libraries(filter_loopback sigfilters sigcore sigtypes)
 
-add_executable(ddc_loopback ddc_loopback.cpp)
-target_link_libraries(ddc_loopback sigfilters sigcore sigtypes)
