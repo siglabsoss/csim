@@ -2,14 +2,15 @@
 #include <filters/fft.hpp>
 #include <cassert>
 
-CyclicPrefix::CyclicPrefix(size_t N, size_t cpLen, size_t ticksPerOutput) :
+CyclicPrefix::CyclicPrefix(size_t N, size_t cpLen, size_t ticksPerOutput, MCS mcs) :
     m_len(cpLen),
+    m_symbolLen(N),
     m_inputIdx(0),
     m_outputIdx(0),
     m_ticksPerOutput(ticksPerOutput),
     m_ticksSinceOutput(ticksPerOutput),
-    m_outputReady(false),
-    m_inputs(N),
+    m_outputActive(false),
+    m_inputs(mcs.getNumCodeWords() * mcs.getCodeWordLength()),
     m_outputs(N + cpLen)
 {
     assert (cpLen < N);
@@ -18,24 +19,27 @@ CyclicPrefix::CyclicPrefix(size_t N, size_t cpLen, size_t ticksPerOutput) :
 bool CyclicPrefix::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-    m_inputs[m_inputIdx].setFormat(data.fc);
-    m_inputs[m_inputIdx++] = data.fc;
+    assert(!m_inputs.full());
+    SLFixComplex sample;
+    sample.setFormat(data.fc);
+    sample = data.fc;
+    m_inputs.push_back(sample);
     return true;
 }
 
 bool CyclicPrefix::output(filter_io_t &data)
 {
-    bool shouldOutput = (m_ticksSinceOutput >= m_ticksPerOutput);
+    bool shouldOutputThisCycle = (m_ticksSinceOutput >= m_ticksPerOutput);
 
-    if (shouldOutput) {
-        if (m_outputReady) {
+    if (shouldOutputThisCycle) {
+        if (m_outputActive) {
             m_ticksSinceOutput = 0;
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
             data.fc.setFormat(m_outputs[m_outputIdx]);
             data.fc = m_outputs[m_outputIdx];
             if (++m_outputIdx >= m_outputs.size()) {
                 m_outputIdx = 0;
-                m_outputReady = false;
+                m_outputActive = false;
             }
         } else {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
@@ -44,32 +48,29 @@ bool CyclicPrefix::output(filter_io_t &data)
         }
     }
 
-    if (shouldOutput) {
+    if (shouldOutputThisCycle) {
         m_ticksSinceOutput = 0;
     }
-
-    return shouldOutput;
+    return shouldOutputThisCycle;
 }
 
 void CyclicPrefix::tick()
 {
-    if (m_inputIdx == m_inputs.size()) {
-        m_inputIdx = 0;
-        m_outputIdx = 0;
+    if (!m_outputActive && m_inputs.size() >= m_symbolLen) {
         assert((m_outputIdx == 0)); //we should not be in the middle of outputting
-        //Fill up the prefix
-        for (size_t i = m_inputs.size() - m_len; i < m_inputs.size(); i++) {
-            size_t outIdx = i - (m_inputs.size() - m_len);
-            //grab the last m_len inputs and store them at the top of the output
-            m_outputs[outIdx].setFormat(m_inputs[i]);
-            m_outputs[outIdx] = m_inputs[i];
+        //Fill the symbol
+        for (size_t i = 0; i < m_symbolLen; i++) {
+            SLFixComplex sample = m_inputs.front();
+            m_inputs.pop_front();
+            m_outputs[i + m_len].setFormat(sample);
+            m_outputs[i + m_len] = sample;
         }
-        //Fill the rest
-        for (size_t i = 0; i < m_inputs.size(); i++) {
-            m_outputs[i + m_len].setFormat(m_inputs[i]);
-            m_outputs[i + m_len] = m_inputs[i];
+        //Prepend the cyclic prefix
+        for (size_t i = 0; i < m_len; i ++) {
+            m_outputs[i].setFormat(m_outputs[m_symbolLen + i]);
+            m_outputs[i] = m_outputs[m_symbolLen + i];
         }
-        m_outputReady = true;
+        m_outputActive = true;
     }
     m_ticksSinceOutput++;
 }
