@@ -34,7 +34,10 @@ public:
     size_t  getNumShorteningBits() const;
     ssize_t getNumPuncOrRepBits() const;
 
+    code_rate_t getCodingRate() const;
     modulation_t getModulation() const;
+    size_t getFrameSize() const;
+    size_t getNumSubCarriers() const;
 
 private:
     code_rate_t m_rate;

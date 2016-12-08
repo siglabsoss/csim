@@ -157,7 +157,23 @@ ssize_t MCS::getNumPuncOrRepBits() const
     return numBitsNecessary - static_cast<ssize_t>(totalCodedBits);
 }
 
+MCS::code_rate_t MCS::getCodingRate() const
+{
+    return m_rate;
+}
+
 MCS::modulation_t MCS::getModulation() const
 {
   return m_mod;
 }
+
+size_t MCS::getFrameSize() const
+{
+    return m_frame;
+}
+
+size_t MCS::getNumSubCarriers() const
+{
+    return m_subs;
+}
+
