@@ -6,7 +6,8 @@ CSIM_TEST_SUITE_BEGIN(CyclicPrefixVerification)
 
 static void runCyclicPrefixValidation(size_t Nfft, size_t Ncp, size_t ticksPerOutput)
 {
-    CyclicPrefix cp(Nfft, Ncp, ticksPerOutput);
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 4096, 1024);
+    CyclicPrefix cp(Nfft, Ncp, ticksPerOutput, mcs);
 
     std::vector< SLFixComplex> inputs(Nfft, SLFixComplex(18, 6, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE));
 
