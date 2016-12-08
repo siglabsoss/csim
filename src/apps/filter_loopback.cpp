@@ -17,8 +17,10 @@
 static constexpr double MIXER_FREQ = 0.16;
 static constexpr size_t FFT_SIZE = 1024;
 static constexpr size_t CP_SIZE = 100;
-static constexpr size_t NUM_INPUT_BITS = FFT_SIZE * 1;
-static constexpr size_t UPSAMPLE_FACTOR = 10;
+static constexpr size_t NUM_INPUT_BITS = 1024 * 100;
+static constexpr size_t NUM_FRAMES_TO_CAPTURE = 10;
+static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
+static constexpr size_t SYMBOL_MAPPING_RATE = 10;
 
 static void loadInput(std::vector<bool> &inputs)
 {
@@ -28,22 +30,22 @@ static void loadInput(std::vector<bool> &inputs)
     }
 }
 
-static void checkOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs)
-{
-    size_t numCorrect = 0;
-    size_t numIncorrect = 0;
-    for (size_t i = 0; i < outputs.size(); i++) {
-        if (inputs[(i)] != outputs[i]) {
-            std::cout << "#" << i << " " << inputs[(i)] << " != " << outputs[i] << std::endl;
-            numIncorrect++;
-        } else {
-            numCorrect++;
-        }
-//        std::cout << inputs[(i)] << "," << outputs[i] << std::endl;
-    }
-
-    std::cout << "Bit error rate = " << static_cast<double>(numIncorrect) / static_cast<double>(numIncorrect + numCorrect) << std::endl;
-}
+//static void checkOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs)
+//{
+//    size_t numCorrect = 0;
+//    size_t numIncorrect = 0;
+//    for (size_t i = 0; i < outputs.size(); i++) {
+//        if (inputs[(i)] != outputs[i]) {
+//            std::cout << "#" << i << " " << inputs[(i)] << " != " << outputs[i] << std::endl;
+//            numIncorrect++;
+//        } else {
+//            numCorrect++;
+//        }
+////        std::cout << inputs[(i)] << "," << outputs[i] << std::endl;
+//    }
+//
+//    std::cout << "Bit error rate = " << static_cast<double>(numIncorrect) / static_cast<double>(numIncorrect + numCorrect) << std::endl;
+//}
 
 //static void printInputsAndOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs)
 //{
@@ -72,7 +74,7 @@ static size_t runFilters(FilterChain &chain, const std::vector<bool> &inputs, st
     return outputs.size();
 }
 
-static void filterLoopback(const std::string &down2CoeffFile, const std::string &down5CoeffFile,
+static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
         const std::string &up2CoeffFile, const std::string &up5CoeffFile,
         const std::vector<bool> &inputs, std::vector<bool> &outputs)
 {
@@ -106,19 +108,18 @@ static void filterLoopback(const std::string &down2CoeffFile, const std::string 
     }
 
     //Initialize blocks
-    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_BPSK, 0, 1024);
-    Mapper * mapper             = new Mapper(UPSAMPLE_FACTOR*2, mcs);
-    FFT * ifft                  = new FFT(FFT_SIZE, true, UPSAMPLE_FACTOR*2);
+    Mapper * mapper             = new Mapper(SYMBOL_MAPPING_RATE, mcs);
+    FFT * ifft                  = new FFT(FFT_SIZE, true, SYMBOL_MAPPING_RATE);
     ifft->setOutputFormat(FFT_OUTPUT_WL, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
-    CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, UPSAMPLE_FACTOR);
+    CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, DUC_UPSAMPLE_FACTOR, mcs);
     DigitalUpConverter * duc    = new DigitalUpConverter(-MIXER_FREQ, up2Coeffs, up5Coeffs);
 
 
     Demapper * demapper         = new Demapper(mcs, true);
-    FFT * fft                   = new FFT(FFT_SIZE, false, UPSAMPLE_FACTOR);
+    FFT * fft                   = new FFT(FFT_SIZE, false, DUC_UPSAMPLE_FACTOR);
     fft->setOutputFormat(FFT_OUTPUT_WL, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     DigitalDownConverter *ddc   = new DigitalDownConverter(MIXER_FREQ, down2Coeffs, down5Coeffs);
-    FrameSync    *fs                = new FrameSync(FFT_SIZE, CP_SIZE);
+    FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE);
 
     //Debug probes
     std::string duc_in_probe_name   = "DUC_INPUT";
@@ -128,12 +129,12 @@ static void filterLoopback(const std::string &down2CoeffFile, const std::string 
     std::string fft_out_probe_name  = "FFT_OUTPUT";
     std::string fft_in_probe_name   = "FFT_INPUT";
     constexpr size_t PHASE_DELAY = 40; //found emperically
-    SampleCountTrigger *duc_in      = new SampleCountTrigger(duc_in_probe_name,   FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*1, 1, 0);
-    SampleCountTrigger *ddc_out     = new SampleCountTrigger(ddc_out_probe_name,  FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*1 + PHASE_DELAY, 1, 0);
-    SampleCountTrigger *ifft_in     = new SampleCountTrigger(ifft_in_probe_name,  FilterProbe::CSV, FFT_SIZE*1, 1, 0);
-    SampleCountTrigger *ifft_out    = new SampleCountTrigger(ifft_out_probe_name, FilterProbe::CSV, FFT_SIZE*1, 1, 0);
-    SampleCountTrigger *fft_out     = new SampleCountTrigger(fft_out_probe_name,  FilterProbe::CSV, FFT_SIZE*1, 1, 0);
-    SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*1, 1, 0);
+    SampleCountTrigger *duc_in      = new SampleCountTrigger(duc_in_probe_name,   FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*NUM_FRAMES_TO_CAPTURE, 1, 0);
+    SampleCountTrigger *ddc_out     = new SampleCountTrigger(ddc_out_probe_name,  FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*NUM_FRAMES_TO_CAPTURE + PHASE_DELAY, 1, 0);
+    SampleCountTrigger *ifft_in     = new SampleCountTrigger(ifft_in_probe_name,  FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
+    SampleCountTrigger *ifft_out    = new SampleCountTrigger(ifft_out_probe_name, FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
+    SampleCountTrigger *fft_out     = new SampleCountTrigger(fft_out_probe_name,  FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
+    SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
     //Test symbol mapping + FFT + DUC
     FilterChain testChain =  *demapper + *fft_out + *fft + *fft_in + *fs + *ddc_out + *ddc + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper;
@@ -141,7 +142,7 @@ static void filterLoopback(const std::string &down2CoeffFile, const std::string 
     size_t numOutputs = runFilters(testChain, inputs, outputs);
     std::cout << "FFT/DUC Loopback has " << numOutputs << " outputs" << std::endl;
 
-    checkOutputs(inputs, outputs);
+//    checkOutputs(inputs, outputs);
 //    printInputsAndOutputs(inputs, outputs);
 }
 
@@ -158,13 +159,16 @@ int main(int argc, char *argv[])
     std::string up2(argv[3]);
     std::string up5(argv[4]);
 
+    size_t frameSize = 11110912; //derived from 1 sec tx burst for 1/2 rate BPSK
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, frameSize, 1024);
+
     std::vector<bool> inputs(NUM_INPUT_BITS);
     std::vector<bool> outputs;
 
     //Calculate random inputs
     loadInput(inputs);
 
-    filterLoopback(down2, down5, up2, up5, inputs, outputs);
+    filterLoopback(mcs, down2, down5, up2, up5, inputs, outputs);
 
     return 0;
 }
