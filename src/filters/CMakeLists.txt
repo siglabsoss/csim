@@ -17,6 +17,7 @@ set(SIGFILTERS_SOURCES
     cyclic_prefix.cpp
     frame_sync.cpp
     scrambler_block.cpp
+    channel_equalizer.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
