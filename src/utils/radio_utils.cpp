@@ -37,10 +37,7 @@ static void construct_rx_chain(FilterChain &rxChain, MCS::modulation_t scheme)
 
 static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 {
-    CSVBitMatrix p;
-    std::vector<char> g_bytes = p.loadCSVFile("data/ldpc/80211n_G_648_12.csv");
-    std::vector<std::vector<bool> > G;
-    p.parseCSV(g_bytes, G);
+    std::vector<std::vector<bool> > G = LDPCUtils::getBitArrayFromCSV("data/ldpc/80211n_G_648_12.csv");
 
     LDPCEncode * encode  = new LDPCEncode(G);
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 1024);
@@ -51,10 +48,7 @@ static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 
 static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
 {
-    CSVBitMatrix p;
-    std::vector<char> bytes = p.loadCSVFile("data/ldpc/80211n_H_648_12.csv");
-    std::vector<std::vector<bool> > H;
-    p.parseCSV(bytes, H);
+    std::vector<std::vector<bool> > H = LDPCUtils::getBitArrayFromCSV("data/ldpc/80211n_H_648_12.csv");
 
     LDPCDecoder * decode = new LDPCDecoder(H);
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 1024);

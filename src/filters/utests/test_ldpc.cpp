@@ -10,12 +10,7 @@ CSIM_TEST_SUITE_BEGIN(LDPCFunctionality)
 
 static void runLDPCDecodeTest(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > &rxCodeWord, const std::vector<bool> &validMessage, const std::string &HFileName)
 {
-    CSVBitMatrix p;
-    std::vector<char> bytes = p.loadCSVFile(HFileName);
-
-    std::vector<std::vector<bool> > H;
-
-    p.parseCSV(bytes, H);
+    std::vector<std::vector<bool> > H = LDPCUtils::getBitArrayFromCSV(HFileName);
 
     size_t rows = H.size();
     size_t cols = H[0].size();
@@ -40,11 +35,7 @@ static void runLDPCDecodeTest(const std::vector<SLFixedPoint<LDPC_LLR_FORMAT> > 
 
 static void runLDPCEncodeTest(const std::vector<bool> &msg, const std::vector<bool> &cw, const std::string &GFileName)
 {
-    CSVBitMatrix p;
-    std::vector<char> g_bytes = p.loadCSVFile(GFileName);
-
-    std::vector<std::vector<bool> > G;
-    p.parseCSV(g_bytes, G);
+    std::vector<std::vector<bool> > G = LDPCUtils::getBitArrayFromCSV(GFileName);
 
     LDPCEncode encoder(G);
 
@@ -74,11 +65,7 @@ static void runLDPCEncodeTest(const std::vector<bool> &msg, const std::vector<bo
 
 static void runLDPCLoopbackTest(const std::vector<bool> &msg, const std::string &GFileName, const std::string &HFileName)
 {
-    CSVBitMatrix g;
-    std::vector<char> g_bytes = g.loadCSVFile(GFileName);
-
-    std::vector<std::vector<bool> > G;
-    g.parseCSV(g_bytes, G);
+    std::vector<std::vector<bool> > G = LDPCUtils::getBitArrayFromCSV(GFileName);
 
     LDPCEncode encoder(G);
 
@@ -111,12 +98,7 @@ static void runLDPCLoopbackTest(const std::vector<bool> &msg, const std::string 
         }
     }
 
-    CSVBitMatrix h;
-    std::vector<char> bytes = h.loadCSVFile(HFileName);
-
-    std::vector<std::vector<bool> > H;
-
-    h.parseCSV(bytes, H);
+    std::vector<std::vector<bool> > H = LDPCUtils::getBitArrayFromCSV(HFileName);
 
     size_t rows = H.size();
     size_t cols = H[0].size();

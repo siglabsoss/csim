@@ -17,6 +17,8 @@
 
 
 typedef boost::tokenizer<boost::escaped_list_separator<char> > Tokenizer;
+namespace LDPCUtils
+{
 
 class CSVBitMatrix
 {
@@ -105,3 +107,15 @@ public:
 //    }
 
 };
+std::vector<std::vector<bool> > getBitArrayFromCSV(const std::string &fileName)
+{
+    CSVBitMatrix p;
+    std::vector<char> bytes = p.loadCSVFile(fileName);
+
+    std::vector<std::vector<bool> > H;
+
+    p.parseCSV(bytes, H);
+    return H;
+}
+
+}; //end namespace
