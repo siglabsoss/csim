@@ -90,7 +90,8 @@ void LDPCDecoder::tick(void)
             }
         }
 
-        //Message size is equal to rows for 80211n codes and the msg is sitting in the first part of the codeword (XXX this is not a generic property!)
+        //Message size is equal to rows for 80211n codes and
+        //the msg is sitting in the first part of the codeword, which is a property of systematic codes
         size_t msgLength = m_hrows;
         for (size_t i = 0; i < msgLength; i++) {
             bool bit = LLRToBit(m_codeBits[msgLength - 1 - i].LLR.to_double());
