@@ -10,16 +10,20 @@
 #include <filters/cyclic_prefix.hpp>
 #include <filters/frame_sync.hpp>
 #include <filters/channel_equalizer.hpp>
+#include <filters/ldpc_encode.hpp>
+#include <filters/ldpc_decoder.hpp>
+#include <filters/puncture.hpp>
+#include <filters/depuncture.hpp>
 
 #include <utils/utils.hpp>
+#include <utils/ldpc_utils.hpp>
 
 #include <probes/sample_count_trigger.hpp>
 
 static constexpr double MIXER_FREQ = 0.16;
 static constexpr size_t FFT_SIZE = 1024;
 static constexpr size_t CP_SIZE = 100;
-static constexpr size_t NUM_INPUT_BITS = FFT_SIZE * 10;
-static constexpr size_t NUM_FRAMES_TO_CAPTURE = 1;
+static constexpr size_t NUM_FRAMES_TO_CAPTURE = 7;
 static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
 static constexpr size_t SYMBOL_MAPPING_RATE = 10;
 
@@ -77,6 +81,7 @@ static size_t runFilters(FilterChain &chain, const std::vector<bool> &inputs, st
 
 static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
         const std::string &up2CoeffFile, const std::string &up5CoeffFile, const std::string &HfFile,
+        const std::string &ldpcH, const std::string &ldpcG,
         const std::vector<bool> &inputs, std::vector<bool> &outputs)
 {
     // Prepare coefficients
@@ -111,20 +116,27 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     //Channel equalization (calculated / exported from MATLAB)
     std::vector<ComplexDouble> Hf = utils::readComplexFromCSV<ComplexDouble>(HfFile);
 
+    //LDPC Matrices
+    std::vector<std::vector<bool> > G = LDPCUtils::getBitArrayFromCSV(ldpcG);
+    std::vector<std::vector<bool> > H = LDPCUtils::getBitArrayFromCSV(ldpcH);
+
     //Initialize blocks
+    LDPCEncode * encode         = new LDPCEncode(G);
     Mapper * mapper             = new Mapper(SYMBOL_MAPPING_RATE, mcs);
     FFT * ifft                  = new FFT(FFT_SIZE, true, SYMBOL_MAPPING_RATE);
     ifft->setOutputFormat(FFT_OUTPUT_WL, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, DUC_UPSAMPLE_FACTOR, mcs);
     DigitalUpConverter * duc    = new DigitalUpConverter(-MIXER_FREQ, up2Coeffs, up5Coeffs);
+    Puncture *punc              = new Puncture(mcs);
 
-
-    Demapper * demapper         = new Demapper(mcs, true);
+    LDPCDecoder * decode        = new LDPCDecoder(H);
+    Demapper * demapper         = new Demapper(mcs);
     FFT * fft                   = new FFT(FFT_SIZE, false, DUC_UPSAMPLE_FACTOR);
     fft->setOutputFormat(FFT_OUTPUT_WL, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     DigitalDownConverter *ddc   = new DigitalDownConverter(MIXER_FREQ, down2Coeffs, down5Coeffs);
     FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE);
     ChannelEqualizer *ce        = new ChannelEqualizer(Hf);
+    Depuncture *depunc          = new Depuncture(mcs);
 
     //Debug probes
     std::string duc_in_probe_name   = "DUC_INPUT";
@@ -142,7 +154,7 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
     //Test symbol mapping + FFT + DUC
-    FilterChain testChain =  *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper;
+    FilterChain testChain =  *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode;
 
     size_t numOutputs = runFilters(testChain, inputs, outputs);
     std::cout << "FFT/DUC Loopback has " << numOutputs << " outputs" << std::endl;
@@ -153,8 +165,8 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
 
 int main(int argc, char *argv[])
 {
-    if (argc != 6) {
-        std::cout << "Usage: " << argv[0] << " <ddc_down2_coeffs> <ddc_down5_coeffs> <duc_up2_coeffs> <duc_up5_coeffs> <Hf_file>" << std::endl;
+    if (argc != 8) {
+        std::cout << "Usage: " << argv[0] << " <ddc_down2_coeffs> <ddc_down5_coeffs> <duc_up2_coeffs> <duc_up5_coeffs> <Hf_file> <ldpc H> <ldpc G>" << std::endl;
         return 1;
     }
 
@@ -164,17 +176,20 @@ int main(int argc, char *argv[])
     std::string up2(argv[3]);
     std::string up5(argv[4]);
     std::string Hf(argv[5]);
+    std::string ldpcH(argv[6]);
+    std::string ldpcG(argv[7]);
 
-    size_t frameSize = 11110912; //derived from 1 sec tx burst for 1/2 rate BPSK
-    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, frameSize, 1024);
+//    size_t frameSize = 11110912; //derived from 1 sec tx burst for 1/2 rate BPSK
+    size_t frameSize = (1944 / 2)*4;
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, frameSize, FFT_SIZE);
 
-    std::vector<bool> inputs(NUM_INPUT_BITS);
+    std::vector<bool> inputs(frameSize);
     std::vector<bool> outputs;
 
     //Calculate random inputs
     loadInput(inputs);
 
-    filterLoopback(mcs, down2, down5, up2, up5, Hf, inputs, outputs);
+    filterLoopback(mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG, inputs, outputs);
 
     return 0;
 }
