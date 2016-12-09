@@ -4,10 +4,12 @@
 #include <filters/mapper.hpp>
 #include <utils/plotter.hpp>
 
+#define SD_LLR_FORMAT             18, 8,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+
 class Demapper : public FilterChainElement
 {
 public:
-    Demapper(MCS mcs, bool hard);
+    Demapper(MCS mcs, bool hard = false);
     ~Demapper();
 
     bool input(const filter_io_t &data) override;

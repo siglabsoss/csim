@@ -1,8 +1,6 @@
 #include <filters/demapper.hpp>
 #include <cassert>
 
-#define SD_LLR_FORMAT             18, 8,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
 Demapper::Demapper(MCS mcs, bool hard) :
     m_value(),
     m_inputValid(false),
