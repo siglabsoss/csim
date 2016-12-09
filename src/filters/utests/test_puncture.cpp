@@ -44,4 +44,37 @@ CSIM_TEST_CASE(PROPER_REPETITION)
     BOOST_CHECK(punc.output(data) == false);
 }
 
+CSIM_TEST_CASE(PROPER_PUNCTURE)
+{
+    size_t frameSize = 3000;
+    size_t numInputCodeWords = 10;
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, frameSize, 1024);
+    BOOST_CHECK(mcs.getNumPuncOrRepBits() > 0); //double check that our MCS calls for puncturing
+    size_t numPunctureBits = mcs.getNumPuncOrRepBits();
+    size_t numPunctureBitsPerSymbol = numPunctureBits / mcs.getNumOFDMSymbols();
+    Puncture punc(mcs);
+    std::vector<bool> inputs(mcs.getCodeWordLength() * numInputCodeWords);
+    for (size_t i = 0; i < numInputCodeWords; ++i) {
+        for (size_t j = 0; j < mcs.getCodeWordLength(); ++j) {
+            inputs[i*mcs.getCodeWordLength() + j] = ((j % 2) == 0);
+        }
+    }
+    filter_io_t data;
+    for (size_t i = 0; i < numInputCodeWords; ++i) {
+        for (size_t j = 0; j < mcs.getCodeWordLength(); ++j) {
+            data.type = IO_TYPE_BIT;
+            data.bit = inputs[i*mcs.getCodeWordLength() + j];
+            punc.input(data);
+            punc.tick();
+
+            if (j < mcs.getCodeWordLength() - numPunctureBitsPerSymbol) {
+                BOOST_CHECK(punc.output(data) == true);
+                BOOST_REQUIRE(data.bit == inputs[i*mcs.getCodeWordLength() + j]);
+            } else {
+                BOOST_CHECK(punc.output(data) == false);
+            }
+        }
+    }
+}
+
 CSIM_TEST_SUITE_END()

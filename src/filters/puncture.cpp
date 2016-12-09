@@ -30,7 +30,32 @@ bool Puncture::input(const filter_io_t &data)
 
 bool Puncture::handlePuncture(filter_io_t &data)
 {
-    return true;
+    size_t numPunctureBits = m_mcs.getNumPuncOrRepBits();
+    size_t numPunctureBitsPerSymbol = numPunctureBits / m_mcs.getNumOFDMSymbols();
+    bool didOutput = false;
+    if (m_outCodeWordCount < (numPunctureBits % m_mcs.getNumOFDMSymbols())) {
+        numPunctureBitsPerSymbol += 1;
+    }
+
+    if (m_outBitCount < m_mcs.getCodeWordLength() - numPunctureBitsPerSymbol) {
+        //simply pass the codeword through
+        data.type = IO_TYPE_BIT;
+        data.bit = m_fifo.front();
+        m_fifo.pop_front();
+        ++m_outBitCount;
+        didOutput = true;
+    } else if (m_outBitCount < m_mcs.getCodeWordLength()) {
+        m_fifo.pop_front(); //drop the bits to be punctured
+        ++m_outBitCount;
+    }
+    if (m_outBitCount == m_mcs.getCodeWordLength()) {
+        m_outBitCount = 0;
+        if (++m_outCodeWordCount == m_mcs.getNumCodeWords()) {
+            m_outCodeWordCount = 0;
+        }
+    }
+
+    return didOutput;
 }
 
 bool Puncture::handleRepetition(filter_io_t &data)
