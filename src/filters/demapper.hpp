@@ -3,6 +3,7 @@
 #include <core/filter_chain_element.hpp>
 #include <filters/mapper.hpp>
 #include <utils/plotter.hpp>
+#include <queue>
 
 #define SD_LLR_FORMAT             18, 8,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
