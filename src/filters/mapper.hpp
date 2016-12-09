@@ -14,7 +14,6 @@ typedef std::map <symbol_t, constellation_t>    constellation_map_t;
 class Mapper : public FilterChainElement
 {
 private: //constants
-    static constexpr size_t INPUT_BUFFER_BITS_MAX = 8 * 512;
     static constexpr symbol_t NULL_SYMBOL = 0;
 
 public:

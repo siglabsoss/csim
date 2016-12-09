@@ -43,10 +43,7 @@ Mapper::Mapper(unsigned int ticksPerSymbol, MCS mcs) :
 bool Mapper::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_BIT);
-    //make sure we have enough space left to store the next symbol
-    if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < 1) {
-        return false;
-    }
+
     //queuing up least significant bit first
     m_inputBuffer.push(data.bit);
     if (!m_gotFirstSymbol && (m_inputBuffer.size() >= m_bitsPerSymbol)) {
