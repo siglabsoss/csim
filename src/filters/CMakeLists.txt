@@ -18,6 +18,7 @@ set(SIGFILTERS_SOURCES
     frame_sync.cpp
     scrambler_block.cpp
     channel_equalizer.cpp
+    puncture.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
