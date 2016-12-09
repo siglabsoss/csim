@@ -13,6 +13,7 @@ Depuncture::Depuncture(MCS mcs) :
 bool Depuncture::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_FIXPOINT);
+    assert(!m_fifo.full());
     m_fifo.push_back(data.fp);
     return true;
 }
