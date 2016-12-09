@@ -1,7 +1,8 @@
 #include <filters/frame_sync.hpp>
 #include <cassert>
 
-static size_t constexpr DDC_DUC_PHASE_DELAY = 40;
+//XXX this used to be 40 but changed to 39 after adding LDPC to the loopback (as determined from MATLAB). Need to understand
+static size_t constexpr DDC_DUC_PHASE_DELAY = 39;
 
 FrameSync::FrameSync(size_t N, size_t cpLen) :
         m_state(STATE_WAIT_FOR_NONZERO),
