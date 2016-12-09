@@ -1,9 +1,9 @@
 #include <types/fixedcomplex.hpp>
+#include <types/circularbuffer.hpp>
 #include <core/filter_chain_element.hpp>
 #include <utils/scrambler.hpp>
 #include <utils/mcs.hpp>
 #include <map>
-#include <queue>
 
 #pragma once
 
@@ -44,7 +44,7 @@ private: //methods
 private:
     constellation_map_t     m_constellations; //mapping of symbol -> constellation vector
     size_t                  m_bitsPerSymbol;
-    std::queue<bool>        m_inputBuffer;    //inefficient storage (8x inflated) but that's OK
+    CircularBuffer<bool>    m_fifo;
     constellation_t         m_output;
     Scrambler               m_scrambler;
 

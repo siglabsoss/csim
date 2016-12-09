@@ -9,7 +9,7 @@ Mapper::Mapper(unsigned int ticksPerSymbol, MCS mcs) :
     FilterChainElement("Mapper"),
     m_constellations(),
     m_bitsPerSymbol(0),
-    m_inputBuffer(),
+    m_fifo(mcs.getNumCodeWords() * mcs.getCodeWordLength() * 100),
     m_output(),
     m_scrambler(0b1111111),
     m_tickCount(0),
@@ -43,10 +43,10 @@ Mapper::Mapper(unsigned int ticksPerSymbol, MCS mcs) :
 bool Mapper::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_BIT);
-
+    assert(!m_fifo.full());
     //queuing up least significant bit first
-    m_inputBuffer.push(data.bit);
-    if (!m_gotFirstSymbol && (m_inputBuffer.size() >= m_bitsPerSymbol)) {
+    m_fifo.push_back(data.bit);
+    if (!m_gotFirstSymbol && (m_fifo.size() >= m_bitsPerSymbol)) {
         m_gotFirstSymbol = true;
     }
     return true;
@@ -68,7 +68,7 @@ void Mapper::tick(void)
 {
     if (m_tickCount >= m_ticksPerSymbol) {
         symbol_t symbol = NULL_SYMBOL;
-        if (m_inputBuffer.size() >= m_bitsPerSymbol) { //we have real input to modulate
+        if (m_fifo.size() >= m_bitsPerSymbol) { //we have real input to modulate
             symbol   = getNextSymbol();
         } else {
             //XXX For now we will assume our input buffer will never by starved after we've started getting symbols.
@@ -86,8 +86,8 @@ symbol_t Mapper::getNextSymbol()
 {
     symbol_t symbol = 0;
     for (size_t i = 0; i < m_bitsPerSymbol; i++) {
-        symbol_t nextBit = static_cast<bool>(!!m_inputBuffer.front()); //first in, first out
-        m_inputBuffer.pop();
+        symbol_t nextBit = static_cast<bool>(!!m_fifo.front()); //first in, first out
+        m_fifo.pop_front();
         symbol |= (nextBit << i);
     }
     return symbol;
