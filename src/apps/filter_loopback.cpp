@@ -179,11 +179,11 @@ int main(int argc, char *argv[])
     std::string ldpcH(argv[6]);
     std::string ldpcG(argv[7]);
 
-//    size_t frameSize = 11110912; //derived from 1 sec tx burst for 1/2 rate BPSK
-    size_t frameSize = (1944 / 2)*4;
+    //This framesize is meant to avoid 0 padding codewords of length 2304
+    size_t frameSize = (2304 / 2)*4;
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, frameSize, FFT_SIZE);
 
-    std::vector<bool> inputs(frameSize);
+    std::vector<bool> inputs(frameSize*2);
     std::vector<bool> outputs;
 
     //Calculate random inputs
