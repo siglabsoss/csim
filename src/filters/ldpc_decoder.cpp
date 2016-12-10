@@ -70,24 +70,24 @@ void LDPCDecoder::tick(void)
 //            }
         } else {
             std::cout << "LDPC decode failed" << std::endl;
-            std::cout << "Before Decode: ";
-            for (size_t i = 0; i < cw.size(); ++i) {
-                std::cout << LLRToBit(cw[i].to_double());
-                if (i != cw.size() - 1) {
-                    std::cout << ",";
-                } else {
-                    std::cout << std::endl;
-                }
-            }
-            std::cout << "After Decode: ";
-            for (size_t i = 0; i < m_codeBits.size(); ++i) {
-                std::cout << LLRToBit(m_codeBits[i].LLR.to_double());
-                if (i != m_codeBits.size() - 1) {
-                    std::cout << ",";
-                } else {
-                    std::cout << std::endl;
-                }
-            }
+//            std::cout << "Before Decode: ";
+//            for (size_t i = 0; i < cw.size(); ++i) {
+//                std::cout << LLRToBit(cw[i].to_double());
+//                if (i != cw.size() - 1) {
+//                    std::cout << ",";
+//                } else {
+//                    std::cout << std::endl;
+//                }
+//            }
+//            std::cout << "After Decode: ";
+//            for (size_t i = 0; i < m_codeBits.size(); ++i) {
+//                std::cout << LLRToBit(m_codeBits[i].LLR.to_double());
+//                if (i != m_codeBits.size() - 1) {
+//                    std::cout << ",";
+//                } else {
+//                    std::cout << std::endl;
+//                }
+//            }
         }
 
         //Message size is equal to rows for 80211n codes and
