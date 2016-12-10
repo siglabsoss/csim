@@ -1,8 +1,10 @@
 #include <filters/frame_sync.hpp>
 #include <cassert>
 
-//XXX this used to be 40 but changed to 39 after adding LDPC to the loopback (as determined from MATLAB). Need to understand
-static size_t constexpr DDC_DUC_PHASE_DELAY = 39;
+//There is some variance to the delay, which changes based on the stream of bits flowing through the filters.
+//Right now this number obtained by xcorr in MATLAB based on the data dumps from the
+//filter_loopback app. This will suffice for now since this block is temporary
+static size_t constexpr DDC_DUC_PHASE_DELAY = 35;
 
 FrameSync::FrameSync(size_t N, size_t cpLen) :
         m_state(STATE_WAIT_FOR_NONZERO),
