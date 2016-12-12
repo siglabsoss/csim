@@ -12,6 +12,7 @@ public:
     void scramble(std::vector<bool> &data);
     bool scramble(bool bit);
     void reset(const std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> &initState);
+    void reset(unsigned initState);
 private:
     ShiftRegister<SCRAMBLER_SHIFT_REGISTER_SIZE> m_reg;
 };

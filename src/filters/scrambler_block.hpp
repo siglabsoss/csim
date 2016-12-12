@@ -10,6 +10,8 @@ public:
     bool output(filter_io_t &data) override;
     void tick(void) override;
 
+    void reset(unsigned initState);
+
 private:
     Scrambler m_scrambler;
     bool m_didGetInput;

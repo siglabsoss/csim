@@ -1,5 +1,13 @@
 #include <filters/scrambler_block.hpp>
 
+ScramblerBlock::ScramblerBlock() :
+    m_scrambler(0b1111111),
+    m_didGetInput(false),
+    m_output(0)
+{
+
+}
+
 bool ScramblerBlock::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_BIT);
@@ -21,4 +29,9 @@ bool ScramblerBlock::output(filter_io_t &data)
 
 void ScramblerBlock::tick()
 {
+}
+
+void ScramblerBlock::reset(unsigned initState)
+{
+    m_scrambler.reset(initState);
 }

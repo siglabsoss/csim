@@ -14,6 +14,7 @@ public:
 
     bool operator[](size_t idx) const;
     ShiftRegister &operator=(const std::bitset<regSize> &newVal);
+    ShiftRegister &operator=(unsigned newVal);
 private:
     std::bitset<regSize> m_bits;
 };

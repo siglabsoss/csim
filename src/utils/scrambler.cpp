@@ -28,3 +28,9 @@ void Scrambler::reset(const std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> &initStat
     assert(initState.size() == SCRAMBLER_SHIFT_REGISTER_SIZE);
     m_reg = initState;
 }
+
+void Scrambler::reset(unsigned initState)
+{
+    assert(log2(initState) <= SCRAMBLER_SHIFT_REGISTER_SIZE);
+    m_reg = initState;
+}

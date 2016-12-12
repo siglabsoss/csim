@@ -1,5 +1,7 @@
 #include <cstdlib>
 #include <iostream>
+#include <cassert>
+#include <cmath>
 
 template <size_t regSize>
 ShiftRegister<regSize>::ShiftRegister() :
@@ -35,5 +37,13 @@ template <size_t regSize>
 ShiftRegister<regSize> & ShiftRegister<regSize>::operator=(const std::bitset<regSize> &newVal)
 {
     m_bits = newVal;
+    return *this;
+}
+
+template <size_t regSize>
+ShiftRegister<regSize> & ShiftRegister<regSize>::operator=(unsigned newVal)
+{
+    assert(regSize >= log2(newVal));
+    m_bits = std::bitset<regSize>(newVal);
     return *this;
 }

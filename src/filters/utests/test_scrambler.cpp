@@ -1,6 +1,6 @@
 #include <test/unit_test.hpp>
 
-#include <utils/scrambler.hpp>
+#include <filters/scrambler_block.hpp>
 
 CSIM_TEST_SUITE_BEGIN(ScramblerValidation)
 
@@ -13,17 +13,22 @@ CSIM_TEST_CASE(SCRAMBLER_BIT_SEQUENCE)
     for (size_t i = 127; i < 254; i++) {
         dummyData[i] = 1; //second half is all ones
     }
-    std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> initState(0b1111111);
-    Scrambler s(initState);
-    s.scramble(dummyData);
-    for (size_t i = 0; i < dummyData.size(); i++) {
 
+    ScramblerBlock s;
+    filter_io_t sample;
+    sample.type = IO_TYPE_BIT;
+    for (size_t i = 0; i < dummyData.size(); i++) {
+        sample.bit = dummyData[i];
+        s.input(sample);
+        s.tick();
+        BOOST_CHECK(s.output(sample) == true);
+        BOOST_CHECK_EQUAL(sample.type, IO_TYPE_BIT);
         //first half of dummy data is all 0's so scrambler should output the 127-bit pattern
         //second half of dummy data is all 1's so scrambler should output inverse of 127-bit pattern
         if (i < 127) {
-            BOOST_CHECK_EQUAL(dummyData[i], pattern[i]);
+            BOOST_CHECK_EQUAL(sample.bit, pattern[i]);
         } else {
-            BOOST_CHECK_EQUAL(dummyData[i], !pattern[i - 127]);
+            BOOST_CHECK_EQUAL(sample.bit, !pattern[i - 127]);
         }
     }
 }
@@ -31,25 +36,36 @@ CSIM_TEST_CASE(SCRAMBLER_BIT_SEQUENCE)
 CSIM_TEST_CASE(SCRAMBLER_RESET)
 {
     std::vector<bool> dummyData(10, 0);
-    std::bitset<SCRAMBLER_SHIFT_REGISTER_SIZE> initState(0b1111111);
-    Scrambler s(initState);
-    s.scramble(dummyData);
+    ScramblerBlock s;
+    filter_io_t sample;
+    sample.type = IO_TYPE_BIT;
     for (size_t i = 0; i < 10; i++) {
-        BOOST_CHECK_EQUAL(dummyData[i], pattern[i]);
+        sample.bit = dummyData[i];
+        s.input(sample);
+        s.tick();
+        BOOST_CHECK(s.output(sample) == true);
+        BOOST_CHECK_EQUAL(sample.bit, pattern[i]);
     }
     dummyData = std::vector<bool>(10, 0);
-    s.scramble(dummyData);
     for (size_t i = 0; i < 10; i++) {
+        sample.bit = dummyData[i];
+        s.input(sample);
+        s.tick();
+        BOOST_CHECK(s.output(sample) == true);
         //since state was not reset, dummyData should equal the pattern 10 bits in
-        BOOST_CHECK_EQUAL(dummyData[i], pattern[i+10]);
+        BOOST_CHECK_EQUAL(sample.bit, pattern[i+10]);
     }
     dummyData = std::vector<bool>(10, 0);
-    s.reset(initState);
-    s.scramble(dummyData);
+    s.reset(0b1111111);
     for (size_t i = 0; i < 10; i++) {
+        sample.bit = dummyData[i];
+        s.input(sample);
+        s.tick();
+        BOOST_CHECK(s.output(sample) == true);
         //since state was reset, dummyData should equal the pattern from the start
-        BOOST_CHECK_EQUAL(dummyData[i], pattern[i]);
+        BOOST_CHECK_EQUAL(sample.bit, pattern[i]);
     }
 }
+
 
 CSIM_TEST_SUITE_END()
