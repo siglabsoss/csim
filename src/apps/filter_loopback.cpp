@@ -14,6 +14,7 @@
 #include <filters/ldpc_decoder.hpp>
 #include <filters/puncture.hpp>
 #include <filters/depuncture.hpp>
+#include <filters/scrambler_block.hpp>
 
 #include <utils/utils.hpp>
 #include <utils/ldpc_utils.hpp>
@@ -41,7 +42,7 @@ static void checkOutputs(const std::vector<bool> &inputs, const std::vector<bool
     size_t numIncorrect = 0;
     for (size_t i = 0; i < outputs.size(); i++) {
         if (inputs[(i)] != outputs[i]) {
-            std::cout << "#" << i << " " << inputs[(i)] << " != " << outputs[i] << std::endl;
+//            std::cout << "#" << i << " " << inputs[(i)] << " != " << outputs[i] << std::endl;
             numIncorrect++;
         } else {
             numCorrect++;
@@ -121,14 +122,16 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     std::vector<std::vector<bool> > H = LDPCUtils::getBitArrayFromCSV(ldpcH);
 
     //Initialize blocks
+    ScramblerBlock *scramTx     = new ScramblerBlock;
     LDPCEncode * encode         = new LDPCEncode(G);
+    Puncture *punc              = new Puncture(mcs);
     Mapper * mapper             = new Mapper(SYMBOL_MAPPING_RATE, mcs);
     FFT * ifft                  = new FFT(FFT_SIZE, true, SYMBOL_MAPPING_RATE);
     ifft->setOutputFormat(FFT_OUTPUT_WL, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, DUC_UPSAMPLE_FACTOR, mcs);
     DigitalUpConverter * duc    = new DigitalUpConverter(-MIXER_FREQ, up2Coeffs, up5Coeffs);
-    Puncture *punc              = new Puncture(mcs);
 
+    ScramblerBlock *scramRx     = new ScramblerBlock;
     LDPCDecoder * decode        = new LDPCDecoder(H);
     Demapper * demapper         = new Demapper(mcs);
     FFT * fft                   = new FFT(FFT_SIZE, false, DUC_UPSAMPLE_FACTOR);
@@ -137,6 +140,8 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE);
     ChannelEqualizer *ce        = new ChannelEqualizer(Hf);
     Depuncture *depunc          = new Depuncture(mcs);
+
+//    NoiseElement *ne            = new NoiseElement(100.0);
 
     //Debug probes
     std::string duc_in_probe_name   = "DUC_INPUT";
@@ -154,7 +159,7 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
     //Test symbol mapping + FFT + DUC
-    FilterChain testChain =  *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode;
+    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + /* *ne + */ *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
 
     size_t numOutputs = runFilters(testChain, inputs, outputs);
     std::cout << "FFT/DUC Loopback has " << numOutputs << " outputs" << std::endl;
