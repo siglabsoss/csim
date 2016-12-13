@@ -20,11 +20,6 @@ public:
     Mapper(MCS mcs);
 
     /**
-     * Input is expected to be a digital bit stream (IO_TYPE_BYTE)
-     */
-    bool input(const filter_io_t &data) override;
-
-    /**
      * Output is a complex number with components ranging from [-1, 1] and norm = 1
      */
     bool output(filter_io_t &data) override;
@@ -44,7 +39,6 @@ private: //methods
 private:
     constellation_map_t     m_constellations; //mapping of symbol -> constellation vector
     size_t                  m_bitsPerSymbol;
-    CircularBuffer<bool>    m_fifo;
     constellation_t         m_output;
     Scrambler               m_scrambler;
 

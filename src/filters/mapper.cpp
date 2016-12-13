@@ -6,10 +6,9 @@
 #include <cassert>
 
 Mapper::Mapper(MCS mcs) :
-    FilterChainElement("Mapper"),
+    FilterChainElement("Mapper", mcs.getNumCodeWords() * mcs.getCodeWordLength() * 100),
     m_constellations(),
     m_bitsPerSymbol(0),
-    m_fifo(mcs.getNumCodeWords() * mcs.getCodeWordLength() * 100),
     m_output(),
     m_scrambler(0b1111111),
     m_outputReady(false)
@@ -35,16 +34,6 @@ Mapper::Mapper(MCS mcs) :
         default:
             break;
     }
-}
-
-bool Mapper::input(const filter_io_t &data)
-{
-    assert(data.type == IO_TYPE_BIT);
-    if (m_fifo.full()) {
-        return false;
-    }
-    m_fifo.push_back(data.bit);
-    return true;
 }
 
 bool Mapper::output(filter_io_t &data)
@@ -73,7 +62,9 @@ symbol_t Mapper::getNextSymbol()
 {
     symbol_t symbol = 0;
     for (size_t i = 0; i < m_bitsPerSymbol; i++) {
-        symbol_t nextBit = static_cast<bool>(!!m_fifo.front()); //first in, first out
+        filter_io_t input = m_fifo.front();
+        assert(input.type == IO_TYPE_BIT);
+        symbol_t nextBit = input.bit; //first in, first out
         m_fifo.pop_front();
         symbol |= (nextBit << i);
     }
