@@ -2,20 +2,12 @@
 #include <filters/depuncture.hpp>
 
 Depuncture::Depuncture(MCS mcs) :
+    FilterChainElement("Depuncture", mcs.getNumCodeWords() * mcs.getCodeWordLength()),
     m_mcs(mcs),
     m_outBitCount(0),
     m_outCodeWordCount(0),
-    m_fifo(mcs.getNumCodeWords() * mcs.getCodeWordLength()),
     m_doPuncture(mcs.getNumPuncOrRepBits() >= 0)
 {
-}
-
-bool Depuncture::input(const filter_io_t &data)
-{
-    assert(data.type == IO_TYPE_FIXPOINT);
-    assert(!m_fifo.full());
-    m_fifo.push_back(data.fp);
-    return true;
 }
 
 bool Depuncture::output(filter_io_t &data)
@@ -47,9 +39,12 @@ bool Depuncture::handlePuncture(filter_io_t &data)
         if (m_fifo.empty()) {
             return false;
         }
+        filter_io_t input = m_fifo.front();
+        assert(input.type == IO_TYPE_FIXPOINT);
+
         data.type = IO_TYPE_FIXPOINT;
-        data.fp.setFormat(m_fifo.front());
-        data.fp = m_fifo.front();
+        data.fp.setFormat(input.fp);
+        data.fp = input.fp;
         m_fifo.pop_front();
         ++m_outBitCount;
         didOutput = true;
@@ -85,9 +80,11 @@ bool Depuncture::handleRepetition(filter_io_t &data)
 
     if (m_outBitCount < m_mcs.getCodeWordLength()) {
         //simply pass the codeword through
+        filter_io_t input = m_fifo.front();
+        assert(input.type == IO_TYPE_FIXPOINT);
         data.type = IO_TYPE_FIXPOINT;
-        data.fp.setFormat(m_fifo.front());
-        data.fp = m_fifo.front();
+        data.fp.setFormat(input.fp);
+        data.fp = input.fp;
         m_fifo.pop_front();
         ++m_outBitCount;
         didOutput = true;

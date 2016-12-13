@@ -9,7 +9,6 @@ class Depuncture : public FilterChainElement
 {
 public:
     Depuncture(MCS mcs);
-    bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data)      override;
     void tick(void)                     override;
 private:
@@ -19,7 +18,6 @@ private:
     MCS m_mcs;
     size_t m_outBitCount;
     size_t m_outCodeWordCount;
-    CircularBuffer<SLFixPoint> m_fifo;
     bool m_doPuncture;
 };
 
