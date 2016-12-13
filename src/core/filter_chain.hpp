@@ -21,6 +21,8 @@ public:
 
     FilterChain & operator=(const FilterChainElement &rhs);
 
+    double getFIFOUtilization() const;
+
 private: //methods
     void publish(FilterChainElement *current);
 
@@ -28,4 +30,5 @@ private:
     std::unique_ptr<FilterChainElement> m_head;
     filter_io_t             m_output;
     bool                    m_outputReady;
+    double                  m_maxFIFOUtilization;
 };

@@ -5,7 +5,8 @@
 FilterChain::FilterChain() :
     m_head(nullptr),
     m_output(),
-    m_outputReady(false)
+    m_outputReady(false),
+    m_maxFIFOUtilization(0.0)
 {
 }
 
@@ -13,14 +14,16 @@ FilterChain::FilterChain() :
 FilterChain::FilterChain(FilterChain &&other) :
         m_head(std::move(other.m_head)),
         m_output(other.m_output),
-        m_outputReady(other.m_outputReady)
+        m_outputReady(other.m_outputReady),
+        m_maxFIFOUtilization(other.m_maxFIFOUtilization)
 {
 }
 
 FilterChain::FilterChain(const FilterChainElement &other) :
         m_head(nullptr),
         m_output(),
-        m_outputReady(false)
+        m_outputReady(false),
+        m_maxFIFOUtilization(0.0)
 {
     (void)this->operator=(other);
 }
@@ -52,6 +55,7 @@ bool FilterChain::output(filter_io_t &data)
 
 void FilterChain::tick()
 {
+    double maxFIFOUtilization = 0;
     for (FilterChainElement * current = m_head.get(); current != nullptr; current = current->m_next.get()) {
         //Tick the current element
         current->tick();
@@ -67,11 +71,17 @@ void FilterChain::tick()
                     log_err("Filter element %s dropped input sample from %s !", current->m_next->getName().c_str(), current->getName().c_str());
                 }
             }
-            //Publish the output externally if desired
-            if (current->shouldPublish()) {
-                publish(current);
+        }
+        if (current->hasInputFIFO()) {
+            double utilization = current->inputFIFOUtilization();
+            if (utilization > maxFIFOUtilization) {
+                maxFIFOUtilization = utilization;
             }
         }
+    }
+    m_maxFIFOUtilization = maxFIFOUtilization;
+    if (m_maxFIFOUtilization > 0.7) {
+        log_warn("FIFO utilization is above threshold! %f", m_maxFIFOUtilization);
     }
 }
 
@@ -81,15 +91,7 @@ FilterChain & FilterChain::operator=(const FilterChainElement &rhs)
     return *this;
 }
 
-void FilterChain::publish(FilterChainElement *current)
+double FilterChain::getFIFOUtilization() const
 {
-    uint8_t buf[200] = {0};
-    uint8_t *head = buf;
-
-    memcpy(head, current->getName().c_str(), current->getName().size());
-    head += current->getName().size();
-
-    size_t size = m_output.serialize(head);
-
-    Publisher::get()->send("FILT", buf, size + current->getName().size());
+    return m_maxFIFOUtilization;
 }
