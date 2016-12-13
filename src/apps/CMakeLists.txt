@@ -12,5 +12,5 @@ add_executable(fft_runner fft_runner.cpp)
 target_link_libraries(fft_runner sigfilters sigtypes sigutils)
 
 add_executable(filter_loopback filter_loopback.cpp)
-target_link_libraries(filter_loopback sigfilters sigcore sigtypes)
+target_link_libraries(filter_loopback sigfilters sigcore sigmath sigtypes)
 

@@ -141,7 +141,8 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     ChannelEqualizer *ce        = new ChannelEqualizer(Hf);
     Depuncture *depunc          = new Depuncture(mcs);
 
-//    NoiseElement *ne            = new NoiseElement(100.0);
+    double signalPower          = 9.7651e-4; //calculated in MATLAB based on IFFT output signal power for BPSK input
+    NoiseElement *ne            = new NoiseElement(-8.0, signalPower);
 
     //Debug probes
     std::string duc_in_probe_name   = "DUC_INPUT";
@@ -159,7 +160,7 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
     //Test symbol mapping + FFT + DUC
-    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + /* *ne + */ *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
+    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + *ne + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
 
     size_t numOutputs = runFilters(testChain, inputs, outputs);
     std::cout << "FFT/DUC Loopback has " << numOutputs << " outputs" << std::endl;
