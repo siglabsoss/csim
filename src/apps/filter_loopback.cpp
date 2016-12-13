@@ -29,6 +29,8 @@ static constexpr size_t CP_SIZE = 100;
 static constexpr size_t NUM_FRAMES_TO_CAPTURE = 7;
 static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
 
+#undef SHOULD_PROBE_FILTERS
+
 static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitErrors)
 {
     filter_io_t sample;
@@ -49,7 +51,7 @@ static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitError
                 if (1 != sample.bit) {
                     numBitErrors++;
                     if (numBitErrors > 400) {
-                        break;
+                        return outputCount;
                     }
                 }
             }
@@ -121,6 +123,7 @@ static FilterChain constructLoopbackChain(double ebn0, const MCS mcs, const std:
     constexpr double signalPower= 9.7651e-4; //calculated in MATLAB based on IFFT output signal power for BPSK input
     NoiseElement *ne            = new NoiseElement(ebn0, signalPower);
 
+#ifdef SHOULD_PROBE_FILTERS
     //Debug probes
     std::string duc_in_probe_name   = "DUC_INPUT";
     std::string ddc_out_probe_name  = "DDC_OUTPUT";
@@ -136,8 +139,10 @@ static FilterChain constructLoopbackChain(double ebn0, const MCS mcs, const std:
     SampleCountTrigger *fft_out     = new SampleCountTrigger(fft_out_probe_name,  FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
     SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
-    //Test symbol mapping + FFT + DUC
     FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc +  *ne + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
+#else
+    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *ce + *fft + *fs + *ddc + *ne + *duc + *cp + *ifft + *mapper + *punc + *encode + *scramTx;
+#endif
 
     return testChain;
 }
@@ -163,15 +168,18 @@ int main(int argc, char *argv[])
     //This frame size passed to the MCS object is chosen to avoid 0 padding codewords of length 2304
     constexpr size_t FRAME_SIZE = (2304 / 2)*4;
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
-    FilterChain loopback = constructLoopbackChain(0.0, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
-    size_t numBitErrors;
-    size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TRANSMITTED, numBitErrors);
+    for (double ebn0 = -60.0; ebn0 <= 0.0; ebn0 += 10.0) {
+        FilterChain loopback = constructLoopbackChain(ebn0, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
-    if (numBitsOutput > 0) {
-        std::cout << "BER = " << static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput) << std::endl;
-    } else {
-        std::cout << "No bits were output" << std::endl;
+        size_t numBitErrors;
+        size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TRANSMITTED, numBitErrors);
+
+        if (numBitsOutput > 0) {
+            std::cout << "EbN0 = " << ebn0 << " BER = " << static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput) << std::endl;
+        } else {
+            std::cout << "No bits were output" << std::endl;
+        }
     }
 
     return 0;
