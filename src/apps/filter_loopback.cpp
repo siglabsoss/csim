@@ -1,6 +1,8 @@
 #include <core/filter_chain.hpp>
 #include <core/logger.hpp>
 
+#include <types/circularbuffer.hpp>
+
 #include <filters/fft.hpp>
 #include <filters/demapper.hpp>
 #include <filters/mapper.hpp>
@@ -26,64 +28,39 @@ static constexpr size_t FFT_SIZE = 1024;
 static constexpr size_t CP_SIZE = 100;
 static constexpr size_t NUM_FRAMES_TO_CAPTURE = 7;
 static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
-static constexpr size_t SYMBOL_MAPPING_RATE = 10;
 
-static void loadInput(std::vector<bool> &inputs)
-{
-    for (size_t i = 0; i < inputs.size(); i++) {
-        bool bit = static_cast<bool>(std::rand() & 1);
-        inputs[i] = bit;
-    }
-}
-
-static void checkOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs)
-{
-    size_t numCorrect = 0;
-    size_t numIncorrect = 0;
-    for (size_t i = 0; i < outputs.size(); i++) {
-        if (inputs[(i)] != outputs[i]) {
-//            std::cout << "#" << i << " " << inputs[(i)] << " != " << outputs[i] << std::endl;
-            numIncorrect++;
-        } else {
-            numCorrect++;
-        }
-//        std::cout << inputs[(i)] << "," << outputs[i] << std::endl;
-    }
-
-    std::cout << "Bit error rate = " << static_cast<double>(numIncorrect) / static_cast<double>(numIncorrect + numCorrect) << std::endl;
-}
-
-//static void printInputsAndOutputs(const std::vector<bool> &inputs, const std::vector<bool> &outputs)
-//{
-//    assert(inputs.size() == outputs.size());
-//    for (size_t i = 0; i < inputs.size(); i++) {
-//        std::cout << inputs[i] << "," << outputs[i] << std::endl;
-//    }
-//}
-
-static size_t runFilters(FilterChain &chain, const std::vector<bool> &inputs, std::vector<bool> &outputs)
+static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitErrors)
 {
     filter_io_t sample;
-    size_t inputCount = 0;
-    while (outputs.size() < inputs.size()) {
-        sample.type = IO_TYPE_BIT;
-        sample.bit = inputs[inputCount];
-        if (chain.input(sample)) {
-            inputCount++;//only move on to the next sample if our sample was accepted
+    size_t outputCount = 0;
+    numBitErrors = 0;
+
+    while (outputCount < numBits) {
+        if (chain.getFIFOUtilization() < 0.5) {
+            sample.type = IO_TYPE_BIT;
+            sample.bit = 1; //we can always use '1' because the scrambler will produce equal number of '1's and '0's
+            chain.input(sample);
         }
-        chain.tick();
-        if (chain.output(sample)) {
-            assert(sample.type == IO_TYPE_BIT);
-            outputs.push_back(sample.bit);
+        for (size_t i = 0; i < 10; i++) {
+            chain.tick();
+            if (chain.output(sample)) {
+                assert(sample.type == IO_TYPE_BIT);
+                outputCount++;
+                if (1 != sample.bit) {
+                    numBitErrors++;
+                    if (numBitErrors > 400) {
+                        break;
+                    }
+                }
+            }
         }
     }
-    return outputs.size();
+    return outputCount;
 }
 
-static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
+static FilterChain constructLoopbackChain(double ebn0, const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
         const std::string &up2CoeffFile, const std::string &up5CoeffFile, const std::string &HfFile,
-        const std::string &ldpcH, const std::string &ldpcG,
-        const std::vector<bool> &inputs, std::vector<bool> &outputs)
+        const std::string &ldpcH, const std::string &ldpcG)
 {
     // Prepare coefficients
     std::vector<ComplexDouble> halfbandComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(down2CoeffFile);
@@ -125,8 +102,8 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     ScramblerBlock *scramTx     = new ScramblerBlock;
     LDPCEncode * encode         = new LDPCEncode(G);
     Puncture *punc              = new Puncture(mcs);
-    Mapper * mapper             = new Mapper(SYMBOL_MAPPING_RATE, mcs);
-    FFT * ifft                  = new FFT(FFT_SIZE, true, SYMBOL_MAPPING_RATE);
+    Mapper * mapper             = new Mapper(mcs);
+    FFT * ifft                  = new FFT(FFT_SIZE, true);
     ifft->setOutputFormat(FFT_OUTPUT_WL, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, DUC_UPSAMPLE_FACTOR, mcs);
     DigitalUpConverter * duc    = new DigitalUpConverter(-MIXER_FREQ, up2Coeffs, up5Coeffs);
@@ -134,15 +111,15 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     ScramblerBlock *scramRx     = new ScramblerBlock;
     LDPCDecoder * decode        = new LDPCDecoder(H);
     Demapper * demapper         = new Demapper(mcs);
-    FFT * fft                   = new FFT(FFT_SIZE, false, DUC_UPSAMPLE_FACTOR);
+    FFT * fft                   = new FFT(FFT_SIZE, false);
     fft->setOutputFormat(FFT_OUTPUT_WL, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     DigitalDownConverter *ddc   = new DigitalDownConverter(MIXER_FREQ, down2Coeffs, down5Coeffs);
     FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE);
     ChannelEqualizer *ce        = new ChannelEqualizer(Hf);
     Depuncture *depunc          = new Depuncture(mcs);
 
-    double signalPower          = 9.7651e-4; //calculated in MATLAB based on IFFT output signal power for BPSK input
-    NoiseElement *ne            = new NoiseElement(-8.0, signalPower);
+    constexpr double signalPower= 9.7651e-4; //calculated in MATLAB based on IFFT output signal power for BPSK input
+    NoiseElement *ne            = new NoiseElement(ebn0, signalPower);
 
     //Debug probes
     std::string duc_in_probe_name   = "DUC_INPUT";
@@ -160,13 +137,9 @@ static void filterLoopback(const MCS mcs, const std::string &down2CoeffFile, con
     SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
     //Test symbol mapping + FFT + DUC
-    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + *ne + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
+    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc +  *ne + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
 
-    size_t numOutputs = runFilters(testChain, inputs, outputs);
-    std::cout << "FFT/DUC Loopback has " << numOutputs << " outputs" << std::endl;
-
-    checkOutputs(inputs, outputs);
-//    printInputsAndOutputs(inputs, outputs);
+    return testChain;
 }
 
 int main(int argc, char *argv[])
@@ -185,17 +158,21 @@ int main(int argc, char *argv[])
     std::string ldpcH(argv[6]);
     std::string ldpcG(argv[7]);
 
-    //This framesize is meant to avoid 0 padding codewords of length 2304
-    size_t frameSize = (2304 / 2)*4;
-    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, frameSize, FFT_SIZE);
+    static constexpr size_t NUM_FRAMES_TRANSMITTED = 10;
 
-    std::vector<bool> inputs(frameSize*2);
-    std::vector<bool> outputs;
+    //This frame size passed to the MCS object is chosen to avoid 0 padding codewords of length 2304
+    constexpr size_t FRAME_SIZE = (2304 / 2)*4;
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
+    FilterChain loopback = constructLoopbackChain(0.0, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
-    //Calculate random inputs
-    loadInput(inputs);
+    size_t numBitErrors;
+    size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TRANSMITTED, numBitErrors);
 
-    filterLoopback(mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG, inputs, outputs);
+    if (numBitsOutput > 0) {
+        std::cout << "BER = " << static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput) << std::endl;
+    } else {
+        std::cout << "No bits were output" << std::endl;
+    }
 
     return 0;
 }
