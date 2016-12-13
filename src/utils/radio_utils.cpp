@@ -14,7 +14,6 @@
 
 static constexpr size_t UPSAMPLE_FACTOR = 1;
 //ticks per symbol needs to be greater than upsample factor in order to not saturate
-static constexpr size_t MIXER_TICKS_PER_PERIOD = UPSAMPLE_FACTOR;
 
 static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 {
