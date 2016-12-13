@@ -20,8 +20,7 @@ private:
     size_t m_Nfft;
     size_t m_cpLen;
     size_t m_sampleCount;
+    size_t m_totalCount;
     bool m_gotInput;
     filter_io_t m_sample;
 };
-
-

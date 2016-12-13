@@ -4,13 +4,14 @@
 //There is some variance to the delay, which changes based on the stream of bits flowing through the filters.
 //Right now this number obtained by xcorr in MATLAB based on the data dumps from the
 //filter_loopback app. This will suffice for now since this block is temporary
-static size_t constexpr FRAME_SYNC_SAMPLE_DELAY = 2227; //determined empirically
+static size_t constexpr FRAME_SYNC_SAMPLE_DELAY = 1420; //determined empirically
 
 FrameSync::FrameSync(size_t N, size_t cpLen) :
         m_state(STATE_WAIT_FOR_FRAME),
         m_Nfft(N),
         m_cpLen(cpLen),
         m_sampleCount(0),
+        m_totalCount(0),
         m_gotInput(false),
         m_sample()
 {
@@ -35,6 +36,7 @@ bool FrameSync::output(filter_io_t &data)
     bool didOutputSample = false;
     if (m_gotInput) {
         m_sampleCount++;
+        m_totalCount++; //this exists for debugging purposes only
     }
     switch (m_state) {
         case STATE_WAIT_FOR_NONZERO:
