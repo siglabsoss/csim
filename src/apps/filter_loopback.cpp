@@ -26,15 +26,17 @@
 static constexpr double MIXER_FREQ = 0.16;
 static constexpr size_t FFT_SIZE = 1024;
 static constexpr size_t CP_SIZE = 100;
-static constexpr size_t NUM_FRAMES_TO_CAPTURE = 7;
 static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
+static constexpr size_t OUTPUTS_PER_PRINT_STATEMENT = 10000;
 
 #undef SHOULD_PROBE_FILTERS
 
 static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitErrors)
 {
+    static constexpr size_t MAX_BIT_ERRORS = 400;
     filter_io_t sample;
     size_t outputCount = 0;
+    size_t printCount = 0;
     numBitErrors = 0;
 
     while (outputCount < numBits) {
@@ -43,16 +45,21 @@ static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitError
             sample.bit = 1; //we can always use '1' because the scrambler will produce equal number of '1's and '0's
             chain.input(sample);
         }
-        for (size_t i = 0; i < 10; i++) {
+
+        for (size_t i = 0; i < 10; ++i) {
             chain.tick();
             if (chain.output(sample)) {
                 assert(sample.type == IO_TYPE_BIT);
                 outputCount++;
                 if (1 != sample.bit) {
                     numBitErrors++;
-                    if (numBitErrors > 400) {
+                    if (numBitErrors >=  MAX_BIT_ERRORS) {
                         return outputCount;
                     }
+                }
+                if (++printCount >= OUTPUTS_PER_PRINT_STATEMENT) {
+                    std::cout << outputCount << " bits sent with " << numBitErrors << " errors." << std::endl;
+                    printCount = 0;
                 }
             }
         }
@@ -132,6 +139,7 @@ static FilterChain constructLoopbackChain(double ebn0, const MCS mcs, const std:
     std::string fft_out_probe_name  = "FFT_OUTPUT";
     std::string fft_in_probe_name   = "FFT_INPUT";
     constexpr size_t PHASE_DELAY    = 40; //found emperically
+    constexpr size_t NUM_FRAMES_TO_CAPTURE = 7;
     SampleCountTrigger *duc_in      = new SampleCountTrigger(duc_in_probe_name,   FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*NUM_FRAMES_TO_CAPTURE, 1, 0);
     SampleCountTrigger *ddc_out     = new SampleCountTrigger(ddc_out_probe_name,  FilterProbe::CSV, (FFT_SIZE + CP_SIZE)*NUM_FRAMES_TO_CAPTURE + PHASE_DELAY, 1, 0);
     SampleCountTrigger *ifft_in     = new SampleCountTrigger(ifft_in_probe_name,  FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
@@ -163,20 +171,21 @@ int main(int argc, char *argv[])
     std::string ldpcH(argv[6]);
     std::string ldpcG(argv[7]);
 
-    static constexpr size_t NUM_FRAMES_TRANSMITTED = 10;
+    static constexpr size_t NUM_FRAMES_TO_TRANSMIT = 220;
 
     //This frame size passed to the MCS object is chosen to avoid 0 padding codewords of length 2304
     constexpr size_t FRAME_SIZE = (2304 / 2)*4;
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
 
-    for (double ebn0 = -60.0; ebn0 <= 0.0; ebn0 += 10.0) {
+    for (double ebn0 = -10.0; ebn0 <= -7.5; ebn0 += 0.25) {
+        std::cout << "Starting EbN0 = " << ebn0 << std::endl;
         FilterChain loopback = constructLoopbackChain(ebn0, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
         size_t numBitErrors;
-        size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TRANSMITTED, numBitErrors);
+        size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TO_TRANSMIT, numBitErrors);
 
         if (numBitsOutput > 0) {
-            std::cout << "EbN0 = " << ebn0 << " BER = " << static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput) << std::endl;
+            std::cout << "EbN0," << ebn0 << ",ERR," << numBitErrors << ",OUT," << numBitsOutput << ",BER," << static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput) << std::endl;
         } else {
             std::cout << "No bits were output" << std::endl;
         }
