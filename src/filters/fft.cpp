@@ -13,7 +13,7 @@
 
 #define FFT_DO_DECIMATE_IN_FREQUENCY
 
-FFT::FFT(size_t N, bool inverse, size_t ticksPerOutput) :
+FFT::FFT(size_t N, bool inverse) :
     FilterChainElement(std::string("FFT")),
     m_numStages(static_cast<uint64_t>(log2(N))),
     m_inputs(N),
@@ -22,8 +22,6 @@ FFT::FFT(size_t N, bool inverse, size_t ticksPerOutput) :
     m_outputValid(false),
     m_outputIdx(0),
     m_inputIdx(0),
-    m_outputCount(0),
-    m_ticksPerOutput(ticksPerOutput),
     m_maxValuePerStage(m_numStages),
     m_scaleExp(0),
     m_inverse(inverse)
@@ -71,15 +69,12 @@ bool FFT::input(const filter_io_t &data)
 bool FFT::output(filter_io_t &data)
 {
     if (m_outputValid == true) {
-        if (++m_outputCount >= m_ticksPerOutput) {
-            m_outputCount = 0;
-            data = m_outputs[m_outputIdx++];
-            if (m_outputIdx >= m_outputs.size()) {
-                m_outputIdx = 0;
-                m_outputValid = false;
-            }
-            return true;
+        data = m_outputs[m_outputIdx++];
+        if (m_outputIdx >= m_outputs.size()) {
+            m_outputIdx = 0;
+            m_outputValid = false;
         }
+        return true;
     }
     return false;
 }
