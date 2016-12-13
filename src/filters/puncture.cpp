@@ -2,10 +2,10 @@
 #include <cassert>
 
 Puncture::Puncture(MCS mcs) :
+        FilterChainElement("Puncture", mcs.getNumCodeWords() * mcs.getCodeWordLength()),
         m_mcs(mcs),
         m_buffer(),
         m_doPuncture(mcs.getNumPuncOrRepBits() >= 0),
-        m_fifo(mcs.getNumCodeWords() * mcs.getCodeWordLength()),
         m_outBitCount(0),
         m_outCodeWordCount(0)
 {
@@ -15,14 +15,6 @@ Puncture::Puncture(MCS mcs) :
         numRepeatBitsPerSymbol += 1; //one additional bit in case the division above truncated
         m_buffer = std::vector<bool>(numRepeatBitsPerSymbol);
     }
-}
-
-bool Puncture::input(const filter_io_t &data)
-{
-    assert(data.type == IO_TYPE_BIT);
-    assert(!m_fifo.full());
-    m_fifo.push_back(data.bit);
-    return true;
 }
 
 bool Puncture::output(filter_io_t &data)
@@ -56,8 +48,10 @@ bool Puncture::handlePuncture(filter_io_t &data)
 
     if (m_outBitCount < m_mcs.getCodeWordLength() - numPunctureBitsPerSymbol) {
         //simply pass the codeword through
+        filter_io_t sample = m_fifo.front();
+        assert(sample.type == IO_TYPE_BIT);
         data.type = IO_TYPE_BIT;
-        data.bit = m_fifo.front();
+        data.bit = sample.bit;
         m_fifo.pop_front();
         ++m_outBitCount;
         didOutput = true;
@@ -87,13 +81,15 @@ bool Puncture::handleRepetition(filter_io_t &data)
         if (m_fifo.empty()) {
             return false;
         }
+        filter_io_t sample = m_fifo.front();
+        assert(sample.type == IO_TYPE_BIT);
         //we need to buffer the first numRepeatBits of the codeword for repetition
         if (m_outBitCount < numRepeatBitsPerSymbol) {
-            m_buffer[m_outBitCount] = m_fifo.front();
+            m_buffer[m_outBitCount] = sample.bit;
         }
         //simply pass the codeword through
         data.type = IO_TYPE_BIT;
-        data.bit = m_fifo.front();
+        data.bit = sample.bit;
         m_fifo.pop_front();
         ++m_outBitCount;
         didOutput = true;
