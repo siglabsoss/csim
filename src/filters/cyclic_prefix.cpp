@@ -1,8 +1,10 @@
 #include <filters/cyclic_prefix.hpp>
 #include <filters/fft.hpp>
+#include <core/logger.hpp>
 #include <cassert>
 
 CyclicPrefix::CyclicPrefix(size_t N, size_t cpLen, size_t ticksPerOutput, MCS mcs) :
+    FilterChainElement("CyclicPrefix", mcs.getNumCodeWords() * mcs.getCodeWordLength()),
     m_len(cpLen),
     m_symbolLen(N),
     m_inputIdx(0),
@@ -10,21 +12,9 @@ CyclicPrefix::CyclicPrefix(size_t N, size_t cpLen, size_t ticksPerOutput, MCS mc
     m_ticksPerOutput(ticksPerOutput),
     m_ticksSinceOutput(ticksPerOutput),
     m_outputActive(false),
-    m_inputs(mcs.getNumCodeWords() * mcs.getCodeWordLength()),
     m_outputs(N + cpLen)
 {
     assert (cpLen < N);
-}
-
-bool CyclicPrefix::input(const filter_io_t &data)
-{
-    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-    assert(!m_inputs.full());
-    SLFixComplex sample;
-    sample.setFormat(data.fc);
-    sample = data.fc;
-    m_inputs.push_back(sample);
-    return true;
 }
 
 bool CyclicPrefix::output(filter_io_t &data)
@@ -56,12 +46,16 @@ bool CyclicPrefix::output(filter_io_t &data)
 
 void CyclicPrefix::tick()
 {
-    if (!m_outputActive && m_inputs.size() >= m_symbolLen) {
+
+//    assert(m_neverReceivedInput || m_outputActive || !m_fifo.empty());
+    if (!m_outputActive && m_fifo.size() >= m_symbolLen) {
         assert((m_outputIdx == 0)); //we should not be in the middle of outputting
         //Fill the symbol
         for (size_t i = 0; i < m_symbolLen; i++) {
-            SLFixComplex sample = m_inputs.front();
-            m_inputs.pop_front();
+            filter_io_t input = m_fifo.front();
+            assert(input.type == IO_TYPE_COMPLEX_FIXPOINT);
+            SLFixComplex sample = input.fc;
+            m_fifo.pop_front();
             m_outputs[i + m_len].setFormat(sample);
             m_outputs[i + m_len] = sample;
         }
