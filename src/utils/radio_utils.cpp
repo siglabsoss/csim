@@ -13,27 +13,8 @@
 #include <utils/utils.hpp>
 
 static constexpr size_t UPSAMPLE_FACTOR = 1;
-static constexpr size_t MOD_TICKS_PER_SYMBOL = 3;
 //ticks per symbol needs to be greater than upsample factor in order to not saturate
-static constexpr size_t MIXER_TICKS_PER_PERIOD = (MOD_TICKS_PER_SYMBOL / UPSAMPLE_FACTOR) * 1;
-
-static void construct_tx_chain(FilterChain &txChain, MCS::modulation_t scheme)
-{
-    MCS mcs(MCS::ONE_HALF_RATE, scheme, 1024);
-    Mapper * qam16    = new Mapper(MOD_TICKS_PER_SYMBOL, mcs);
-    Mixer *     upmixer  = new Mixer(MIXER_TICKS_PER_PERIOD, true /* upmix */);
-    txChain = *upmixer + *qam16;
-}
-
-static void construct_rx_chain(FilterChain &rxChain, MCS::modulation_t scheme)
-{
-    MCS mcs(MCS::ONE_HALF_RATE, scheme, 1024);
-    Mixer *downmixer = new Mixer(MIXER_TICKS_PER_PERIOD, false /* downmix */);
-    Decimator *decim = new Decimator(MOD_TICKS_PER_SYMBOL, 0);
-    Demapper *demod = new Demapper(mcs, true);
-    NoiseElement * ne = new NoiseElement(15);
-    rxChain = *demod + *decim + *downmixer + *ne;
-}
+static constexpr size_t MIXER_TICKS_PER_PERIOD = UPSAMPLE_FACTOR;
 
 static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 {
@@ -41,7 +22,7 @@ static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 
     LDPCEncode * encode  = new LDPCEncode(G);
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 1024);
-    Mapper *     mapper   = new Mapper(1, mcs);
+    Mapper *     mapper   = new Mapper(mcs);
 
     txChain = *mapper + *encode;
 }
@@ -56,31 +37,6 @@ static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
     NoiseElement * ne    = new NoiseElement(ebn0);
 
     rxChain = *decode + *demapper + *ne;
-}
-
-void construct_radio_set(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, MCS::modulation_t scheme)
-{
-    size_t count = 0;
-    for (auto it = coords.begin(); it != coords.end(); it++) {
-        rs.addRadio([scheme, it, count]()
-                {
-                    radio_config_t config {
-                        .position = Vector2d(it->first, it->second),
-                        .id = static_cast<radio_id_t>(count)
-                    };
-                    std::cout << "Adding radio with id = " << count << std::endl;
-
-                    FilterChain modulation_chain;
-                    construct_tx_chain(modulation_chain, scheme);
-
-                    FilterChain demodulation_chain;
-                    construct_rx_chain(demodulation_chain, scheme);
-
-                    return std::unique_ptr<RadioS>(new RadioS(config, modulation_chain, demodulation_chain));
-                });
-        count++;
-    }
-    rs.init(false, true, true);
 }
 
 void construct_radio_set_ldpc_ebn0(RadioSet &rs, const std::vector <std::pair<double, double> > &coords, double ebn0)

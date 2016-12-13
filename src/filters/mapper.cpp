@@ -5,19 +5,16 @@
 
 #include <cassert>
 
-Mapper::Mapper(unsigned int ticksPerSymbol, MCS mcs) :
+Mapper::Mapper(MCS mcs) :
     FilterChainElement("Mapper"),
     m_constellations(),
     m_bitsPerSymbol(0),
     m_fifo(mcs.getNumCodeWords() * mcs.getCodeWordLength() * 100),
     m_output(),
     m_scrambler(0b1111111),
-    m_tickCount(0),
-    m_ticksPerSymbol(ticksPerSymbol),
-    m_gotFirstSymbol(false)
+    m_outputReady(false)
 {
     MCS::modulation_t scheme = mcs.getModulation();
-    m_tickCount = m_ticksPerSymbol; //set to trigger an output update on first iteration
     assert(scheme != MCS::MOD_QAM64); //not implemented
     m_bitsPerSymbol = mcs.getNumBitsPerSubcarrier();
     switch(scheme) {
@@ -43,18 +40,17 @@ Mapper::Mapper(unsigned int ticksPerSymbol, MCS mcs) :
 bool Mapper::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_BIT);
-    assert(!m_fifo.full());
-    //queuing up least significant bit first
-    m_fifo.push_back(data.bit);
-    if (!m_gotFirstSymbol && (m_fifo.size() >= m_bitsPerSymbol)) {
-        m_gotFirstSymbol = true;
+    if (m_fifo.full()) {
+        return false;
     }
+    m_fifo.push_back(data.bit);
     return true;
 }
 
 bool Mapper::output(filter_io_t &data)
 {
-    if (m_gotFirstSymbol && m_tickCount == 1) {
+    if (m_outputReady == true) {
+        m_outputReady = false;
         data = m_output;
 //        if (std::abs(data.toComplexDouble()) > 0.01) {
 //            std::cout << "mapper out: " << data.toComplexDouble() << std::endl;
@@ -66,20 +62,11 @@ bool Mapper::output(filter_io_t &data)
 
 void Mapper::tick(void)
 {
-    if (m_tickCount >= m_ticksPerSymbol) {
-        symbol_t symbol = NULL_SYMBOL;
-        if (m_fifo.size() >= m_bitsPerSymbol) { //we have real input to modulate
-            symbol   = getNextSymbol();
-        } else {
-            //XXX For now we will assume our input buffer will never by starved after we've started getting symbols.
-            //Later we will have to decide how this block will handle this case
-            assert(!m_gotFirstSymbol);
-            symbol   = generateRandomSymbol();
-        }
+    if (m_fifo.size() >= m_bitsPerSymbol) { //we have real input to modulate
+        symbol_t symbol   = getNextSymbol();
         m_output = m_constellations.at(symbol);
-        m_tickCount = 0;
+        m_outputReady = true;
     }
-    m_tickCount++;
 }
 
 symbol_t Mapper::getNextSymbol()

@@ -17,7 +17,7 @@ private: //constants
     static constexpr symbol_t NULL_SYMBOL = 0;
 
 public:
-    Mapper(unsigned int ticksPerSymbol, MCS mcs);
+    Mapper(MCS mcs);
 
     /**
      * Input is expected to be a digital bit stream (IO_TYPE_BYTE)
@@ -48,7 +48,5 @@ private:
     constellation_t         m_output;
     Scrambler               m_scrambler;
 
-    unsigned int            m_tickCount;
-    unsigned int            m_ticksPerSymbol;
-    bool                    m_gotFirstSymbol;
+    bool                    m_outputReady;
 };
