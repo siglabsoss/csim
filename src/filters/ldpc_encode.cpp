@@ -8,20 +8,6 @@
 
 static constexpr size_t INPUT_BUFFER_BITS_MAX = 512 * 8;
 
-bool LDPCEncode::input(const filter_io_t &data)
-{
-    assert(data.type == IO_TYPE_BIT);
-    //make sure we have enough space left to store the next symbol
-    if (INPUT_BUFFER_BITS_MAX - m_inputBuffer.size() < 1) {
-        return false;
-    }
-
-    m_inputBuffer.push(data.bit);
-
-//    std::cout << "enc in: " << (int) data.bit << std::endl;
-    return true;
-}
-
 bool LDPCEncode::output(filter_io_t &data)
 {
     if (m_outputBuffer.size() > 0) {
@@ -38,13 +24,15 @@ bool LDPCEncode::output(filter_io_t &data)
 void LDPCEncode::tick(void)
 {
     size_t msgLen = m_G.size();
-    if (m_inputBuffer.size() >= msgLen) {
+    if (m_fifo.size() >= msgLen) {
         //we've queued up enough bits
         std::vector<bool> msg(msgLen);
         //we're popping off LSB first and storing MSB in msg[0]
         for (ssize_t i = msgLen - 1; i >= 0; --i) {
-            bool nextBit = !!m_inputBuffer.front();
-            m_inputBuffer.pop();
+            filter_io_t sample = m_fifo.front();
+            assert(sample.type == IO_TYPE_BIT);
+            bool nextBit = sample.bit;
+            m_fifo.pop_front();
             msg[i] = nextBit;
         }
 //        std::cout << "msg: ";
@@ -56,7 +44,6 @@ void LDPCEncode::tick(void)
         for (ssize_t i = cw.size() - 1; i >= 0; --i) {
             //we're pushing LSB onto the FIFO first so that we output LSB first
             m_outputBuffer.push(cw[i]);
-
         }
     }
 }
@@ -72,9 +59,8 @@ size_t LDPCEncode::getCwLen() const
 }
 
 LDPCEncode::LDPCEncode(const std::vector<std::vector<bool> > &G):
-    FilterChainElement(std::string("LDPCEncode")),
+    FilterChainElement(std::string("LDPCEncode"), INPUT_BUFFER_BITS_MAX),
     m_G(G),
-    m_inputBuffer(),
     m_outputBuffer()
 {
     assert(m_G.size() > 0 && m_G[0].size() > 0);

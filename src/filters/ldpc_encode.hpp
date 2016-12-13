@@ -13,7 +13,6 @@ class LDPCEncode : public FilterChainElement
 public:
     virtual ~LDPCEncode();
     LDPCEncode(const std::vector<std::vector<bool> > &G);
-    bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
 
@@ -24,7 +23,6 @@ private:
     std::vector<bool> encode(const std::vector<bool> &u) const;
 
     std::vector<std::vector<bool> >    m_G;
-    std::queue<bool>                   m_inputBuffer;
     std::queue<bool>                   m_outputBuffer;
 };
 
