@@ -7,10 +7,10 @@ NoiseElement::~NoiseElement()
 {
 }
 //we want a gaussian distribution with mean = 0 and stddev = 10^(-ebn0/20)
-NoiseElement::NoiseElement(double ebn0) :
+NoiseElement::NoiseElement(double ebn0, double ps) :
     FilterChainElement(std::string("NoiseElement")),
-    //XXX this is the noise variance for BPSK + 1/2 rate code. this shouldn't be hardcoded
-    m_noiseGenerator(1.0 / (pow(10, ebn0/10.0))), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
+    //determine noise power from given signal power and desired ebn0
+    m_noiseGenerator(ps / (pow(10, ebn0/10.0))), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
     m_inputValid(false)
 {
 }
@@ -20,9 +20,7 @@ bool NoiseElement::input(const filter_io_t &data)
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT || data.type == IO_TYPE_COMPLEX_DOUBLE);
 
     m_input = data.toComplexDouble();
-    if (std::abs(m_input) > 0.01) {
-        m_inputValid = true;
-    }
+    m_inputValid = true;
     return true;
 }
 

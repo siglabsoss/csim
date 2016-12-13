@@ -12,7 +12,7 @@ class NoiseElement : public FilterChainElement
 {
 public:
     virtual ~NoiseElement();
-    NoiseElement(double ebn0);
+    NoiseElement(double ebn0, double ps = 1.0);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
