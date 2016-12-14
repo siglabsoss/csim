@@ -12,9 +12,6 @@
 #include <filters/fft.hpp>
 #include <utils/utils.hpp>
 
-static constexpr size_t UPSAMPLE_FACTOR = 1;
-//ticks per symbol needs to be greater than upsample factor in order to not saturate
-
 static void construct_ldpc_ebn0_tx(FilterChain &txChain)
 {
     std::vector<std::vector<bool> > G = LDPCUtils::getBitArrayFromCSV("data/ldpc/80211n_G_648_12.csv");
