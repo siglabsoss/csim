@@ -33,7 +33,7 @@ static constexpr size_t OUTPUTS_PER_PRINT_STATEMENT = 10000;
 
 static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitErrors)
 {
-    static constexpr size_t MAX_BIT_ERRORS = 400;
+    static constexpr size_t MAX_BIT_ERRORS = 4000;
     filter_io_t sample;
     size_t outputCount = 0;
     size_t printCount = 0;
@@ -171,21 +171,30 @@ int main(int argc, char *argv[])
     std::string ldpcH(argv[6]);
     std::string ldpcG(argv[7]);
 
+    const plotter &plot = plotter::get();
+    std::vector<std::vector<double> > bers(1);
+    std::vector<std::vector<double> > ebnos(1);
+    std::vector<std::string> titles;
+    titles.push_back("OFDM Loopback");
+
     static constexpr size_t NUM_FRAMES_TO_TRANSMIT = 220;
 
     //This frame size passed to the MCS object is chosen to avoid 0 padding codewords of length 2304
     constexpr size_t FRAME_SIZE = (2304 / 2)*4;
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
 
-    for (double ebn0 = -10.0; ebn0 <= -7.5; ebn0 += 0.25) {
+    for (double ebn0 = -18.0; ebn0 <= -5.0; ebn0 += 0.25) {
         std::cout << "Starting EbN0 = " << ebn0 << std::endl;
         FilterChain loopback = constructLoopbackChain(ebn0, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
         size_t numBitErrors;
         size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TO_TRANSMIT, numBitErrors);
-
+        double ber = static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput);
+        bers[0].push_back(ber);
+        ebnos[0].push_back(ebn0);
+        plot.nplotber(bers, ebnos, titles);
         if (numBitsOutput > 0) {
-            std::cout << "EbN0," << ebn0 << ",ERR," << numBitErrors << ",OUT," << numBitsOutput << ",BER," << static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput) << std::endl;
+            std::cout << "EbN0," << ebn0 << ",ERR," << numBitErrors << ",OUT," << numBitsOutput << ",BER," << ber << std::endl;
         } else {
             std::cout << "No bits were output" << std::endl;
         }
