@@ -7,10 +7,9 @@ NoiseElement::~NoiseElement()
 {
 }
 //we want a gaussian distribution with mean = 0 and stddev = 10^(-ebn0/20)
-NoiseElement::NoiseElement(double ebn0, double signalPower) :
+NoiseElement::NoiseElement(double variance) :
     FilterChainElement(std::string("NoiseElement")),
-    //determine noise power from given signal power and desired ebn0 XXX this is assuming energy per bit = energy per symbol (e.g. BPSK) and 1/2 code rate
-    m_noiseGenerator(signalPower / (pow(10, ebn0/10.0))), //more info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
+    m_noiseGenerator(variance),
     m_inputValid(false)
 {
 }
