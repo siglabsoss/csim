@@ -101,6 +101,41 @@ public:
         send(jsn);
     }
 
+    void nplotmulti(const std::vector<std::vector<double> > &xVals, const std::vector<std::vector<double> > &yVals, const std::vector<std::string> &titles, const std::string &xLabel, const std::string &yLabel, const std::string &title, bool semilog) const
+    {
+        Json::Value jsn;
+        if (semilog == true) {
+            jsn["method"] = "nplotmultisemilog";
+        } else {
+            jsn["method"] = "nplotmulti";
+        }
+
+        assert(xVals.size() == yVals.size());
+        assert(xVals.size() == titles.size());
+
+        unsigned sz = xVals.size();
+
+        for(unsigned i = 0; i < sz; i++) {
+            assert(xVals[i].size() == yVals[i].size());
+            unsigned sz2 = xVals[i].size();
+
+            for(unsigned j = 0; j < sz2; j++)
+            {
+                jsn["arg0"][i][j] = xVals[i][j];
+                jsn["arg1"][i][j] = yVals[i][j];
+            }
+            jsn["arg2"][i] = titles[i];
+
+        }
+
+        jsn["arg3"] = xLabel;
+        jsn["arg4"] = yLabel;
+
+        jsn["arg5"] = title;
+
+        send(jsn);
+    }
+
 
     // Normal 2D plot, may plot imag() only if data is complex
     template<typename T> void nplot(const T &obj, const std::string &title) const
