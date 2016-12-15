@@ -30,7 +30,9 @@ static void construct_ldpc_enb0_rx(FilterChain &rxChain, double ebn0)
     LDPCDecoder * decode = new LDPCDecoder(H);
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 1024);
     Demapper * demapper = new Demapper(mcs, false);
-    NoiseElement * ne    = new NoiseElement(ebn0);
+
+    double noiseVar = 1.0 / pow(10, ebn0/10.0);
+    NoiseElement * ne    = new NoiseElement(noiseVar);
 
     rxChain = *decode + *demapper + *ne;
 }
