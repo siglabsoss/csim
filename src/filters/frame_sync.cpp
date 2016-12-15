@@ -4,7 +4,10 @@
 //There is some variance to the delay, which changes based on the stream of bits flowing through the filters.
 //Right now this number obtained by xcorr in MATLAB based on the data dumps from the
 //filter_loopback app. This will suffice for now since this block is temporary
-static size_t constexpr FRAME_SYNC_SAMPLE_DELAY = 1420; //determined empirically
+
+
+//static size_t constexpr FRAME_SYNC_SAMPLE_DELAY = 1420; //determined empirically for 802.16 code
+static size_t constexpr FRAME_SYNC_SAMPLE_DELAY = 1240; //determined empirically for 802.11n code
 
 FrameSync::FrameSync(size_t N, size_t cpLen) :
         m_state(STATE_WAIT_FOR_FRAME),
