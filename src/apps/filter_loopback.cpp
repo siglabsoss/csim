@@ -67,7 +67,7 @@ static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitError
     return outputCount;
 }
 
-static FilterChain constructLoopbackChain(double ebn0, const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
+static FilterChain constructLoopbackChain(double noiseVar, const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
         const std::string &up2CoeffFile, const std::string &up5CoeffFile, const std::string &HfFile,
         const std::string &ldpcH, const std::string &ldpcG)
 {
@@ -127,8 +127,7 @@ static FilterChain constructLoopbackChain(double ebn0, const MCS mcs, const std:
     ChannelEqualizer *ce        = new ChannelEqualizer(Hf);
     Depuncture *depunc          = new Depuncture(mcs);
 
-    constexpr double signalPower= 9.7651e-4; //calculated in MATLAB based on IFFT output signal power for BPSK input
-    NoiseElement *ne            = new NoiseElement(ebn0, signalPower);
+    NoiseElement *ne            = new NoiseElement(noiseVar);
 
 #ifdef SHOULD_PROBE_FILTERS
     //Debug probes
@@ -147,12 +146,19 @@ static FilterChain constructLoopbackChain(double ebn0, const MCS mcs, const std:
     SampleCountTrigger *fft_out     = new SampleCountTrigger(fft_out_probe_name,  FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
     SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
-    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc +  *ne + *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
+    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + /* *ne + */ *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
 #else
     FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *ce + *fft + *fs + *ddc + *ne + *duc + *cp + *ifft + *mapper + *punc + *encode + *scramTx;
 #endif
 
     return testChain;
+}
+
+static double getNoiseVarFromSNR(double snr)
+{
+    //determine noise power from desired signal to noise ratio
+    //some relevant info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
+    return (1.0 / 1024.0) / (pow(10, snr/10.0));
 }
 
 int main(int argc, char *argv[])
@@ -177,28 +183,50 @@ int main(int argc, char *argv[])
     std::vector<std::string> titles;
     titles.push_back("OFDM Loopback");
 
-    static constexpr size_t NUM_FRAMES_TO_TRANSMIT = 220;
+    //This needs to change with the LDPC codeword specified from the command line arguments.
+    //Obviously hard coding this here is not ideal but we'll get by for now.
+    constexpr size_t EXPECTED_CODEWORD_LENGTH = 1944;
+    //This frame size passed to the MCS object is chosen to avoid 0 padding
+    constexpr size_t FRAME_SIZE = (EXPECTED_CODEWORD_LENGTH / 2)*4;
+    constexpr size_t NUM_FRAMES_TO_TRANSMIT  = 220;
+    constexpr double SNR_START               = -15.0;
+    constexpr double SNR_END                 = -5.0;
+    constexpr double SNR_COARSE_TRANSITION   = -10.0;
+    constexpr double SNR_COARSE_INCREMENT    = 1.0;
+    constexpr double SNR_FINE_INCREMENT      = 0.25;
 
-    //This frame size passed to the MCS object is chosen to avoid 0 padding codewords of length 2304
-    constexpr size_t FRAME_SIZE = (2304 / 2)*4;
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
 
-    for (double ebn0 = -18.0; ebn0 <= -5.0; ebn0 += 0.25) {
-        std::cout << "Starting EbN0 = " << ebn0 << std::endl;
-        FilterChain loopback = constructLoopbackChain(ebn0, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
+    double snr = SNR_START;
+    while (snr <= SNR_END) {
+        std::cout << "Starting run for SNR of " << snr << std::endl;
+        double noiseVar = getNoiseVarFromSNR(snr);
+        FilterChain loopback = constructLoopbackChain(noiseVar, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
         size_t numBitErrors;
         size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TO_TRANSMIT, numBitErrors);
         double ber = static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput);
         bers[0].push_back(ber);
-        ebnos[0].push_back(ebn0);
-        plot.nplotber(bers, ebnos, titles);
+        ebnos[0].push_back(snr);
         if (numBitsOutput > 0) {
-            std::cout << "EbN0," << ebn0 << ",ERR," << numBitErrors << ",OUT," << numBitsOutput << ",BER," << ber << std::endl;
+            std::cout << "SNR," << snr << ",ERR," << numBitErrors << ",OUT," << numBitsOutput << ",BER," << ber << std::endl;
         } else {
             std::cout << "No bits were output" << std::endl;
         }
+
+        if (ber == 0.0) {
+            std::cout << "Did not see any bit errors. Stopping." << std::endl;
+            break;
+        }
+        if (snr < SNR_COARSE_TRANSITION) {
+            snr += SNR_COARSE_INCREMENT;
+        } else {
+            snr += SNR_FINE_INCREMENT;
+        }
     }
+
+    plot.nplotmulti(bers, ebnos, titles, "SNR (dB)", "BER", "OFDM Loopback (LDPC 802.11n code 1944 bit 1/2 rate)", true);
+    sleep(1);
 
     return 0;
 }
