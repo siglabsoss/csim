@@ -5,7 +5,7 @@
 class FrameSync : public FilterChainElement
 {
 public:
-    FrameSync(size_t N, size_t cpLen);
+    FrameSync(size_t N, size_t cpLen, size_t sampleDelay);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
@@ -23,4 +23,5 @@ private:
     size_t m_totalCount;
     bool m_gotInput;
     filter_io_t m_sample;
+    size_t m_sampleDelay;
 };

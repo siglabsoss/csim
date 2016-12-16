@@ -1,22 +1,15 @@
 #include <filters/frame_sync.hpp>
 #include <cassert>
 
-//There is some variance to the delay, which changes based on the stream of bits flowing through the filters.
-//Right now this number obtained by xcorr in MATLAB based on the data dumps from the
-//filter_loopback app. This will suffice for now since this block is temporary
-
-
-//static size_t constexpr FRAME_SYNC_SAMPLE_DELAY = 1420; //determined empirically for 802.16 code
-static size_t constexpr FRAME_SYNC_SAMPLE_DELAY = 1240; //determined empirically for 802.11n code
-
-FrameSync::FrameSync(size_t N, size_t cpLen) :
+FrameSync::FrameSync(size_t N, size_t cpLen, size_t sampleDelay) :
         m_state(STATE_WAIT_FOR_FRAME),
         m_Nfft(N),
         m_cpLen(cpLen),
         m_sampleCount(0),
         m_totalCount(0),
         m_gotInput(false),
-        m_sample()
+        m_sample(),
+        m_sampleDelay(sampleDelay)
 {
 
 }
@@ -51,7 +44,7 @@ bool FrameSync::output(filter_io_t &data)
             }
             break;
         case STATE_WAIT_FOR_FRAME:
-            if (m_sampleCount > FRAME_SYNC_SAMPLE_DELAY) {
+            if (m_sampleCount > m_sampleDelay) {
                 m_sampleCount = 1;
                 m_state = STATE_DROP_PREFIX;
             }
