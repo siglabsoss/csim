@@ -23,6 +23,8 @@
 
 #include <probes/sample_count_trigger.hpp>
 
+#include <3rd/json/json.h>
+
 static constexpr double MIXER_FREQ = 0.16;
 static constexpr size_t FFT_SIZE = 1024;
 static constexpr size_t CP_SIZE = 100;
@@ -161,21 +163,112 @@ static double getNoiseVarFromSNR(double snr)
     return (1.0 / 1024.0) / (pow(10, snr/10.0));
 }
 
+static bool validateConfiguration(const Json::Value &config)
+{
+    if (!config.isMember("ldpc")    ||
+            !config.isMember("ddc") ||
+            !config.isMember("duc") ||
+            !config.isMember("snr") ||
+            !config.isMember("Hf")
+       )
+    {
+        return false;
+    }
+    const Json::Value &ldpc = config["ldpc"];
+    const Json::Value &ddc  = config["ddc"];
+    const Json::Value &duc  = config["duc"];
+    const Json::Value &snr  = config["snr"];
+
+    if (!ldpc.isMember("H") || !ldpc.isMember("G") || !ldpc.isMember("wordlen")) {
+        return false;
+    }
+
+    if (!ldpc["H"].isString() || !ldpc["G"].isString() || !ldpc["wordlen"].isIntegral()) {
+        return false;
+    }
+
+    if (!ddc.isMember("down2") || !ddc.isMember("down5")) {
+        return false;
+    }
+
+    if (!ddc["down2"].isString() || !ddc["down5"].isString()) {
+        return false;
+    }
+
+    if (!duc.isMember("up2") || !duc.isMember("up5")) {
+        return false;
+    }
+
+    if (!duc["up2"].isString() || !duc["up5"].isString()) {
+        return false;
+    }
+
+    if (!config["Hf"].isString()) {
+        return false;
+    }
+
+    if (!snr.isMember("start")          ||
+            !snr.isMember("end")        ||
+            !snr.isMember("transition") ||
+            !snr.isMember("fine_incr")  ||
+            !snr.isMember("coarse_incr")) {
+        return false;
+    }
+
+    if (!snr["start"].isDouble() ||
+            !snr["end"].isDouble() ||
+            !snr["transition"].isDouble() ||
+            !snr["fine_incr"].isDouble() ||
+            !snr["coarse_incr"].isDouble()
+    )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 int main(int argc, char *argv[])
 {
-    if (argc != 8) {
-        std::cout << "Usage: " << argv[0] << " <ddc_down2_coeffs> <ddc_down5_coeffs> <duc_up2_coeffs> <duc_up5_coeffs> <Hf_file> <ldpc H> <ldpc G>" << std::endl;
+    if (argc != 2) {
+        std::cout << "Usage: " << argv[0] << " <config_file_path>" << std::endl;
         return 1;
     }
 
     std::srand(1473294057+1);
-    std::string down2(argv[1]);
-    std::string down5(argv[2]);
-    std::string up2(argv[3]);
-    std::string up5(argv[4]);
-    std::string Hf(argv[5]);
-    std::string ldpcH(argv[6]);
-    std::string ldpcG(argv[7]);
+
+    Json::Value config;
+    Json::Reader configReader;
+
+    std::ifstream stream;
+    stream.open(argv[1], std::ifstream::in);
+
+    if (stream.is_open() == false) {
+        std::cout << "Error opening configuration file!" << std::endl;
+        return 1;
+    }
+
+    if (configReader.parse(stream, config) == false) {
+        std::cout << "Error reading configuration file!" << std::endl;
+        return 1;
+    }
+
+    if (validateConfiguration(config) == false) {
+        std::cout << "Invalid configuration file" << std::endl;
+        return 1;
+    }
+    const Json::Value &ldpc = config["ldpc"];
+    const Json::Value &ddc  = config["ddc"];
+    const Json::Value &duc  = config["duc"];
+    const Json::Value &snr  = config["snr"];
+
+    std::string down2 = ddc["down2"].asString();
+    std::string down5 = ddc["down5"].asString();
+    std::string up2 = duc["up2"].asString();
+    std::string up5 = duc["up5"].asString();
+    std::string Hf = config["Hf"].asString();
+    std::string ldpcH = ldpc["H"].asString();
+    std::string ldpcG = ldpc["G"].asString();
 
     const plotter &plot = plotter::get();
     std::vector<std::vector<double> > bers(1);
@@ -183,33 +276,31 @@ int main(int argc, char *argv[])
     std::vector<std::string> titles;
     titles.push_back("OFDM Loopback");
 
-    //This needs to change with the LDPC codeword specified from the command line arguments.
-    //Obviously hard coding this here is not ideal but we'll get by for now.
-    constexpr size_t EXPECTED_CODEWORD_LENGTH = 1944;
-    //This frame size passed to the MCS object is chosen to avoid 0 padding
-    constexpr size_t FRAME_SIZE = (EXPECTED_CODEWORD_LENGTH / 2)*4;
     constexpr size_t NUM_FRAMES_TO_TRANSMIT  = 220;
-    constexpr double SNR_START               = -15.0;
-    constexpr double SNR_END                 = -5.0;
-    constexpr double SNR_COARSE_TRANSITION   = -10.0;
-    constexpr double SNR_COARSE_INCREMENT    = 1.0;
-    constexpr double SNR_FINE_INCREMENT      = 0.25;
+    const size_t EXPECTED_CODEWORD_LENGTH = ldpc["wordlen"].asInt();
+    //This frame size passed to the MCS object is chosen to avoid 0 padding
+    const size_t FRAME_SIZE = (EXPECTED_CODEWORD_LENGTH / 2)*4;
+    const double SNR_START               = snr["start"].asDouble();
+    const double SNR_END                 = snr["end"].asDouble();
+    const double SNR_COARSE_TRANSITION   = snr["transition"].asDouble();
+    const double SNR_COARSE_INCREMENT    = snr["coarse_incr"].asDouble();
+    const double SNR_FINE_INCREMENT      = snr["fine_incr"].asDouble();
 
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
 
-    double snr = SNR_START;
-    while (snr <= SNR_END) {
-        std::cout << "Starting run for SNR of " << snr << std::endl;
-        double noiseVar = getNoiseVarFromSNR(snr);
+    double snrVal = SNR_START;
+    while (snrVal <= SNR_END) {
+        std::cout << "Starting run for SNR of " << snrVal << std::endl;
+        double noiseVar = getNoiseVarFromSNR(snrVal);
         FilterChain loopback = constructLoopbackChain(noiseVar, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
         size_t numBitErrors;
         size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TO_TRANSMIT, numBitErrors);
         double ber = static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput);
         bers[0].push_back(ber);
-        ebnos[0].push_back(snr);
+        ebnos[0].push_back(snrVal);
         if (numBitsOutput > 0) {
-            std::cout << "SNR," << snr << ",ERR," << numBitErrors << ",OUT," << numBitsOutput << ",BER," << ber << std::endl;
+            std::cout << "SNR," << snrVal << ",ERR," << numBitErrors << ",OUT," << numBitsOutput << ",BER," << ber << std::endl;
         } else {
             std::cout << "No bits were output" << std::endl;
         }
@@ -218,10 +309,10 @@ int main(int argc, char *argv[])
             std::cout << "Did not see any bit errors. Stopping." << std::endl;
             break;
         }
-        if (snr < SNR_COARSE_TRANSITION) {
-            snr += SNR_COARSE_INCREMENT;
+        if (snrVal < SNR_COARSE_TRANSITION) {
+            snrVal += SNR_COARSE_INCREMENT;
         } else {
-            snr += SNR_FINE_INCREMENT;
+            snrVal += SNR_FINE_INCREMENT;
         }
     }
 
