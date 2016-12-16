@@ -69,7 +69,7 @@ static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitError
     return outputCount;
 }
 
-static FilterChain constructLoopbackChain(double noiseVar, const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
+static FilterChain constructLoopbackChain(double noiseVar, size_t syncDelay, const MCS mcs, const std::string &down2CoeffFile, const std::string &down5CoeffFile,
         const std::string &up2CoeffFile, const std::string &up5CoeffFile, const std::string &HfFile,
         const std::string &ldpcH, const std::string &ldpcG)
 {
@@ -125,7 +125,7 @@ static FilterChain constructLoopbackChain(double noiseVar, const MCS mcs, const 
     FFT * fft                   = new FFT(FFT_SIZE, false);
     fft->setOutputFormat(FFT_OUTPUT_WL, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     DigitalDownConverter *ddc   = new DigitalDownConverter(MIXER_FREQ, down2Coeffs, down5Coeffs);
-    FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE);
+    FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay);
     ChannelEqualizer *ce        = new ChannelEqualizer(Hf);
     Depuncture *depunc          = new Depuncture(mcs);
 
@@ -169,7 +169,8 @@ static bool validateConfiguration(const Json::Value &config)
             !config.isMember("ddc") ||
             !config.isMember("duc") ||
             !config.isMember("snr") ||
-            !config.isMember("Hf")
+            !config.isMember("Hf")  ||
+            !config.isMember("sync")
        )
     {
         return false;
@@ -178,6 +179,7 @@ static bool validateConfiguration(const Json::Value &config)
     const Json::Value &ddc  = config["ddc"];
     const Json::Value &duc  = config["duc"];
     const Json::Value &snr  = config["snr"];
+    const Json::Value &sync  = config["sync"];
 
     if (!ldpc.isMember("H") || !ldpc.isMember("G") || !ldpc.isMember("wordlen")) {
         return false;
@@ -225,6 +227,14 @@ static bool validateConfiguration(const Json::Value &config)
         return false;
     }
 
+    if (!sync.isMember("delay")) {
+        return false;
+    }
+
+    if (!sync["delay"].isIntegral()) {
+        return false;
+    }
+
     return true;
 }
 
@@ -261,6 +271,7 @@ int main(int argc, char *argv[])
     const Json::Value &ddc  = config["ddc"];
     const Json::Value &duc  = config["duc"];
     const Json::Value &snr  = config["snr"];
+    const Json::Value &sync  = config["sync"];
 
     std::string down2 = ddc["down2"].asString();
     std::string down5 = ddc["down5"].asString();
@@ -285,6 +296,7 @@ int main(int argc, char *argv[])
     const double SNR_COARSE_TRANSITION   = snr["transition"].asDouble();
     const double SNR_COARSE_INCREMENT    = snr["coarse_incr"].asDouble();
     const double SNR_FINE_INCREMENT      = snr["fine_incr"].asDouble();
+    const size_t FRAME_SYNC_DELAY        = sync["delay"].asInt();
 
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
 
@@ -292,7 +304,7 @@ int main(int argc, char *argv[])
     while (snrVal <= SNR_END) {
         std::cout << "Starting run for SNR of " << snrVal << std::endl;
         double noiseVar = getNoiseVarFromSNR(snrVal);
-        FilterChain loopback = constructLoopbackChain(noiseVar, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
+        FilterChain loopback = constructLoopbackChain(noiseVar, FRAME_SYNC_DELAY, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
         size_t numBitErrors;
         size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TO_TRANSMIT, numBitErrors);

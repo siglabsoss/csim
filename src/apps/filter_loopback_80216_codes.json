@@ -1,8 +1,8 @@
 {
 	"ldpc": {
-		"H": "../data/ldpc/80211n_H_1944_12.csv",
-		"G": "../data/ldpc/80211n_G_1944_12.csv",
-		"wordlen": 1944
+		"H": "../data/ldpc/80216_H_2304_12.csv",
+		"G": "../data/ldpc/80216_G_2304_12.csv",
+		"wordlen": 2304
 	},
 	"ddc": {
 		"down2": "../data/ddc/coeffs/down2.txt",
@@ -21,6 +21,6 @@
 	},
 	"Hf": "../data/filter_loopback/Hf.csv",
 	"sync": {
-		"delay": 1240
+		"delay": 1420
 	}
 }
