@@ -29,13 +29,11 @@ static constexpr double MIXER_FREQ = 0.16;
 static constexpr size_t FFT_SIZE = 1024;
 static constexpr size_t CP_SIZE = 100;
 static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
-static constexpr size_t OUTPUTS_PER_PRINT_STATEMENT = 10000;
 
 #undef SHOULD_PROBE_FILTERS
 
-static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitErrors)
+static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitErrors, size_t maxBitErr, size_t outputsPerPrint)
 {
-    static constexpr size_t MAX_BIT_ERRORS = 4000;
     filter_io_t sample;
     size_t outputCount = 0;
     size_t printCount = 0;
@@ -55,11 +53,11 @@ static size_t runFilters(FilterChain &chain, size_t numBits, size_t &numBitError
                 outputCount++;
                 if (1 != sample.bit) {
                     numBitErrors++;
-                    if (numBitErrors >=  MAX_BIT_ERRORS) {
+                    if (numBitErrors >=  maxBitErr) {
                         return outputCount;
                     }
                 }
-                if (++printCount >= OUTPUTS_PER_PRINT_STATEMENT) {
+                if (++printCount >= outputsPerPrint) {
                     std::cout << outputCount << " bits sent with " << numBitErrors << " errors." << std::endl;
                     printCount = 0;
                 }
@@ -170,7 +168,8 @@ static bool validateConfiguration(const Json::Value &config)
             !config.isMember("duc") ||
             !config.isMember("snr") ||
             !config.isMember("Hf")  ||
-            !config.isMember("sync")
+            !config.isMember("sync") ||
+            !config.isMember("plot")
        )
     {
         return false;
@@ -180,6 +179,7 @@ static bool validateConfiguration(const Json::Value &config)
     const Json::Value &duc  = config["duc"];
     const Json::Value &snr  = config["snr"];
     const Json::Value &sync  = config["sync"];
+    const Json::Value &plot  = config["plot"];
 
     if (!ldpc.isMember("H") || !ldpc.isMember("G") || !ldpc.isMember("wordlen")) {
         return false;
@@ -213,15 +213,20 @@ static bool validateConfiguration(const Json::Value &config)
             !snr.isMember("end")        ||
             !snr.isMember("transition") ||
             !snr.isMember("fine_incr")  ||
-            !snr.isMember("coarse_incr")) {
+            !snr.isMember("coarse_incr") ||
+            !snr.isMember("max_bit_err") ||
+            !snr.isMember("outputs_per_print")
+            ) {
         return false;
     }
 
-    if (!snr["start"].isDouble() ||
-            !snr["end"].isDouble() ||
+    if (!snr["start"].isDouble()          ||
+            !snr["end"].isDouble()        ||
             !snr["transition"].isDouble() ||
-            !snr["fine_incr"].isDouble() ||
-            !snr["coarse_incr"].isDouble()
+            !snr["fine_incr"].isDouble()  ||
+            !snr["coarse_incr"].isDouble() ||
+            !snr["max_bit_err"].isIntegral() ||
+            !snr["outputs_per_print"].isIntegral()
     )
     {
         return false;
@@ -232,6 +237,10 @@ static bool validateConfiguration(const Json::Value &config)
     }
 
     if (!sync["delay"].isIntegral()) {
+        return false;
+    }
+
+    if (!plot.isMember("title") || !plot["title"].isString()) {
         return false;
     }
 
@@ -264,7 +273,7 @@ int main(int argc, char *argv[])
     }
 
     if (validateConfiguration(config) == false) {
-        std::cout << "Invalid configuration file" << std::endl;
+        std::cout << "Invalid configuration file!" << std::endl;
         return 1;
     }
     const Json::Value &ldpc = config["ldpc"];
@@ -272,6 +281,7 @@ int main(int argc, char *argv[])
     const Json::Value &duc  = config["duc"];
     const Json::Value &snr  = config["snr"];
     const Json::Value &sync  = config["sync"];
+    const Json::Value &plotcfg  = config["plot"];
 
     std::string down2 = ddc["down2"].asString();
     std::string down5 = ddc["down5"].asString();
@@ -280,6 +290,7 @@ int main(int argc, char *argv[])
     std::string Hf = config["Hf"].asString();
     std::string ldpcH = ldpc["H"].asString();
     std::string ldpcG = ldpc["G"].asString();
+    std::string title = plotcfg["title"].asString();
 
     const plotter &plot = plotter::get();
     std::vector<std::vector<double> > bers(1);
@@ -297,6 +308,8 @@ int main(int argc, char *argv[])
     const double SNR_COARSE_INCREMENT    = snr["coarse_incr"].asDouble();
     const double SNR_FINE_INCREMENT      = snr["fine_incr"].asDouble();
     const size_t FRAME_SYNC_DELAY        = sync["delay"].asInt();
+    const size_t MAX_BIT_ERRORS          = snr["max_bit_err"].asInt();
+    const size_t OUTPUTS_PER_PRINT       = snr["outputs_per_print"].asInt();
 
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
 
@@ -307,7 +320,7 @@ int main(int argc, char *argv[])
         FilterChain loopback = constructLoopbackChain(noiseVar, FRAME_SYNC_DELAY, mcs, down2, down5, up2, up5, Hf, ldpcH, ldpcG);
 
         size_t numBitErrors;
-        size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TO_TRANSMIT, numBitErrors);
+        size_t numBitsOutput = runFilters(loopback, FRAME_SIZE*NUM_FRAMES_TO_TRANSMIT, numBitErrors, MAX_BIT_ERRORS, OUTPUTS_PER_PRINT);
         double ber = static_cast<double>(numBitErrors) / static_cast<double>(numBitsOutput);
         bers[0].push_back(ber);
         ebnos[0].push_back(snrVal);
@@ -328,7 +341,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    plot.nplotmulti(bers, ebnos, titles, "SNR (dB)", "BER", "OFDM Loopback (LDPC 802.11n code 1944 bit 1/2 rate)", true);
+    plot.nplotmulti(bers, ebnos, titles, "SNR (dB)", "BER", title, true);
     sleep(1);
 
     return 0;

@@ -17,10 +17,15 @@
 		"end": -5.0,
 		"transition": -10.0,
 		"fine_incr": 0.25,
-		"coarse_incr": 1.0
+		"coarse_incr": 1.0,
+		"max_bit_err": 4000,
+		"outputs_per_print": 10000
 	},
 	"Hf": "../data/filter_loopback/Hf.csv",
 	"sync": {
 		"delay": 1420
+	},
+	"plot": {
+		"title": "OFDM Loopback (LDPC 802.16 code 2304 bit 1/2 rate)"
 	}
 }
