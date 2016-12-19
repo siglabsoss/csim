@@ -37,8 +37,7 @@ Below is an example JSON configuration file (with comments added for clarificati
 {
 	"ldpc": {
 		"H": "../data/ldpc/80216_H_2304_12.csv", /* relative path to LDPC H matrix file */
-		"G": "../data/ldpc/80216_G_2304_12.csv", /* relative path to LDPC G matrix file */
-		"wordlen": 2304 /* codeword length of given matrices */
+		"G": "../data/ldpc/80216_G_2304_12.csv" /* relative path to LDPC G matrix file */
 	},
 	"ddc": {
 		"down2": "../data/ddc/coeffs/down2.txt", /* relative path to digital down converter's down-by-2 FIR coefficients */
@@ -53,11 +52,18 @@ Below is an example JSON configuration file (with comments added for clarificati
 		"end": -5.0, /* final SNR vlaue in dB for BER tests */
 		"transition": -10.0, /* SNR value to transition from coarse to fine incremements */
 		"fine_incr": 0.25, /* SNR increment value when performing fine increments */
-		"coarse_incr": 1.0 /* SNR increment value when performing coarse increments */
+		"coarse_incr": 1.0, /* SNR increment value when performing coarse increments */
+		"max_bit_err"           : 4000, /* If this number of bit errors is hit, move on to next SNR */
+		"outputs_per_print"     : 10000, /* Print current number of bit errors every 'x' outputs */
+		"num_frames_to_send"    : 220, /* The number of frames to send before moving on to the next SNR */
+		"frame_size"            : 4608 /* The size of a frame carefully chosen to be integer multiple of codeword size * code rate */
 	},
 	"Hf": "../data/filter_loopback/Hf.csv", /* relative path to CSV file containing H(f), which would be 1024 complex values used to reverse the linear phase delay effects of the tx/rx chains */
 	"sync": {
 		"delay": 1420 /* the number of time domain input samples to skip initially. this is the number of samples it takes for the time domain signal to propagate through. */
+	},
+	"plot": {
+			"title": "OFDM Loopback (LDPC 802.16 code 2304 bit 1/2 rate)"
 	}
 }
 ```
