@@ -1,31 +1,32 @@
 {
-	"ldpc": {
-		"H": "../data/ldpc/80211n_H_1944_12.csv",
-		"G": "../data/ldpc/80211n_G_1944_12.csv",
-		"wordlen": 1944
-	},
-	"ddc": {
-		"down2": "../data/ddc/coeffs/down2.txt",
-		"down5": "../data/ddc/coeffs/down5.txt"
-	},
-	"duc": {
-		"up2": "../data/ddc/coeffs/up2.txt",
-		"up5": "../data/ddc/coeffs/up5.txt"
-	},
-	"snr": {
-		"start": -15.0,
-		"end": -5.0,
-		"transition": -10.0,
-		"fine_incr": 0.25,
-		"coarse_incr": 1.0,
-		"max_bit_err": 4000,
-		"outputs_per_print": 10000
-	},
-	"Hf": "../data/filter_loopback/Hf.csv",
-	"sync": {
-		"delay": 1240
-	},
-	"plot": {
-		"title": "OFDM Loopback (LDPC 802.11n code 1944 bit 1/2 rate)"
-	}
+    "ldpc": {
+        "H": "../data/ldpc/80211n_H_1944_12.csv",
+        "G": "../data/ldpc/80211n_G_1944_12.csv"
+    },
+    "ddc": {
+        "down2": "../data/ddc/coeffs/down2.txt",
+        "down5": "../data/ddc/coeffs/down5.txt"
+    },
+    "duc": {
+        "up2": "../data/ddc/coeffs/up2.txt",
+        "up5": "../data/ddc/coeffs/up5.txt"
+    },
+    "snr": {
+        "start"                 : -15.0,
+        "end"                   : -5.0,
+        "transition"            : -10.0,
+        "fine_incr"             : 0.25,
+        "coarse_incr"           : 1.0,
+        "max_bit_err"           : 4000,
+        "outputs_per_print"     : 10000,
+        "num_frames_to_send"    : 220,
+        "frame_size"            : 3888
+    },
+    "Hf": "../data/filter_loopback/Hf.csv",
+    "sync": {
+        "delay": 1240
+    },
+    "plot": {
+        "title": "OFDM Loopback (LDPC 802.11n code 1944 bit 1/2 rate)"
+    }
 }

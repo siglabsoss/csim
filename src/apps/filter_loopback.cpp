@@ -181,11 +181,11 @@ static bool validateConfiguration(const Json::Value &config)
     const Json::Value &sync  = config["sync"];
     const Json::Value &plot  = config["plot"];
 
-    if (!ldpc.isMember("H") || !ldpc.isMember("G") || !ldpc.isMember("wordlen")) {
+    if (!ldpc.isMember("H") || !ldpc.isMember("G")) {
         return false;
     }
 
-    if (!ldpc["H"].isString() || !ldpc["G"].isString() || !ldpc["wordlen"].isIntegral()) {
+    if (!ldpc["H"].isString() || !ldpc["G"].isString()) {
         return false;
     }
 
@@ -215,7 +215,9 @@ static bool validateConfiguration(const Json::Value &config)
             !snr.isMember("fine_incr")  ||
             !snr.isMember("coarse_incr") ||
             !snr.isMember("max_bit_err") ||
-            !snr.isMember("outputs_per_print")
+            !snr.isMember("outputs_per_print") ||
+            !snr.isMember("num_frames_to_send") ||
+            !snr.isMember("frame_size")
             ) {
         return false;
     }
@@ -226,7 +228,9 @@ static bool validateConfiguration(const Json::Value &config)
             !snr["fine_incr"].isDouble()  ||
             !snr["coarse_incr"].isDouble() ||
             !snr["max_bit_err"].isIntegral() ||
-            !snr["outputs_per_print"].isIntegral()
+            !snr["outputs_per_print"].isIntegral() ||
+            !snr["num_frames_to_send"].isIntegral() ||
+            !snr["frame_size"].isIntegral()
     )
     {
         return false;
@@ -298,20 +302,23 @@ int main(int argc, char *argv[])
     std::vector<std::string> titles;
     titles.push_back("OFDM Loopback");
 
-    constexpr size_t NUM_FRAMES_TO_TRANSMIT  = 220;
-    const size_t EXPECTED_CODEWORD_LENGTH = ldpc["wordlen"].asInt();
     //This frame size passed to the MCS object is chosen to avoid 0 padding
-    const size_t FRAME_SIZE = (EXPECTED_CODEWORD_LENGTH / 2)*4;
+    const size_t NUM_FRAMES_TO_TRANSMIT  = snr["num_frames_to_send"].asInt();
+    const size_t FRAME_SIZE              = snr["frame_size"].asInt();
     const double SNR_START               = snr["start"].asDouble();
     const double SNR_END                 = snr["end"].asDouble();
     const double SNR_COARSE_TRANSITION   = snr["transition"].asDouble();
     const double SNR_COARSE_INCREMENT    = snr["coarse_incr"].asDouble();
     const double SNR_FINE_INCREMENT      = snr["fine_incr"].asDouble();
-    const size_t FRAME_SYNC_DELAY        = sync["delay"].asInt();
     const size_t MAX_BIT_ERRORS          = snr["max_bit_err"].asInt();
     const size_t OUTPUTS_PER_PRINT       = snr["outputs_per_print"].asInt();
 
+    const size_t FRAME_SYNC_DELAY        = sync["delay"].asInt();
+
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
+
+    std::cout << "Testing SNR of " << SNR_START << " to " << SNR_END << " with coarse increments of " << SNR_COARSE_INCREMENT << " and fine incrememnts of " << SNR_FINE_INCREMENT << std::endl;
+    std::cout << "Counting up to " << MAX_BIT_ERRORS << " bit errors per SNR or " << NUM_FRAMES_TO_TRANSMIT << " frames, " << FRAME_SIZE << " bits long" << std::endl;
 
     double snrVal = SNR_START;
     while (snrVal <= SNR_END) {
