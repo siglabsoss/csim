@@ -156,9 +156,17 @@ static FilterChain constructLoopbackChain(double noiseVar, size_t syncDelay, con
 
 static double getNoiseVarFromSNR(double snr)
 {
-    //determine noise power from desired signal to noise ratio
+    //We need to determine noise power from desired signal to noise ratio.
+    //We are defining noise power to be the noise power as observed on the
+    //receive chain after processing gains
     //some relevant info here: http://read.pudn.com/downloads152/doc/comm/664022/ber.pdf
-    return (1.0 / 1024.0) / (pow(10, snr/10.0));
+
+    //We are applying this noise in between the DUC/DDC. Because the DUC actually has a
+    //gain of 0.5, we account for that with a 3dB offset. In addition, because this noise
+    //is applied before the ~10dB processing gain that comes from the DDC's bandpass, we
+    //account for that 10dB as well.
+    snr += +3.0 + -10.0;
+    return (1.0 / static_cast<double>(FFT_SIZE)) / (pow(10, snr/10.0));
 }
 
 static bool validateConfiguration(const Json::Value &config)
@@ -302,7 +310,6 @@ int main(int argc, char *argv[])
     std::vector<std::string> titles;
     titles.push_back("OFDM Loopback");
 
-    //This frame size passed to the MCS object is chosen to avoid 0 padding
     const size_t NUM_FRAMES_TO_TRANSMIT  = snr["num_frames_to_send"].asInt();
     const size_t FRAME_SIZE              = snr["frame_size"].asInt();
     const double SNR_START               = snr["start"].asDouble();
