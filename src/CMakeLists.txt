@@ -42,19 +42,28 @@ endif( ZEROMQ_FOUND )
 
 # --- End 0MQ ---
 
+ 
+
+option(USE_PYTHON_BINDINGS "USE_PYTHON_BINDINGS" ON)
 
 # ================ boost.python ================
-FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs)
-if(APPLE AND ${PYTHON_VERSION_MAJOR} EQUAL 3)
-    FIND_PACKAGE(Boost COMPONENTS python3)
-else()
-    FIND_PACKAGE(Boost COMPONENTS python)
-endif()
+if(USE_PYTHON_BINDINGS)
+	message(Python Bindings Enabled)
+	add_definitions(-DUSE_PYTHON_BINDINGS)  # this defines a macro for our c files
+	FIND_PACKAGE(PythonInterp)
+	FIND_PACKAGE(PythonLibs)
+	if(APPLE AND ${PYTHON_VERSION_MAJOR} EQUAL 3)
+	    FIND_PACKAGE(Boost COMPONENTS python3)
+	else()
+	    FIND_PACKAGE(Boost COMPONENTS python)
+	endif()
 
-#ENABLE_TESTING()
-INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
-LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES}) # Deprecated but so convenient!
+	#ENABLE_TESTING()
+	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+	LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES}) # Deprecated but so convenient!
+else()
+	message(Skipping Python Bindings)
+endif()
 # ================ boost.python ================
 
 

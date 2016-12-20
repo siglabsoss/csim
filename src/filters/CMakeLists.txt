@@ -20,8 +20,24 @@ set(SIGFILTERS_SOURCES
     channel_equalizer.cpp
     puncture.cpp
     depuncture.cpp
+    boost_pywrap.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
 add_library(sigfilters $<TARGET_OBJECTS:sigfiltersobj>)
 target_link_libraries(sigfilters sigutils sigcore)
+
+
+
+
+
+if(USE_PYTHON_BINDINGS)
+	#PYTHON_ADD_MODULE(inheritance ddc.hpp)
+	#FILE(COPY inheritance.py DESTINATION .)
+	#ADD_TEST(05-Inheritance inheritance.py)
+
+
+	PYTHON_ADD_MODULE(libboost_pywrap boost_pywrap.cpp)
+	#ADD_LIBRARY(boost_pywrap SHARED boost_pywrap.cpp)
+	TARGET_LINK_LIBRARIES(libboost_pywrap ${Boost_LIBRARIES})
+endif()
