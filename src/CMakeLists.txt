@@ -48,7 +48,7 @@ option(USE_PYTHON_BINDINGS "USE_PYTHON_BINDINGS" ON)
 
 # ================ boost.python ================
 if(USE_PYTHON_BINDINGS)
-	message(Python Bindings Enabled)
+	message( STATUS "Python Bindings: Enabled")
 	add_definitions(-DUSE_PYTHON_BINDINGS)  # this defines a macro for our c files
 	FIND_PACKAGE(PythonInterp)
 	FIND_PACKAGE(PythonLibs)
@@ -62,7 +62,7 @@ if(USE_PYTHON_BINDINGS)
 	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
 	LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES}) # Deprecated but so convenient!
 else()
-	message(Skipping Python Bindings)
+	message( STATUS "Python Bindings: Disabled")
 endif()
 # ================ boost.python ================
 
