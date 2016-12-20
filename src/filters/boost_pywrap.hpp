@@ -1,3 +1,4 @@
+#pragma once
 #include <core/filter_chain.hpp>
 #include <core/logger.hpp>
 
@@ -22,13 +23,24 @@
 #include <utils/ldpc_utils.hpp>
 
 #include <probes/sample_count_trigger.hpp>
+#include <filters/ddc_duc/duc.hpp>
 
 #include <3rd/json/json.h>
 
 
-//class PyWrap(){
-//
-//};
+class PyWrap{
+	int m_val;
+public:
+	void set(int);
+	int get(void);
+	PyWrap(int);
+
+};
+
+
+class WrapDigitalUpConverter{
+
+};
 
 void unboundd(void)
 {
@@ -44,6 +56,17 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE(libboost_pywrap)
 {
     def("unboundd", unboundd);
+
+    class_<PyWrap>("PyWrap", init<int>())
+            .def("get", &PyWrap::get)
+            .def("set", &PyWrap::set)
+        ;
+
+//    class_<DigitalUpConverter>("DigitalUpConverter")
+////			.def("get", &PyWrap::get)
+////			.def("set", &PyWrap::set)
+//		;
+
 }
 
 #endif
