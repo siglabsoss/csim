@@ -27,25 +27,35 @@
 
 #include <3rd/json/json.h>
 
+class PyWrap
+{
 
-class PyWrap{
-	int m_val;
 public:
 	void set(int);
 	int get(void);
 	PyWrap(int);
-
+private:
+	int m_val;
 };
 
 
-class WrapDigitalUpConverter{
-
+class WrapDigitalUpConverter
+{
+public:
+	WrapDigitalUpConverter();
+//	bool input(const filter_io_t &data);
+//	bool output(filter_io_t &data);
+	void tick(void);
+private:
+	DigitalUpConverter *m_duc;
+	SLFixPoint junk; // we need to use these types to make sure they are exported to python
+	filter_io_t junk1;
+	//FilterChain *m_chain;
 };
 
 void unboundd(void)
 {
-	using namespace std;
-	cout << "from inside" << endl;
+	std::cout << "from inside" << std::endl;
 }
 
 
@@ -62,11 +72,9 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
             .def("set", &PyWrap::set)
         ;
 
-//    class_<DigitalUpConverter>("DigitalUpConverter")
-////			.def("get", &PyWrap::get)
-////			.def("set", &PyWrap::set)
-//		;
-
+    class_<WrapDigitalUpConverter>("WrapDigitalUpConverter", init<>())
+    		.def("tick", &WrapDigitalUpConverter::tick)
+		;
 }
 
 #endif
