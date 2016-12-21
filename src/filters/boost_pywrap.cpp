@@ -35,3 +35,7 @@ void WrapDigitalUpConverter::tick()
 	m_duc->tick();
 }
 
+bool WrapDigitalUpConverter::input(const filter_io_t &data)
+{
+	return false;
+}

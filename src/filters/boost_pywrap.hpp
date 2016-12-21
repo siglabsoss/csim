@@ -26,6 +26,7 @@
 #include <filters/ddc_duc/duc.hpp>
 
 #include <3rd/json/json.h>
+#include <cstdint>
 
 class PyWrap
 {
@@ -43,7 +44,7 @@ class WrapDigitalUpConverter
 {
 public:
 	WrapDigitalUpConverter();
-//	bool input(const filter_io_t &data);
+	bool input(const filter_io_t &data);
 //	bool output(filter_io_t &data);
 	void tick(void);
 private:
@@ -58,6 +59,17 @@ void unboundd(void)
 	std::cout << "from inside" << std::endl;
 }
 
+double real(ComplexDouble in)
+{
+	return in.real();
+}
+
+double imag(ComplexDouble in)
+{
+	return in.imag();
+}
+
+
 
 #ifdef USE_PYTHON_BINDINGS
 #include <boost/python.hpp>
@@ -66,14 +78,26 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE(libboost_pywrap)
 {
     def("unboundd", unboundd);
+    def("real", real);
+    def("imag", imag);
 
     class_<PyWrap>("PyWrap", init<int>())
             .def("get", &PyWrap::get)
             .def("set", &PyWrap::set)
         ;
 
+    class_<ComplexDouble>("ComplexDouble", init<double,double>())
+    		;
+
+    class_<filter_io_t>("filter_io_t", init<>())
+			.def(init<uint8_t>())
+			.def(init<ComplexDouble>())
+    		.def("toComplexDouble", &filter_io_t::toComplexDouble)
+    		;
+
     class_<WrapDigitalUpConverter>("WrapDigitalUpConverter", init<>())
     		.def("tick", &WrapDigitalUpConverter::tick)
+    		.def("input", &WrapDigitalUpConverter::input)
 		;
 }
 
