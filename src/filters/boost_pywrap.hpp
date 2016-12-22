@@ -65,6 +65,21 @@ private:
 	NoiseElement *m_wrap;
 };
 
+class WrapFilterChain
+{
+public:
+	WrapFilterChain();
+	bool input(const filter_io_t &data);
+	bool output(filter_io_t &data);
+	void tick(void);
+private:
+	FilterChain *m_wrap;
+	FilterChainElement *m_filters[10];
+	void add(FilterChainElement &rhs);
+	NoiseElement *m_wrap1;
+	NoiseElement *m_wrap2;
+};
+
 void unboundd(void)
 {
 	std::cout << "from inside" << std::endl;
@@ -157,13 +172,17 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
                 .value("OVERFLOW_SATURATE", SLFixPoint::overflow_mode_t::OVERFLOW_SATURATE)
 			;
 
+    class_<WrapFilterChain>("WrapFilterChain")
+			.def("tick", &WrapFilterChain::tick)
+			.def("input", &WrapFilterChain::input)
+			.def("output", &WrapFilterChain::output)
+		;
 
 
     class_<WrapDigitalUpConverter>("WrapDigitalUpConverter", init<>())
     		.def("tick", &WrapDigitalUpConverter::tick)
     		.def("input", &WrapDigitalUpConverter::input)
 		;
-
 
 
     class_<WrapNoiseElement>("WrapNoiseElement", init<double>())

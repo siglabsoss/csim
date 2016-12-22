@@ -79,5 +79,35 @@ bool WrapNoiseElement::output(filter_io_t &data)
 
 
 
+WrapFilterChain::WrapFilterChain()
+{
+	m_wrap = new FilterChain();
+
+	m_wrap1 = new NoiseElement(0.000);
+	m_wrap2 = new NoiseElement(0.000);
+
+
+	*m_wrap = *m_wrap1+*m_wrap2;
+}
+
+
+void WrapFilterChain::tick()
+{
+	m_wrap->tick();
+}
+
+bool WrapFilterChain::input(const filter_io_t &data)
+{
+	return m_wrap->input(data);
+}
+
+bool WrapFilterChain::output(filter_io_t &data)
+{
+	return m_wrap->output(data);
+}
+
+
+
+
 
 
