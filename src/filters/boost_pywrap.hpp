@@ -103,6 +103,17 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
     		.def("tick", &WrapDigitalUpConverter::tick)
     		.def("input", &WrapDigitalUpConverter::input)
 		;
+
+    enum_<SLFixPoint::quant_mode_t>("SLFixPoint_quant_mode_t")
+            .value("QUANT_TRUNCATE", SLFixPoint::quant_mode_t::QUANT_TRUNCATE)
+            .value("QUANT_RND_HALF_UP", SLFixPoint::quant_mode_t::QUANT_RND_HALF_UP)
+            ;
+
+    enum_<SLFixPoint::overflow_mode_t>("SLFixPoint_overflow_mode_t")
+                .value("OVERFLOW_WRAP_AROUND", SLFixPoint::overflow_mode_t::OVERFLOW_WRAP_AROUND)
+                .value("OVERFLOW_SATURATE", SLFixPoint::overflow_mode_t::OVERFLOW_SATURATE)
+			;
+
 }
 
 #endif
