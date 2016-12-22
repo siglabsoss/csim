@@ -8,7 +8,7 @@ SLFixComplex::SLFixComplex() :
 
 }
 
-SLFixComplex::SLFixComplex(size_t wordLength, size_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode) :
+SLFixComplex::SLFixComplex(size_t wordLength, ssize_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode) :
     m_real(wordLength, intLength, quantMode, overflowMode),
     m_imag(wordLength, intLength, quantMode, overflowMode)
 {
@@ -133,13 +133,13 @@ void SLFixComplex::shiftRadixLeft(size_t shiftAmount)
     this->m_real.shiftRadixLeft(shiftAmount);
 }
 
-void SLFixComplex::setFormat(size_t wordLength, size_t intLength)
+void SLFixComplex::setFormat(size_t wordLength, ssize_t intLength)
 {
     m_real.setFormat(wordLength, intLength);
     m_imag.setFormat(wordLength, intLength);
 }
 
-void SLFixComplex::setFormat(size_t wordLength, size_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode)
+void SLFixComplex::setFormat(size_t wordLength, ssize_t intLength, SLFixPoint::quant_mode_t quantMode, SLFixPoint::overflow_mode_t overflowMode)
 {
     m_real.setFormat(wordLength, intLength, quantMode, overflowMode);
     m_imag.setFormat(wordLength, intLength, quantMode, overflowMode);
