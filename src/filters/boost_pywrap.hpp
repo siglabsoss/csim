@@ -26,6 +26,9 @@
 #include <filters/ddc_duc/duc.hpp>
 
 #include <3rd/json/json.h>
+
+#include <mathlib/complex_gaussian_noise.hpp>
+
 #include <cstdint>
 
 class PyWrap
@@ -45,11 +48,21 @@ class WrapDigitalUpConverter
 public:
 	WrapDigitalUpConverter();
 	bool input(const filter_io_t &data);
-//	bool output(filter_io_t &data);
+	bool output(filter_io_t &data);
 	void tick(void);
 private:
 	DigitalUpConverter *m_duc;
-	//FilterChain *m_chain;
+};
+
+class WrapNoiseElement
+{
+public:
+	WrapNoiseElement(double variance);
+	bool input(const filter_io_t &data);
+	bool output(filter_io_t &data);
+	void tick(void);
+private:
+	NoiseElement *m_wrap;
 };
 
 void unboundd(void)
@@ -84,13 +97,48 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
     		.def("imag", imag_setter)
     		;
 
+    class_<ComplexGaussianNoise>("ComplexGaussianNoise", init<>())
+    		.def(init<double>())
+    		.def("getNext", &ComplexGaussianNoise::getNext)
+    		;
+
     // overrides require making a function pointer like this
-    void (SLFixPoint::*set_format_full)(size_t, ssize_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t) = &SLFixPoint::setFormat;
+    void (SLFixPoint::*slfp_set_format_full)(size_t, ssize_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t) = &SLFixPoint::setFormat;
+
+    double (SLFixPoint::*slfp_to_double)(void) const = &SLFixPoint::to_double;
 
     class_<SLFixPoint>("SLFixPoint", init<>())
     		.def(init<size_t, ssize_t>())
     		.def(init<size_t, ssize_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t>())
-    		.def("setFormat", set_format_full)
+    		.def("setFormat", slfp_set_format_full)
+    		.def("to_double", slfp_to_double)
+    		;
+
+    // getters
+    SLFixPoint (SLFixComplex::*slfc_real_getter)() const = &SLFixComplex::real;
+    void (SLFixComplex::*slfc_real_slfp_setter)(const SLFixPoint&) = &SLFixComplex::real;
+    void (SLFixComplex::*slfc_real_double_setter)(double) = &SLFixComplex::real;
+
+    // setters
+    SLFixPoint (SLFixComplex::*slfc_imag_getter)() const = &SLFixComplex::imag;
+    void (SLFixComplex::*slfc_imag_slfp_setter)(const SLFixPoint&) = &SLFixComplex::imag;
+    void (SLFixComplex::*slfc_imag_double_setter)(double) = &SLFixComplex::imag;
+
+    // format
+    void (SLFixComplex::*slfc_set_format_full)(size_t, size_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t) = &SLFixComplex::setFormat;
+
+    // to complex double
+    ComplexDouble (SLFixComplex::*slfc_to_complex_double)(void) const = &SLFixComplex::toComplexDouble;
+
+    class_<SLFixComplex>("SLFixComplex", init<>())
+			.def("real", slfc_real_getter)
+			.def("real", slfc_real_slfp_setter)
+			.def("real", slfc_real_double_setter)
+			.def("imag", slfc_imag_getter)
+			.def("imag", slfc_imag_slfp_setter)
+			.def("imag", slfc_imag_double_setter)
+			.def("setFormat", slfc_set_format_full)
+			.def("toComplexDouble", slfc_to_complex_double)
     		;
 
     class_<filter_io_t>("filter_io_t", init<>())
@@ -98,11 +146,6 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
 			.def(init<ComplexDouble>())
     		.def("toComplexDouble", &filter_io_t::toComplexDouble)
     		;
-
-    class_<WrapDigitalUpConverter>("WrapDigitalUpConverter", init<>())
-    		.def("tick", &WrapDigitalUpConverter::tick)
-    		.def("input", &WrapDigitalUpConverter::input)
-		;
 
     enum_<SLFixPoint::quant_mode_t>("SLFixPoint_quant_mode_t")
             .value("QUANT_TRUNCATE", SLFixPoint::quant_mode_t::QUANT_TRUNCATE)
@@ -114,6 +157,20 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
                 .value("OVERFLOW_SATURATE", SLFixPoint::overflow_mode_t::OVERFLOW_SATURATE)
 			;
 
+
+
+    class_<WrapDigitalUpConverter>("WrapDigitalUpConverter", init<>())
+    		.def("tick", &WrapDigitalUpConverter::tick)
+    		.def("input", &WrapDigitalUpConverter::input)
+		;
+
+
+
+    class_<WrapNoiseElement>("WrapNoiseElement", init<double>())
+    		.def("tick", &WrapNoiseElement::tick)
+    		.def("input", &WrapNoiseElement::input)
+    		.def("output", &WrapNoiseElement::output)
+		;
 }
 
 #endif

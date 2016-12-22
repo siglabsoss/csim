@@ -39,3 +39,45 @@ bool WrapDigitalUpConverter::input(const filter_io_t &data)
 {
 	return m_duc->input(data);
 }
+
+bool WrapDigitalUpConverter::output(filter_io_t &data)
+{
+	return m_duc->output(data);
+}
+
+
+
+
+
+
+
+
+
+
+WrapNoiseElement::WrapNoiseElement(double variance)
+{
+	m_wrap = new NoiseElement(variance);
+}
+
+void WrapNoiseElement::tick()
+{
+	m_wrap->tick();
+}
+
+bool WrapNoiseElement::input(const filter_io_t &data)
+{
+	return m_wrap->input(data);
+}
+
+bool WrapNoiseElement::output(filter_io_t &data)
+{
+	return m_wrap->output(data);
+}
+
+
+
+
+
+
+
+
