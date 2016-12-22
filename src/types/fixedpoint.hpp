@@ -41,7 +41,7 @@ public:
     virtual SLFixPoint &operator=(double val);
     virtual SLFixPoint &operator=(uint64_t val);
 
-    void set(double val);
+    void     set(double val);
 
 
     void     shiftRadixRight(size_t shiftAmount);

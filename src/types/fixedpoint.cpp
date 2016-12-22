@@ -270,34 +270,7 @@ void SLFixPoint::set(double val)
 
 SLFixPoint &SLFixPoint::operator=(double val)
 {
-    assert(m_formatSet);
-    this->m_value = static_cast<long long>(val * (1ull << m_fl));
-
-    bool wasPositive = (val >= 0);
-    bool isNegative = (this->m_value & (1ull << (this->m_wl - 1)));
-
-    if (this->m_value == 0 && val != 0.0) {
-        underflowCount++; //value was too small to represent with current scaling format
-    }
-    bool excessBits = hasExcessBits(m_value);
-    //if the floating point value is too small, the scaled integer may be 0, in which case
-    //a "sign change" is a red herring and not a real overflow
-    if (this->m_value != 0) {
-        if ( (wasPositive && isNegative) || (!wasPositive && !isNegative) || excessBits) {
-            handleOverflow();
-            switch(m_overflowMode) {
-                case OVERFLOW_SATURATE:
-                {
-                    this->m_value = getSaturatedValue(!wasPositive);
-                    break;
-                }
-                case OVERFLOW_WRAP_AROUND:
-                default:
-                    break;
-            }
-        }
-    }
-    maskAndSignExtend();
+    set(val);
     return *this;
 }
 

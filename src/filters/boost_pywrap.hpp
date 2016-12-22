@@ -122,11 +122,14 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
 
     double (SLFixPoint::*slfp_to_double)(void) const = &SLFixPoint::to_double;
 
+    void (SLFixPoint::*slfp_set)(double) = &SLFixPoint::set;
+
     class_<SLFixPoint>("SLFixPoint", init<>())
     		.def(init<size_t, ssize_t>())
     		.def(init<size_t, ssize_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t>())
     		.def("setFormat", slfp_set_format_full)
     		.def("to_double", slfp_to_double)
+    		.def("set", slfp_set)
     		;
 
     // getters
