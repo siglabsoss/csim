@@ -140,7 +140,7 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
     void (SLFixComplex::*slfc_imag_double_setter)(double) = &SLFixComplex::imag;
 
     // format
-    void (SLFixComplex::*slfc_set_format_full)(size_t, size_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t) = &SLFixComplex::setFormat;
+    void (SLFixComplex::*slfc_set_format_full)(size_t, ssize_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t) = &SLFixComplex::setFormat;
 
     // to complex double
     ComplexDouble (SLFixComplex::*slfc_to_complex_double)(void) const = &SLFixComplex::toComplexDouble;
