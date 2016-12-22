@@ -49,8 +49,6 @@ public:
 	void tick(void);
 private:
 	DigitalUpConverter *m_duc;
-	SLFixPoint junk; // we need to use these types to make sure they are exported to python
-	filter_io_t junk1;
 	//FilterChain *m_chain;
 };
 
@@ -58,17 +56,6 @@ void unboundd(void)
 {
 	std::cout << "from inside" << std::endl;
 }
-
-double real(ComplexDouble in)
-{
-	return in.real();
-}
-
-double imag(ComplexDouble in)
-{
-	return in.imag();
-}
-
 
 
 #ifdef USE_PYTHON_BINDINGS
@@ -78,15 +65,32 @@ using namespace boost::python;
 BOOST_PYTHON_MODULE(libboost_pywrap)
 {
     def("unboundd", unboundd);
-    def("real", real);
-    def("imag", imag);
 
     class_<PyWrap>("PyWrap", init<int>())
             .def("get", &PyWrap::get)
             .def("set", &PyWrap::set)
         ;
 
+    double (ComplexDouble::*real_getter)() const = &ComplexDouble::real;
+    void (ComplexDouble::*real_setter)(double) = &ComplexDouble::real;
+
+    double (ComplexDouble::*imag_getter)() const = &ComplexDouble::imag;
+    void (ComplexDouble::*imag_setter)(double) = &ComplexDouble::imag;
+
     class_<ComplexDouble>("ComplexDouble", init<double,double>())
+    		.def("real", real_getter)
+    		.def("real", real_setter)
+    		.def("imag", imag_getter)
+    		.def("imag", imag_setter)
+    		;
+
+    // overrides require making a function pointer like this
+    void (SLFixPoint::*set_format_full)(size_t, ssize_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t) = &SLFixPoint::setFormat;
+
+    class_<SLFixPoint>("SLFixPoint", init<>())
+    		.def(init<size_t, ssize_t>())
+    		.def(init<size_t, ssize_t, SLFixPoint::quant_mode_t, SLFixPoint::overflow_mode_t>())
+    		.def("setFormat", set_format_full)
     		;
 
     class_<filter_io_t>("filter_io_t", init<>())
