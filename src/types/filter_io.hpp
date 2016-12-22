@@ -29,6 +29,7 @@ struct filter_io_t
     filter_io_t(const filter_io_t &other);
     filter_io_t(const uint8_t in);
     filter_io_t(const ComplexDouble in);
+    filter_io_t(const SLFixComplex in);
 
     filter_io_t & operator=(const filter_io_t &rhs);
     filter_io_t & operator=(const ComplexDouble &rhs);

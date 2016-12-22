@@ -47,6 +47,13 @@ filter_io_t::filter_io_t(const uint8_t in) :
 	this->byte = in;
 }
 
+filter_io_t::filter_io_t(const SLFixComplex in) :
+		type(IO_TYPE_COMPLEX_FIXPOINT)
+{
+	this->fc.setFormat(in);
+	this->fc = in;
+}
+
 
 
 filter_io_t::filter_io_t(const filter_io_t &other) :
