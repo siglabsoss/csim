@@ -1,6 +1,7 @@
 #include <filters/subcarrier_mapper.hpp>
 
 #include <cassert>
+#include <random>
 
 SubcarrierMapper::SubcarrierMapper(MCS mcs) :
         FilterChainElement("SubcarrierMapper", mcs.getNumSubCarriers() * 2),
@@ -25,8 +26,18 @@ void SubcarrierMapper::initializePreamble()
         m_longPreamble[i].setFormat(FFT_INPUT_FORMAT);
         m_longPreamble[i].set(0.0, 0.0);
     }
-
-    //XXX load up the appropriate subchannels with the pseudonoise patterns
+    auto g = std::bind(std::uniform_int_distribution<unsigned>(0,1), std::mt19937());
+    for (size_t i = 0; i < (preambleSize >> 2); ++i) {
+        int val = (g() << 1) - 1;
+        m_shortPreamble[i*4].real(static_cast<double>(val));
+    }
+    for (size_t i = 0; i < (preambleSize >> 1); ++i) {
+        int val = (g() << 1) - 1;
+        m_longPreamble[i*2].real(static_cast<double>(val));
+    }
+//    for (size_t i = 0; i < preambleSize; ++i) {
+//        std::cout << i << ": " << m_shortPreamble[i] << std::endl;
+//    }
 }
 
 SLFixComplex SubcarrierMapper::getNextShortPreambleSymbol(bool &finished)
