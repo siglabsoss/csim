@@ -4,7 +4,7 @@
 #include <cassert>
 
 CyclicPrefix::CyclicPrefix(size_t N, size_t cpLen, size_t ticksPerOutput, MCS mcs) :
-    FilterChainElement("CyclicPrefix", mcs.getNumCodeWords() * mcs.getCodeWordLength()),
+    FilterChainElement("CyclicPrefix", mcs.getNumCodeWords() * mcs.getCodeWordLength() * 2),
     m_len(cpLen),
     m_symbolLen(N),
     m_inputIdx(0),
