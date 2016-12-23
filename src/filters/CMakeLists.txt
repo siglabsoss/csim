@@ -18,6 +18,7 @@ set(SIGFILTERS_SOURCES
     channel_equalizer.cpp
     puncture.cpp
     depuncture.cpp
+    subcarrier_mapper.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
