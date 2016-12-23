@@ -293,6 +293,19 @@ SLFixPoint &SLFixPoint::operator>>(size_t shift)
     return *this;
 }
 
+bool       SLFixPoint::operator==(const SLFixPoint &rhs)
+{
+    if (!m_formatSet || !rhs.m_formatSet) {
+        return false;
+    }
+    return (m_value == rhs.m_value) &&
+            (m_wl == rhs.m_wl) &&
+            (m_fl == rhs.m_fl) &&
+            (m_quantMode == rhs.m_quantMode) &&
+            (m_overflowMode == rhs.m_overflowMode);
+
+}
+
 void SLFixPoint::shiftRadixRight(size_t shiftAmount)
 {
     this->m_fl += shiftAmount;

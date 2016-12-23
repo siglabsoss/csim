@@ -36,6 +36,8 @@ public:
     SLFixPoint &operator<<(size_t shift);
     SLFixPoint &operator>>(size_t shift);
 
+    bool       operator==(const SLFixPoint &rhs);
+
     //Assignment operators
     virtual SLFixPoint &operator=(const SLFixPoint &rhs);
     virtual SLFixPoint &operator=(double val);

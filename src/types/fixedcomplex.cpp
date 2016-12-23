@@ -121,6 +121,11 @@ SLFixComplex &SLFixComplex::operator>>(size_t shift)
     return *this;
 }
 
+bool         SLFixComplex::operator ==(const SLFixComplex & rhs)
+{
+    return (m_real == rhs.m_real) && (m_imag == rhs.m_imag);
+}
+
 void SLFixComplex::shiftRadixRight(size_t shiftAmount)
 {
     this->m_real.shiftRadixRight(shiftAmount);

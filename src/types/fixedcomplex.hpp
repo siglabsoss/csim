@@ -32,6 +32,8 @@ public:
     SLFixComplex &operator<<(size_t shift);
     SLFixComplex &operator>>(size_t shift);
 
+    bool         operator==(const SLFixComplex &rhs);
+
     void        shiftRadixRight(size_t shiftAmount);
     void        shiftRadixLeft(size_t shiftAmount);
 
