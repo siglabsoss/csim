@@ -59,7 +59,7 @@ size_t LDPCEncode::getCwLen() const
 }
 
 LDPCEncode::LDPCEncode(const std::vector<std::vector<bool> > &G):
-    FilterChainElement(std::string("LDPCEncode"), INPUT_BUFFER_BITS_MAX),
+    FilterChainElement("LDPCEncode", INPUT_BUFFER_BITS_MAX),
     m_G(G),
     m_outputBuffer()
 {
