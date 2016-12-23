@@ -56,6 +56,8 @@ bool FilterChain::output(filter_io_t &data)
 void FilterChain::tick()
 {
     double maxFIFOUtilization = 0;
+    size_t elementCounter = 0;
+    size_t maxFIFOElementCount = 0;
     for (FilterChainElement * current = m_head.get(); current != nullptr; current = current->m_next.get()) {
         //Tick the current element
         current->tick();
@@ -76,12 +78,14 @@ void FilterChain::tick()
             double utilization = current->inputFIFOUtilization();
             if (utilization > maxFIFOUtilization) {
                 maxFIFOUtilization = utilization;
+                maxFIFOElementCount = elementCounter;
             }
         }
+        elementCounter++;
     }
     m_maxFIFOUtilization = maxFIFOUtilization;
     if (m_maxFIFOUtilization > 0.7) {
-        log_warn("FIFO utilization is above threshold! %f", m_maxFIFOUtilization);
+        log_warn("FIFO utilization for FilterChainElement #%d is above threshold! %f", maxFIFOElementCount, m_maxFIFOUtilization);
     }
 }
 
