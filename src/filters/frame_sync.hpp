@@ -13,8 +13,12 @@ private:
     enum sync_state_t {
         STATE_WAIT_FOR_NONZERO = 0,
         STATE_WAIT_FOR_FRAME,
+        STATE_DROP_SHORT_PREAMBLE_PREFIX,
+        STATE_DROP_LONG_PREAMBLE_PREFIX,
         STATE_DROP_PREFIX,
-        STATE_PASS_FRAME
+        STATE_DROP_SHORT_PREAMBLE,
+        STATE_DROP_LONG_PREAMBLE,
+        STATE_PASS_SYMBOL
     };
     sync_state_t m_state;
     size_t m_Nfft;

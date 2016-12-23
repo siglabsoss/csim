@@ -4,7 +4,7 @@
 #include <random>
 
 SubcarrierMapper::SubcarrierMapper(MCS mcs) :
-        FilterChainElement("SubcarrierMapper", mcs.getNumSubCarriers() * 2),
+        FilterChainElement("SubcarrierMapper", mcs.getNumSubCarriers() * 4),
         m_mcs(mcs),
         m_state(WAITING_FOR_INPUT),
         m_output(),
@@ -103,11 +103,13 @@ void SubcarrierMapper::tick()
                 m_shouldOutput = true;
                 if (++m_subSymbolCount == (m_mcs.getNumActiveSubCarriers() * m_mcs.getNumOFDMSymbols())) {
                     m_subSymbolCount = 0;
-                    m_state = WAITING_FOR_INPUT;
+                    if (m_fifo.size() > 0) {
+                        //we already have another frame so jump straight to preamble so we don't skip a beat
+                        m_state = OUTPUT_SHORT_PREAMBLE;
+                    } else {
+                        m_state = WAITING_FOR_INPUT;
+                    }
                 }
-            }
-            if (m_fifo.size() == 0) {
-                m_state = WAITING_FOR_INPUT;
             }
             break;
     }

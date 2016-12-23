@@ -46,15 +46,34 @@ bool FrameSync::output(filter_io_t &data)
         case STATE_WAIT_FOR_FRAME:
             if (m_sampleCount > m_sampleDelay) {
                 m_sampleCount = 1;
-                m_state = STATE_DROP_PREFIX;
+                m_state = STATE_DROP_SHORT_PREAMBLE_PREFIX;
             }
             break;
+        case STATE_DROP_SHORT_PREAMBLE_PREFIX:
+        case STATE_DROP_LONG_PREAMBLE_PREFIX:
         case STATE_DROP_PREFIX:
             if (m_sampleCount == m_cpLen) {
-                m_state = STATE_PASS_FRAME;
+                if (m_state == STATE_DROP_SHORT_PREAMBLE_PREFIX) {
+                    m_state = STATE_DROP_SHORT_PREAMBLE;
+                } else if (m_state == STATE_DROP_LONG_PREAMBLE_PREFIX) {
+                    m_state = STATE_DROP_LONG_PREAMBLE;
+                } else {
+                    m_state = STATE_PASS_SYMBOL;
+                }
             }
             break;
-        case STATE_PASS_FRAME:
+        case STATE_DROP_SHORT_PREAMBLE:
+        case STATE_DROP_LONG_PREAMBLE:
+            if (m_sampleCount >= m_cpLen + m_Nfft) {
+                if (m_state == STATE_DROP_SHORT_PREAMBLE) {
+                    m_state = STATE_DROP_LONG_PREAMBLE_PREFIX;
+                } else {
+                    m_state = STATE_DROP_PREFIX;
+                }
+                m_sampleCount = 0;
+            }
+            break;
+        case STATE_PASS_SYMBOL:
             if (m_sampleCount >= m_cpLen + m_Nfft) {
                 m_state = STATE_DROP_PREFIX;
                 m_sampleCount = 0;
