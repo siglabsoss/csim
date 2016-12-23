@@ -1,7 +1,7 @@
 #include <filters/frame_sync.hpp>
 #include <cassert>
 
-FrameSync::FrameSync(size_t N, size_t cpLen, size_t sampleDelay) :
+FrameSync::FrameSync(size_t N, size_t cpLen, size_t sampleDelay, MCS mcs) :
         m_state(STATE_WAIT_FOR_FRAME),
         m_Nfft(N),
         m_cpLen(cpLen),
@@ -9,7 +9,9 @@ FrameSync::FrameSync(size_t N, size_t cpLen, size_t sampleDelay) :
         m_totalCount(0),
         m_gotInput(false),
         m_sample(),
-        m_sampleDelay(sampleDelay)
+        m_sampleDelay(sampleDelay),
+        m_symbolCount(0),
+        m_mcs(mcs)
 {
 
 }
@@ -75,7 +77,12 @@ bool FrameSync::output(filter_io_t &data)
             break;
         case STATE_PASS_SYMBOL:
             if (m_sampleCount >= m_cpLen + m_Nfft) {
-                m_state = STATE_DROP_PREFIX;
+                if (++m_symbolCount == m_mcs.getNumOFDMSymbols()) {
+                    m_state = STATE_DROP_SHORT_PREAMBLE_PREFIX;
+                    m_symbolCount = 0;
+                } else {
+                    m_state = STATE_DROP_PREFIX;
+                }
                 m_sampleCount = 0;
             }
             if (m_gotInput) {

@@ -1,11 +1,12 @@
 #pragma once
 
 #include <core/filter_chain_element.hpp>
+#include <utils/mcs.hpp>
 
 class FrameSync : public FilterChainElement
 {
 public:
-    FrameSync(size_t N, size_t cpLen, size_t sampleDelay);
+    FrameSync(size_t N, size_t cpLen, size_t sampleDelay, MCS mcs);
     bool input(const filter_io_t &data) override;
     bool output(filter_io_t &data) override;
     void tick(void) override;
@@ -28,4 +29,6 @@ private:
     bool m_gotInput;
     filter_io_t m_sample;
     size_t m_sampleDelay;
+    size_t m_symbolCount;
+    MCS    m_mcs;
 };
