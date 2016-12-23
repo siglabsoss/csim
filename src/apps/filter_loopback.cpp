@@ -17,6 +17,7 @@
 #include <filters/puncture.hpp>
 #include <filters/depuncture.hpp>
 #include <filters/scrambler_block.hpp>
+#include <filters/subcarrier_mapper.hpp>
 
 #include <utils/utils.hpp>
 #include <utils/ldpc_utils.hpp>
@@ -112,6 +113,7 @@ static FilterChain constructLoopbackChain(double noiseVar, size_t syncDelay, con
     LDPCEncode * encode         = new LDPCEncode(G);
     Puncture *punc              = new Puncture(mcs);
     Mapper * mapper             = new Mapper(mcs);
+    SubcarrierMapper *sm        = new SubcarrierMapper(mcs);
     FFT * ifft                  = new FFT(FFT_SIZE, true);
     ifft->setOutputFormat(FFT_OUTPUT_WL, 1, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     CyclicPrefix *cp            = new CyclicPrefix(FFT_SIZE, CP_SIZE, DUC_UPSAMPLE_FACTOR, mcs);
@@ -123,7 +125,7 @@ static FilterChain constructLoopbackChain(double noiseVar, size_t syncDelay, con
     FFT * fft                   = new FFT(FFT_SIZE, false);
     fft->setOutputFormat(FFT_OUTPUT_WL, 2, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     DigitalDownConverter *ddc   = new DigitalDownConverter(MIXER_FREQ, down2Coeffs, down5Coeffs);
-    FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay);
+    FrameSync    *fs            = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay, mcs);
     ChannelEqualizer *ce        = new ChannelEqualizer(Hf);
     Depuncture *depunc          = new Depuncture(mcs);
 
@@ -146,9 +148,9 @@ static FilterChain constructLoopbackChain(double noiseVar, size_t syncDelay, con
     SampleCountTrigger *fft_out     = new SampleCountTrigger(fft_out_probe_name,  FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
     SampleCountTrigger *fft_in      = new SampleCountTrigger(fft_in_probe_name,   FilterProbe::CSV, FFT_SIZE*NUM_FRAMES_TO_CAPTURE, 1, 0);
 
-    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + /* *ne + */ *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *mapper + *punc + *encode + *scramTx;
+    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *fft_out + *ce + *fft + *fft_in + *fs + *ddc_out + *ddc + /* *ne + */ *duc + *duc_in + *cp + *ifft_out + *ifft + *ifft_in + *sm + *mapper + *punc + *encode + *scramTx;
 #else
-    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *ce + *fft + *fs + *ddc + *ne + *duc + *cp + *ifft + *mapper + *punc + *encode + *scramTx;
+    FilterChain testChain =  *scramRx + *decode + *depunc + *demapper + *ce + *fft + *fs + *ddc + *ne + *duc + *cp + *ifft + *sm + *mapper + *punc + *encode + *scramTx;
 #endif
 
     return testChain;
