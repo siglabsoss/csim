@@ -44,12 +44,20 @@
 //    return result;
 // }
 
-MCS::MCS(MCS::code_rate_t rate, MCS::modulation_t mod, size_t frame, size_t subs) :
+MCS::MCS(MCS::code_rate_t rate, MCS::modulation_t mod, size_t frame, size_t subs, std::vector<bool> subMask) :
   m_rate(rate),
   m_mod(mod),
   m_frame(frame),
-  m_subs(subs)
+  m_subs(subs),
+  m_activeSubs(0),
+  m_subMask(subMask)
 {
+    assert(m_subMask.size() == subs);
+    for (size_t i = 0; i < subs; ++i) {
+        if (m_subMask[i] == true) {
+            m_activeSubs++;
+        }
+    }
 }
 
 size_t MCS::getNumBitsPerSubcarrier() const
@@ -177,3 +185,7 @@ size_t MCS::getNumSubCarriers() const
     return m_subs;
 }
 
+size_t MCS::getNumActiveSubCarriers() const
+{
+    return m_activeSubs;
+}
