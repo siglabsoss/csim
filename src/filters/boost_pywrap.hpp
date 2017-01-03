@@ -30,6 +30,7 @@
 #include <mathlib/complex_gaussian_noise.hpp>
 
 #include <cstdint>
+#include <types/fixedpoint.hpp>
 
 class PyWrap
 {
@@ -73,11 +74,13 @@ public:
 	bool output(filter_io_t &data);
 	void tick(void);
 private:
+	static constexpr size_t max_chain = 10;
 	FilterChain *m_wrap;
-	FilterChainElement *m_filters[10];
+	FilterChainElement *m_links[max_chain];
 	void add(FilterChainElement &rhs);
-	NoiseElement *m_wrap1;
-	NoiseElement *m_wrap2;
+//	std::vector<FilterChainElement*> m_links;
+//	FilterChainElement *m_wrap1;
+//	FilterChainElement *m_wrap2;
 };
 
 void unboundd(void)
@@ -89,6 +92,27 @@ void unboundd(void)
 #ifdef USE_PYTHON_BINDINGS
 #include <boost/python.hpp>
 using namespace boost::python;
+
+
+
+
+
+
+
+#define PP_XSTR(s) PP_STR(s)
+#define PP_STR(s) #s
+#define PP_STRIP(...) __VA_ARGS__
+
+
+#define PYWRAP_FILTER_HEADER(cls, signature)                                    \
+	class_<cls>(PP_STR(cls), init<signature>())   \
+	.def("tick", &cls::tick)   \
+	.def("input", &cls::input)   \
+	.def("output", &cls::output)
+
+
+
+
 
 BOOST_PYTHON_MODULE(libboost_pywrap)
 {
@@ -188,11 +212,12 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
 		;
 
 
-    class_<WrapNoiseElement>("WrapNoiseElement", init<double>())
-    		.def("tick", &WrapNoiseElement::tick)
-    		.def("input", &WrapNoiseElement::input)
-    		.def("output", &WrapNoiseElement::output)
-		;
+
+
+
+    PYWRAP_FILTER_HEADER(WrapNoiseElement,double);
+
+
 }
 
 #endif

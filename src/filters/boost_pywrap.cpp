@@ -48,8 +48,19 @@ bool WrapDigitalUpConverter::output(filter_io_t &data)
 
 
 
-
-
+#define PYWRAP_FILTER_DEFINITIONS(cls) \
+void cls::tick() \
+{ \
+	m_wrap->tick(); \
+} \
+bool cls::input(const filter_io_t &data) \
+{ \
+	return m_wrap->input(data); \
+} \
+bool cls::output(filter_io_t &data) \
+{ \
+	return m_wrap->output(data); \
+} \
 
 
 
@@ -59,20 +70,8 @@ WrapNoiseElement::WrapNoiseElement(double variance)
 	m_wrap = new NoiseElement(variance);
 }
 
-void WrapNoiseElement::tick()
-{
-	m_wrap->tick();
-}
+PYWRAP_FILTER_DEFINITIONS(WrapNoiseElement);
 
-bool WrapNoiseElement::input(const filter_io_t &data)
-{
-	return m_wrap->input(data);
-}
-
-bool WrapNoiseElement::output(filter_io_t &data)
-{
-	return m_wrap->output(data);
-}
 
 
 
@@ -83,11 +82,15 @@ WrapFilterChain::WrapFilterChain()
 {
 	m_wrap = new FilterChain();
 
-	m_wrap1 = new NoiseElement(0.000);
-	m_wrap2 = new NoiseElement(0.000);
+	m_links[0] = new NoiseElement(0.000);
+	m_links[1] = new NoiseElement(0.000);
+
+//	m_links[0] = m_filters[0];
+//	m_links[1] = m_filters[1];
 
 
-	*m_wrap = *m_wrap1+*m_wrap2;
+	*m_wrap = *m_links[0] + *m_links[1];
+
 }
 
 
