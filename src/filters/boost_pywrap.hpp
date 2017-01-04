@@ -30,6 +30,9 @@
 #include <mathlib/complex_gaussian_noise.hpp>
 
 #include <cstdint>
+#include <boost/preprocessor/cat.hpp>
+
+
 #include <types/fixedpoint.hpp>
 
 class PyWrap
@@ -44,27 +47,21 @@ private:
 };
 
 
-class WrapDigitalUpConverter
-{
-public:
-	WrapDigitalUpConverter();
-	bool input(const filter_io_t &data);
-	bool output(filter_io_t &data);
-	void tick(void);
-private:
-	DigitalUpConverter *m_duc;
+#define PYWRAP_FILTER_CLASS(cls, signature) \
+class BOOST_PP_CAT(Wrap,cls) \
+{ \
+public: \
+BOOST_PP_CAT(Wrap,cls)(signature);\
+	bool input(const filter_io_t &data); \
+	bool output(filter_io_t &data); \
+	void tick(void); \
+private: \
+	cls *m_wrap; \
 };
 
-class WrapNoiseElement
-{
-public:
-	WrapNoiseElement(double variance);
-	bool input(const filter_io_t &data);
-	bool output(filter_io_t &data);
-	void tick(void);
-private:
-	NoiseElement *m_wrap;
-};
+
+PYWRAP_FILTER_CLASS(DigitalUpConverter,)
+PYWRAP_FILTER_CLASS(NoiseElement,double)
 
 class WrapFilterChain
 {
@@ -206,16 +203,12 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
 		;
 
 
-    class_<WrapDigitalUpConverter>("WrapDigitalUpConverter", init<>())
-    		.def("tick", &WrapDigitalUpConverter::tick)
-    		.def("input", &WrapDigitalUpConverter::input)
-		;
 
 
+    PYWRAP_FILTER_HEADER(WrapDigitalUpConverter, );
 
 
-
-    PYWRAP_FILTER_HEADER(WrapNoiseElement,double);
+    PYWRAP_FILTER_HEADER(WrapNoiseElement, double);
 
 
 }
