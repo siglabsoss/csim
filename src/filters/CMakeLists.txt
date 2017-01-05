@@ -19,6 +19,7 @@ set(SIGFILTERS_SOURCES
     puncture.cpp
     depuncture.cpp
     subcarrier_mapper.cpp
+    ofdm_frame_sync.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})

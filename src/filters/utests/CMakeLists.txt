@@ -31,3 +31,6 @@ target_link_libraries(test_scrambler sigfilters sigtypes)
 
 add_executable(test_subcarrier_mapper ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_subcarrier_mapper.cpp)
 target_link_libraries(test_subcarrier_mapper sigfilters sigtypes)
+
+add_executable(test_ofdm_frame_sync ${CMAKE_SOURCE_DIR}/test/utests_main.cpp test_ofdm_frame_sync.cpp)
+target_link_libraries(test_ofdm_frame_sync sigfilters sigtypes)
