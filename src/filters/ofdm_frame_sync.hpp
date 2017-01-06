@@ -35,6 +35,7 @@ private:
     size_t  m_sampleCounter;
     size_t  m_symbolCounter;
     ssize_t m_frameOffset;
+    size_t  m_numSamplesToDrop;
 
     // Output buffer
     filter_io_t m_sample;
