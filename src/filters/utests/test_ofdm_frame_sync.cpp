@@ -17,8 +17,7 @@ CSIM_TEST_CASE(FOO_BAR)
         inputs2[500 + i] = inputs[i];
     }
 
-    MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM16, 4000, 1024,
-            std::vector<bool>(1024, true));
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 3888, 1024);
     OFDMFrameSync fs(100, mcs);
 
     filter_io_t sample;
@@ -29,6 +28,11 @@ CSIM_TEST_CASE(FOO_BAR)
         sample.fc.real(inputs2[i].real());
         sample.fc.imag(inputs2[i].imag());
         fs.input(sample);
+        fs.tick();
+        fs.output(sample);
+    }
+
+    for (size_t i = 0; i < inputs.size(); ++i) {
         fs.tick();
         fs.output(sample);
     }
