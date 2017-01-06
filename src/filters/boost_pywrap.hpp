@@ -60,6 +60,7 @@ private: \
 };
 
 
+PYWRAP_FILTER_CLASS(DigitalDownConverter,)
 PYWRAP_FILTER_CLASS(DigitalUpConverter,)
 PYWRAP_FILTER_CLASS(NoiseElement,double)
 
@@ -183,6 +184,7 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
     class_<filter_io_t>("filter_io_t", init<>())
 			.def(init<uint8_t>())
 			.def(init<ComplexDouble>())
+			.def(init<SLFixComplex>())
     		.def("toComplexDouble", &filter_io_t::toComplexDouble)
     		;
 
@@ -205,6 +207,7 @@ BOOST_PYTHON_MODULE(libboost_pywrap)
 
 
 
+    PYWRAP_FILTER_HEADER(WrapDigitalDownConverter, );
     PYWRAP_FILTER_HEADER(WrapDigitalUpConverter, );
 
 
