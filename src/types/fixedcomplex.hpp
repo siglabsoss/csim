@@ -50,8 +50,6 @@ public:
     void          imag(const SLFixPoint& val);
     void          imag(double val);
 
-    void          setFormat(size_t  wordLength,
-                            ssize_t intLength);
     void          setFormat(size_t                      wordLength,
                             ssize_t                     intLength,
                             SLFixPoint::quant_mode_t    quantMode,

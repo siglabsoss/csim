@@ -52,8 +52,6 @@ public:
     void                shiftRadixRight(size_t shiftAmount);
     void                shiftRadixLeft(size_t shiftAmount);
 
-    void                setFormat(size_t  wordLength,
-                                  ssize_t intLength);
     void                setFormat(size_t          wordLength,
                                   ssize_t         intLength,
                                   quant_mode_t    quantMode,
@@ -79,14 +77,14 @@ protected:
     void       handleOverflow();
     SLFixPoint addition(const SLFixPoint& rhs) const;
 
-public:
-
     long long m_value;
-    size_t m_wl;
-    size_t m_fl;
+    size_t    m_wl;
+    size_t    m_fl;
     bool m_formatSet;
     quant_mode_t m_quantMode;
     overflow_mode_t m_overflowMode;
+
+public:
 
     // Global options
     static bool   throwOnOverflow;

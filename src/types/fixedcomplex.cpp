@@ -16,7 +16,7 @@ SLFixComplex::SLFixComplex(size_t                      wordLength,
 
 SLFixComplex SLFixComplex::operator+(const SLFixComplex& rhs)
 {
-    assert(m_real.m_wl != 0);
+    assert(m_real.wl() != 0);
     SLFixComplex result;
     SLFixPoint   newReal = this->m_real + rhs.m_real;
     SLFixPoint   newImag = this->m_imag + rhs.m_imag;
@@ -30,7 +30,7 @@ SLFixComplex SLFixComplex::operator+(const SLFixComplex& rhs)
 
 SLFixComplex SLFixComplex::operator-(const SLFixComplex& rhs)
 {
-    assert(m_real.m_wl != 0);
+    assert(m_real.wl() != 0);
     SLFixComplex result;
     SLFixPoint   newReal = this->m_real - rhs.m_real;
     SLFixPoint   newImag = this->m_imag - rhs.m_imag;
@@ -153,12 +153,6 @@ void SLFixComplex::shiftRadixLeft(size_t shiftAmount)
 {
     this->m_real.shiftRadixLeft(shiftAmount);
     this->m_real.shiftRadixLeft(shiftAmount);
-}
-
-void SLFixComplex::setFormat(size_t wordLength, ssize_t intLength)
-{
-    m_real.setFormat(wordLength, intLength);
-    m_imag.setFormat(wordLength, intLength);
 }
 
 void SLFixComplex::setFormat(size_t                      wordLength,

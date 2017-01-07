@@ -28,7 +28,7 @@ SLFixPoint::SLFixPoint(size_t  wordLength,
     m_quantMode(DEFAULT_QUANT_MODE),
     m_overflowMode(DEFAULT_OVERFLOW_MODE)
 {
-    setFormat(wordLength, intLength);
+    setFormat(wordLength, intLength, DEFAULT_QUANT_MODE, DEFAULT_OVERFLOW_MODE);
 }
 
 SLFixPoint::SLFixPoint(size_t          wordLength,
@@ -85,7 +85,7 @@ SLFixPoint SLFixPoint::addition(const SLFixPoint& rhs) const
 
     bool sameSign =
         (tempLHS.m_value >= 0 &&
-    tempRHS.m_value >= 0) || (tempLHS.m_value < 0 && tempRHS.m_value < 0);
+         tempRHS.m_value >= 0) || (tempLHS.m_value < 0 && tempRHS.m_value < 0);
     bool wasPositive = (tempLHS.m_value >= 0);
     result.maskAndSignExtend();
     bool isNegative = (result.m_value < 0);
@@ -251,7 +251,7 @@ SLFixPoint& SLFixPoint::operator=(const SLFixPoint& rhs)
         // either of these three conditions indicates overflow
         bool tooSmall =
             (value >= 0 &&
-        this->m_value == 0) ||
+             this->m_value == 0) ||
             (value < 0 && (this->m_value == -1 || this->m_value == 0));
 
         if (!tooSmall) { // if our value was too small such that all sigbits
@@ -469,26 +469,21 @@ void SLFixPoint::handleOverflow()
     }
 }
 
-void SLFixPoint::setFormat(size_t wordLength, ssize_t intLength)
+void SLFixPoint::setFormat(size_t          wordLength,
+                           ssize_t         intLength,
+                           quant_mode_t    quantMode,
+                           overflow_mode_t overflowMode)
 {
         assert(static_cast<ssize_t>(wordLength) >= intLength);
         assert(wordLength <= sizeof(m_value) * 8);
+    m_quantMode    = quantMode;
+    m_overflowMode = overflowMode;
 
     // intLength can be negative to represent small values with
     // higher precision. thus m_fl can be greater than m_wl
     m_wl        = wordLength;
     m_fl        = wordLength - intLength;
     m_formatSet = true;
-}
-
-void SLFixPoint::setFormat(size_t          wordLength,
-                           ssize_t         intLength,
-                           quant_mode_t    quantMode,
-                           overflow_mode_t overflowMode)
-{
-    m_quantMode    = quantMode;
-    m_overflowMode = overflowMode;
-    setFormat(wordLength, intLength);
 }
 
 void SLFixPoint::setFormat(const SLFixPoint& other)
