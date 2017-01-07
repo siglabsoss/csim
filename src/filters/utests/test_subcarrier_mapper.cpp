@@ -50,10 +50,10 @@ CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
                     if (numOutputs % 4 == 0) {
                         int val = (g() << 1) - 1;
                         BOOST_CHECK_EQUAL(sample.fc.real().to_double(), static_cast<double>(val));
-                        BOOST_CHECK_EQUAL(sample.fc.imag().m_value, 0);
+                        BOOST_CHECK_EQUAL(sample.fc.imag().to_int64(), 0);
                     } else {
-                        BOOST_CHECK_EQUAL(sample.fc.real().m_value, 0);
-                        BOOST_CHECK_EQUAL(sample.fc.imag().m_value, 0);
+                        BOOST_CHECK_EQUAL(sample.fc.real().to_int64(), 0);
+                        BOOST_CHECK_EQUAL(sample.fc.imag().to_int64(), 0);
                     }
                 } else {
                     //The long preamble repeats twice in time within an OFDM symbol. This is because we loaded every
@@ -61,10 +61,10 @@ CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
                     if (numOutputs % 2 == 0) {
                         int val = (g() << 1) - 1;
                         BOOST_CHECK_EQUAL(sample.fc.real().to_double(), static_cast<double>(val));
-                        BOOST_CHECK_EQUAL(sample.fc.imag().m_value, 0);
+                        BOOST_CHECK_EQUAL(sample.fc.imag().to_int64(), 0);
                     } else {
-                        BOOST_CHECK_EQUAL(sample.fc.real().m_value, 0);
-                        BOOST_CHECK_EQUAL(sample.fc.imag().m_value, 0);
+                        BOOST_CHECK_EQUAL(sample.fc.real().to_int64(), 0);
+                        BOOST_CHECK_EQUAL(sample.fc.imag().to_int64(), 0);
                     }
                 }
                 //preamble outputs XXX make comparisons here

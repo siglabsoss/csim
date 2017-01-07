@@ -62,7 +62,7 @@ bool DigitalDownConverter::output(filter_io_t &data)
 {
     if (_output_ready) {
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(_output_inph.wl(), _output_inph.iwl());
+        data.fc.setFormat(_output_inph);
         //The output of the DUC is Re{x_bb(t) * exp(1j*w_c*t)} = x_bb(t) * cos(w_c*t) = 0.5 * x_bb(t) * [exp(j*w_c*t) + exp(-j*w_c*t)], thus we add a 2x gain here to compensate
         data.fc.real(_output_inph.to_double() * 2);
         data.fc.imag(_output_quad.to_double() * 2);
