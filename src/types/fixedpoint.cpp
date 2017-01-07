@@ -2,6 +2,7 @@
 #include <cassert>
 #include <algorithm>
 #include <climits>
+#include <iomanip>
 
 bool   SLFixPoint::throwOnOverflow    = false;
 size_t SLFixPoint::overflowCount      = 0;
@@ -496,6 +497,6 @@ void SLFixPoint::setFormat(const SLFixPoint& other)
 
 std::ostream& operator<<(std::ostream& os, const SLFixPoint& obj)
 {
-    os << obj.to_double();
+    os << std::setprecision(52) << obj.to_double();
     return os;
 }
