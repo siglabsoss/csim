@@ -1,12 +1,19 @@
 #include <filters/ofdm_frame_sync.hpp>
 
-static constexpr size_t MIN_PLATEAU_WIDTH         = 2;
+static constexpr size_t MIN_PLATEAU_WIDTH         = 50;
 static constexpr size_t MAX_TIMING_METRIC_HISTORY = 200;
-static constexpr double TIMING_METRIC_MIN_PEAK    = 0.1;
+
+// This is a threshold placed on a normalized value, thus it does not depend
+// on the power level of the input signal.
+static constexpr double TIMING_METRIC_MIN_PEAK = 0.1;
+
+// This threshold depends on the power level of the input signal and will need
+// to change if some kind of AGC block comes earlier in the chain.
+static constexpr double POWER_EST_MIN_THRESHOLD = 0.001;
 
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
                              MCS    mcs) :
-    FilterChainElement("FrameSync", mcs.getNumSubCarriers() * 2),
+    FilterChainElement("FrameSync", mcs.getNumSubCarriers() * 2 * 10),
     m_cpLen(cpLen),
     m_mcs(mcs),
     m_P(0.0, 0.0),
@@ -34,18 +41,21 @@ void OFDMFrameSync::updateSlidingCalculations()
     SLFixComplex old    = m_fifo[MAX_TIMING_METRIC_HISTORY + 1 * L].fc;
     SLFixComplex oldest = m_fifo[MAX_TIMING_METRIC_HISTORY + 0 * L].fc;
 
-    // TODO fixed point calculations
+    // TODO fixed point calculations and avoid the division
     // By adding the newest element of the summation and subtracting out the
-    // oldest we're, effectively 'sliding' the summation along a series of
+    // oldest, we're effectively 'sliding' the summation along a series of
     // samples in an iterative fashion
     m_P = m_P + ((*old * newest) - (*oldest * old)).toComplexDouble();
     m_R = m_R + std::norm(newest.toComplexDouble()) -
           std::norm(old.toComplexDouble());
 
-    double timingMetric = 0.0;
+    double timingMetric;
+    double powerEst = (m_R * m_R);
 
-    if (m_R != 0.0) {
-        timingMetric = std::norm(m_P) / (m_R * m_R);
+    if (powerEst < POWER_EST_MIN_THRESHOLD) {
+        timingMetric = 0.0;
+    } else {
+        timingMetric = std::norm(m_P) / powerEst;
     }
     m_timingMetrics.push_back(timingMetric);
 }
@@ -64,6 +74,8 @@ ssize_t OFDMFrameSync::findPeak()
     // most recent timing metric value
     double  timingMetric = m_timingMetrics[m_timingMetrics.size() - 1];
     ssize_t retval       = -1;
+
+    // std::cout << timingMetric << std::endl;
 
     if (timingMetric > m_peak) {
         m_peak = timingMetric;
@@ -92,23 +104,17 @@ ssize_t OFDMFrameSync::findPeak()
 
         if ((tm >= (0.9 * m_peak)) ||
             (MAX_TIMING_METRIC_HISTORY - idx < MIN_PLATEAU_WIDTH)) {
-            // We didn't quite detect a real plateau. Keep trying.
+            // This 'plateau' wasn't quite wide enough to count. Keep looking.
         } else {
-            // At this point we know how many samples ago we're going to
-            // consider to be the start of the frame, so we can move on.
+            // At this point we can say we found the start of the frame. We
+            // will go ahead and calculate it as the midpoint in between the
+            // two 90% crossings
             size_t frameStartDelay = ((MAX_TIMING_METRIC_HISTORY - idx) / 2);
 
-            // std::cout << "Frame start is set to " << frameStartDelay <<
-            // " samples ago. Peak timing metric was " << m_peak <<
-            // std::endl;
+            std::cout << "***Frame start is set to " << frameStartDelay <<
+            " samples ago. Peak timing metric was " << m_peak <<
+            std::endl;
 
-            // for (size_t numSamplesToToss = (2 * L) - frameStartDelay;
-            //      numSamplesToToss > 0; --numSamplesToToss) {
-            //     m_fifo.pop_front();
-            // }
-            // std::cout << "Fast forwarding by dropping " <<
-            // (2 * L) - frameStartDelay << " samples to reach start of frame."
-            //           << std::endl;
             retval = MAX_TIMING_METRIC_HISTORY - frameStartDelay;
         }
         m_peak = 0.0;
@@ -120,10 +126,6 @@ ssize_t OFDMFrameSync::findPeak()
 void OFDMFrameSync::tick()
 {
     // Wait until we have more than a symbol's worth of samples
-    // if (m_gotInput) {
-    //     m_sampleCount++;
-    //     m_totalCount++; // this exists for debugging purposes only
-    // }
     if (m_fifo.size() <= m_mcs.getNumSubCarriers() + MAX_TIMING_METRIC_HISTORY) {
         return;
     }
@@ -135,18 +137,17 @@ void OFDMFrameSync::tick()
     if (frameOffset < 0) {
         m_frameOffset--;
     } else {
-        std::cout << "Found frame at offset " << frameOffset <<
+        std::cout << "***Found frame at offset " << frameOffset <<
         std::endl;
 
         if (m_frameOffset < 0) {
-            m_frameOffset = frameOffset;
+            // XXX this hardcoded offset shift is here temporarily
+            m_frameOffset = frameOffset + 63;
         } else {
-            std::cout << "Using previously found frame offset of " <<
+            std::cout << "***Using previously found frame offset of " <<
             m_frameOffset << std::endl;
         }
     }
-
-    // std::cout << "frame offset = " << m_frameOffset << std::endl;
 
     switch (m_state) {
     case STATE_FINDING_PEAK:
@@ -157,7 +158,7 @@ void OFDMFrameSync::tick()
             m_state            = STATE_DROP_PREAMBLE;
             m_numSamplesToDrop = TOTAL_PREAMBLE_LENGTH + m_frameOffset;
 
-            std::cout << "Frame is at offset " << m_frameOffset <<
+            std::cout << "***Frame is at offset " << m_frameOffset <<
             " dropping the next " << m_numSamplesToDrop << " samples" <<
             std::endl;
         }
@@ -173,7 +174,7 @@ void OFDMFrameSync::tick()
         }
 
         if (m_sampleCounter >= m_numSamplesToDrop) {
-            std::cout << "Dropped " << m_sampleCounter <<
+            std::cout << "***Dropped " << m_sampleCounter <<
             " samples, passing frame" << std::endl;
             m_state         = STATE_PASS_SYMBOL;
             m_sampleCounter = 0;
@@ -208,13 +209,13 @@ void OFDMFrameSync::tick()
 
         if (m_sampleCounter >= numSamplesPerSymbol) {
             if (++m_symbolCounter >= numSymbolsPerFrame) {
-                std::cout << "Passed " << m_symbolCounter <<
+                std::cout << "***Passed " << m_symbolCounter <<
                 " OFDM symbols, which makes up a full frame" << std::endl;
                 m_state         = STATE_FINDING_PEAK;
                 m_symbolCounter = 0;
             } else {
-                // std::cout << "Passed OFDM symbol of " << m_sampleCounter <<
-                // " samples" << std::endl;
+                std::cout << "***Passed OFDM symbol of " << m_sampleCounter <<
+                " samples" << std::endl;
                 m_state = STATE_DROP_PREFIX;
             }
             m_sampleCounter = 0;
