@@ -11,7 +11,7 @@ CSIM_TEST_SUITE_BEGIN(validateOFDMFrameSync)
 CSIM_TEST_CASE(DID_DETECT_PILOT_AND_PASS_FRAME)
 {
     std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>(
-        "./data/frame_sync/preamble_10db_43frames.csv");
+        "./data/frame_sync/preamble_60db_103symbols.csv");
 
     std::cout << std::setprecision(52);
 
