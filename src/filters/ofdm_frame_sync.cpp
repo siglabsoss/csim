@@ -144,8 +144,7 @@ void OFDMFrameSync::tick()
         std::endl;
 
         if (m_frameOffset < 0) {
-            // XXX this hardcoded offset shift is here temporarily
-            m_frameOffset = frameOffset + 63;
+            m_frameOffset = frameOffset;
         } else {
             std::cout << "***Using previously found frame offset of " <<
             m_frameOffset << std::endl;
