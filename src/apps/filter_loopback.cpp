@@ -10,6 +10,7 @@
 #include <filters/ddc_duc/duc.hpp>
 #include <filters/ddc_duc/ddc.hpp>
 #include <filters/cyclic_prefix.hpp>
+#include <filters/ofdm_frame_sync.hpp>
 #include <filters/frame_sync.hpp>
 #include <filters/channel_equalizer.hpp>
 #include <filters/ldpc_encode.hpp>
@@ -25,13 +26,14 @@
 #include <probes/sample_count_trigger.hpp>
 
 #include <3rd/json/json.h>
+#include <iomanip>
 
 static constexpr double MIXER_FREQ          = 0.16;
 static constexpr size_t FFT_SIZE            = 1024;
 static constexpr size_t CP_SIZE             = 100;
 static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
 
-#undef SHOULD_PROBE_FILTERS
+#define SHOULD_PROBE_FILTERS
 
 static size_t runFilters(FilterChain& chain,
                          size_t       numBits,
@@ -162,7 +164,10 @@ static FilterChain constructLoopbackChain(double             noiseVar,
     DigitalDownConverter *ddc = new DigitalDownConverter(MIXER_FREQ,
                                                          down2Coeffs,
                                                          down5Coeffs);
-    FrameSync *fs        = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay, mcs);
+
+    OFDMFrameSync *fs = new OFDMFrameSync(CP_SIZE, mcs);
+
+    // FrameSync *fs        = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay, mcs);
     ChannelEqualizer *ce = new ChannelEqualizer(Hf);
     Depuncture *depunc   = new Depuncture(mcs);
 
@@ -178,7 +183,7 @@ static FilterChain constructLoopbackChain(double             noiseVar,
     std::string fft_out_probe_name         = "FFT_OUTPUT";
     std::string fft_in_probe_name          = "FFT_INPUT";
     constexpr size_t PHASE_DELAY           = 40; // found emperically
-    constexpr size_t NUM_FRAMES_TO_CAPTURE = 30;
+    constexpr size_t NUM_FRAMES_TO_CAPTURE = 103;
     SampleCountTrigger *duc_in             = new SampleCountTrigger(
         duc_in_probe_name,
         FilterProbe::CSV,
@@ -348,6 +353,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+    std::cout << std::setprecision(52);
+
     std::srand(1473294057 + 1);
 
     Json::Value  config;
@@ -402,6 +409,7 @@ int main(int argc, char *argv[])
     const size_t MAX_BIT_ERRORS         = snr["max_bit_err"].asInt();
     const size_t OUTPUTS_PER_PRINT      = snr["outputs_per_print"].asInt();
 
+    // TODO remove this parameter
     const size_t FRAME_SYNC_DELAY = sync["delay"].asInt();
 
     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, FRAME_SIZE, FFT_SIZE);
