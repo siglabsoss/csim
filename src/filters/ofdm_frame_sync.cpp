@@ -5,11 +5,11 @@ static constexpr size_t MAX_TIMING_METRIC_HISTORY = 200;
 
 // This is a threshold placed on a normalized value, thus it does not depend
 // on the power level of the input signal.
-static constexpr double TIMING_METRIC_MIN_PEAK = 0.5;
+static constexpr double TIMING_METRIC_MIN_PEAK = 0.6;
 
 // This threshold depends on the power level of the input signal and will need
 // to change if some kind of AGC block comes earlier in the chain.
-static constexpr double POWER_EST_MIN_THRESHOLD = 0.005;
+static constexpr double POWER_EST_MIN_THRESHOLD = 0.1;
 
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
                              MCS    mcs) :
