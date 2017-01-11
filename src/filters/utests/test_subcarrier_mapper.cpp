@@ -48,7 +48,7 @@ CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
         // fourth subchannel with a non-zero value
         if (i % 4 == 0) {
             int val = (g() << 1) - 1;
-            expectedPreambleTones[i].real(static_cast<double>(val));
+            expectedPreambleTones[i].real(static_cast<double>(val) * 2.0);
         } else {
             expectedPreambleTones[i].real(0.0);
         }
@@ -61,7 +61,7 @@ CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
         // second subchannel with a non-zero value
         if (i % 2 == 0) {
             int val = (g() << 1) - 1;
-            expectedPreambleTones[i].real(static_cast<double>(val));
+            expectedPreambleTones[i].real(static_cast<double>(val) * M_SQRT2);
         } else {
             expectedPreambleTones[i].real(0.0);
         }
@@ -87,12 +87,14 @@ CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
                 BOOST_CHECK(sample.type == IO_TYPE_COMPLEX_FIXPOINT);
 
                 if (numOutputs < totalPreambleLength) {
-                    BOOST_CHECK_EQUAL(
+                    BOOST_CHECK_CLOSE(
                         sample.fc.real().to_double(),
-                        expectedPreambleTones[numOutputs].real());
-                    BOOST_CHECK_EQUAL(
+                        expectedPreambleTones[numOutputs].real(),
+                        1.0 / (1 << 10));
+                    BOOST_CHECK_CLOSE(
                         sample.fc.imag().to_double(),
-                        expectedPreambleTones[numOutputs].imag());
+                        expectedPreambleTones[numOutputs].imag(),
+                        1.0 / (1 << 10));
                 } else {
                     // symbol outputs
                     BOOST_CHECK(constellations[0b0100] == sample.fc);
