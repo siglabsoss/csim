@@ -30,7 +30,6 @@ public:
         size_t subs = NUM_OFDM_CARRIERS,
         std::vector<bool>subMask = std::vector<bool>(NUM_OFDM_CARRIERS, true));
 
-    // std::vector<bool> generateOFDMFrames(const std::vector<bool> &data);
     size_t       getNumBitsPerSubcarrier() const;
     size_t       getNumBitsPerSymbol() const;
     double       getCodeRateAsDouble() const;
@@ -48,7 +47,7 @@ public:
 
 private:
 
-    code_rate_t m_rate;
+    code_rate_t  m_rate;
     modulation_t m_mod;
     size_t m_frame;
     size_t m_subs;
