@@ -9,11 +9,11 @@ static constexpr size_t MAX_TIMING_METRIC_HISTORY = PEAK_FINDING_WINDOW_WIDTH *
 
 // This is a threshold placed on a normalized value, thus it does not depend
 // on the power level of the input signal.
-static constexpr double TIMING_METRIC_MIN_PEAK = 0.5;
+static constexpr double TIMING_METRIC_MIN_PEAK = 0.1;
 
 // This threshold depends on the power level of the input signal and will need
 // to change if some kind of AGC block comes earlier in the chain.
-static constexpr double POWER_EST_MIN_THRESHOLD = .0002;
+static constexpr double POWER_EST_MIN_THRESHOLD = 0.0;
 
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
                              MCS    mcs) :
@@ -89,8 +89,8 @@ ssize_t OFDMFrameSync::findPeak()
     ssize_t retval       = -1;
 
     // static size_t tmCount = 0;
-    //
-    // std::cout << tmCount++ << " " << timingMetric << "," << std::norm(m_P) <<
+
+    // std::cout << timingMetric << "," << std::norm(m_P) <<
     // "," << m_R * m_R <<
     // std::endl;
 
@@ -227,7 +227,7 @@ void OFDMFrameSync::tick()
         if (m_didFindPeak == false) {
             std::cout << "***Found frame at offset " << frameOffset <<
             " current state = " << m_state << std::endl;
-            m_frameOffset = frameOffset + 1;
+            m_frameOffset = frameOffset;
             m_didFindPeak = true;
         } else {
             std::cout <<
