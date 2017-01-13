@@ -17,6 +17,7 @@ private:
 
     ssize_t findPeak();
     void    updateSlidingCalculations();
+    void    initializeSlidingCalculations();
     enum state_t {
         STATE_FINDING_PEAK = 0,
         STATE_DROP_PREAMBLE,
@@ -25,13 +26,20 @@ private:
     };
     size_t m_cpLen;
     MCS    m_mcs;
+
+    bool m_didInit;
+
+    // Persistent values used by peak finding logic
+    ssize_t m_findPeakCounter;
+    size_t  m_lastPeakFoundDelay;
     ComplexDouble m_P;
     double        m_R;
-    state_t       m_state;
     double        m_peak;
+    bool          m_wasAboveThreshold;
     CircularBuffer<double> m_timingMetrics;
 
     // Persistent values used by state machine
+    state_t m_state;
     size_t  m_sampleCounter;
     size_t  m_symbolCounter;
     ssize_t m_frameOffset;
