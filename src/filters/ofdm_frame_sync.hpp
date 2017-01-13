@@ -31,11 +31,12 @@ private:
 
     // Persistent values used by peak finding logic
     ssize_t m_findPeakCounter;
-    size_t  m_lastPeakFoundDelay;
+    ssize_t m_lastPeakIdx;
     ComplexDouble m_P;
     double        m_R;
     double        m_peak;
     bool          m_wasAboveThreshold;
+    bool          m_didFindPeak;
     CircularBuffer<double> m_timingMetrics;
 
     // Persistent values used by state machine

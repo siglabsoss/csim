@@ -9,11 +9,11 @@ static constexpr size_t MAX_TIMING_METRIC_HISTORY = PEAK_FINDING_WINDOW_WIDTH *
 
 // This is a threshold placed on a normalized value, thus it does not depend
 // on the power level of the input signal.
-static constexpr double TIMING_METRIC_MIN_PEAK = 0.8;
+static constexpr double TIMING_METRIC_MIN_PEAK = 0.5;
 
 // This threshold depends on the power level of the input signal and will need
 // to change if some kind of AGC block comes earlier in the chain.
-static constexpr double POWER_EST_MIN_THRESHOLD = 0.0002;
+static constexpr double POWER_EST_MIN_THRESHOLD = .0002;
 
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
                              MCS    mcs) :
@@ -22,11 +22,12 @@ OFDMFrameSync::OFDMFrameSync(size_t cpLen,
     m_mcs(mcs),
     m_didInit(false),
     m_findPeakCounter(-1),
-    m_lastPeakFoundDelay(0),
+    m_lastPeakIdx(0),
     m_P(0.0, 0.0),
     m_R(0.0),
     m_peak(0.0),
     m_wasAboveThreshold(false),
+    m_didFindPeak(false),
     m_timingMetrics(MAX_TIMING_METRIC_HISTORY),
     m_state(STATE_FINDING_PEAK),
     m_sampleCounter(0),
@@ -42,8 +43,9 @@ void OFDMFrameSync::initializeSlidingCalculations()
     const size_t L = m_mcs.getNumSubCarriers() / 2; // length of repeating pilot
 
     for (size_t i = 0; i < L; ++i) {
-        SLFixComplex first = m_fifo[MAX_TIMING_METRIC_HISTORY + i + 0].fc;
-        SLFixComplex last  = m_fifo[MAX_TIMING_METRIC_HISTORY + i + L].fc;
+        size_t end         = m_fifo.size() - 1;
+        SLFixComplex first = m_fifo[end - (2 * L) + i].fc;
+        SLFixComplex last  = m_fifo[end - (1 * L) + i].fc;
         m_P = m_P + (*first * last).toComplexDouble();
         m_R = m_R + std::norm(last.toComplexDouble());
     }
@@ -51,12 +53,12 @@ void OFDMFrameSync::initializeSlidingCalculations()
 
 void OFDMFrameSync::updateSlidingCalculations()
 {
-    // ssize_t end = m_fifo.size() - 1;
     const size_t L = m_mcs.getNumSubCarriers() / 2; // length of repeating pilot
+    size_t end     = m_fifo.size() - 1;
 
-    SLFixComplex newest = m_fifo[MAX_TIMING_METRIC_HISTORY - 1 + 2 * L].fc;
-    SLFixComplex old    = m_fifo[MAX_TIMING_METRIC_HISTORY - 1 + 1 * L].fc;
-    SLFixComplex oldest = m_fifo[MAX_TIMING_METRIC_HISTORY - 1 + 0 * L].fc;
+    SLFixComplex oldest = m_fifo[end - (2 * L)].fc;
+    SLFixComplex old    = m_fifo[end - (1 * L)].fc;
+    SLFixComplex newest = m_fifo[end - (0 * L)].fc;
 
     // TODO fixed point calculations and avoid the division
     // By adding the newest element of the summation and subtracting out the
@@ -82,16 +84,18 @@ void OFDMFrameSync::updateSlidingCalculations()
 
 ssize_t OFDMFrameSync::findPeak()
 {
-    updateSlidingCalculations();
-
     // most recent timing metric value
     double  timingMetric = m_timingMetrics[m_timingMetrics.size() - 1];
     ssize_t retval       = -1;
 
-    // std::cout << timingMetric << "," << std::norm(m_P) << "," << m_R * m_R <<
+    // static size_t tmCount = 0;
+    //
+    // std::cout << tmCount++ << " " << timingMetric << "," << std::norm(m_P) <<
+    // "," << m_R * m_R <<
     // std::endl;
 
     // static size_t tmCount = 0;
+    //
     // std::cout << tmCount++ << " " << timingMetric << std::endl;
 
     // std::cout << timingMetric << std::endl;
@@ -125,11 +129,11 @@ ssize_t OFDMFrameSync::findPeak()
     // While timer is running, scan for peak
     if (m_findPeakCounter-- > 0) {
         if (timingMetric > m_peak) {
-            std::cout << "***New peak at " << timingMetric << std::endl;
-            m_peak               = timingMetric;
-            m_lastPeakFoundDelay = 0;
+            // std::cout << "***New peak at " << timingMetric << std::endl;
+            m_peak        = timingMetric;
+            m_lastPeakIdx = m_timingMetrics.size() - 1;
         } else {
-            m_lastPeakFoundDelay++;
+            m_lastPeakIdx--;
         }
     }
 
@@ -141,13 +145,17 @@ ssize_t OFDMFrameSync::findPeak()
         // the peak
         ssize_t end        = m_timingMetrics.size() - 1;
         ssize_t start      = 0;
-        ssize_t peakIdx    = end - m_lastPeakFoundDelay;
+        ssize_t peakIdx    = m_lastPeakIdx;
         ssize_t leftIdx    = peakIdx;
         ssize_t rightIdx   = peakIdx;
         bool    foundLeft  = false;
         bool    foundRight = false;
 
         double tm;
+
+        // This can't happen if the timer is shorter than the timing metric
+        // history buffer, but checking anyway
+        assert(peakIdx >= 0);
 
         // Find 90% crossing to the left of the peak
         do {
@@ -162,11 +170,6 @@ ssize_t OFDMFrameSync::findPeak()
         } while ((tm >= (0.9 * m_peak)) && (rightIdx <= end));
 
         foundRight = (rightIdx <= end);
-
-        // std::cout << "loop exit " << tm << " < " <<
-        // (0.9 * m_peak) << " || " << idx << " == 0" << std::endl;
-
-        // assert(foundLeft && foundRight);
 
         if (foundLeft && foundRight) {
             ssize_t frameStartDelay = leftIdx + (rightIdx - leftIdx) / 2;
@@ -197,40 +200,46 @@ ssize_t OFDMFrameSync::findPeak()
 void OFDMFrameSync::tick()
 {
     // Wait until we have more than a symbol's worth of samples
+    if (m_fifo.size() > m_mcs.getNumSubCarriers()) {
+        if (m_didInit == false) {
+            initializeSlidingCalculations();
+            m_didInit = true;
+        } else {
+            if (m_gotInput == true) {
+                updateSlidingCalculations();
+                m_gotInput = false;
+            }
+        }
+    }
+
     if (m_fifo.size() < m_mcs.getNumSubCarriers() + MAX_TIMING_METRIC_HISTORY) {
         return;
     }
 
-    if (m_didInit == false) {
-        initializeSlidingCalculations();
-        m_didInit = true;
-    }
-
     static const size_t TOTAL_PREAMBLE_LENGTH = m_mcs.getNumSubCarriers() * 2 +
                                                 m_cpLen * 2;
+
     ssize_t frameOffset = findPeak();
 
     if (frameOffset < 0) {
         m_frameOffset--;
     } else {
-        std::cout << "***Found frame at offset " << frameOffset <<
-        " current state = " << m_state << std::endl;
-        m_frameOffset = frameOffset;
-
-        // if (m_frameOffset < 0) {
-        //     m_frameOffset = frameOffset;
-        // } else {
-        //     std::cout << "***Using previously found frame offset of " <<
-        //     m_frameOffset << std::endl;
-        // }
+        if (m_didFindPeak == false) {
+            std::cout << "***Found frame at offset " << frameOffset <<
+            " current state = " << m_state << std::endl;
+            m_frameOffset = frameOffset + 1;
+            m_didFindPeak = true;
+        } else {
+            std::cout <<
+            "***Using previously found frame at current offset of " <<
+            m_frameOffset << std::endl;
+        }
     }
 
     switch (m_state) {
     case STATE_FINDING_PEAK:
     {
-        m_fifo.pop_front();
-
-        if (m_frameOffset >= 0) {
+        if (m_didFindPeak) {
             m_state            = STATE_DROP_PREAMBLE;
             m_numSamplesToDrop = TOTAL_PREAMBLE_LENGTH + m_frameOffset;
 
@@ -243,9 +252,7 @@ void OFDMFrameSync::tick()
 
     case STATE_DROP_PREAMBLE:
 
-        if ((m_sampleCounter < m_numSamplesToDrop) &&
-            (m_fifo.size() > 0)) {
-            m_fifo.pop_front();
+        if ((m_sampleCounter < m_numSamplesToDrop)) {
             m_sampleCounter++;
         }
 
@@ -254,13 +261,13 @@ void OFDMFrameSync::tick()
             " samples, passing frame" << std::endl;
             m_state         = STATE_PASS_SYMBOL;
             m_sampleCounter = 0;
+            m_didFindPeak   = false; // allow us to find peaks again
         }
         break;
 
     case STATE_DROP_PREFIX:
     {
         if (m_sampleCounter < m_cpLen) {
-            m_fifo.pop_front();
             m_sampleCounter++;
         }
 
@@ -279,7 +286,6 @@ void OFDMFrameSync::tick()
         if (m_sampleCounter < numSamplesPerSymbol) {
             m_shouldOutput = true;
             m_sample       = m_fifo.front();
-            m_fifo.pop_front();
             m_sampleCounter++;
         }
 
@@ -299,6 +305,8 @@ void OFDMFrameSync::tick()
         break;
     }
     }
+
+    m_fifo.pop_front();
 }
 
 bool OFDMFrameSync::output(filter_io_t& data)
