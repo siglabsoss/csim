@@ -47,6 +47,14 @@ static size_t runFilters(FilterChain& chain,
 
     numBitErrors = 0;
 
+    // "Prime the pump" by warming up the filter chain. This can help for
+    // blocks that have a processing pipeline (delay) to warm up before inputs
+    // are fed through the chain
+    for (size_t i = 0; i < 20480; ++i) {
+        chain.tick();
+        chain.output(sample);
+    }
+
     while (outputCount < numBits) {
         if (chain.getFIFOUtilization() < 0.5) {
             sample.type = IO_TYPE_BIT;
