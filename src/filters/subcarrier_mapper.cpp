@@ -9,8 +9,7 @@ SubcarrierMapper::SubcarrierMapper(MCS mcs) :
     m_state(WAITING_FOR_INPUT),
     m_output(),
     m_shouldOutput(false),
-    m_shortPreamble(mcs.getNumSubCarriers()),
-    m_longPreamble(mcs.getNumSubCarriers()),
+    m_preamble(mcs.getNumSubCarriers() * 2),
     m_preambleIdx(0),
     m_subSymbolCount(0)
 {
@@ -19,91 +18,64 @@ SubcarrierMapper::SubcarrierMapper(MCS mcs) :
 
 void SubcarrierMapper::initializePreamble()
 {
-    size_t preambleSize = m_shortPreamble.size(); // both preamble vectors are
+    size_t symbolSize = m_preamble.size() / 2; // both preamble vectors are
 
     // the same size
 
-    for (size_t i = 0; i < preambleSize; ++i) {
-        m_shortPreamble[i].setFormat(FFT_INPUT_FORMAT);
-        m_shortPreamble[i].set(0.0, 0.0);
-        m_longPreamble[i].setFormat(FFT_INPUT_FORMAT);
-        m_longPreamble[i].set(0.0, 0.0);
+    for (size_t i = 0; i < m_preamble.size(); ++i) {
+        m_preamble[i].setFormat(FFT_INPUT_FORMAT);
+        m_preamble[i].set(0.0, 0.0);
     }
     auto g =
         std::bind(std::uniform_int_distribution<unsigned>(0, 1), std::mt19937());
 
-    for (size_t i = 0; i < (preambleSize >> 2); ++i) {
+    for (size_t i = 0; i < (symbolSize >> 1); ++i) {
         int val = (g() << 1) - 1;
-        m_shortPreamble[i * 4].real(static_cast<double>(val) * 2.0);
+        m_preamble[i * 2].real(static_cast<double>(val) * M_SQRT2);
     }
 
-    for (size_t i = 0; i < (preambleSize >> 1); ++i) {
+    for (size_t i = 0; i < (symbolSize >> 2); ++i) {
         int val = (g() << 1) - 1;
-        m_longPreamble[i * 2].real(static_cast<double>(val) * M_SQRT2);
+        m_preamble[symbolSize + i * 4].real(static_cast<double>(val) * 2.0);
     }
 
     //    for (size_t i = 0; i < preambleSize; ++i) {
-    //        std::cout << i << ": " << m_shortPreamble[i] << std::endl;
+    //        std::cout << i << ": " << m_preamble[i] << std::endl;
     //    }
 }
 
-SLFixComplex SubcarrierMapper::getNextShortPreambleSymbol(bool& finished)
+SLFixComplex SubcarrierMapper::getNextPreambleSymbol(bool& finished)
 {
     size_t idx = m_preambleIdx;
 
     finished = false;
 
-    if (++m_preambleIdx >= m_shortPreamble.size()) {
+    if (++m_preambleIdx >= m_preamble.size()) {
         m_preambleIdx = 0;
         finished      = true;
     }
-    return m_shortPreamble[idx];
-}
-
-SLFixComplex SubcarrierMapper::getNextLongPreambleSymbol(bool& finished)
-{
-    size_t idx = m_preambleIdx;
-
-    finished = false;
-
-    if (++m_preambleIdx >= m_longPreamble.size()) {
-        m_preambleIdx = 0;
-        finished      = true;
-    }
-    return m_longPreamble[idx];
+    return m_preamble[idx];
 }
 
 void SubcarrierMapper::tick()
 {
     switch (m_state) {
     case WAITING_FOR_INPUT:
-
-        if (m_fifo.size() > 0) {
-            m_state = OUTPUT_SHORT_PREAMBLE;
-            assert(m_preambleIdx == 0);
-        }
-        break;
-
-    case OUTPUT_SHORT_PREAMBLE:
     {
-        bool sent_short_preamble;
-        m_output       = getNextShortPreambleSymbol(sent_short_preamble);
-        m_shouldOutput = true;
-
-        if (sent_short_preamble) {
-            m_state = OUTPUT_LONG_PREAMBLE;
+        if (m_fifo.size() > 0) {
+            m_state = OUTPUT_PREAMBLE;
             assert(m_preambleIdx == 0);
         }
         break;
     }
 
-    case OUTPUT_LONG_PREAMBLE:
+    case OUTPUT_PREAMBLE:
     {
-        bool sent_long_preamble;
-        m_output       = getNextLongPreambleSymbol(sent_long_preamble);
+        bool sent_preamble;
+        m_output       = getNextPreambleSymbol(sent_preamble);
         m_shouldOutput = true;
 
-        if (sent_long_preamble) {
+        if (sent_preamble) {
             m_state = OUTPUT_SYMBOLS;
             assert(m_preambleIdx == 0);
             assert(m_subSymbolCount == 0);
@@ -112,7 +84,7 @@ void SubcarrierMapper::tick()
     }
 
     case OUTPUT_SYMBOLS:
-
+    {
         if (m_fifo.size() > 0) {
             filter_io_t sample = m_fifo.front();
             m_fifo.pop_front();
@@ -127,13 +99,14 @@ void SubcarrierMapper::tick()
                 if (m_fifo.size() > 0) {
                     // we already have another frame so jump straight to
                     // preamble so we don't skip a beat
-                    m_state = OUTPUT_SHORT_PREAMBLE;
+                    m_state = OUTPUT_PREAMBLE;
                 } else {
                     m_state = WAITING_FOR_INPUT;
                 }
             }
         }
         break;
+    }
     }
 }
 

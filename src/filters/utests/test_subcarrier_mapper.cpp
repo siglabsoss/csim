@@ -43,12 +43,12 @@ CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
     std::vector<ComplexDouble> expectedPreambleTones(totalPreambleLength);
 
     for (size_t i = 0; i < totalPreambleLength / 2; ++i) {
-        // The short preamble repeats four times in time within an
-        // OFDM symbol. This is because we loaded every
-        // fourth subchannel with a non-zero value
-        if (i % 4 == 0) {
+        // The first symbol repeats twice in time within an OFDM
+        // symbol. This is because we loaded every
+        // second subchannel with a non-zero value
+        if (i % 2 == 0) {
             int val = (g() << 1) - 1;
-            expectedPreambleTones[i].real(static_cast<double>(val) * 2.0);
+            expectedPreambleTones[i].real(static_cast<double>(val) * M_SQRT2);
         } else {
             expectedPreambleTones[i].real(0.0);
         }
@@ -56,12 +56,12 @@ CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
     }
 
     for (size_t i = totalPreambleLength / 2; i < totalPreambleLength; ++i) {
-        // The long preamble repeats twice in time within an OFDM
-        // symbol. This is because we loaded every
-        // second subchannel with a non-zero value
-        if (i % 2 == 0) {
+        // The second symbol repeats four times in time within an
+        // OFDM symbol. This is because we loaded every
+        // fourth subchannel with a non-zero value
+        if (i % 4 == 0) {
             int val = (g() << 1) - 1;
-            expectedPreambleTones[i].real(static_cast<double>(val) * M_SQRT2);
+            expectedPreambleTones[i].real(static_cast<double>(val) * 2.0);
         } else {
             expectedPreambleTones[i].real(0.0);
         }

@@ -10,29 +10,28 @@
 class SubcarrierMapper : public FilterChainElement
 {
 public:
+
     enum state_t {
         WAITING_FOR_INPUT = 0,
-        OUTPUT_SHORT_PREAMBLE,
-        OUTPUT_LONG_PREAMBLE,
+        OUTPUT_PREAMBLE,
         OUTPUT_SYMBOLS
     };
     SubcarrierMapper(MCS mcs);
-    bool output(filter_io_t &data) override;
+    bool output(filter_io_t& data) override;
     void tick() override;
 
 private:
+
     void         initializePreamble();
 
-    SLFixComplex getNextShortPreambleSymbol(bool &finished);
-    SLFixComplex getNextLongPreambleSymbol(bool &finished);
+    SLFixComplex getNextPreambleSymbol(bool& finished);
 
-    MCS                       m_mcs;
-    state_t                   m_state;
-    filter_io_t               m_output;
-    bool                      m_shouldOutput;
+    MCS m_mcs;
+    state_t m_state;
+    filter_io_t m_output;
+    bool m_shouldOutput;
 
-    std::vector<SLFixComplex> m_shortPreamble;
-    std::vector<SLFixComplex> m_longPreamble;
+    std::vector<SLFixComplex> m_preamble;
     size_t                    m_preambleIdx;
     size_t                    m_subSymbolCount;
 };
