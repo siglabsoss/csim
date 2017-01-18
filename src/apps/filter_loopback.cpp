@@ -81,6 +81,7 @@ static size_t runFilters(FilterChain& chain,
                 if (++printCount >= outputsPerPrint) {
                     std::cout << outputCount << " bits sent with " <<
                     numBitErrors << " errors." << std::endl;
+                    chain.printTimingReport();
                     printCount = 0;
                 }
             }
@@ -173,7 +174,7 @@ static FilterChain constructLoopbackChain(double             noiseVar,
                                                          down2Coeffs,
                                                          down5Coeffs);
 
-    OFDMFrameSync *fs = new OFDMFrameSync(CP_SIZE, mcs);
+    OFDMFrameSync *fs = new OFDMFrameSync(CP_SIZE, 512, mcs);
 
     // FrameSync *fs        = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay, mcs);
     ChannelEqualizer *ce = new ChannelEqualizer(Hf);
@@ -241,6 +242,9 @@ static FilterChain constructLoopbackChain(double             noiseVar,
                             *mapper + *punc +
                             *encode + *scramTx;
 #endif // ifdef SHOULD_PROBE_FILTERS
+
+
+    testChain.init();
 
     return testChain;
 }
