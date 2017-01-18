@@ -3,6 +3,8 @@ set(SIGUTILS_SOURCES
     radio_utils.cpp
     scrambler.cpp
     mcs.cpp
+    timer.cpp
+    filter_timer.cpp
     utils.cpp)
 
 add_library(sigutilsobj OBJECT ${SIGUTILS_SOURCES})
