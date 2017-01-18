@@ -6,30 +6,42 @@ FilterChain::FilterChain() :
     m_head(nullptr),
     m_output(),
     m_outputReady(false),
-    m_maxFIFOUtilization(0.0)
+    m_maxFIFOUtilization(0.0),
+    m_didInit(false)
 {}
 
 FilterChain::FilterChain(FilterChain && other) :
     m_head(std::move(other.m_head)),
     m_output(other.m_output),
     m_outputReady(other.m_outputReady),
-    m_maxFIFOUtilization(other.m_maxFIFOUtilization)
+    m_maxFIFOUtilization(other.m_maxFIFOUtilization),
+    m_didInit(other.m_didInit)
 {}
 
 FilterChain::FilterChain(const FilterChainElement& other) :
     m_head(nullptr),
     m_output(),
     m_outputReady(false),
-    m_maxFIFOUtilization(0.0)
+    m_maxFIFOUtilization(0.0),
+    m_didInit(false)
 {
     (void)this->operator=(other);
 }
 
 void            FilterChain::init()
-{}
-
-bool            FilterChain::input(const filter_io_t& data)
 {
+    for (FilterChainElement *current = m_head.get(); current != nullptr;
+         current = current->m_next.get()) {
+        // Construct a timer for each filter chain element for profiling
+        m_timers.push_back(std::unique_ptr<FilterTimer>(new FilterTimer()));
+    }
+    m_didInit = true;
+}
+
+bool FilterChain::input(const filter_io_t& data)
+{
+    assert(m_didInit);
+
     if (m_head == nullptr) {
         return false;
     }
@@ -54,8 +66,12 @@ void FilterChain::tick()
     size_t elementCounter      = 0;
     size_t maxFIFOElementCount = 0;
 
+    m_timers[elementCounter]->start();
+
     for (FilterChainElement *current = m_head.get(); current != nullptr;
          current = current->m_next.get()) {
+        // Star timer for profiling
+
         // Tick the current element
         current->tick();
 
@@ -64,10 +80,13 @@ void FilterChain::tick()
         // otherwise forward the output to the next element first
         bool didOutput = current->output(m_output);
 
+        m_timers[elementCounter]->stop();
+
         if (didOutput) {
             if (current->m_next == nullptr) {
                 m_outputReady = true; // last block in the chain output data
             } else {
+                m_timers[elementCounter + 1]->start();
                 bool didInput = current->m_next->input(m_output);
 
                 if (!didInput) {
@@ -75,6 +94,10 @@ void FilterChain::tick()
                             current->m_next->getName().c_str(),
                             current->getName().c_str());
                 }
+            }
+        } else {
+            if (current->m_next != nullptr) {
+                m_timers[elementCounter + 1]->start();
             }
         }
 
@@ -107,4 +130,22 @@ FilterChain& FilterChain::operator=(const FilterChainElement& rhs)
 double FilterChain::getFIFOUtilization() const
 {
     return m_maxFIFOUtilization;
+}
+
+void FilterChain::printTimingReport() const
+{
+    double total = 0.0;
+
+    for (size_t i = 0; i < m_timers.size(); ++i) {
+        total += m_timers[i]->getAverage();
+    }
+
+    size_t i = 0;
+
+    for (FilterChainElement *current = m_head.get(); current != nullptr;
+         current = current->m_next.get()) {
+        std::cout << current->getName() << ": " << m_timers[i]->getAverage() <<
+        " " << 100 * m_timers[i]->getAverage() / total << "%" << std::endl;
+        i++;
+    }
 }
