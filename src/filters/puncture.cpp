@@ -2,7 +2,7 @@
 #include <cassert>
 
 Puncture::Puncture(MCS mcs) :
-        FilterChainElement("Puncture", mcs.getNumCodeWords() * mcs.getCodeWordLength()),
+        FilterChainElement("PUNCTURE", mcs.getNumCodeWords() * mcs.getCodeWordLength()),
         m_mcs(mcs),
         m_buffer(),
         m_doPuncture(mcs.getNumPuncOrRepBits() >= 0),

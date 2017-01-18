@@ -9,9 +9,14 @@ class OFDMFrameSync : public FilterChainElement
 public:
 
     OFDMFrameSync(size_t cpLen,
+                  size_t autoCorrLen,
                   MCS    mcs);
-    bool output(filter_io_t& data) override;
-    void tick(void) override;
+    bool   output(filter_io_t& data) override;
+    void   tick(void) override;
+
+    double getTimingMetric() const;
+    size_t getPeakDetectionCount() const;
+    size_t getFrameDetectionCount() const;
 
 private:
 
@@ -25,9 +30,13 @@ private:
         STATE_PASS_SYMBOL
     };
     size_t m_cpLen;
+    size_t m_autoCorrLen;
     MCS    m_mcs;
+    bool   m_didInit;
 
-    bool m_didInit;
+    // Performance / profiling variables
+    size_t m_peakDetectionCount;
+    size_t m_frameDetectionCount;
 
     // Persistent values used by peak finding logic
     ssize_t m_findPeakCounter;

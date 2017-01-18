@@ -4,7 +4,7 @@
 #include <random>
 
 SubcarrierMapper::SubcarrierMapper(MCS mcs) :
-    FilterChainElement("SubcarrierMapper", mcs.getNumSubCarriers() * 4),
+    FilterChainElement("SUBCARRIER_MAPPER", mcs.getNumSubCarriers() * 4),
     m_mcs(mcs),
     m_state(WAITING_FOR_INPUT),
     m_output(),

@@ -16,11 +16,15 @@ static constexpr double TIMING_METRIC_MIN_PEAK = 0.1;
 static constexpr double POWER_EST_MIN_THRESHOLD = 0.0;
 
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
+                             size_t autoCorrLen,
                              MCS    mcs) :
-    FilterChainElement("FrameSync", MAX_TIMING_METRIC_HISTORY * 10),
+    FilterChainElement("FRAME_SYNC", MAX_TIMING_METRIC_HISTORY * 10),
     m_cpLen(cpLen),
+    m_autoCorrLen(autoCorrLen),
     m_mcs(mcs),
     m_didInit(false),
+    m_peakDetectionCount(0),
+    m_frameDetectionCount(0),
     m_findPeakCounter(-1),
     m_lastPeakIdx(0),
     m_P(0.0, 0.0),
@@ -40,7 +44,7 @@ OFDMFrameSync::OFDMFrameSync(size_t cpLen,
 
 void OFDMFrameSync::initializeSlidingCalculations()
 {
-    const size_t L = m_mcs.getNumSubCarriers() / 2; // length of repeating pilot
+    const size_t L = m_autoCorrLen; // length of repeating pilot
 
     for (size_t i = 0; i < L; ++i) {
         size_t end         = m_fifo.size() - 1;
@@ -53,7 +57,7 @@ void OFDMFrameSync::initializeSlidingCalculations()
 
 void OFDMFrameSync::updateSlidingCalculations()
 {
-    const size_t L = m_mcs.getNumSubCarriers() / 2; // length of repeating pilot
+    const size_t L = m_autoCorrLen; // length of repeating pilot
     size_t end     = m_fifo.size() - 1;
 
     SLFixComplex oldest = m_fifo[end - (2 * L)].fc;
@@ -170,6 +174,7 @@ ssize_t OFDMFrameSync::findPeak()
         } while ((tm >= (0.9 * m_peak)) && (rightIdx <= end));
 
         foundRight = (rightIdx <= end);
+        m_peakDetectionCount++;
 
         if (foundLeft && foundRight) {
             ssize_t frameStartDelay = leftIdx + (rightIdx - leftIdx) / 2;
@@ -200,7 +205,7 @@ ssize_t OFDMFrameSync::findPeak()
 void OFDMFrameSync::tick()
 {
     // Wait until we have more than a symbol's worth of samples
-    if (m_fifo.size() > m_mcs.getNumSubCarriers()) {
+    if (m_fifo.size() > m_autoCorrLen * 2) {
         if (m_didInit == false) {
             initializeSlidingCalculations();
             m_didInit = true;
@@ -212,7 +217,7 @@ void OFDMFrameSync::tick()
         }
     }
 
-    if (m_fifo.size() < m_mcs.getNumSubCarriers() + MAX_TIMING_METRIC_HISTORY) {
+    if (m_fifo.size() < m_autoCorrLen * 2 + MAX_TIMING_METRIC_HISTORY) {
         return;
     }
 
@@ -295,9 +300,11 @@ void OFDMFrameSync::tick()
                 " OFDM symbols, which makes up a full frame" << std::endl;
                 m_state         = STATE_FINDING_PEAK;
                 m_symbolCounter = 0;
+                m_frameDetectionCount++;
             } else {
-                std::cout << "***Passed OFDM symbol of " << m_sampleCounter <<
-                " samples" << std::endl;
+                // std::cout << "***Passed OFDM symbol of " << m_sampleCounter
+                // <<
+                // " samples" << std::endl;
                 m_state = STATE_DROP_PREFIX;
             }
             m_sampleCounter = 0;
@@ -317,4 +324,19 @@ bool OFDMFrameSync::output(filter_io_t& data)
         return true;
     }
     return false;
+}
+
+double OFDMFrameSync::getTimingMetric() const
+{
+    return m_timingMetrics.back();
+}
+
+size_t OFDMFrameSync::getPeakDetectionCount() const
+{
+    return m_peakDetectionCount;
+}
+
+size_t OFDMFrameSync::getFrameDetectionCount() const
+{
+    return m_frameDetectionCount;
 }

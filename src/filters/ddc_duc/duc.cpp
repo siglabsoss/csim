@@ -3,7 +3,7 @@
 DigitalUpConverter::DigitalUpConverter(double                     freq,
                                        const std::vector<double>& up2Coeffs,
                                        const std::vector<double>& up5Coeffs) :
-    FilterChainElement("DDC"),
+    FilterChainElement("DUC"),
     _nco(freq),
     _up2FIR(nullptr),
     _up5FIR(nullptr),
