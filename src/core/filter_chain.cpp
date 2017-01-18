@@ -47,6 +47,7 @@ bool FilterChain::input(const filter_io_t& data)
     }
 
     bool didInput = m_head->input(data);
+    m_timers[0]->start(); // Start the profiling timer for the first element
     return didInput;
 }
 
@@ -66,12 +67,12 @@ void FilterChain::tick()
     size_t elementCounter      = 0;
     size_t maxFIFOElementCount = 0;
 
-    m_timers[elementCounter]->start();
+    if (!m_timers[elementCounter]->isStarted()) {
+        m_timers[elementCounter]->start();
+    }
 
     for (FilterChainElement *current = m_head.get(); current != nullptr;
          current = current->m_next.get()) {
-        // Star timer for profiling
-
         // Tick the current element
         current->tick();
 
@@ -144,8 +145,13 @@ void FilterChain::printTimingReport() const
 
     for (FilterChainElement *current = m_head.get(); current != nullptr;
          current = current->m_next.get()) {
-        std::cout << current->getName() << ": " << m_timers[i]->getAverage() <<
-        " " << 100 * m_timers[i]->getAverage() / total << "%" << std::endl;
+        const std::string name = current->getName();
+        std::cout << name << ":";
+
+        for (ssize_t j = 0; j < static_cast<ssize_t>(50 - name.length()); ++j) {
+            std::cout << " ";
+        }
+        std::cout << 100 * m_timers[i]->getAverage() / total << "%" << std::endl;
         i++;
     }
 }
