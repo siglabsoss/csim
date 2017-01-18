@@ -14,10 +14,12 @@ public:
     void   start();
     void   stop();
     double getAverage() const;
+    bool   isStarted() const;
 
 private:
 
     CircularBuffer<double> m_timings;
     double                 m_sum;
     Timer m_timer;
+    bool  m_started;
 };
