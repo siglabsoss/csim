@@ -5,18 +5,11 @@
 #include <utils/utils.hpp>
 #include <iomanip>
 
-CSIM_TEST_SUITE_BEGIN(validateOFDMFrameSync)
 
-// XXX make actual assertions
-CSIM_TEST_CASE(DID_DETECT_PILOT_AND_PASS_FRAME)
+static void runSamplesThrough(const std::string& inputFile, OFDMFrameSync& fs)
 {
     std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>(
-        "./data/frame_sync/ofdm_frame_captures/10_frames_n5db.csv");
-
-    std::cout << std::setprecision(52);
-
-    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 3888, 1024);
-    OFDMFrameSync fs(100, mcs);
+        inputFile);
 
     filter_io_t sample;
 
@@ -26,8 +19,6 @@ CSIM_TEST_CASE(DID_DETECT_PILOT_AND_PASS_FRAME)
         sample.fc.real(inputs[i].real());
         sample.fc.imag(inputs[i].imag());
 
-        // std::cout << i << " - " << inputs[i] << " ---- " << sample <<
-        // std::endl;
         fs.input(sample);
 
         for (size_t j = 0; j < 10; ++j) {
@@ -35,6 +26,46 @@ CSIM_TEST_CASE(DID_DETECT_PILOT_AND_PASS_FRAME)
             fs.output(sample);
         }
     }
+}
+
+CSIM_TEST_SUITE_BEGIN(validateOFDMFrameSync)
+
+
+// CSIM_TEST_CASE(DID_DETECT_CORRECT_NUMBER_OF_FRAMES_HIGH_SNR)
+// {
+//     constexpr size_t symbolLen = 1024;
+//     constexpr size_t cpLen     = 100;
+//
+//     MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 3888, symbolLen);
+//     OFDMFrameSync fs(cpLen, symbolLen / 2, mcs);
+//
+//
+//
+//
+//
+//
+// runSamplesThrough("./data/frame_sync/ofdm_frame_captures/10_frames_60db.csv",
+//                       fs);
+//
+//     // The sample input has the start of the 11th frame. Enough to detect
+//     // an extra peak, but not enough to fully detect the 10th frame
+//     BOOST_CHECK_EQUAL(fs.getPeakDetectionCount(),  21);
+//     BOOST_CHECK_EQUAL(fs.getFrameDetectionCount(), 9);
+// }
+
+CSIM_TEST_CASE(DID_DETECT_CORRECT_NUMBER_OF_FRAMES_LOW_SNR)
+{
+    constexpr size_t symbolLen = 1024;
+    constexpr size_t cpLen     = 100;
+
+    MCS mcs(MCS::ONE_HALF_RATE, MCS::MOD_BPSK, 3888, symbolLen);
+    OFDMFrameSync fs(cpLen, symbolLen / 2, mcs);
+
+    runSamplesThrough("./data/frame_sync/ofdm_frame_captures/10_frames_0db.csv",
+                      fs);
+
+    BOOST_CHECK_EQUAL(fs.getPeakDetectionCount(),  21);
+    BOOST_CHECK_EQUAL(fs.getFrameDetectionCount(), 9);
 }
 
 CSIM_TEST_SUITE_END()
