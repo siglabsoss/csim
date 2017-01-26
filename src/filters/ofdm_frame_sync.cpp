@@ -18,7 +18,8 @@ static constexpr double POWER_EST_MIN_THRESHOLD = 0.0;
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
                              size_t autoCorrLen,
                              MCS    mcs) :
-    FilterChainElement("FRAME_SYNC", MAX_TIMING_METRIC_HISTORY * 10),
+    FilterChainElement("FRAME_SYNC",
+                       (autoCorrLen + MAX_TIMING_METRIC_HISTORY) * 2),
     m_cpLen(cpLen),
     m_autoCorrLen(autoCorrLen),
     m_mcs(mcs),
@@ -82,7 +83,11 @@ void OFDMFrameSync::updateSlidingCalculations()
     // } else {
     //     timingMetric = std::norm(m_P) / powerEst;
     // }
-    timingMetric = std::norm(m_P) / powerEst;
+    if (powerEst == 0.0) {
+        timingMetric = 0.0;
+    } else {
+        timingMetric = std::norm(m_P) / powerEst;
+    }
     m_timingMetrics.push_back(timingMetric);
 }
 
