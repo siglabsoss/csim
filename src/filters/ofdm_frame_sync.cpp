@@ -1,27 +1,25 @@
 #include <filters/ofdm_frame_sync.hpp>
 
-static constexpr size_t MIN_PLATEAU_WIDTH         = 2;
-static constexpr size_t PEAK_FINDING_WINDOW_WIDTH = 512 + 100;
-
-// Timing metric history must be larger than the peak-finding window width
-static constexpr size_t MAX_TIMING_METRIC_HISTORY = PEAK_FINDING_WINDOW_WIDTH *
-                                                    2;
-
 // This is a threshold placed on a normalized value, thus it does not depend
 // on the power level of the input signal.
-static constexpr double TIMING_METRIC_MIN_PEAK = 0.1;
+static constexpr double TIMING_METRIC_MIN_PEAK = 5.0e-5;
 
 // This threshold depends on the power level of the input signal and will need
 // to change if some kind of AGC block comes earlier in the chain.
 static constexpr double POWER_EST_MIN_THRESHOLD = 0.0;
 
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
-                             size_t autoCorrLen,
+                             size_t autoCorrSymbolLen,
+                             size_t numTrainingSym,
                              MCS    mcs) :
-    FilterChainElement("FRAME_SYNC",
-                       (autoCorrLen + MAX_TIMING_METRIC_HISTORY) * 2),
+    FilterChainElement("FRAME_SYNC", 4 * (autoCorrSymbolLen *
+                                          (cpLen + mcs.getNumSubCarriers()))),
     m_cpLen(cpLen),
-    m_autoCorrLen(autoCorrLen),
+    m_autoCorrSymbolLen(autoCorrSymbolLen),
+    m_numTrainingSym(numTrainingSym),
+    m_peakFindingWindowWidth(autoCorrSymbolLen *
+                             (cpLen + mcs.getNumSubCarriers()) / 2),
+    m_timingMetricMaxHistory(2 * m_peakFindingWindowWidth),
     m_mcs(mcs),
     m_didInit(false),
     m_peakDetectionCount(0),
@@ -33,7 +31,7 @@ OFDMFrameSync::OFDMFrameSync(size_t cpLen,
     m_peak(0.0),
     m_wasAboveThreshold(false),
     m_didFindPeak(false),
-    m_timingMetrics(MAX_TIMING_METRIC_HISTORY),
+    m_timingMetrics(m_timingMetricMaxHistory),
     m_state(STATE_FINDING_PEAK),
     m_sampleCounter(0),
     m_symbolCounter(0),
@@ -45,7 +43,7 @@ OFDMFrameSync::OFDMFrameSync(size_t cpLen,
 
 void OFDMFrameSync::initializeSlidingCalculations()
 {
-    const size_t L = m_autoCorrLen; // length of repeating pilot
+    const size_t L = m_autoCorrSymbolLen * (m_cpLen + m_mcs.getNumSubCarriers());
 
     for (size_t i = 0; i < L; ++i) {
         size_t end         = m_fifo.size() - 1;
@@ -58,7 +56,7 @@ void OFDMFrameSync::initializeSlidingCalculations()
 
 void OFDMFrameSync::updateSlidingCalculations()
 {
-    const size_t L = m_autoCorrLen; // length of repeating pilot
+    const size_t L = m_autoCorrSymbolLen * (m_cpLen + m_mcs.getNumSubCarriers());
     size_t end     = m_fifo.size() - 1;
 
     SLFixComplex oldest = m_fifo[end - (2 * L)].fc;
@@ -123,7 +121,7 @@ ssize_t OFDMFrameSync::findPeak()
             if (!m_wasAboveThreshold) {
                 m_wasAboveThreshold = true;
                 std::cout << "***Restarting peak detection timer " << std::endl;
-                m_findPeakCounter = PEAK_FINDING_WINDOW_WIDTH;
+                m_findPeakCounter = m_peakFindingWindowWidth;
                 m_peak            = 0.0;
             }
         }
@@ -185,7 +183,7 @@ ssize_t OFDMFrameSync::findPeak()
             ssize_t frameStartDelay = leftIdx + (rightIdx - leftIdx) / 2;
 
             std::cout << "***Frame start is set to " <<
-            MAX_TIMING_METRIC_HISTORY - frameStartDelay <<
+            m_timingMetricMaxHistory - frameStartDelay <<
             " samples ago. Peak timing metric was " << m_peak <<
             std::endl;
             std::cout << "leftIdx = " << leftIdx << " rightIdx = " << rightIdx <<
@@ -196,7 +194,7 @@ ssize_t OFDMFrameSync::findPeak()
             std::cout <<
             "***Did not find 90% drop off point on both sides of peak using peak at "
                       <<
-            MAX_TIMING_METRIC_HISTORY - peakIdx << " samples ago" << std::endl;
+            m_timingMetricMaxHistory - peakIdx << " samples ago" << std::endl;
             retval = peakIdx;
         }
 
@@ -210,7 +208,9 @@ ssize_t OFDMFrameSync::findPeak()
 void OFDMFrameSync::tick()
 {
     // Wait until we have more than a symbol's worth of samples
-    if (m_fifo.size() > m_autoCorrLen * 2) {
+    const size_t L = m_autoCorrSymbolLen * (m_cpLen + m_mcs.getNumSubCarriers());
+
+    if (m_fifo.size() > L * 2) {
         if (m_didInit == false) {
             initializeSlidingCalculations();
             m_didInit = true;
@@ -222,12 +222,13 @@ void OFDMFrameSync::tick()
         }
     }
 
-    if (m_fifo.size() < m_autoCorrLen * 2 + MAX_TIMING_METRIC_HISTORY) {
+    if (m_fifo.size() < L * 2 + m_timingMetricMaxHistory) {
         return;
     }
 
-    static const size_t TOTAL_PREAMBLE_LENGTH = m_mcs.getNumSubCarriers() * 2 +
-                                                m_cpLen * 2;
+    static const size_t TOTAL_PREAMBLE_LENGTH = m_numTrainingSym *
+                                                (m_mcs.getNumSubCarriers() +
+                                                 m_cpLen);
 
     ssize_t frameOffset = findPeak();
 
