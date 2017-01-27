@@ -2,25 +2,22 @@
 
 // This is a threshold placed on a normalized value, thus it does not depend
 // on the power level of the input signal.
-static constexpr double TIMING_METRIC_MIN_PEAK = 5.0e-5;
+static constexpr double TIMING_METRIC_MIN_PEAK = 0.5;
 
 // This threshold depends on the power level of the input signal and will need
 // to change if some kind of AGC block comes earlier in the chain.
 static constexpr double POWER_EST_MIN_THRESHOLD = 0.0;
 
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
-                             size_t autoCorrSymbolLen,
                              size_t numTrainingSym,
                              MCS    mcs) :
-    FilterChainElement("FRAME_SYNC", 4 * (autoCorrSymbolLen *
-                                          (cpLen + mcs.getNumSubCarriers()))),
+    FilterChainElement("FRAME_SYNC", 4 * (numTrainingSym) * (cpLen + mcs.getNumSubCarriers())),
     m_cpLen(cpLen),
-    m_autoCorrSymbolLen(autoCorrSymbolLen),
     m_numTrainingSym(numTrainingSym),
-    m_peakFindingWindowWidth(autoCorrSymbolLen *
-                             (cpLen + mcs.getNumSubCarriers()) / 2),
+    m_peakFindingWindowWidth(512 + 100),
     m_timingMetricMaxHistory(2 * m_peakFindingWindowWidth),
     m_mcs(mcs),
+    m_L((numTrainingSym / 2) * (cpLen + mcs.getNumSubCarriers())),
     m_didInit(false),
     m_peakDetectionCount(0),
     m_frameDetectionCount(0),
@@ -43,12 +40,10 @@ OFDMFrameSync::OFDMFrameSync(size_t cpLen,
 
 void OFDMFrameSync::initializeSlidingCalculations()
 {
-    const size_t L = m_autoCorrSymbolLen * (m_cpLen + m_mcs.getNumSubCarriers());
-
-    for (size_t i = 0; i < L; ++i) {
+    for (size_t i = 0; i < m_L; ++i) {
         size_t end         = m_fifo.size() - 1;
-        SLFixComplex first = m_fifo[end - (2 * L) + i].fc;
-        SLFixComplex last  = m_fifo[end - (1 * L) + i].fc;
+        SLFixComplex first = m_fifo[end - (2 * m_L) + i].fc;
+        SLFixComplex last  = m_fifo[end - (1 * m_L) + i].fc;
         m_P = m_P + (*first * last).toComplexDouble();
         m_R = m_R + std::norm(last.toComplexDouble());
     }
@@ -56,12 +51,11 @@ void OFDMFrameSync::initializeSlidingCalculations()
 
 void OFDMFrameSync::updateSlidingCalculations()
 {
-    const size_t L = m_autoCorrSymbolLen * (m_cpLen + m_mcs.getNumSubCarriers());
-    size_t end     = m_fifo.size() - 1;
+    size_t end = m_fifo.size() - 1;
 
-    SLFixComplex oldest = m_fifo[end - (2 * L)].fc;
-    SLFixComplex old    = m_fifo[end - (1 * L)].fc;
-    SLFixComplex newest = m_fifo[end - (0 * L)].fc;
+    SLFixComplex oldest = m_fifo[end - (2 * m_L)].fc;
+    SLFixComplex old    = m_fifo[end - (1 * m_L)].fc;
+    SLFixComplex newest = m_fifo[end - (0 * m_L)].fc;
 
     // TODO fixed point calculations and avoid the division
     // By adding the newest element of the summation and subtracting out the
@@ -207,11 +201,9 @@ ssize_t OFDMFrameSync::findPeak()
 
 void OFDMFrameSync::tick()
 {
-    // Wait until we have more than a symbol's worth of samples
-    const size_t L = m_autoCorrSymbolLen * (m_cpLen + m_mcs.getNumSubCarriers());
-
-    if (m_fifo.size() > L * 2) {
+    if (m_fifo.size() > m_L * 2) {
         if (m_didInit == false) {
+            std::cout << "Frame Sync FIFO has " << m_L * 2 << " samples. Initializing" << std::endl;
             initializeSlidingCalculations();
             m_didInit = true;
         } else {
@@ -222,7 +214,7 @@ void OFDMFrameSync::tick()
         }
     }
 
-    if (m_fifo.size() < L * 2 + m_timingMetricMaxHistory) {
+    if (m_fifo.size() < (m_L * 2) + m_timingMetricMaxHistory) {
         return;
     }
 

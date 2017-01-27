@@ -9,7 +9,6 @@ class OFDMFrameSync : public FilterChainElement
 public:
 
     OFDMFrameSync(size_t cpLen,
-                  size_t autoCorrSymbolLen,
                   size_t numTrainingSym,
                   MCS    mcs);
     bool   output(filter_io_t& data) override;
@@ -32,11 +31,11 @@ private:
     };
 
     const size_t m_cpLen;
-    const size_t m_autoCorrSymbolLen;
     const size_t m_numTrainingSym;
     const size_t m_peakFindingWindowWidth;
     const size_t m_timingMetricMaxHistory;
     const MCS    m_mcs;
+    const size_t m_L;
 
     bool m_didInit;
 
