@@ -28,10 +28,11 @@
 #include <3rd/json/json.h>
 #include <iomanip>
 
-static constexpr double MIXER_FREQ          = 0.16;
-static constexpr size_t FFT_SIZE            = 1024;
-static constexpr size_t CP_SIZE             = 100;
-static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
+static constexpr double MIXER_FREQ           = 0.16;
+static constexpr size_t FFT_SIZE             = 1024;
+static constexpr size_t CP_SIZE              = 100;
+static constexpr size_t DUC_UPSAMPLE_FACTOR  = 10;
+static constexpr size_t NUM_TRAINING_SYMBOLS = 2;
 
 #define SHOULD_PROBE_FILTERS
 
@@ -50,7 +51,7 @@ static size_t runFilters(FilterChain& chain,
     // "Prime the pump" by warming up the filter chain. This can help for
     // blocks that have a processing pipeline (delay) to warm up before inputs
     // are fed through the chain
-    for (size_t i = 0; i < 20480; ++i) {
+    for (size_t i = 0; i < (CP_SIZE + FFT_SIZE) * NUM_TRAINING_SYMBOLS; ++i) {
         chain.tick();
         chain.output(sample);
     }
@@ -148,8 +149,11 @@ static FilterChain constructLoopbackChain(double             noiseVar,
     LDPCEncode     *encode  = new LDPCEncode(G);
     Puncture *punc          = new Puncture(mcs);
     Mapper   *mapper        = new Mapper(mcs);
-    SubcarrierMapper *sm    = new SubcarrierMapper(mcs);
-    FFT *ifft               = new FFT(FFT_SIZE, true);
+    SubcarrierMapper *sm    = new SubcarrierMapper(mcs,
+                                                   2,
+                                                   0,
+                                                   NUM_TRAINING_SYMBOLS);
+    FFT *ifft = new FFT(FFT_SIZE, true);
     ifft->setOutputFormat(FFT_OUTPUT_WL,
                           1,
                           SLFixPoint::QUANT_RND_HALF_UP,
@@ -174,7 +178,9 @@ static FilterChain constructLoopbackChain(double             noiseVar,
                                                          down2Coeffs,
                                                          down5Coeffs);
 
-    OFDMFrameSync *fs = new OFDMFrameSync(CP_SIZE, 512, mcs);
+    OFDMFrameSync *fs = new OFDMFrameSync(CP_SIZE,
+                                          NUM_TRAINING_SYMBOLS,
+                                          mcs);
 
     // FrameSync *fs        = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay, mcs);
     ChannelEqualizer *ce = new ChannelEqualizer(Hf);
@@ -365,7 +371,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::cout << std::setprecision(52);
+    // std::cout << std::setprecision(52);
 
     std::srand(1473294057 + 1);
 
