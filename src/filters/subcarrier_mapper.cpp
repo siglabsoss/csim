@@ -7,7 +7,8 @@ SubcarrierMapper::SubcarrierMapper(MCS    mcs,
                                    size_t pilotSpacing,
                                    size_t initialPilotOfset,
                                    size_t symbolRep) :
-    FilterChainElement("SUBCARRIER_MAPPER", mcs.getNumSubCarriers() * 4),
+    FilterChainElement("SUBCARRIER_MAPPER", mcs.getNumSubCarriers() * symbolRep *
+                       2),
     m_mcs(mcs),
     m_pilotSpacing(pilotSpacing),
     m_initialPilotOffset(initialPilotOfset),
@@ -85,6 +86,8 @@ SLFixComplex SubcarrierMapper::getNextPreambleSymbol(bool& finished)
     finished = false;
 
     if (++m_preambleIdx >= m_preamble.size() * m_symbolRep) {
+        std::cout << "SENT " << m_preambleIdx <<
+        " PREAMBLE SYMBOLS, OUTPUTTING DATA SYMBOLS" << std::endl;
         m_preambleIdx = 0;
         finished      = true;
     }
