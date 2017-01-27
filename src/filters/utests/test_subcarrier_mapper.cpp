@@ -44,14 +44,15 @@ CSIM_TEST_SUITE_BEGIN(validateSubcarrierMapper)
 CSIM_TEST_CASE(OUTPUTS_PREAMBLE_BEFORE_SYMBOLS)
 {
     // We're going to say that 124 carriers are inactive (62 on each side of the
-    // spectrum)
+    // spectrum). This will determine how many output samples to expect after
+    // the preamble
     std::vector<bool> subMask(1024, false);
 
     for (size_t i = (1024 - 900) / 2; i < 1024 - ((1024 - 900) / 2); i++) {
         subMask[i] = true;
     }
 
-    size_t numPilotSymbols = 10;
+    size_t numPilotSymbols = 30;
 
     MCS mcs(MCS::FIVE_SIXTHS_RATE, MCS::MOD_QAM16, 4000, 1024, subMask);
     SubcarrierMapper sm(mcs, 2 /* pilot spacing */,
