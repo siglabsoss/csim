@@ -8,7 +8,7 @@ CyclicPrefix::CyclicPrefix(size_t N,
                            size_t ticksPerOutput,
                            MCS    mcs) :
     FilterChainElement("CYCLIC_PREFIX", mcs.getNumCodeWords() *
-                       mcs.getCodeWordLength() * 2),
+                       mcs.getCodeWordLength() * 20),
     m_len(cpLen),
     m_symbolLen(N),
     m_inputIdx(0),
