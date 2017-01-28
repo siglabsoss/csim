@@ -11,14 +11,17 @@ static constexpr double POWER_EST_MIN_THRESHOLD = 0.0;
 OFDMFrameSync::OFDMFrameSync(size_t cpLen,
                              size_t numTrainingSym,
                              MCS    mcs) :
-    FilterChainElement("FRAME_SYNC", 4 * (numTrainingSym) * (cpLen + mcs.getNumSubCarriers())),
+    FilterChainElement("FRAME_SYNC", 8 * (numTrainingSym) *
+                       (cpLen + mcs.getNumSubCarriers())),
     m_cpLen(cpLen),
     m_numTrainingSym(numTrainingSym),
-    m_peakFindingWindowWidth(512 + 100),
+    m_peakFindingWindowWidth(2048 + 100),
     m_timingMetricMaxHistory(2 * m_peakFindingWindowWidth),
     m_mcs(mcs),
     m_L((numTrainingSym / 2) * (cpLen + mcs.getNumSubCarriers())),
     m_didInit(false),
+    m_debugMode(false),
+    m_outputTimingMetric(false),
     m_peakDetectionCount(0),
     m_frameDetectionCount(0),
     m_findPeakCounter(-1),
@@ -91,9 +94,11 @@ ssize_t OFDMFrameSync::findPeak()
 
     // static size_t tmCount = 0;
 
-    // std::cout << timingMetric << "," << std::norm(m_P) <<
-    // "," << m_R * m_R <<
-    // std::endl;
+    if (m_outputTimingMetric) {
+        std::cout << timingMetric << "," << std::norm(m_P) <<
+        "," << m_R * m_R <<
+        std::endl;
+    }
 
     // static size_t tmCount = 0;
     //
@@ -203,7 +208,8 @@ void OFDMFrameSync::tick()
 {
     if (m_fifo.size() > m_L * 2) {
         if (m_didInit == false) {
-            std::cout << "Frame Sync FIFO has " << m_L * 2 << " samples. Initializing" << std::endl;
+            std::cout << "Frame Sync FIFO has " << m_L * 2 <<
+            " samples. Initializing" << std::endl;
             initializeSlidingCalculations();
             m_didInit = true;
         } else {
@@ -337,4 +343,14 @@ size_t OFDMFrameSync::getPeakDetectionCount() const
 size_t OFDMFrameSync::getFrameDetectionCount() const
 {
     return m_frameDetectionCount;
+}
+
+void OFDMFrameSync::setDebugMode(bool flag)
+{
+    m_debugMode = flag;
+}
+
+void OFDMFrameSync::setOutputTimingMetric(bool flag)
+{
+    m_outputTimingMetric = flag;
 }
