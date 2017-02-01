@@ -15,7 +15,7 @@ OFDMFrameSync::OFDMFrameSync(size_t cpLen,
                        (cpLen + mcs.getNumSubCarriers())),
     m_cpLen(cpLen),
     m_numTrainingSym(numTrainingSym),
-    m_peakFindingWindowWidth(2048 + 100),
+    m_peakFindingWindowWidth(numTrainingSym * mcs.getNumSubCarriers() / 4 + cpLen),
     m_timingMetricMaxHistory(2 * m_peakFindingWindowWidth),
     m_mcs(mcs),
     m_L((numTrainingSym / 2) * (cpLen + mcs.getNumSubCarriers())),
@@ -92,10 +92,10 @@ ssize_t OFDMFrameSync::findPeak()
     double  timingMetric = m_timingMetrics[m_timingMetrics.size() - 1];
     ssize_t retval       = -1;
 
-    // static size_t tmCount = 0;
 
     if (m_outputTimingMetric) {
-        std::cout << timingMetric << "," << std::norm(m_P) <<
+        static size_t tmCount = 0;
+        std::cout << tmCount++ << "," << timingMetric << "," << std::norm(m_P) <<
         "," << m_R * m_R <<
         std::endl;
     }
