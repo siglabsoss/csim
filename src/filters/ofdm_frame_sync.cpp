@@ -20,7 +20,6 @@ OFDMFrameSync::OFDMFrameSync(size_t cpLen,
     m_mcs(mcs),
     m_L((numTrainingSym / 2) * (cpLen + mcs.getNumSubCarriers())),
     m_didInit(false),
-    m_debugMode(false),
     m_outputTimingMetric(false),
     m_peakDetectionCount(0),
     m_frameDetectionCount(0),
@@ -343,11 +342,6 @@ size_t OFDMFrameSync::getPeakDetectionCount() const
 size_t OFDMFrameSync::getFrameDetectionCount() const
 {
     return m_frameDetectionCount;
-}
-
-void OFDMFrameSync::setDebugMode(bool flag)
-{
-    m_debugMode = flag;
 }
 
 void OFDMFrameSync::setOutputTimingMetric(bool flag)

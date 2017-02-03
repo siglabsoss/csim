@@ -18,7 +18,6 @@ public:
     size_t getPeakDetectionCount() const;
     size_t getFrameDetectionCount() const;
 
-    void   setDebugMode(bool flag);
     void   setOutputTimingMetric(bool flag);
 
 private:
@@ -41,7 +40,6 @@ private:
     const size_t m_L;
 
     bool m_didInit;
-    bool m_debugMode;
     bool m_outputTimingMetric;
 
     // Performance / profiling variables
