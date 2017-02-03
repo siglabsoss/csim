@@ -32,10 +32,13 @@ public:
     bool                hasInputFIFO() const;
     double              inputFIFOUtilization() const;
 
+    void                setDebug(bool flag);
+
     std::unique_ptr<FilterChainElement> m_next;
 protected:
     std::string         m_name;
     bool                m_gotInput;
+    bool                m_debug;
     CircularBuffer<filter_io_t> m_fifo;
 
     static unsigned int instanceCount;
