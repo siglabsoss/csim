@@ -11,3 +11,5 @@ target_link_libraries(fft_runner sigfilters sigtypes sigutils)
 add_executable(filter_loopback filter_loopback.cpp)
 target_link_libraries(filter_loopback sigfilters sigcore sigmath sigtypes sigutils)
 
+add_executable(complex_multiplier complex_multiplier.cpp)
+target_link_libraries(complex_multiplier sigfilters sigcore sigmath sigtypes sigutils)
