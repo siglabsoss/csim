@@ -173,8 +173,8 @@ SLFixPoint& SLFixPoint::operator=(const SLFixPoint& rhs)
         long long value = rhs.m_value;
 
         for (ssize_t i = 0; i < fracDiff; i++) {
-            bool signBitSet    = value & (1ull << (m_wl - 1));
-            bool mostSigBitSet = value & (1ull << (m_wl - 2));
+            bool signBitSet    = value & (1ull << (rhs.m_wl - 1));
+            bool mostSigBitSet = value & (1ull << (rhs.m_wl - 2));
 
             // if the next single bit shift is going to cause the sign bit to
             // invert we have an overflow
