@@ -170,7 +170,7 @@ void LDPCDecoder::parseH()
 void LDPCDecoder::printEdges() const
 {
     for (auto it = m_messages.begin(); it != m_messages.end(); ++it) {
-        std::cout << "(" << it->first.checkNum << "," << it->first.bitNum << ") = " << it->second.to_double() << std::endl;
+        std::cout << "( check = " << it->first.checkNum << ", bit = " << it->first.bitNum << ") = " << it->second.to_double() << std::endl;
     }
 }
 
@@ -193,8 +193,10 @@ void LDPCDecoder::iteration()
         }
     }
     m_messages = m_tmpMsgs;
-//    std::cout << "Bits-to-checks" << std::endl;
-//    printEdges();
+    if (m_debug == true) {
+        std::cout << "Bits-to-checks" << std::endl;
+        printEdges();
+    }
     //Checks-to-bits pass: Create messages for each edge by taking the minimum...
     for (size_t check = 0; check < m_checkNodes.size(); ++check) {
         double minMag = static_cast<double>(1ull << LDPC_LLR_IWL); //starting with larger magnitude than possible
@@ -231,8 +233,10 @@ void LDPCDecoder::iteration()
         }
     }
     m_messages = m_tmpMsgs;
-//    std::cout << "Checks-to-bits" << std::endl;
-//    printEdges();
+    if (m_debug == true) {
+        std::cout << "Checks-to-bits" << std::endl;
+        printEdges();
+    }
 }
 
 size_t LDPCDecoder::parityCheck() const
