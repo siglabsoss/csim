@@ -166,64 +166,28 @@ SLFixPoint& SLFixPoint::operator=(const SLFixPoint& rhs)
     if (!m_formatSet) {
         setFormat(rhs);
     }
-    ssize_t fracDiff = this->m_fl - rhs.m_fl;
 
-    // Shift the value to align the fractional bits
+    // Record sign of value to be assigned
+    bool isPositive   = (rhs.m_value >= 0);
+    bool willOverflow = false;
+
+    if (rhs.m_value != 0) {
+        // Check if we have enough integer bits available
+        ssize_t intBitsRequired  = rhs.minNumIntBits();
+        ssize_t intBitsAvailable = m_wl - m_fl;
+        willOverflow = intBitsRequired > intBitsAvailable;
+    }
+
+    ssize_t fracDiff      = this->m_fl - rhs.m_fl;
+    const long long value = rhs.m_value;
+
     if (fracDiff >= 0) {
-        long long value = rhs.m_value;
-
-        for (ssize_t i = 0; i < fracDiff; i++) {
-            bool signBitSet    = value & (1ull << (rhs.m_wl - 1));
-            bool mostSigBitSet = value & (1ull << (rhs.m_wl - 2));
-
-            // if the next single bit shift is going to cause the sign bit to
-            // invert we have an overflow
-            if ((signBitSet &&
-                 !mostSigBitSet) || (!signBitSet && mostSigBitSet)) {
-                handleOverflow();
-
-                switch (m_overflowMode) {
-                case OVERFLOW_SATURATE:
-                {
-                    value = getSaturatedValue(signBitSet);
-                    break;
-                }
-
-                case OVERFLOW_WRAP_AROUND:
-                default:
-                    break;
-                }
-                break;
-            }
-            value <<= 1;
-        }
-        this->m_value = value;
-        bool excessBits  = hasExcessBits(this->m_value);
-        bool wasPositive = (this->m_value >= 0);
-
-        if (excessBits) {
-                handleOverflow();
-
-            switch (m_overflowMode) {
-            case OVERFLOW_SATURATE:
-            {
-                this->m_value = getSaturatedValue(!wasPositive);
-                break;
-            }
-
-            case OVERFLOW_WRAP_AROUND:
-            default:
-                break;
-            }
-        }
-    } else { // here we are losing precision
+        this->m_value = (value << fracDiff);
+    } else {
         precisionLossCount++;
         fracDiff = -fracDiff;
-        const long long value = rhs.m_value;
 
-        switch (m_quantMode) {
-        case QUANT_RND_HALF_UP:
-        {
+        if (m_quantMode == QUANT_RND_HALF_UP) {
             // shift one bit short of the final amount so that we can take the
             // last bit for rounding
             this->m_value = (value >> (fracDiff - 1));
@@ -236,44 +200,16 @@ SLFixPoint& SLFixPoint::operator=(const SLFixPoint& rhs)
             } else {
                 roundDownCount++;
             }
-            break;
-        }
-
-        case QUANT_TRUNCATE:
-        default:
+        } else { // QUANT_TRUNCATE
             this->m_value = (value >> fracDiff);
-            break;
         }
-        bool wasPositive = (value >= 0);
-        bool isNegative  = (this->m_value & (1ull << (this->m_wl - 1)));
-        bool excessBits  = hasExcessBits(this->m_value);
+    }
 
-        // either of these three conditions indicates overflow
-        bool tooSmall =
-            (value >= 0 &&
-             this->m_value == 0) ||
-            (value < 0 && (this->m_value == -1 || this->m_value == 0));
-
-        if (!tooSmall) { // if our value was too small such that all sigbits
-                         // were shifted away, we don't want to count it as
-                         // overflow
-            if ((wasPositive &&
-                 isNegative) || (!wasPositive && !isNegative) || excessBits) {
-                handleOverflow();
-
-                switch (m_overflowMode) {
-                case OVERFLOW_SATURATE:
-                {
-                    this->m_value = getSaturatedValue(!wasPositive);
-                    break;
-                }
-
-                case OVERFLOW_WRAP_AROUND:
-                default:
-                    break;
-                }
-            }
+    if (willOverflow) {
+        if (m_overflowMode == OVERFLOW_SATURATE) {
+            this->m_value = getSaturatedValue(!isPositive);
         }
+        handleOverflow();
     }
     maskAndSignExtend();
     return *this;
@@ -435,6 +371,26 @@ bool SLFixPoint::hasExcessBits(long long value) const
         tempVal = -tempVal;
     }
     return static_cast<bool>(tempVal & mask);
+}
+
+ssize_t SLFixPoint::minNumIntBits() const
+{
+    long long value = m_value;
+
+    if (value < 0) {
+        value = -value;
+    }
+
+    ssize_t numBits = m_wl - m_fl;
+
+    unsigned long long mask = (~(0ull) >> (sizeof(value) * 8 - m_wl));
+    value = value & mask;
+
+    while (value != 0 && (value & (1ull << (m_wl - 1))) == 0) {
+        value <<= 1;
+        numBits--;
+    }
+    return numBits + 1; // add one for sign bit
 }
 
 uint64_t SLFixPoint::slice(size_t end, size_t start) const

@@ -72,6 +72,7 @@ protected:
     long long  getMaskedValue() const;
     long long  getSaturatedValue(bool negative) const;
     bool       hasExcessBits(long long value) const;
+    ssize_t    minNumIntBits() const;
     void       extendSign();
     void       maskAndSignExtend();
     void       handleOverflow();

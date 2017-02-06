@@ -31,6 +31,9 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        //
                                                                        //
                                                                        //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
                                                                        // part
                                                                        // change
@@ -55,8 +58,14 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        //
                                                                        //
                                                                        //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // (truncation
                                                                        // of
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        //
                                                                        //
                                                                        //
@@ -74,8 +83,14 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        //
                                                                        //
                                                                        //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // (truncation
                                                                        // of
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        //
                                                                        //
                                                                        //
@@ -101,7 +116,13 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        //
                                                                        //
                                                                        //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        //
                                                                        //
                                                                        //
@@ -122,7 +143,13 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        //
                                                                        //
                                                                        //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        //
                                                                        //
                                                                        //
@@ -143,7 +170,13 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        //
                                                                        //
                                                                        //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        //
                                                                        //
                                                                        //
@@ -183,6 +216,9 @@ CSIM_TEST_CASE(BIT_REPRESENTATION_ALL_FRACTIONAL)
                                                                          //
                                                                          //
                                                                          //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          // overflow
                                                                          // to
                                                                          // sign
@@ -201,7 +237,13 @@ CSIM_TEST_CASE(BIT_REPRESENTATION_ALL_FRACTIONAL)
                                                                           //
                                                                           //
                                                                           //
+                                                                          //
+                                                                          //
+                                                                          //
                                                                           // underflow
+                                                                          //
+                                                                          //
+                                                                          //
                                                                           //
                                                                           //
                                                                           //
@@ -220,7 +262,13 @@ CSIM_TEST_CASE(BIT_REPRESENTATION_ALL_FRACTIONAL)
                                                                           //
                                                                           //
                                                                           //
+                                                                          //
+                                                                          //
+                                                                          //
                                                                           // underflow
+                                                                          //
+                                                                          //
+                                                                          //
                                                                           //
                                                                           //
                                                                           //
@@ -556,6 +604,22 @@ CSIM_TEST_CASE(PROPER_SATURATION)
                  SLFixPoint::OVERFLOW_SATURATE);
 
     a = -44.25;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), -128);
+}
+
+CSIM_TEST_CASE(PROPER_SATURATION2)
+{
+    SLFixPoint a(11,
+                 9,
+                 SLFixPoint::QUANT_RND_HALF_UP,
+                 SLFixPoint::OVERFLOW_SATURATE);
+    SLFixPoint b(8,
+                 3,
+                 SLFixPoint::QUANT_RND_HALF_UP,
+                 SLFixPoint::OVERFLOW_SATURATE);
+
+    a =          -4.75;
     b = a;
     BOOST_CHECK_EQUAL(b.to_int64(), -128);
 }
