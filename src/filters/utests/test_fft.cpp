@@ -224,9 +224,9 @@ void checkError(const vector<T> &outputs, const vector<T> &answers, double diffe
             double realDiff = fabs(outputReal - answersReal);
             double imagDiff = fabs(outputImag - answersImag);
             BOOST_REQUIRE_MESSAGE(realDiff < difference,
-            "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+            "I: " << i << " Real Actual: " << outputReal << " Real Expected: " << answersReal << " Real Diff: " << realDiff );
             BOOST_REQUIRE_MESSAGE(imagDiff < difference,
-            "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
+            "I: " << i << " Imag Actual: " << outputImag << " Imag Expected: " << answersImag << " Imag Diff: " << imagDiff );
 		}
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
@@ -240,8 +240,8 @@ void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const v
         accumRealDiff += realDiff;
         accumImagDiff += imagDiff;
 
-        BOOST_CHECK_MESSAGE(realDiff < threshold, "Real Output: " << actual[i].real() << " Real Answer: " << expected[i].real() << " Real Diff: " << realDiff);
-        BOOST_CHECK_MESSAGE(imagDiff < threshold, "Imag Output: " << actual[i].imag() << " Imag Answer: " << expected[i].imag() << " Imag Diff: " << imagDiff);
+        BOOST_CHECK_MESSAGE(realDiff < threshold, "Real Actual: " << actual[i].real() << " Real Expected: " << expected[i].real() << " Real Diff: " << realDiff);
+        BOOST_CHECK_MESSAGE(imagDiff < threshold, "Imag Actual: " << actual[i].imag() << " Imag Expected: " << expected[i].imag() << " Imag Diff: " << imagDiff);
     }
 
     double avgRealDiff = static_cast<double>(accumRealDiff) / actual.size();
@@ -260,11 +260,10 @@ void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<
             double realDiff = fabs(outputReal - answersReal);
             double imagDiff = fabs(outputImag - answersImag);
             BOOST_CHECK_MESSAGE(realDiff < difference,
-            "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+            "I: " << i << " Real Actual: " << outputReal << " Real Expected: " << answersReal << " Real Diff: " << realDiff );
             BOOST_CHECK_MESSAGE(imagDiff < difference,
-            "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
+            "I: " << i << " Imag Actual: " << outputImag << " Imag Expected: " << answersImag << " Imag Diff: " << imagDiff );
         }
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
 CSIM_TEST_SUITE_END()
-
