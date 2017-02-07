@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
     std::string inputFile;
     int c;
 
-    while ((c = getopt(argc, argv, "f:i:w:sx")) != -1) {
+    while ((c = getopt(argc, argv, "f:")) != -1) {
         switch (c) {
         case 'f':
             inputFile    = std::string(optarg);
