@@ -43,6 +43,7 @@ FilterChainElement::FilterChainElement(std::string name,
     m_next(nullptr),
     m_name(name + std::to_string(instanceCount)),
     m_gotInput(false),
+    m_debug(false),
     m_fifo(inputFIFOSize)
 {
     // log_info("New filter chain element with name = %s", m_name.c_str());
