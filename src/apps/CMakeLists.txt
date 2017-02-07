@@ -13,3 +13,6 @@ target_link_libraries(filter_loopback sigfilters sigcore sigmath sigtypes siguti
 
 add_executable(complex_multiplier complex_multiplier.cpp)
 target_link_libraries(complex_multiplier sigfilters sigcore sigmath sigtypes sigutils)
+
+add_executable(ldpc_decode ldpc_decode.cpp)
+target_link_libraries(ldpc_decode sigfilters sigcore sigmath sigtypes sigutils)
