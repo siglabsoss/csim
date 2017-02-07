@@ -117,14 +117,18 @@ void LDPCDecoder::decode(size_t  iterations,
     solved            = false;
     solved_iterations = 0;
 
+    updateLLR();
+
     for (size_t i = 0; i < iterations; ++i)
     {
+        iteration();
         updateLLR();
 
         if (m_debug == true) {
             std::cout << i << ": ";
             printSoftCodeWord();
         }
+
         bool justSolved = (parityCheck() == 0);
 
         if (justSolved && !solved) {
@@ -138,7 +142,6 @@ void LDPCDecoder::decode(size_t  iterations,
                         // simulation
             }
         }
-        iteration();
     }
 }
 
@@ -240,23 +243,55 @@ void LDPCDecoder::iteration()
     // minimum...
     for (size_t check = 0; check < m_checkNodes.size(); ++check) {
         double minMag = static_cast<double>(1ull << LDPC_LLR_IWL);       //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          // starting
                                                                          // with
                                                                          //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          // larger
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          //
                                                                          // magnitude
                                                                          // than
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          //
                                                                          // possible
         double secondMinMag = static_cast<double>(1ull << LDPC_LLR_IWL); //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          // starting
                                                                          // with
                                                                          //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          // larger
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          //
                                                                          // magnitude
                                                                          // than
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
                                                                          //
                                                                          // possible
         double sign = 1.0;
