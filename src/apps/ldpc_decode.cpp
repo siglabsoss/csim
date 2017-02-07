@@ -13,16 +13,14 @@ static void runLDPCDecodeTest(
     size_t cols = H[0].size();
     std::cout << "Loaded H with rows, cols " << rows << ", " << cols << std::endl;
 
-    LDPCDecoder decode(H, true /* no early exit */);
+    LDPCDecoder decode(H, false /* no early exit */);
 
-    // decode.setDebug(true);
+    decode.setDebug(true);
 
     filter_io_t sample;
 
     for (size_t i = 0; i < rxCodeWord.size(); i++) {
         sample = rxCodeWord[rxCodeWord.size() - 1 - i];
-
-        // sample = rxCodeWord[i];
         decode.input(sample);
     }
 
