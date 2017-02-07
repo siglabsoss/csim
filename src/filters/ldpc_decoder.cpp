@@ -119,13 +119,18 @@ void LDPCDecoder::decode(size_t  iterations,
 
     updateLLR();
 
+    if (m_debug == true) {
+        std::cout << "0: ";
+        printSoftCodeWord();
+    }
+
     for (size_t i = 0; i < iterations; ++i)
     {
         iteration();
         updateLLR();
 
         if (m_debug == true) {
-            std::cout << i << ": ";
+            std::cout << i + 1 << ": ";
             printSoftCodeWord();
         }
 
@@ -247,8 +252,10 @@ void LDPCDecoder::iteration()
                                                                          //
                                                                          //
                                                                          //
+                                                                         //
                                                                          // starting
                                                                          // with
+                                                                         //
                                                                          //
                                                                          //
                                                                          //
@@ -260,8 +267,10 @@ void LDPCDecoder::iteration()
                                                                          //
                                                                          //
                                                                          //
+                                                                         //
                                                                          // magnitude
                                                                          // than
+                                                                         //
                                                                          //
                                                                          //
                                                                          //
@@ -273,8 +282,10 @@ void LDPCDecoder::iteration()
                                                                          //
                                                                          //
                                                                          //
+                                                                         //
                                                                          // starting
                                                                          // with
+                                                                         //
                                                                          //
                                                                          //
                                                                          //
@@ -286,8 +297,10 @@ void LDPCDecoder::iteration()
                                                                          //
                                                                          //
                                                                          //
+                                                                         //
                                                                          // magnitude
                                                                          // than
+                                                                         //
                                                                          //
                                                                          //
                                                                          //
