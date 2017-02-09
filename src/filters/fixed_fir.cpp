@@ -76,15 +76,20 @@ FixedFIR<COEFF_T, IO_T>::FixedFIR(const std::vector<double> &coeffs, const Fixed
     //assert(bitsRequired <= 52); //Lattice ECP5 max accumulator width
     m_accum.setFormat(52, conf.iwlOut + m_coeffs[0].iwl(), SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
     //m_accum.setFormat(bitsRequired, maxIntWidth + worstCaseBitGrowth, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
-    log_debug("FIR coefficient format is Q%d.%d, Accumulator format is Q%d.%d. Number of taps is %d", m_coeffs[0].iwl(), m_coeffs[0].wl() - m_coeffs[0].iwl(), m_accum.real().iwl(), m_accum.real().wl() - m_accum.real().iwl(), coeffs.size());
+    // log_debug("FIR coefficient format is Q%d.%d, Accumulator format is Q%d.%d. Number of taps is %d", m_coeffs[0].iwl(), m_coeffs[0].wl() - m_coeffs[0].iwl(), m_accum.real().iwl(), m_accum.real().wl() - m_accum.real().iwl(), coeffs.size());
 }
 
 template<class COEFF_T, class IO_T>
 bool FixedFIR<COEFF_T, IO_T>::input(const filter_io_t &data)
 {
-    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
+    assert(data.type == IO_TYPE_COMPLEX_FIXPOINT || data.type == IO_TYPE_FIXPOINT);
     m_lastInput.setFormat(data.fc.getFormat());
-    m_lastInput = data.fc;
+
+    if (data.type == IO_TYPE_COMPLEX_FIXPOINT) {
+        m_lastInput = data.fc;
+    } else if (data.type == IO_TYPE_FIXPOINT) {
+        m_lastInput = data.fp;
+    }
     m_newInput = true;
 
     return true;
@@ -133,7 +138,7 @@ void FixedFIR<COEFF_T, IO_T>::tick()
 template<class COEFF_T, class IO_T>
 void FixedFIR<COEFF_T, IO_T>::filter(IO_T &input, size_t polyPhaseOffset)
 {
-    m_accum = 0;
+    m_accum = 0.0;
 
     bool noRateAdjustment = (m_rateAdj >= -1 && m_rateAdj <= 1);
     bool downSampling = (m_rateAdj < -1);
@@ -166,4 +171,4 @@ void FixedFIR<COEFF_T, IO_T>::filter(IO_T &input, size_t polyPhaseOffset)
 }
 
 template class FixedFIR<SLFixPoint, SLFixComplex>;
-// template class FixedFIR<SLFixPoint, SLFixPoint>;
+template class FixedFIR<SLFixPoint, SLFixPoint>;
