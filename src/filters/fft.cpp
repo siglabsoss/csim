@@ -3,10 +3,10 @@
  * and the block floating point technique to maximize precision.
  *
  * This implementation was inspired by the non-recursive method outlined here:
- *http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
+ **http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
  *
  * The "block floating point" technique was inspired by the paper here:
- *http://www.ti.com/lit/an/spra948/spra948.pdf
+ **http://www.ti.com/lit/an/spra948/spra948.pdf
  *
  */
 
@@ -63,7 +63,7 @@ bool FFT::input(const filter_io_t& data)
 
     // Rely on upstream to use expected input format so that
     // this module can be slightly more flexible
-    m_inputs[inputIdx].setFormat(data.fc);
+    m_inputs[inputIdx].setFormat(data.fc.getFormat());
     m_inputs[inputIdx] = data.fc;
 
     // Track the maximum input value for proper scaling
@@ -135,18 +135,19 @@ void FFT::execute()
 {
     /**
      * Block floating point scaling operates on a per-stage basis by executing
-     *the following steps
+     **the following steps
      * 1) Calculate the appropriate shift for the entire "block" (inputs for the
-     *current stage) based on the single maximum input value.
+     **current stage) based on the single maximum input value.
      * 2) Shift the "block" based on the scaling factor from step 1.
      * 3) Perform the radix-2 butterflies
      */
-    size_t N         = m_inputs.size() >> 1;                // number of
-                                                            // butterflies per
-                                                            // block
-    size_t numBlocks = 1;                                   // number of blocks
-                                                            // in the current
-                                                            // stage
+    size_t N = m_inputs.size() >> 1; // number of
+                                     // butterflies per
+                                     // block
+    size_t numBlocks = 1;            // number of blocks
+
+    // in the current
+    // stage
 
     for (size_t stage = 1; stage <= m_numStages; stage++) { // stage loop
         // Step 1 - Calculate shift amount
@@ -282,7 +283,7 @@ void FFT::execute()
         }     // end block loop
         N         >>= 1;
         numBlocks <<= 1;
-    }         // end stage loop
+    } // end stage loop
 }
 
 void FFT::shiftFixedComplex(SLFixComplex& val, ssize_t shiftBits)

@@ -29,7 +29,7 @@ bool CyclicPrefix::output(filter_io_t& data)
         if (m_outputActive) {
             m_ticksSinceOutput = 0;
             data.type          = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(m_outputs[m_outputIdx]);
+            data.fc.setFormat(m_outputs[m_outputIdx].getFormat());
             data.fc = m_outputs[m_outputIdx];
 
             if (++m_outputIdx >= m_outputs.size()) {
@@ -62,13 +62,13 @@ void CyclicPrefix::tick()
             assert(input.type == IO_TYPE_COMPLEX_FIXPOINT);
             SLFixComplex sample = input.fc;
             m_fifo.pop_front();
-            m_outputs[i + m_len].setFormat(sample);
+            m_outputs[i + m_len].setFormat(sample.getFormat());
             m_outputs[i + m_len] = sample;
         }
 
         // Prepend the cyclic prefix
         for (size_t i = 0; i < m_len; i++) {
-            m_outputs[i].setFormat(m_outputs[m_symbolLen + i]);
+            m_outputs[i].setFormat(m_outputs[m_symbolLen + i].getFormat());
             m_outputs[i] = m_outputs[m_symbolLen + i];
         }
         m_outputActive = true;

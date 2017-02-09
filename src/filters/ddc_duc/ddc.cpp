@@ -30,7 +30,7 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
         by5NormCoeffs[i] *= coeff_scale;
     }
 
-    FixedFIR::Config hbConf = {
+    FixedFIRConfig hbConf = {
         .wlCoeff        = 18,
         .wlDelay        = DDC_OUTPUT_WL,
         .iwlDelay       =  DDC_OUTPUT_IWL,
@@ -38,7 +38,7 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
         .iwlOut         =  DDC_OUTPUT_IWL,
         .rateChange     = -2
     };
-    FixedFIR::Config by5Conf = {
+    FixedFIRConfig by5Conf = {
         .wlCoeff        = 18,
         .wlDelay        = 18,
         .iwlDelay       =  1,
@@ -46,8 +46,8 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
         .iwlOut         =  DDC_OUTPUT_IWL,
         .rateChange     = -5
     };
-    _halfbandFIR = new FixedFIR(halfbandNormCoeffs, hbConf);
-    _by5FIR = new FixedFIR(by5NormCoeffs, by5Conf);
+    _halfbandFIR = new FixedFIR<SLFixPoint, SLFixComplex>(halfbandNormCoeffs, hbConf);
+    _by5FIR = new FixedFIR<SLFixPoint, SLFixComplex>(by5NormCoeffs, by5Conf);
 }
 
 bool DigitalDownConverter::input(const filter_io_t &data)
@@ -62,7 +62,7 @@ bool DigitalDownConverter::output(filter_io_t &data)
 {
     if (_output_ready) {
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(_output_inph);
+        data.fc.setFormat(_output_inph.getFormat());
         //The output of the DUC is Re{x_bb(t) * exp(1j*w_c*t)} = x_bb(t) * cos(w_c*t) = 0.5 * x_bb(t) * [exp(j*w_c*t) + exp(-j*w_c*t)], thus we add a 2x gain here to compensate
         data.fc.real(_output_inph.to_double() * 2);
         data.fc.imag(_output_quad.to_double() * 2);
@@ -107,7 +107,7 @@ bool DigitalDownConverter::push(
 
     filter_io_t sample;
     sample.type = IO_TYPE_COMPLEX_FIXPOINT;
-    sample.fc.setFormat(bb_inph);
+    sample.fc.setFormat(bb_inph.getFormat());
     sample.fc.real(bb_inph);
     sample.fc.imag(bb_quad);
 

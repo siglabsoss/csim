@@ -148,7 +148,7 @@ void runIFFTLoopbackTest(const std::string &infile, double threshold)
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(ifftoutputs[j]);
+            data.fc.setFormat(ifftoutputs[j].getFormat());
             data.fc = ifftoutputs[j];
             fft.input(data);
             fft.tick();
@@ -198,7 +198,7 @@ void runFFTLoopbackTest(const std::string &infile, double threshold)
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(fftoutputs[j]);
+            data.fc.setFormat(fftoutputs[j].getFormat());
             data.fc = fftoutputs[j];
             ifft.input(data);
             ifft.tick();

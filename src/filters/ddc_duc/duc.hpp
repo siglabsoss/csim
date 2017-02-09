@@ -39,8 +39,8 @@ private: //methods
 private: //members
 
     NCO                                                    _nco;
-    FixedFIR *                                             _up2FIR;
-    FixedFIR *                                             _up5FIR;
+    FixedFIR<SLFixPoint, SLFixComplex> *                   _up2FIR;
+    FixedFIR<SLFixPoint, SLFixComplex> *                   _up5FIR;
 
     // Output variables
     bool                                                   _output_ready;
@@ -53,4 +53,3 @@ private: //members
     SLFixedPoint<DUC_INPUT_FP_FORMAT>                      _quad_in;
     unsigned long                                          _iteration;
 };
-

@@ -68,7 +68,7 @@ static void runDDC(const std::string& halfbandCoeffFile,
         // std::cout << input_sample << ",0" << std::endl;
 
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(input_sample);
+        data.fc.setFormat(input_sample.getFormat());
         data.fc.real(input_sample);
         data.fc.imag(0.0);
         ddc.input(data);
@@ -99,7 +99,7 @@ static void runDUC(const std::string& up2CoeffFile,
     std::vector<ComplexDouble> up5ComplexCoeffs =
         utils::readComplexFromCSV<ComplexDouble>(up5CoeffFile);
 
-    std::vector<ComplexDouble> inputs  = utils::readComplexFromCSV<ComplexDouble>(
+    std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>(
         inputsFile);
     std::vector<ComplexDouble> answers = utils::readComplexFromCSV<ComplexDouble>(
         answersFile);
@@ -133,7 +133,7 @@ static void runDUC(const std::string& up2CoeffFile,
         quad_in = inputs[ii].imag();
 
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(inph_in);
+        data.fc.setFormat(inph_in.getFormat());
         data.fc.real(inph_in);
         data.fc.imag(quad_in);
 
