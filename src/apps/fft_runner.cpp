@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
         saturationCount = SLFixPoint::overflowCount;
         for (size_t j = 0; j < N_FFT_POINTS; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(inputsFP[j]);
+            data.fc.setFormat(inputsFP[j].getFormat());
             data.fc = inputsFP[j];
             inWl = data.fc.wl();
             inIwl = data.fc.iwl();
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
             bool didGetOutput = fft.output(data);
             bool lastInput = (i == 1 && j == N_FFT_POINTS - 1);
             if (didGetOutput && !lastInput) {
-                outputs[outputCount].setFormat(data.fc);
+                outputs[outputCount].setFormat(data.fc.getFormat());
                 outputs[outputCount] = data.fc;
                 ++outputCount;
             }//If output is ready
