@@ -19,6 +19,22 @@ public:
         OVERFLOW_WRAP_AROUND = 0,
         OVERFLOW_SATURATE
     };
+    struct format_t
+    {
+        format_t() :
+            wl(0),
+            fl(0),
+            qm(DEFAULT_QUANT_MODE),
+            om(DEFAULT_OVERFLOW_MODE),
+            valid(false)
+        {}
+
+        size_t          wl;
+        size_t          fl;
+        quant_mode_t    qm;
+        overflow_mode_t om;
+        bool            valid;
+    };
     SLFixPoint();
     SLFixPoint(size_t  wordLength,
                ssize_t intLength);
@@ -27,6 +43,7 @@ public:
                quant_mode_t    quantMode,
                overflow_mode_t overflowMode);
     SLFixPoint(const SLFixPoint& other);
+    SLFixPoint(const format_t& fmt);
     virtual ~SLFixPoint();
 
     // Const operators, which return new objects
@@ -41,13 +58,12 @@ public:
     SLFixPoint& operator<<(size_t shift);
     SLFixPoint& operator>>(size_t shift);
 
-    bool                operator==(const SLFixPoint& rhs) const;
-
     // Assignment operators
     virtual SLFixPoint& operator=(const SLFixPoint& rhs);
     virtual SLFixPoint& operator=(double val);
     virtual SLFixPoint& operator=(uint64_t val);
 
+    bool                operator==(const SLFixPoint& rhs) const;
 
     void                shiftRadixRight(size_t shiftAmount);
     void                shiftRadixLeft(size_t shiftAmount);
@@ -56,7 +72,10 @@ public:
                                   ssize_t         intLength,
                                   quant_mode_t    quantMode,
                                   overflow_mode_t overflowMode);
-    void     setFormat(const SLFixPoint& other);
+
+    void     setFormat(const format_t& fmt);
+
+    format_t getFormat() const;
 
     uint64_t to_uint64() const;
     int64_t  to_int64()  const;
@@ -79,11 +98,7 @@ protected:
     SLFixPoint addition(const SLFixPoint& rhs) const;
 
     long long m_value;
-    size_t    m_wl;
-    size_t    m_fl;
-    bool m_formatSet;
-    quant_mode_t m_quantMode;
-    overflow_mode_t m_overflowMode;
+    format_t  m_fmt;
 
 public:
 
@@ -117,7 +132,7 @@ public:
     SLFixedPoint(double val) :
         SLFixPoint(N, M, Q, O)
     {
-        this->m_value = static_cast<long long>(val * (1ull << m_fl));
+        this->m_value = static_cast<long long>(val * (1ull << m_fmt.fl));
     }
 
     using SLFixPoint::operator+;
