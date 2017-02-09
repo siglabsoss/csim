@@ -22,7 +22,8 @@ void checkError(const std::vector<ComplexDouble>& outputs,
                             " Answer: " << answers[i].imag());
     }
 } // Compares results of fft with answers. Takes in vector of outputs and
-  // answers, the max percent error as a float, and the max difference as an int
+
+// answers, the max percent error as a float, and the max difference as an int
 
 void runTest(const std::string& coeffFile,
              const std::string& inputFile,
@@ -40,6 +41,7 @@ void runTest(const std::string& coeffFile,
                                                                   // answers
     std::vector<ComplexDouble> coeffs;                            // Vector to
                                                                   // hold
+                                                                  //
                                                                   // coefficients
     coeffs = utils::readComplexFromCSV<ComplexDouble>(coeffFile); // Reads in
                                                                   // taps from
@@ -55,14 +57,14 @@ void runTest(const std::string& coeffFile,
     input = utils::readComplexFromCSV<ComplexDouble>(inputFile);    // Reads
                                                                     // input
                                                                     // file
-    BOOST_REQUIRE_MESSAGE(!input.empty(),   "Could not read from " << inputFile);
+    BOOST_REQUIRE_MESSAGE(!input.empty(), "Could not read from " << inputFile);
 
     answers = utils::readComplexFromCSV<ComplexDouble>(outputFile); // Reads
                                                                     // answer
                                                                     // file
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not read from " << outputFile);
 
-    FixedFIR::Config conf = {
+    FixedFIRConfig conf = {
         .wlCoeff    = 18,
         .wlDelay    = 18,
         .iwlDelay   =  1,
@@ -70,7 +72,7 @@ void runTest(const std::string& coeffFile,
         .iwlOut     =  1,
         .rateChange = 0
     };
-    FixedFIR fir(realCoeffs, conf);
+    FixedFIR<SLFixPoint, SLFixComplex> fir(realCoeffs, conf);
 
     for (unsigned int k = 0; k < input.size(); k++) {
         filter_io_t  data;
@@ -100,6 +102,7 @@ void runImpulseResponse(const std::string& coeffFile)
     SLFixPoint::throwOnOverflow = true;
     std::vector<ComplexDouble> coeffs;                            // Vector to
                                                                   // hold
+                                                                  //
                                                                   // coefficients
     std::vector<ComplexDouble> output;                            // Vector to
                                                                   // hold
@@ -116,7 +119,7 @@ void runImpulseResponse(const std::string& coeffFile)
         realCoeffs.push_back(coeffs[i].real());
     }
 
-    FixedFIR::Config conf = {
+    FixedFIRConfig conf = {
         .wlCoeff    = 18,
         .wlDelay    = 18,
         .iwlDelay   =  1,
@@ -125,7 +128,7 @@ void runImpulseResponse(const std::string& coeffFile)
         .rateChange = 0
     };
 
-    FixedFIR fir(realCoeffs, conf);
+    FixedFIR<SLFixPoint, SLFixComplex> fir(realCoeffs, conf);
     filter_io_t  data;
     SLFixComplex sample;
     sample.setFormat(18,

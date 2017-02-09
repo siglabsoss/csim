@@ -4,7 +4,8 @@
 #include <core/logger.hpp>
 #include <utils/utils.hpp>
 
-FixedFIR::FixedFIR(const std::vector<double> &coeffs, const Config &conf) :
+template<class COEFF_T, class IO_T>
+FixedFIR<COEFF_T, IO_T>::FixedFIR(const std::vector<double> &coeffs, const FixedFIRConfig &conf) :
     FilterChainElement("FixedFIR"),
     m_coeffs(),
     m_delayLine(),
@@ -62,7 +63,7 @@ FixedFIR::FixedFIR(const std::vector<double> &coeffs, const Config &conf) :
     if (m_rateAdj > 1) {
         delaySize /= m_rateAdj;
     }
-    m_delayLine = CircularBuffer<SLFixComplex>(delaySize, SLFixComplex(conf.wlDelay, conf.iwlDelay, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE));
+    m_delayLine = CircularBuffer<IO_T>(delaySize, IO_T(conf.wlDelay, conf.iwlDelay, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE));
 
     if (m_rateAdj < -1) {
         log_debug("Decimation filter downsampling by a factor of %d.", abs(m_rateAdj));
@@ -78,17 +79,19 @@ FixedFIR::FixedFIR(const std::vector<double> &coeffs, const Config &conf) :
     log_debug("FIR coefficient format is Q%d.%d, Accumulator format is Q%d.%d. Number of taps is %d", m_coeffs[0].iwl(), m_coeffs[0].wl() - m_coeffs[0].iwl(), m_accum.real().iwl(), m_accum.real().wl() - m_accum.real().iwl(), coeffs.size());
 }
 
-bool FixedFIR::input(const filter_io_t &data)
+template<class COEFF_T, class IO_T>
+bool FixedFIR<COEFF_T, IO_T>::input(const filter_io_t &data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
-    m_lastInput.setFormat(data.fc);
+    m_lastInput.setFormat(data.fc.getFormat());
     m_lastInput = data.fc;
     m_newInput = true;
 
     return true;
 }
 
-bool FixedFIR::output(filter_io_t &data)
+template<class COEFF_T, class IO_T>
+bool FixedFIR<COEFF_T, IO_T>::output(filter_io_t &data)
 {
     if (m_outputReady) {
         m_outputReady = false;
@@ -98,7 +101,8 @@ bool FixedFIR::output(filter_io_t &data)
     return false;
 }
 
-void FixedFIR::tick()
+template<class COEFF_T, class IO_T>
+void FixedFIR<COEFF_T, IO_T>::tick()
 {
     bool receivedFirstSample = m_lastInput.isFormatSet();
     if (!receivedFirstSample) {
@@ -126,7 +130,8 @@ void FixedFIR::tick()
     m_newInput = false;
 }
 
-void FixedFIR::filter(SLFixComplex &input, size_t polyPhaseOffset)
+template<class COEFF_T, class IO_T>
+void FixedFIR<COEFF_T, IO_T>::filter(IO_T &input, size_t polyPhaseOffset)
 {
     m_accum = 0;
 
@@ -159,3 +164,6 @@ void FixedFIR::filter(SLFixComplex &input, size_t polyPhaseOffset)
         m_filterIteration = 0;
     }
 }
+
+template class FixedFIR<SLFixPoint, SLFixComplex>;
+// template class FixedFIR<SLFixPoint, SLFixPoint>;
