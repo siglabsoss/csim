@@ -7,6 +7,8 @@
 #define DEFAULT_QUANT_MODE SLFixPoint::QUANT_TRUNCATE
 #define DEFAULT_OVERFLOW_MODE SLFixPoint::OVERFLOW_WRAP_AROUND
 
+class SLFixComplex;
+
 class SLFixPoint
 {
 public:
@@ -60,6 +62,7 @@ public:
 
     // Assignment operators
     virtual SLFixPoint& operator=(const SLFixPoint& rhs);
+    virtual SLFixPoint& operator=(const SLFixComplex& rhs);
     virtual SLFixPoint& operator=(double val);
     virtual SLFixPoint& operator=(uint64_t val);
 

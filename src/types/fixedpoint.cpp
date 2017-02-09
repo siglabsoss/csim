@@ -1,3 +1,4 @@
+#include <types/fixedcomplex.hpp>
 #include <types/fixedpoint.hpp>
 #include <cassert>
 #include <algorithm>
@@ -205,6 +206,13 @@ SLFixPoint& SLFixPoint::operator=(const SLFixPoint& rhs)
         handleOverflow();
     }
     maskAndSignExtend();
+    return *this;
+}
+
+SLFixPoint& SLFixPoint::operator=(const SLFixComplex& rhs)
+{
+    // Assign the real component, dropping the imaginary component
+    this->operator=(rhs.real());
     return *this;
 }
 

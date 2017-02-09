@@ -38,6 +38,7 @@ public:
     SLFixComplex& operator>>(size_t shift);
 
     SLFixComplex& operator=(const SLFixComplex& rhs);
+    SLFixComplex& operator=(const SLFixPoint& rhs);
     SLFixComplex& operator=(double val);
 
     bool          operator==(const SLFixComplex& rhs) const;
