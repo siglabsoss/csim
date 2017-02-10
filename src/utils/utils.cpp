@@ -112,31 +112,29 @@ template std::vector<std::pair<ComplexDouble,
 
 /**
  * Calculates the amount to shift a fixed point value such that there are no
- ******leading zeros
- * in the fractional component, or in the case of values above one, how much to
- ******scale down
- * in powers of two to normalize the value.
+ * leading zeros in the fractional component, or in the case of values above
+ * one, how much to scale down in powers of two to normalize the value.
  *
  * @return Amount to shift. Left is negative.
  */
-int getShiftAmount(double coeff)
+int getShiftAmount(double value)
 {
     int n = 0;
 
-    if (coeff == 0.0) {
+    if (value == 0.0) {
         return n;
     }
-    coeff = fabs(coeff); // we want same result for + and -
+    value = fabs(value); // we want same result for + and -
 
-    if (coeff < 1) {
-        unsigned ratio = static_cast<unsigned>(1.0 / coeff) >> 2;
+    if (value < 1) {
+        unsigned ratio = static_cast<unsigned>(1.0 / value) >> 2;
 
         while (ratio) {
             n--;
             ratio >>= 1;
         }
     } else {
-        unsigned ratio = static_cast<unsigned>(coeff / 1.0);
+        unsigned ratio = static_cast<unsigned>(value / 1.0);
 
         while (ratio) {
             n++;
@@ -147,12 +145,23 @@ int getShiftAmount(double coeff)
 }
 
 /**
+ * Calculates the amount to shift a complex fixed point value such that there
+ * are no leading zeros in the fractional component, or in the case of values
+ * above one, how much to scale down in powers of two to normalize the value.
+ *
+ * @return Amount to shift. Left is negative.
+ */
+int getShiftAmount(ComplexDouble value)
+{
+    return std::max(getShiftAmount(value.real()), getShiftAmount(value.imag()));
+}
+
+/**
  * Calculates the number of bits required to store the non-fractional component
- ******of a signed,
- * fixed-point integer.
+ * of a signed, fixed-point integer.
  *
  * @return The number of bits required to store the non-fractional component of
- ******a signed, fixed-point integer.
+ * a signed, fixed-point integer.
  */
 unsigned getIntegerBits(double coeff)
 {

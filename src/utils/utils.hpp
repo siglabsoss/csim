@@ -27,7 +27,8 @@ unsigned int calculateHammingDistance(uint8_t a,
                                       uint8_t b);
 
 
-int      getShiftAmount(double coeff);
+int      getShiftAmount(double value);
+int      getShiftAmount(ComplexDouble value);
 unsigned getIntegerBits(double coeff);
 bool     addition32DoesOverflow(int32_t a,
                                 int32_t b);
