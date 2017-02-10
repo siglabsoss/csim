@@ -111,10 +111,10 @@ SLFixComplex& SLFixComplex::operator=(const SLFixPoint& rhs)
     return *this;
 }
 
-SLFixComplex& SLFixComplex::operator=(double val)
+SLFixComplex& SLFixComplex::operator=(ComplexDouble val)
 {
-    this->m_real = val;
-    this->m_imag = val;
+    this->m_real = val.real();
+    this->m_imag = val.imag();
     return *this;
 }
 

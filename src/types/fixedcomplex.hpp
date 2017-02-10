@@ -39,7 +39,7 @@ public:
 
     SLFixComplex& operator=(const SLFixComplex& rhs);
     SLFixComplex& operator=(const SLFixPoint& rhs);
-    SLFixComplex& operator=(double val);
+    SLFixComplex& operator=(ComplexDouble val);
 
     bool          operator==(const SLFixComplex& rhs) const;
 
