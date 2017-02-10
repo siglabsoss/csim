@@ -20,13 +20,13 @@ struct FixedFIRConfig
                         // = downsample, 0 = no rate change)
 };
 
-template<class COEFF_T, class IO_T>
+template<class COEFF_T, class IO_T, class COEFFI_T>
 class FixedFIR : public FilterChainElement
 {
 public:
 
-    FixedFIR(const std::vector<double>& coeffs,
-             const FixedFIRConfig     & conf);
+    FixedFIR(const std::vector<COEFFI_T>& coeffs,
+             const FixedFIRConfig       & conf);
     bool input(const filter_io_t& data) override;
     bool output(filter_io_t& data) override;
     void tick() override;
@@ -51,3 +51,7 @@ private:
     size_t  m_ticksSinceLastInput;
     size_t  m_filterIteration;
 };
+
+typedef class FixedFIR<SLFixPoint, SLFixComplex, double>FixedFirRealCoeff;
+typedef class FixedFIR<SLFixPoint, SLFixPoint, double> FixedFirReal;
+typedef class FixedFIR<SLFixComplex, SLFixComplex, ComplexDouble> FixedFirComplex;
