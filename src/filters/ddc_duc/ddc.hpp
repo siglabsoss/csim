@@ -49,9 +49,9 @@ private:
     // members
 
     NCO _nco;
-    FixedFIR<SLFixPoint, SLFixComplex> *_halfbandFIR;
-    FixedFIR<SLFixPoint, SLFixComplex> *_by5FIR;
-    SLFixedPoint<DDC_INPUT_FP_FORMAT>   _input;
+    FixedFirRealCoeff *_halfbandFIR;
+    FixedFirRealCoeff *_by5FIR;
+    SLFixedPoint<DDC_INPUT_FP_FORMAT> _input;
     bool _did_receive_input;
 
     // Output variables

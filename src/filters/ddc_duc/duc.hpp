@@ -39,8 +39,8 @@ private: //methods
 private: //members
 
     NCO                                                    _nco;
-    FixedFIR<SLFixPoint, SLFixComplex> *                   _up2FIR;
-    FixedFIR<SLFixPoint, SLFixComplex> *                   _up5FIR;
+    FixedFirRealCoeff *                                    _up2FIR;
+    FixedFirRealCoeff *                                    _up5FIR;
 
     // Output variables
     bool                                                   _output_ready;

@@ -55,8 +55,8 @@ DigitalUpConverter::DigitalUpConverter(double                     freq,
         .iwlOut     =  DUC_INPUT_IWL,
         .rateChange =  5
     };
-    _up2FIR = new FixedFIR<SLFixPoint, SLFixComplex>(up2NormCoeffs, up2Conf);
-    _up5FIR = new FixedFIR<SLFixPoint, SLFixComplex>(up5NormCoeffs, up5Conf);
+    _up2FIR = new FixedFirRealCoeff(up2NormCoeffs, up2Conf);
+    _up5FIR = new FixedFirRealCoeff(up5NormCoeffs, up5Conf);
 }
 
 bool DigitalUpConverter::input(const filter_io_t& data)

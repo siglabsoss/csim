@@ -46,8 +46,8 @@ DigitalDownConverter::DigitalDownConverter(double freq, const std::vector<double
         .iwlOut         =  DDC_OUTPUT_IWL,
         .rateChange     = -5
     };
-    _halfbandFIR = new FixedFIR<SLFixPoint, SLFixComplex>(halfbandNormCoeffs, hbConf);
-    _by5FIR = new FixedFIR<SLFixPoint, SLFixComplex>(by5NormCoeffs, by5Conf);
+    _halfbandFIR = new FixedFirRealCoeff(halfbandNormCoeffs, hbConf);
+    _by5FIR = new FixedFirRealCoeff(by5NormCoeffs, by5Conf);
 }
 
 bool DigitalDownConverter::input(const filter_io_t &data)
