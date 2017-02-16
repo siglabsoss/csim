@@ -42,6 +42,7 @@ void runTest(const std::string& coeffFile,
     std::vector<ComplexDouble> coeffs;                            // Vector to
                                                                   // hold
                                                                   //
+                                                                  //
                                                                   // coefficients
     coeffs = utils::readComplexFromCSV<ComplexDouble>(coeffFile); // Reads in
                                                                   // taps from
@@ -72,7 +73,7 @@ void runTest(const std::string& coeffFile,
         .iwlOut     =  1,
         .rateChange = 0
     };
-    FixedFIR<SLFixPoint, SLFixComplex> fir(realCoeffs, conf);
+    FixedFirRealCoeff fir(realCoeffs, conf);
 
     for (unsigned int k = 0; k < input.size(); k++) {
         filter_io_t  data;
@@ -103,6 +104,7 @@ void runImpulseResponse(const std::string& coeffFile)
     std::vector<ComplexDouble> coeffs;                            // Vector to
                                                                   // hold
                                                                   //
+                                                                  //
                                                                   // coefficients
     std::vector<ComplexDouble> output;                            // Vector to
                                                                   // hold
@@ -128,7 +130,7 @@ void runImpulseResponse(const std::string& coeffFile)
         .rateChange = 0
     };
 
-    FixedFIR<SLFixPoint, SLFixComplex> fir(realCoeffs, conf);
+    FixedFirRealCoeff fir(realCoeffs, conf);
     filter_io_t  data;
     SLFixComplex sample;
     sample.setFormat(18,
