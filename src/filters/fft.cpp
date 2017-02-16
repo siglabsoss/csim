@@ -3,10 +3,10 @@
  * and the block floating point technique to maximize precision.
  *
  * This implementation was inspired by the non-recursive method outlined here:
- ******http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
+ *******http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
  *
  * The "block floating point" technique was inspired by the paper here:
- ******http://www.ti.com/lit/an/spra948/spra948.pdf
+ *******http://www.ti.com/lit/an/spra948/spra948.pdf
  *
  */
 
@@ -135,9 +135,9 @@ void FFT::execute()
 {
     /**
      * Block floating point scaling operates on a per-stage basis by executing
-     ******the following steps
+     *******the following steps
      * 1) Calculate the appropriate shift for the entire "block" (inputs for the
-     ******current stage) based on the single maximum input value.
+     *******current stage) based on the single maximum input value.
      * 2) Shift the "block" based on the scaling factor from step 1.
      * 3) Perform the radix-2 butterflies
      */
@@ -260,22 +260,22 @@ void FFT::execute()
 
                 if (m_debug) {
                     std::cout << stage << ": m_inputs[" << topIdx <<
-                    "] = top + bot = (" << top.real().to_double() << "," <<
-                    top.imag().to_double() << ") + (" <<
-                    bot.real().to_double() <<
-                    "," << bot.imag().to_double() << ") = (" <<
-                    m_inputs[topIdx].real().to_double() << "," <<
-                    m_inputs[topIdx].imag().to_double() << ")" << std::endl;
+                    "] = top + bot = (" << top.real().to_int64() << "," <<
+                    top.imag().to_int64() << ") + (" <<
+                    bot.real().to_int64() <<
+                    "," << bot.imag().to_int64() << ") = (" <<
+                    m_inputs[topIdx].real().to_int64() << "," <<
+                    m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
 
                     std::cout << stage << ": m_inputs[" << botIdx <<
                     "] = (top - bot) * twiddle(" << k << ") = ( (" <<
-                    top.real().to_double() << "," << top.imag().to_double() <<
-                    ") - (" << bot.real().to_double() << "," <<
-                    bot.imag().to_double() << ") ) * (" <<
-                    twiddle.real().to_double() << "," <<
-                    twiddle.imag().to_double() << ") = (" <<
-                    m_inputs[botIdx].real().to_double() << "," <<
-                    m_inputs[botIdx].imag().to_double() << ")" << std::endl;
+                    top.real().to_int64() << "," << top.imag().to_int64() <<
+                    ") - (" << bot.real().to_int64() << "," <<
+                    bot.imag().to_int64() << ") ) * (" <<
+                    twiddle.real().to_int64() << "," <<
+                    twiddle.imag().to_int64() << ") = (" <<
+                    m_inputs[botIdx].real().to_int64() << "," <<
+                    m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
                 }
 #else // ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 m_inputs[botIdx] = top - bot;
