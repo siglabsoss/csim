@@ -2,7 +2,12 @@
 
 static void runFilter(const std::vector<ComplexDouble>& inputs)
 {
-    printf("Running filter with %ld input samples\n", inputs.size());
+        printf("Running filter with %ld input samples\n", inputs.size());
+
+    for (unsigned i = 0; i < inputs.size(); ++i) {
+        printf("%f,%f\n",
+               inputs[i].real(), inputs[i].imag());
+    }
 
     // Write filter here
 }
