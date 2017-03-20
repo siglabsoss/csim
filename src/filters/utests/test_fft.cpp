@@ -81,33 +81,13 @@ void runFFTTest(const std::string &infile, const std::string &outfile, size_t ou
 
     std::vector<ComplexDouble> inputs;
     std::vector<ComplexDouble> answers;
-    std::vector<ComplexDouble> outputs;
 
     inputs = utils::readComplexFromCSV<ComplexDouble>(inFile);
     BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
     answers = utils::readComplexFromCSV<ComplexDouble >(answersFile);
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
-    int points = inputs.size();
-    FFT fft(points, inverse);
-    fft.setOutputFormat(FFT_OUTPUT_WL, outputIWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
-    filter_io_t data;
-    for (unsigned int i = 0; i < 2; i++) {
-        for (int j = 0; j < points; j++) {
-            //std::cout << j << ": " << inputs[j] << std::endl;
-            data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(FFT_INPUT_FORMAT);
-            data.fc.set(inputs[j].real(), inputs[j].imag());
-            //std::cout << inputs[j] << " = " << data << std::endl;
-            fft.input(data);
-            fft.tick();
-            bool didGetOutput = fft.output(data);
-            bool lastInput = (i == 1 && j == points - 1);
-            if (didGetOutput && !lastInput) {
-                outputs.push_back(data.toComplexDouble());
-            }//If output is ready
-        }//Insert all input
-    }//Insert input again to get output
+    std::vector<ComplexDouble> outputs = FFTWrap(inputs, inverse, FFT_OUTPUT_WL, outputIWL);
 
     //This threshold is arbitrary and can be refined based on some kind of analysis
     checkErrorComplexDouble(outputs, answers, threshold);
