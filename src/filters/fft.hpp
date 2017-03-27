@@ -87,3 +87,9 @@ std::vector<ComplexDouble>FFTWrap(
     bool                              inverse,
     size_t                            outputWordLength,
     size_t                            outputIntLength);
+
+std::vector<SLFixComplex>FFTWrap(
+    const std::vector<SLFixComplex>& inputs,
+    bool                             inverse,
+    size_t                           outputWordLength,
+    size_t                           outputIntLength);
