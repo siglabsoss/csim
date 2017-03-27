@@ -12,4 +12,4 @@ set(SIGCORE_SOURCES
 
 add_library(sigcoreobj OBJECT ${SIGCORE_SOURCES})
 add_library(sigcore $<TARGET_OBJECTS:sigcoreobj>)
-target_link_libraries(sigcore zmq jsoncpp)
+target_link_libraries(sigcore sigutils zmq jsoncpp)

@@ -1,8 +1,6 @@
 #include <utils/radio_utils.hpp>
 #include <utils/ldpc_utils.hpp>
 
-#include <filters/mixer.hpp>
-#include <filters/decimator.hpp>
 #include <filters/demapper.hpp>
 #include <filters/noise_element.hpp>
 #include <filters/ldpc_encode.hpp>

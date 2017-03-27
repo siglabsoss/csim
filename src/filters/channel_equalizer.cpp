@@ -2,16 +2,17 @@
 #include <filters/channel_equalizer.hpp>
 #include <cassert>
 
-ChannelEqualizer::ChannelEqualizer(const std::vector<ComplexDouble> &Hf) :
-        m_Hf(Hf),
-        m_sample(),
-        m_outIdx(0),
-        gotInput(false)
+ChannelEqualizer::ChannelEqualizer(const std::vector<ComplexDouble>& Hf) :
+    FilterChainElement("CHANNEL_EQ"),
+    m_Hf(Hf),
+    m_sample(),
+    m_outIdx(0),
+    gotInput(false)
 {
     assert(m_Hf.size() == 1024);
 }
 
-bool ChannelEqualizer::input(const filter_io_t &data)
+bool ChannelEqualizer::input(const filter_io_t& data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
     gotInput = true;
@@ -20,11 +21,12 @@ bool ChannelEqualizer::input(const filter_io_t &data)
     return true;
 }
 
-bool ChannelEqualizer::output(filter_io_t &data)
+bool ChannelEqualizer::output(filter_io_t& data)
 {
     if (gotInput) {
         gotInput = false;
         ComplexDouble result = m_sample.toComplexDouble() / m_Hf[m_outIdx++];
+
         if (m_outIdx == m_Hf.size()) {
             m_outIdx = 0;
         }
@@ -37,6 +39,4 @@ bool ChannelEqualizer::output(filter_io_t &data)
 }
 
 void ChannelEqualizer::tick()
-{
-
-}
+{}

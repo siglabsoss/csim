@@ -6,7 +6,7 @@
 #include <cassert>
 
 Mapper::Mapper(MCS mcs) :
-    FilterChainElement("Mapper", mcs.getNumCodeWords() * mcs.getCodeWordLength() * 100),
+    FilterChainElement("MAPPER", mcs.getNumCodeWords() * mcs.getCodeWordLength() * 100),
     m_constellations(),
     m_bitsPerSymbol(0),
     m_output(),
@@ -162,4 +162,3 @@ constellation_map_t Mapper::getQAM16Constellations()
 
     return constellations;
 }
-

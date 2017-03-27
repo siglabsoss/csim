@@ -12,9 +12,9 @@
         "up5": "../data/ddc/coeffs/up5.txt"
     },
     "snr": {
-        "start"                 : -15.0,
-        "end"                   : -5.0,
-        "transition"            : -10.0,
+        "start"                 : -8.0,
+        "end"                   :  2.0,
+        "transition"            : -3.0,
         "fine_incr"             : 0.25,
         "coarse_incr"           : 1.0,
         "max_bit_err"           : 4000,

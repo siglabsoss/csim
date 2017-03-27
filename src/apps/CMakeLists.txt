@@ -1,7 +1,4 @@
 ########################### Analysis Tools ###########################
-add_executable(ldpc_analysis ldpc_analysis.cpp)
-target_link_libraries(ldpc_analysis sigcore sigtypes sigmath sigutils sigfilters)
-
 add_executable(twiddles print_twiddle.cpp)
 target_link_libraries(twiddles sigfilters sigtypes)
 

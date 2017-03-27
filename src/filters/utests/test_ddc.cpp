@@ -13,15 +13,20 @@
 CSIM_TEST_SUITE_BEGIN(DigitalDownConverterVerification)
 
 // Number of iterations to run simulation
-static constexpr int MAX_ITERS  = 2000000; //1068576;
+static constexpr int MAX_ITERS = 2000000; // 1068576;
 static constexpr double MIXER_FREQ = 0.16;
 
-static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5CoeffFile, const std::string &answersFile)
+static void runDDC(const std::string& halfbandCoeffFile,
+                   const std::string& by5CoeffFile,
+                   const std::string& answersFile)
 {
     SLFixPoint::throwOnOverflow = true;
-    std::vector<ComplexDouble> halfbandComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(halfbandCoeffFile);
-    std::vector<ComplexDouble> by5ComplexCoeffs      = utils::readComplexFromCSV<ComplexDouble>(by5CoeffFile);
-    std::vector<ComplexDouble> answers               = utils::readComplexFromCSV<ComplexDouble>(answersFile);
+    std::vector<ComplexDouble> halfbandComplexCoeffs =
+        utils::readComplexFromCSV<ComplexDouble>(halfbandCoeffFile);
+    std::vector<ComplexDouble> by5ComplexCoeffs =
+        utils::readComplexFromCSV<ComplexDouble>(by5CoeffFile);
+    std::vector<ComplexDouble> answers =
+        utils::readComplexFromCSV<ComplexDouble>(answersFile);
 
     assert(answers.size() > 0);
 
@@ -44,43 +49,60 @@ static void runDDC(const std::string &halfbandCoeffFile, const std::string &by5C
     filter_io_t data;
 
     size_t outputCount = 0;
+
     for (int ii = 0; ii < MAX_ITERS; ++ii) {
         input_sample = 0.1
-            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ + 0.005)*ii + 0.72)
-            + 0.125 * std::cos(2*M_PI*(0.5 * MIXER_FREQ)*ii)
-            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ - 0.005)*ii + 0.72)
-            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ + 0.01)*ii - 1.333)
-            + 0.125 * std::cos(2*M_PI*(0.25 * MIXER_FREQ)*ii)
-            + 0.125 * std::cos(2*M_PI*(MIXER_FREQ - 0.01)*ii - 1.333);
+                       + 0.125 * std::cos(
+            2 * M_PI * (MIXER_FREQ + 0.005) * ii + 0.72)
+                       + 0.125 * std::cos(2 * M_PI * (0.5 * MIXER_FREQ) * ii)
+                       + 0.125 * std::cos(
+            2 * M_PI * (MIXER_FREQ - 0.005) * ii + 0.72)
+                       + 0.125 * std::cos(
+            2 * M_PI * (MIXER_FREQ + 0.01) * ii - 1.333)
+                       + 0.125 * std::cos(2 * M_PI * (0.25 * MIXER_FREQ) * ii)
+                       + 0.125 * std::cos(
+            2 * M_PI * (MIXER_FREQ - 0.01) * ii - 1.333);
 
-        //input_sample = 0.5 * std::cos(2*M_PI*(MIXER_FREQ)*ii + 0.72);
+        // input_sample = 0.5 * std::cos(2*M_PI*(MIXER_FREQ)*ii + 0.72);
 
-        //std::cout << input_sample << ",0" << std::endl;
+        // std::cout << input_sample << ",0" << std::endl;
 
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(input_sample.wl(), input_sample.iwl());
+        data.fc.setFormat(input_sample);
         data.fc.real(input_sample);
         data.fc.imag(0.0);
         ddc.input(data);
+
         if (ddc.output(data)) {
-            double realDiff = fabs(data.fc.real().to_double() - answers[outputCount].real());
-            double imagDiff = fabs(data.fc.imag().to_double() - answers[outputCount].imag());
+            double realDiff =
+                fabs(data.fc.real().to_double() - answers[outputCount].real());
+            double imagDiff =
+                fabs(data.fc.imag().to_double() - answers[outputCount].imag());
             ++outputCount;
             BOOST_CHECK(realDiff < 1.0 / (1ull << DDC_INPUT_WL));
             BOOST_CHECK(imagDiff < 1.0 / (1ull << DDC_INPUT_WL));
-            //std::cout << data.fc.real().to_double() << "," << data.fc.imag().to_double() << std::endl;
+
+            // std::cout << data.fc.real().to_double() << "," <<
+            // data.fc.imag().to_double() << std::endl;
         }
     }
 }
 
-static void runDUC(const std::string &up2CoeffFile, const std::string &up5CoeffFile, const std::string &inputsFile, const std::string &answersFile)
+static void runDUC(const std::string& up2CoeffFile,
+                   const std::string& up5CoeffFile,
+                   const std::string& inputsFile,
+                   const std::string& answersFile)
 {
     SLFixPoint::throwOnOverflow = true;
-    std::vector<ComplexDouble> up2ComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(up2CoeffFile);
-    std::vector<ComplexDouble> up5ComplexCoeffs = utils::readComplexFromCSV<ComplexDouble>(up5CoeffFile);
+    std::vector<ComplexDouble> up2ComplexCoeffs =
+        utils::readComplexFromCSV<ComplexDouble>(up2CoeffFile);
+    std::vector<ComplexDouble> up5ComplexCoeffs =
+        utils::readComplexFromCSV<ComplexDouble>(up5CoeffFile);
 
-    std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>(inputsFile);
-    std::vector<ComplexDouble> answers = utils::readComplexFromCSV<ComplexDouble>(answersFile);
+    std::vector<ComplexDouble> inputs  = utils::readComplexFromCSV<ComplexDouble>(
+        inputsFile);
+    std::vector<ComplexDouble> answers = utils::readComplexFromCSV<ComplexDouble>(
+        answersFile);
 
     assert(answers.size() > 0);
 
@@ -111,52 +133,77 @@ static void runDUC(const std::string &up2CoeffFile, const std::string &up5CoeffF
         quad_in = inputs[ii].imag();
 
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(inph_in.wl(), inph_in.iwl());
+        data.fc.setFormat(inph_in);
         data.fc.real(inph_in);
         data.fc.imag(quad_in);
 
         duc.input(data);
+
         for (size_t i = 0; i < 10; i++) {
             duc.tick();
+
             if (duc.output(data)) {
-//                double realDiff = fabs(data.fc.real().to_double() - answers[outputCount].real());
-//                double imagDiff = fabs(data.fc.imag().to_double() - answers[outputCount].imag());
-//                BOOST_CHECK(realDiff < 1.0 / (1ull << DUC_INPUT_WL));
-//                BOOST_CHECK(imagDiff < 1.0 / (1ull << DUC_INPUT_WL));
-                //std::cout << data.fc.real().to_double() << "," << data.fc.imag().to_double() << std::endl;
+                //                double realDiff =
+                // fabs(data.fc.real().to_double() -
+                // answers[outputCount].real());
+                //                double imagDiff =
+                // fabs(data.fc.imag().to_double() -
+                // answers[outputCount].imag());
+                //                BOOST_CHECK(realDiff < 1.0 / (1ull <<
+                // DUC_INPUT_WL));
+                //                BOOST_CHECK(imagDiff < 1.0 / (1ull <<
+                // DUC_INPUT_WL));
+                // std::cout << data.fc.real().to_double() << "," <<
+                // data.fc.imag().to_double() << std::endl;
                 outputCount++;
             }
         }
     }
 }
 
-//XXX shorten these tests to decrease runtime and then reenable them
+// XXX shorten these tests to decrease runtime and then reenable them
 CSIM_TEST_CASE(BASIC_DDC_FUNCTIONALITY)
 {
-//    runDDC("./data/ddc/coeffs/down2.txt", "./data/ddc/coeffs/down5.txt", "./data/ddc/ddc_out.csv");
+    //    runDDC("./data/ddc/coeffs/down2.txt", "./data/ddc/coeffs/down5.txt",
+    // "./data/ddc/ddc_out.csv");
 }
 
 CSIM_TEST_CASE(BASIC_DUC_FUNCTIONALITY)
 {
-//    runDUC("./data/ddc/coeffs/up2.txt", "./data/ddc/coeffs/up5.txt", "./data/ddc/ddc_out.csv", "./data/ddc/duc_out.csv");
+    //    runDUC("./data/ddc/coeffs/up2.txt", "./data/ddc/coeffs/up5.txt",
+    // "./data/ddc/ddc_out.csv", "./data/ddc/duc_out.csv");
 }
 
 CSIM_TEST_CASE(DDC_DUC_LOOPBACK)
 {
-    std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>("./data/ddc/duc_loopback_in.csv");
+    std::vector<ComplexDouble> inputs = utils::readComplexFromCSV<ComplexDouble>(
+        "./data/ddc/duc_loopback_in.csv");
     std::vector<ComplexDouble> outputs;
 
-    DDCUtils::runLoopbackTest("./data/ddc/coeffs/down2.txt", "./data/ddc/coeffs/down5.txt", "./data/ddc/coeffs/up2.txt", "./data/ddc/coeffs/up5.txt", inputs, outputs);
+    DDCUtils::runLoopbackTest("./data/ddc/coeffs/down2.txt",
+                              "./data/ddc/coeffs/down5.txt",
+                              "./data/ddc/coeffs/up2.txt",
+                              "./data/ddc/coeffs/up5.txt",
+                              inputs,
+                              outputs);
 
     constexpr size_t TIME_DOMAIN_DELAY = 64;
+
     for (size_t i = 0; i < outputs.size(); i++) {
         if (i >= TIME_DOMAIN_DELAY) {
             double phaseOut = atan2(outputs[i].imag(), outputs[i].real());
-            double phaseIn = atan2(inputs[i-TIME_DOMAIN_DELAY].imag(), inputs[i - TIME_DOMAIN_DELAY].real());
-//            std::cout << phaseOut << " = " << phaseIn << std::endl;
+            double phaseIn  =
+                atan2(inputs[i - TIME_DOMAIN_DELAY].imag(),
+                      inputs[i - TIME_DOMAIN_DELAY].real());
+
+            //            std::cout << phaseOut << " = " << phaseIn <<
+            // std::endl;
             double phaseDiff = utils::angleDiff(phaseIn, phaseOut);
-            BOOST_CHECK_MESSAGE(std::abs(phaseDiff) < 0.1, "Phase diff " << phaseDiff << " is too large!");
-            //XXX add magnitude check
+            BOOST_CHECK_MESSAGE(std::abs(
+                                    phaseDiff) < 0.1, "Phase diff " <<
+                                phaseDiff << " is too large!");
+
+            // XXX add magnitude check
         }
     }
 }

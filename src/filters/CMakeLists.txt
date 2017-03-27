@@ -20,6 +20,8 @@ set(SIGFILTERS_SOURCES
     channel_equalizer.cpp
     puncture.cpp
     depuncture.cpp
+    subcarrier_mapper.cpp
+    ofdm_frame_sync.cpp
     boost_pywrap.cpp
     )
 

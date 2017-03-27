@@ -6,7 +6,7 @@
 #include <cassert>
 
 LDPCDecoder::LDPCDecoder(const std::vector<std::vector<bool> > &H):
-FilterChainElement(std::string("LDPCDecoder")),
+FilterChainElement(std::string("LDPC_DECODER")),
 m_hrows(H.size()),
 m_hcols(H[0].size()), //will crash if hrows == 0
 m_H(H),
@@ -315,4 +315,3 @@ bool operator<(const LDPCDecoder::GraphEdgeKey &lhs, const LDPCDecoder::GraphEdg
         return lhs.checkNum < rhs.checkNum;
     }
 }
-
