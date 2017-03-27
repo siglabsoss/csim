@@ -14,29 +14,29 @@ SLFixComplex::SLFixComplex(size_t                      wordLength,
     m_imag(wordLength, intLength, quantMode, overflowMode)
 {}
 
-SLFixComplex SLFixComplex::operator+(const SLFixComplex& rhs)
+SLFixComplex SLFixComplex::operator+(const SLFixComplex& rhs) const
 {
     assert(m_real.wl() != 0);
     SLFixComplex result;
     SLFixPoint   newReal = this->m_real + rhs.m_real;
     SLFixPoint   newImag = this->m_imag + rhs.m_imag;
-    result.m_real.setFormat(newReal);
+    result.m_real.setFormat(newReal.getFormat());
     result.m_real = newReal;
-    result.m_imag.setFormat(newImag);
+    result.m_imag.setFormat(newImag.getFormat());
     result.m_imag = newImag;
 
     return result;
 }
 
-SLFixComplex SLFixComplex::operator-(const SLFixComplex& rhs)
+SLFixComplex SLFixComplex::operator-(const SLFixComplex& rhs) const
 {
     assert(m_real.wl() != 0);
     SLFixComplex result;
     SLFixPoint   newReal = this->m_real - rhs.m_real;
     SLFixPoint   newImag = this->m_imag - rhs.m_imag;
-    result.m_real.setFormat(newReal);
+    result.m_real.setFormat(newReal.getFormat());
     result.m_real = newReal;
-    result.m_imag.setFormat(newImag);
+    result.m_imag.setFormat(newImag.getFormat());
     result.m_imag = newImag;
 
     return result;
@@ -56,37 +56,37 @@ SLFixComplex& SLFixComplex::operator-=(const SLFixComplex& rhs)
     return *this;
 }
 
-SLFixComplex SLFixComplex::operator*(const SLFixComplex& rhs)
+SLFixComplex SLFixComplex::operator*(const SLFixComplex& rhs) const
 {
     SLFixComplex result;
 
     SLFixPoint newReal = (this->m_real * rhs.m_real) - (this->m_imag * rhs.m_imag);
     SLFixPoint newImag = (this->m_real * rhs.m_imag) + (this->m_imag * rhs.m_real);
 
-    result.m_real.setFormat(newReal);
+    result.m_real.setFormat(newReal.getFormat());
     result.m_real = newReal;
-    result.m_imag.setFormat(newImag);
+    result.m_imag.setFormat(newImag.getFormat());
     result.m_imag = newImag;
 
     return result;
 }
 
-SLFixComplex SLFixComplex::operator*(const SLFixPoint& rhs)
+SLFixComplex SLFixComplex::operator*(const SLFixPoint& rhs) const
 {
     SLFixComplex result;
 
     SLFixPoint newReal = this->m_real * rhs;
     SLFixPoint newImag = this->m_imag * rhs;
 
-    result.m_real.setFormat(newReal);
+    result.m_real.setFormat(newReal.getFormat());
     result.m_real = newReal;
-    result.m_imag.setFormat(newImag);
+    result.m_imag.setFormat(newImag.getFormat());
     result.m_imag = newImag;
 
     return result;
 }
 
-SLFixComplex SLFixComplex::operator/(const SLFixComplex& rhs)
+SLFixComplex SLFixComplex::operator/(const SLFixComplex& rhs) const
 {
     // XXX implement
     SLFixComplex result(0,
@@ -104,10 +104,17 @@ SLFixComplex& SLFixComplex::operator=(const SLFixComplex& rhs)
     return *this;
 }
 
-SLFixComplex& SLFixComplex::operator=(double val)
+SLFixComplex& SLFixComplex::operator=(const SLFixPoint& rhs)
 {
-    this->m_real = val;
-    this->m_imag = val;
+    this->m_real = rhs;
+    this->m_imag = 0.0;
+    return *this;
+}
+
+SLFixComplex& SLFixComplex::operator=(ComplexDouble val)
+{
+    this->m_real = val.real();
+    this->m_imag = val.imag();
     return *this;
 }
 
@@ -129,10 +136,10 @@ SLFixComplex SLFixComplex::operator*()
 {
     SLFixComplex result;
 
-    result.m_real.setFormat(this->m_real);
+    result.m_real.setFormat(this->m_real.getFormat());
     result.m_real = m_real;
 
-    result.m_imag.setFormat(this->m_imag);
+    result.m_imag.setFormat(this->m_imag.getFormat());
     result.m_imag = -(this->m_imag.to_double());
 
     return result;
@@ -164,16 +171,15 @@ void SLFixComplex::setFormat(size_t                      wordLength,
     m_imag.setFormat(wordLength, intLength, quantMode, overflowMode);
 }
 
-void SLFixComplex::setFormat(const SLFixComplex& other)
+void SLFixComplex::setFormat(const SLFixPoint::format_t& fmt)
 {
-    m_real.setFormat(other.real());
-    m_imag.setFormat(other.imag());
+    m_real.setFormat(fmt);
+    m_imag.setFormat(fmt);
 }
 
-void SLFixComplex::setFormat(const SLFixPoint& other)
+SLFixPoint::format_t SLFixComplex::getFormat() const
 {
-    m_real.setFormat(other);
-    m_imag.setFormat(other);
+    return m_real.getFormat();
 }
 
 SLFixPoint SLFixComplex::real() const

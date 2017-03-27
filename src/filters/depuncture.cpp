@@ -43,7 +43,7 @@ bool Depuncture::handlePuncture(filter_io_t& data)
         assert(input.type == IO_TYPE_FIXPOINT);
 
         data.type = IO_TYPE_FIXPOINT;
-        data.fp.setFormat(input.fp);
+        data.fp.setFormat(input.fp.getFormat());
         data.fp = input.fp;
         m_fifo.pop_front();
         ++m_outBitCount;
@@ -86,7 +86,7 @@ bool Depuncture::handleRepetition(filter_io_t& data)
         filter_io_t input = m_fifo.front();
         assert(input.type == IO_TYPE_FIXPOINT);
         data.type = IO_TYPE_FIXPOINT;
-        data.fp.setFormat(input.fp);
+        data.fp.setFormat(input.fp.getFormat());
         data.fp = input.fp;
         m_fifo.pop_front();
         ++m_outBitCount;

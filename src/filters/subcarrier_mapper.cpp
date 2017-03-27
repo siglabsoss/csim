@@ -3,54 +3,91 @@
 #include <cassert>
 #include <random>
 
-SubcarrierMapper::SubcarrierMapper(MCS mcs) :
-    FilterChainElement("SUBCARRIER_MAPPER", mcs.getNumSubCarriers() * 4),
+SubcarrierMapper::SubcarrierMapper(MCS    mcs,
+                                   size_t pilotSpacing,
+                                   size_t initialPilotOfset,
+                                   size_t symbolRep) :
+    FilterChainElement("SUBCARRIER_MAPPER", mcs.getNumSubCarriers() * symbolRep *
+                       2),
     m_mcs(mcs),
+    m_pilotSpacing(pilotSpacing),
+    m_initialPilotOffset(initialPilotOfset),
+    m_symbolRep(symbolRep),
     m_state(WAITING_FOR_INPUT),
     m_output(),
     m_shouldOutput(false),
-    m_preamble(mcs.getNumSubCarriers() * 2),
+    m_preamble(mcs.getNumSubCarriers()),
     m_preambleIdx(0),
     m_subSymbolCount(0)
 {
     initializePreamble();
 }
 
+size_t SubcarrierMapper::getNumPilotTones() const
+{
+    size_t numPilots = 0;
+
+    for (size_t n = m_initialPilotOffset; n < m_mcs.getNumSubCarriers() / 2;
+         n += m_pilotSpacing) {
+        numPilots += 2; // a positive and negative index for each 'n'
+    }
+
+    return numPilots;
+}
+
 void SubcarrierMapper::initializePreamble()
 {
-    size_t symbolSize = m_preamble.size() / 2; // both preamble vectors are
-
-    // the same size
-
     for (size_t i = 0; i < m_preamble.size(); ++i) {
         m_preamble[i].setFormat(FFT_INPUT_FORMAT);
         m_preamble[i].set(0.0, 0.0);
     }
+
     auto g =
         std::bind(std::uniform_int_distribution<unsigned>(0, 1), std::mt19937());
 
-    for (size_t i = 0; i < (symbolSize >> 1); ++i) {
-        int val = (g() << 1) - 1;
-        m_preamble[i * 2].real(static_cast<double>(val) * M_SQRT2);
-    }
+    size_t numPilots = getNumPilotTones();
 
-    for (size_t i = 0; i < (symbolSize >> 2); ++i) {
-        int val = (g() << 1) - 1;
-        m_preamble[symbolSize + i * 4].real(static_cast<double>(val) * 2.0);
-    }
+    std::cout << "Using training symbol with " << numPilots <<
+    " pilot tones spaced " << m_pilotSpacing <<
+    " tones apart with an initial offset of " << m_initialPilotOffset <<
+    std::endl;
 
-    //    for (size_t i = 0; i < preambleSize; ++i) {
-    //        std::cout << i << ": " << m_preamble[i] << std::endl;
-    //    }
+    double powerScale =
+        sqrt(m_mcs.getNumSubCarriers() / static_cast<double>(numPilots));
+
+    for (size_t n = m_initialPilotOffset; n < m_mcs.getNumSubCarriers() / 2;
+         n += m_pilotSpacing) {
+        // Positive tone
+        size_t fftIdx = subcarrierIdxToFFTIdx(n);
+        int    val    = (g() << 1) - 1;
+        m_preamble[fftIdx].real(static_cast<double>(val) * powerScale);
+
+        // Corresponding negative tone
+        fftIdx = subcarrierIdxToFFTIdx(-n);
+        val    = (g() << 1) - 1;
+        m_preamble[fftIdx].real(static_cast<double>(val) * powerScale);
+    }
+}
+
+size_t SubcarrierMapper::subcarrierIdxToFFTIdx(ssize_t subcarrierIdx) const
+{
+    if (subcarrierIdx >= 0) {
+        return subcarrierIdx;
+    }
+    subcarrierIdx = m_mcs.getNumSubCarriers() + subcarrierIdx;
+            assert(subcarrierIdx >= 0);
+    return static_cast<size_t>(subcarrierIdx);
 }
 
 SLFixComplex SubcarrierMapper::getNextPreambleSymbol(bool& finished)
 {
-    size_t idx = m_preambleIdx;
+    size_t idx = m_preambleIdx % m_preamble.size();
 
     finished = false;
 
-    if (++m_preambleIdx >= m_preamble.size()) {
+    if (++m_preambleIdx >= m_preamble.size() * m_symbolRep) {
+        std::cout << "SENT " << m_preambleIdx <<
+        " PREAMBLE SYMBOLS, OUTPUTTING DATA SYMBOLS" << std::endl;
         m_preambleIdx = 0;
         finished      = true;
     }

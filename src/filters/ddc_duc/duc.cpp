@@ -39,7 +39,7 @@ DigitalUpConverter::DigitalUpConverter(double                     freq,
     for (size_t i = 0; i < up5Coeffs.size(); i++) {
         up5NormCoeffs[i] = up5Coeffs[i] * coeff_scale * 5;
     }
-    FixedFIR::Config up2Conf = {
+    FixedFIRConfig up2Conf = {
         .wlCoeff    =             18,
         .wlDelay    = DUC_INPUT_WL,
         .iwlDelay   =  DUC_INPUT_IWL,
@@ -47,7 +47,7 @@ DigitalUpConverter::DigitalUpConverter(double                     freq,
         .iwlOut     =  DUC_INPUT_IWL,
         .rateChange =  2
     };
-    FixedFIR::Config up5Conf = {
+    FixedFIRConfig up5Conf = {
         .wlCoeff    =             18,
         .wlDelay    = DUC_INPUT_WL,
         .iwlDelay   =  DUC_INPUT_IWL,
@@ -55,8 +55,8 @@ DigitalUpConverter::DigitalUpConverter(double                     freq,
         .iwlOut     =  DUC_INPUT_IWL,
         .rateChange =  5
     };
-    _up2FIR = new FixedFIR(up2NormCoeffs, up2Conf);
-    _up5FIR = new FixedFIR(up5NormCoeffs, up5Conf);
+    _up2FIR = new FixedFirRealCoeff(up2NormCoeffs, up2Conf);
+    _up5FIR = new FixedFirRealCoeff(up5NormCoeffs, up5Conf);
 }
 
 bool DigitalUpConverter::input(const filter_io_t& data)
@@ -73,7 +73,7 @@ bool DigitalUpConverter::output(filter_io_t& data)
 {
     if (_output_ready) {
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(_output_inph);
+        data.fc.setFormat(_output_inph.getFormat());
         data.fc.real(static_cast<SLFixPoint>(_output_inph));
         data.fc.imag(static_cast<SLFixPoint>(_output_quad));
     }
@@ -123,7 +123,7 @@ bool DigitalUpConverter::push(
 
     filter_io_t sample;
     sample.type = IO_TYPE_COMPLEX_FIXPOINT;
-    sample.fc.setFormat(inph_in);
+    sample.fc.setFormat(inph_in.getFormat());
     sample.fc.real(inph_in);
     sample.fc.imag(quad_in);
 

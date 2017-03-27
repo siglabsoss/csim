@@ -28,12 +28,19 @@
 #include <3rd/json/json.h>
 #include <iomanip>
 
-static constexpr double MIXER_FREQ          = 0.16;
-static constexpr size_t FFT_SIZE            = 1024;
-static constexpr size_t CP_SIZE             = 100;
-static constexpr size_t DUC_UPSAMPLE_FACTOR = 10;
+static constexpr double MIXER_FREQ           = 0.16;
+static constexpr size_t FFT_SIZE             = 1024;
+static constexpr size_t CP_SIZE              = 100;
+static constexpr size_t SYMBOL_SIZE          = FFT_SIZE + CP_SIZE;
+static constexpr size_t DUC_UPSAMPLE_FACTOR  = 10;
+static constexpr size_t NUM_TRAINING_SYMBOLS = 2;
+static constexpr size_t NUM_INITIALIZATION_SYMBOLS = 3;
 
 #define SHOULD_PROBE_FILTERS
+
+#ifdef SHOULD_PROBE_FILTERS
+constexpr size_t NUM_FRAMES_TO_CAPTURE = 10;
+#endif // ifdef SHOULD_PROBE_FILTERS
 
 static size_t runFilters(FilterChain& chain,
                          size_t       numBits,
@@ -50,7 +57,8 @@ static size_t runFilters(FilterChain& chain,
     // "Prime the pump" by warming up the filter chain. This can help for
     // blocks that have a processing pipeline (delay) to warm up before inputs
     // are fed through the chain
-    for (size_t i = 0; i < 20480; ++i) {
+    for (size_t i = 0;
+         i < SYMBOL_SIZE * NUM_TRAINING_SYMBOLS * DUC_UPSAMPLE_FACTOR * NUM_INITIALIZATION_SYMBOLS; ++i) {
         chain.tick();
         chain.output(sample);
     }
@@ -148,8 +156,11 @@ static FilterChain constructLoopbackChain(double             noiseVar,
     LDPCEncode     *encode  = new LDPCEncode(G);
     Puncture *punc          = new Puncture(mcs);
     Mapper   *mapper        = new Mapper(mcs);
-    SubcarrierMapper *sm    = new SubcarrierMapper(mcs);
-    FFT *ifft               = new FFT(FFT_SIZE, true);
+    SubcarrierMapper *sm    = new SubcarrierMapper(mcs,
+                                                   2,
+                                                   0,
+                                                   NUM_TRAINING_SYMBOLS);
+    FFT *ifft = new FFT(FFT_SIZE, true);
     ifft->setOutputFormat(FFT_OUTPUT_WL,
                           1,
                           SLFixPoint::QUANT_RND_HALF_UP,
@@ -174,7 +185,9 @@ static FilterChain constructLoopbackChain(double             noiseVar,
                                                          down2Coeffs,
                                                          down5Coeffs);
 
-    OFDMFrameSync *fs = new OFDMFrameSync(CP_SIZE, 512, mcs);
+    OFDMFrameSync *fs = new OFDMFrameSync(CP_SIZE,
+                                          NUM_TRAINING_SYMBOLS,
+                                          mcs);
 
     // FrameSync *fs        = new FrameSync(FFT_SIZE, CP_SIZE, syncDelay, mcs);
     ChannelEqualizer *ce = new ChannelEqualizer(Hf);
@@ -185,48 +198,51 @@ static FilterChain constructLoopbackChain(double             noiseVar,
 #ifdef SHOULD_PROBE_FILTERS
 
     // Debug probes
-    std::string duc_in_probe_name          = "DUC_INPUT";
-    std::string ddc_out_probe_name         = "DDC_OUTPUT";
-    std::string ifft_in_probe_name         = "IFFT_INPUT";
-    std::string ifft_out_probe_name        = "IFFT_OUTPUT";
-    std::string fft_out_probe_name         = "FFT_OUTPUT";
-    std::string fft_in_probe_name          = "FFT_INPUT";
-    constexpr size_t PHASE_DELAY           = 40; // found emperically
-    constexpr size_t NUM_FRAMES_TO_CAPTURE = 103;
-    SampleCountTrigger *duc_in             = new SampleCountTrigger(
+    std::string duc_in_probe_name                = "DUC_INPUT";
+    std::string ddc_out_probe_name               = "DDC_OUTPUT";
+    std::string ifft_in_probe_name               = "IFFT_INPUT";
+    std::string ifft_out_probe_name              = "IFFT_OUTPUT";
+    std::string fft_out_probe_name               = "FFT_OUTPUT";
+    std::string fft_in_probe_name                = "FFT_INPUT";
+    constexpr size_t PHASE_DELAY                 = 40; // found emperically
+    const     size_t NUM_DATA_SYMBOLS_PER_FRAME  = mcs.getNumOFDMSymbols();
+    const     size_t NUM_TOTAL_SYMBOLS_PER_FRAME = NUM_DATA_SYMBOLS_PER_FRAME +
+                                                   NUM_TRAINING_SYMBOLS;
+    SampleCountTrigger *duc_in = new SampleCountTrigger(
         duc_in_probe_name,
         FilterProbe::CSV,
-        (FFT_SIZE + CP_SIZE) * NUM_FRAMES_TO_CAPTURE,
+        SYMBOL_SIZE * (NUM_TOTAL_SYMBOLS_PER_FRAME * NUM_FRAMES_TO_CAPTURE + NUM_INITIALIZATION_SYMBOLS),
         1,
         0);
     SampleCountTrigger *ddc_out = new SampleCountTrigger(
         ddc_out_probe_name,
         FilterProbe::CSV,
-        (FFT_SIZE + CP_SIZE) * NUM_FRAMES_TO_CAPTURE + PHASE_DELAY,
+        SYMBOL_SIZE * (NUM_TOTAL_SYMBOLS_PER_FRAME * NUM_FRAMES_TO_CAPTURE + NUM_INITIALIZATION_SYMBOLS) +
+        PHASE_DELAY,
         1,
         0);
     SampleCountTrigger *ifft_in = new SampleCountTrigger(
         ifft_in_probe_name,
         FilterProbe::CSV,
-        FFT_SIZE * NUM_FRAMES_TO_CAPTURE,
+        FFT_SIZE * (NUM_TOTAL_SYMBOLS_PER_FRAME * NUM_FRAMES_TO_CAPTURE + NUM_INITIALIZATION_SYMBOLS),
         1,
         0);
     SampleCountTrigger *ifft_out = new SampleCountTrigger(
         ifft_out_probe_name,
         FilterProbe::CSV,
-        FFT_SIZE * NUM_FRAMES_TO_CAPTURE,
+        FFT_SIZE * (NUM_TOTAL_SYMBOLS_PER_FRAME * NUM_FRAMES_TO_CAPTURE + NUM_INITIALIZATION_SYMBOLS),
         1,
         0);
     SampleCountTrigger *fft_out = new SampleCountTrigger(
         fft_out_probe_name,
         FilterProbe::CSV,
-        FFT_SIZE * NUM_FRAMES_TO_CAPTURE,
+        FFT_SIZE * (NUM_TOTAL_SYMBOLS_PER_FRAME * NUM_FRAMES_TO_CAPTURE + NUM_INITIALIZATION_SYMBOLS),
         1,
         0);
     SampleCountTrigger *fft_in = new SampleCountTrigger(
         fft_in_probe_name,
         FilterProbe::CSV,
-        FFT_SIZE * NUM_FRAMES_TO_CAPTURE,
+        FFT_SIZE * (NUM_TOTAL_SYMBOLS_PER_FRAME * NUM_FRAMES_TO_CAPTURE + NUM_INITIALIZATION_SYMBOLS),
         1,
         0);
 
@@ -365,7 +381,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    std::cout << std::setprecision(52);
+    // std::cout << std::setprecision(52);
 
     std::srand(1473294057 + 1);
 

@@ -12,12 +12,12 @@
         "up5": "../data/ddc/coeffs/up5.txt"
     },
     "snr": {
-        "start"                 : 7.5,
-        "end"                   : 7.5,
+        "start"                 : 60,
+        "end"                   : 60,
         "transition"            : -3.0,
         "fine_incr"             : 0.25,
         "coarse_incr"           : 1.0,
-        "max_bit_err"           : 30000,
+        "max_bit_err"           : 300000,
         "outputs_per_print"     : 10000,
         "num_frames_to_send"    : 220,
         "frame_size"            : 3888

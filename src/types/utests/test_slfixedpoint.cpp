@@ -24,6 +24,17 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        // (why
                                                                        // does
                                                                        // the
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
                                                                        // part
                                                                        // change
@@ -41,13 +52,57 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        // 1111
     tests.push_back(std::pair<double, int64_t>(01.9999, 0b00011111));  // 0 001
                                                                        // 1111
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // (truncation
                                                                        // of
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // precision)
     tests.push_back(std::pair<double, int64_t>(15.9999, 0b11111111));  // 1 111
                                                                        // 1111
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // (truncation
                                                                        // of
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // precision
                                                                        // & roll
                                                                        // over
@@ -59,21 +114,87 @@ CSIM_TEST_CASE(BIT_REPRESENTATION)
                                                                        // (roll
                                                                        // over
                                                                        // of
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // component)
     tests.push_back(std::pair<double, int64_t>(17.0000, 0b00010000));  // 0 001
                                                                        // 0000
                                                                        // (roll
                                                                        // over
                                                                        // of
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // component)
     tests.push_back(std::pair<double, int64_t>(17.9999, 0b00011111));  // 0 001
                                                                        // 0000
                                                                        // (roll
                                                                        // over
                                                                        // of
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // integer
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // component)
 
     SLFixedPoint<8, 4> fp;
@@ -99,7 +220,18 @@ CSIM_TEST_CASE(BIT_REPRESENTATION_ALL_FRACTIONAL)
     tests.push_back(std::pair<double, int64_t>(00.9687500, 0b01111100));
     tests.push_back(std::pair<double, int64_t>(00.9843750, 0b01111110));
     tests.push_back(std::pair<double, int64_t>(00.9921875, 0b01111111));
-    tests.push_back(std::pair<double, int64_t>(01.0000000, 0b10000000)); // overflow
+    tests.push_back(std::pair<double, int64_t>(01.0000000, 0b10000000)); //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         //
+                                                                         // overflow
                                                                          // to
                                                                          // sign
                                                                          // bit
@@ -110,12 +242,56 @@ CSIM_TEST_CASE(BIT_REPRESENTATION_ALL_FRACTIONAL)
     tests.push_back(std::pair<double, int64_t>(-00.9687500, 0b10000100));
     tests.push_back(std::pair<double, int64_t>(-00.9843750, 0b10000010));
     tests.push_back(std::pair<double, int64_t>(-00.9921875, 0b10000001));
-    tests.push_back(std::pair<double, int64_t>(-01.0000000, 0b10000000)); // underflow
+    tests.push_back(std::pair<double, int64_t>(-01.0000000, 0b10000000)); //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          // underflow
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
                                                                           // -1.0
                                                                           // =
                                                                           // 1.0
     tests.push_back(std::pair<double, int64_t>(01.5000000, 0b11000000));
-    tests.push_back(std::pair<double, int64_t>(-01.5000000, 0b01000000)); // underflow
+    tests.push_back(std::pair<double, int64_t>(-01.5000000, 0b01000000)); //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          // underflow
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
+                                                                          //
                                                                           // -1.5
                                                                           // =
                                                                           // 0.5
@@ -210,31 +386,31 @@ CSIM_TEST_CASE(FRACTIONAL_MULTIPLICATION)
     SLFixedPoint<8, 1> a;
     SLFixedPoint<8, 1> b;
     SLFixedPoint<8, 1> c;
-    a = 0.5;                                         // 0 1000000
-    b = 0.5;                                         // 0 1000000
+    a = 0.5;                             // 0 1000000
+    b = 0.5;                             // 0 1000000
     c = a * b;
     int64_t result         = c.to_uint64();
-    int64_t expectedResult = 0b00100000;             // 00[001 0000 0]000 0000
+    int64_t expectedResult = 0b00100000; // 00[001 0000 0]000 0000
     BOOST_CHECK_EQUAL(result, expectedResult);
 
-    a              = 1.0; b = 1.0; c = a * b;        // 1 0000000 (roll over to
-                                                     // sign bit)
+    a = 1.0; b = 1.0; c = a * b;         // 1 0000000 (roll over to
+                                         // sign bit)
     result         = c.to_uint64();
-    expectedResult = 0b10000000;                     // 0[100 0000 0]000 0000
+    expectedResult = 0b10000000;         // 0[100 0000 0]000 0000
     BOOST_CHECK_EQUAL(result, expectedResult);
 
-    a              = 1.0; b = 1.5; c = a * b;        // 1 0000000 * 1 1000000
-                                                     // (roll over to sign bit)
+    a = 1.0; b = 1.5; c = a * b;         // 1 0000000 * 1 1000000
+                                         // (roll over to sign bit)
     result         = c.to_uint64();
-    expectedResult = 0b01000000;                     // 01[10 0000 0]000 0000
+    expectedResult = 0b01000000;         // 01[10 0000 0]000 0000
     BOOST_CHECK_EQUAL(result, expectedResult);
 
-    a              = 1.0; b = -0.9921875; c = a * b; // 1 0000000 * 1 0000001
-                                                     // (roll over to sign bit)
-                                                     // (-0.9921875 ==
-                                                     // 1.0078125)
+    a = 1.0; b = -0.9921875; c = a * b;  // 1 0000000 * 1 0000001
+                                         // (roll over to sign bit)
+                                         // (-0.9921875 ==
+                                         // 1.0078125)
     result         = c.to_uint64();
-    expectedResult = 0b01111111;                     // 0[100 0000 1]000 0000
+    expectedResult = 0b01111111;         // 0[100 0000 1]000 0000
     BOOST_CHECK_EQUAL(result, expectedResult);
 }
 
@@ -257,9 +433,18 @@ CSIM_TEST_CASE(ADDITION_OF_DIFFERING_FORMATS)
 {
     SLFixPoint a, b, c;
 
-    a.setFormat(48, 2, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND);
-    b.setFormat(16, 1, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND);
-    c.setFormat(32, 1, SLFixPoint::QUANT_TRUNCATE, SLFixPoint::OVERFLOW_WRAP_AROUND);
+    a.setFormat(48,
+                2,
+                SLFixPoint::QUANT_TRUNCATE,
+                SLFixPoint::OVERFLOW_WRAP_AROUND);
+    b.setFormat(16,
+                1,
+                SLFixPoint::QUANT_TRUNCATE,
+                SLFixPoint::OVERFLOW_WRAP_AROUND);
+    c.setFormat(32,
+                1,
+                SLFixPoint::QUANT_TRUNCATE,
+                SLFixPoint::OVERFLOW_WRAP_AROUND);
     a = 0.3;
     b = -0.3;
     c = a - b;
@@ -370,10 +555,10 @@ CSIM_TEST_CASE(COPYING_OBJECTS)
     b = a;
 
     // After assignment, these attributes should be left unchanged.
-    BOOST_CHECK_EQUAL(b.m_overflowMode, SLFixPoint::OVERFLOW_WRAP_AROUND);
-    BOOST_CHECK_EQUAL(b.m_quantMode,    SLFixPoint::QUANT_RND_HALF_UP);
-    BOOST_CHECK_EQUAL(b.m_fl,           4);
-    BOOST_CHECK_EQUAL(b.m_wl,           8);
+    BOOST_CHECK_EQUAL(b.m_fmt.om, SLFixPoint::OVERFLOW_WRAP_AROUND);
+    BOOST_CHECK_EQUAL(b.m_fmt.qm, SLFixPoint::QUANT_RND_HALF_UP);
+    BOOST_CHECK_EQUAL(b.m_fmt.fl, 4);
+    BOOST_CHECK_EQUAL(b.m_fmt.wl, 8);
 }
 
 CSIM_TEST_CASE(SATURATION)
@@ -421,6 +606,38 @@ CSIM_TEST_CASE(TO_DOUBLE_AND_BACK)
     a = -7.62939e-6;
     b = a.to_double();
     BOOST_CHECK_EQUAL(a.to_uint64(), b.to_uint64());
+}
+
+CSIM_TEST_CASE(PROPER_SATURATION)
+{
+    SLFixPoint a(11,
+                 9,
+                 SLFixPoint::QUANT_RND_HALF_UP,
+                 SLFixPoint::OVERFLOW_SATURATE);
+    SLFixPoint b(8,
+                 3,
+                 SLFixPoint::QUANT_RND_HALF_UP,
+                 SLFixPoint::OVERFLOW_SATURATE);
+
+    a = -44.25;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), -128);
+}
+
+CSIM_TEST_CASE(PROPER_SATURATION2)
+{
+    SLFixPoint a(11,
+                 9,
+                 SLFixPoint::QUANT_RND_HALF_UP,
+                 SLFixPoint::OVERFLOW_SATURATE);
+    SLFixPoint b(8,
+                 3,
+                 SLFixPoint::QUANT_RND_HALF_UP,
+                 SLFixPoint::OVERFLOW_SATURATE);
+
+    a =          -4.75;
+    b = a;
+    BOOST_CHECK_EQUAL(b.to_int64(), -128);
 }
 
 CSIM_TEST_SUITE_END()

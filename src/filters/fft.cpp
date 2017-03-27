@@ -3,10 +3,10 @@
  * and the block floating point technique to maximize precision.
  *
  * This implementation was inspired by the non-recursive method outlined here:
- *http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
+ *****************http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
  *
  * The "block floating point" technique was inspired by the paper here:
- *http://www.ti.com/lit/an/spra948/spra948.pdf
+ *****************http://www.ti.com/lit/an/spra948/spra948.pdf
  *
  */
 
@@ -63,7 +63,7 @@ bool FFT::input(const filter_io_t& data)
 
     // Rely on upstream to use expected input format so that
     // this module can be slightly more flexible
-    m_inputs[inputIdx].setFormat(data.fc);
+    m_inputs[inputIdx].setFormat(data.fc.getFormat());
     m_inputs[inputIdx] = data.fc;
 
     // Track the maximum input value for proper scaling
@@ -135,18 +135,19 @@ void FFT::execute()
 {
     /**
      * Block floating point scaling operates on a per-stage basis by executing
-     *the following steps
+     *****************the following steps
      * 1) Calculate the appropriate shift for the entire "block" (inputs for the
-     *current stage) based on the single maximum input value.
+     *****************current stage) based on the single maximum input value.
      * 2) Shift the "block" based on the scaling factor from step 1.
      * 3) Perform the radix-2 butterflies
      */
-    size_t N         = m_inputs.size() >> 1;                // number of
-                                                            // butterflies per
-                                                            // block
-    size_t numBlocks = 1;                                   // number of blocks
-                                                            // in the current
-                                                            // stage
+    size_t N = m_inputs.size() >> 1; // number of
+                                     // butterflies per
+                                     // block
+    size_t numBlocks = 1;            // number of blocks
+
+    // in the current
+    // stage
 
     for (size_t stage = 1; stage <= m_numStages; stage++) { // stage loop
         // Step 1 - Calculate shift amount
@@ -192,13 +193,16 @@ void FFT::execute()
 #ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 SLFixComplex bot = m_inputs[botIdx];
 
-                //                std::cout << stage << ": top = m_inputs[" <<
-                // topIdx << "] = (" << top.real().to_int64() << "," <<
-                // top.imag().to_int64() << ") Q" << top.iwl() << "." <<
-                // top.wl() - top.iwl() << std::endl;
-                //                std::cout << stage << ": bot = m_inputs[" <<
-                // botIdx << "] = (" << bot.real().to_int64() << "," <<
-                // bot.imag().to_int64() << ")" << std::endl;
+                // if (m_debug) {
+                //     std::cout << stage << ": top = m_inputs[" <<
+                //     topIdx << "] = (" << top.real().to_int64() << "," <<
+                //     top.imag().to_int64() << ") Q" << top.iwl() << "." <<
+                //     top.wl() - top.iwl() << std::endl;
+                //
+                //     std::cout << stage << ": bot = m_inputs[" <<
+                //     botIdx << "] = (" << bot.real().to_int64() << "," <<
+                //     bot.imag().to_int64() << ")" << std::endl;
+                // }
 #else // ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 SLFixComplex bot;
 
@@ -254,21 +258,25 @@ void FFT::execute()
                     m_inputs[botIdx] = (top - bot) * twiddle;
                 }
 
-                //                std::cout << stage << ": m_inputs[" << topIdx
-                // << "] = top + bot = (" << top.real().to_double() << "," <<
-                // top.imag().to_double() << ") + (" << bot.real().to_double()
-                // << "," << bot.imag().to_double() << ") = (" <<
-                // m_inputs[topIdx].real().to_double() << "," <<
-                // m_inputs[topIdx].imag().to_double() << ")" << std::endl;
-                //                std::cout << stage << ": m_inputs[" << botIdx
-                // << "] = (top - bot) * twiddle(" << k << ") = ( ("<<
-                // top.real().to_double() << "," << top.imag().to_double() << ")
-                // - (" << bot.real().to_double() << "," <<
-                // bot.imag().to_double() << ") ) * (" <<
-                // twiddle.real().to_double() << "," <<
-                // twiddle.imag().to_double() << ") = (" <<
-                // m_inputs[botIdx].real().to_double() << "," <<
-                // m_inputs[botIdx].imag().to_double() << ")" << std::endl;
+                if (m_debug) {
+                    std::cout << stage << ": m_inputs[" << topIdx <<
+                    "] = top + bot = (" << top.real().to_int64() << "," <<
+                    top.imag().to_int64() << ") + (" <<
+                    bot.real().to_int64() <<
+                    "," << bot.imag().to_int64() << ") = (" <<
+                    m_inputs[topIdx].real().to_int64() << "," <<
+                    m_inputs[topIdx].imag().to_int64() << ")" << std::endl;
+
+                    std::cout << stage << ": m_inputs[" << botIdx <<
+                    "] = (top - bot) * twiddle(" << k << ") = ( (" <<
+                    top.real().to_int64() << "," << top.imag().to_int64() <<
+                    ") - (" << bot.real().to_int64() << "," <<
+                    bot.imag().to_int64() << ") ) * (" <<
+                    twiddle.real().to_int64() << "," <<
+                    twiddle.imag().to_int64() << ") = (" <<
+                    m_inputs[botIdx].real().to_int64() << "," <<
+                    m_inputs[botIdx].imag().to_int64() << ")" << std::endl;
+                }
 #else // ifdef FFT_DO_DECIMATE_IN_FREQUENCY
                 m_inputs[botIdx] = top - bot;
 #endif // ifdef FFT_DO_DECIMATE_IN_FREQUENCY
@@ -282,7 +290,7 @@ void FFT::execute()
         }     // end block loop
         N         >>= 1;
         numBlocks <<= 1;
-    }         // end stage loop
+    } // end stage loop
 }
 
 void FFT::shiftFixedComplex(SLFixComplex& val, ssize_t shiftBits)
@@ -393,4 +401,42 @@ void FFT::printTwiddleFactors() const
         m_twiddleFactors[i].real().to_double() << ", " <<
         m_twiddleFactors[i].imag().to_double() << std::endl;
     }
+}
+
+std::vector<ComplexDouble>FFTWrap(
+    const std::vector<ComplexDouble>& inputs,
+    bool                              inverse,
+    size_t                            outputWordLength,
+    size_t                            outputIntLength)
+{
+    const size_t Nfft = inputs.size();
+
+    std::vector<ComplexDouble> outputs;
+    FFT fft(inputs.size(), inverse);
+    fft.setOutputFormat(outputWordLength,
+                        outputIntLength,
+                        SLFixPoint::QUANT_RND_HALF_UP,
+                        SLFixPoint::OVERFLOW_SATURATE);
+    filter_io_t data;
+
+    for (unsigned int i = 0; i < 2; i++) {
+        for (size_t j = 0; j < Nfft; j++) {
+            // std::cout << j << ": " << inputs[j] << std::endl;
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(FFT_INPUT_FORMAT);
+            data.fc.set(inputs[j].real(), inputs[j].imag());
+
+            // std::cout << inputs[j] << " = " << data << std::endl;
+            fft.input(data);
+            fft.tick();
+            bool didGetOutput = fft.output(data);
+            bool lastInput    = (i == 1 && j == Nfft - 1);
+
+            if (didGetOutput && !lastInput) {
+                outputs.push_back(data.toComplexDouble());
+            } // If output is ready
+        }     // Insert all input
+    }         // Insert input again to get output
+
+    return std::move(outputs);
 }

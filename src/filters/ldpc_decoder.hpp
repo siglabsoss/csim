@@ -17,7 +17,8 @@ class LDPCDecoder : public FilterChainElement
 public:
 
     virtual ~LDPCDecoder();
-    LDPCDecoder(const std::vector<std::vector<bool> >& H);
+    LDPCDecoder(const std::vector<std::vector<bool> >& H,
+                bool                                   earlyExit = true);
     bool input(const filter_io_t& data) override;
     bool output(filter_io_t& data) override;
     void tick(void) override;
@@ -77,11 +78,33 @@ private:
     std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > m_messages; // store
                                                                        // LLR
                                                                        //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        // messages
                                                                        // per
                                                                        // edge
     std::map<GraphEdgeKey, SLFixedPoint<LDPC_LLR_FORMAT> > m_tmpMsgs;  // store
                                                                        // LLR
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
+                                                                       //
                                                                        //
                                                                        // messages
                                                                        // per
@@ -89,6 +112,8 @@ private:
 
     std::queue<SLFixedPoint<LDPC_LLR_FORMAT> > m_softInputBits;
     std::queue<bool> m_hardOutputBits;
+
+    bool m_earlyExit;
 };
 
 bool operator<(const LDPCDecoder::GraphEdgeKey& lhs,

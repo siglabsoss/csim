@@ -15,37 +15,47 @@
 #define DDC_OUTPUT_WL  22
 #define DDC_OUTPUT_IWL 2
 
-#define DDC_OUTPUT_FP_FORMAT            DDC_OUTPUT_WL,     DDC_OUTPUT_IWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-#define DDC_INPUT_FP_FORMAT             DDC_INPUT_WL,      DDC_INPUT_IWL,  SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_OUTPUT_FP_FORMAT            DDC_OUTPUT_WL,     DDC_OUTPUT_IWL, \
+    SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
+#define DDC_INPUT_FP_FORMAT             DDC_INPUT_WL,      DDC_INPUT_IWL, \
+    SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 
 class DigitalDownConverter : public FilterChainElement
 {
 public:
-    DigitalDownConverter(double freq, const std::vector<double> &halfbandCoeffs, const std::vector<double> &by5Coeffs);
 
-    bool input(const filter_io_t &data) override;
-    bool output(filter_io_t &data)      override;
+    DigitalDownConverter(double                     freq,
+                         const std::vector<double>& halfbandCoeffs,
+                         const std::vector<double>& by5Coeffs);
+
+    bool input(const filter_io_t& data) override;
+    bool output(filter_io_t& data)      override;
     void tick(void)                     override;
 
-private: //methods
+private:
+
+    // methods
     bool push(
+
         // Inputs
-        const SLFixedPoint<DDC_INPUT_FP_FORMAT> & input_sample,
+        const SLFixedPoint<DDC_INPUT_FP_FORMAT>& input_sample,
+
         // Outputs
-        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & inph_out,
-        SLFixedPoint<DDC_OUTPUT_FP_FORMAT> & quad_out);
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT>     & inph_out,
+        SLFixedPoint<DDC_OUTPUT_FP_FORMAT>     & quad_out);
 
-private: //members
+private:
 
-    NCO                                                    _nco;
-    FixedFIR *                                             _halfbandFIR;
-    FixedFIR *                                             _by5FIR;
-    SLFixedPoint<DDC_INPUT_FP_FORMAT>                      _input;
-    bool                                                   _did_receive_input;
+    // members
+
+    NCO _nco;
+    FixedFirRealCoeff *_halfbandFIR;
+    FixedFirRealCoeff *_by5FIR;
+    SLFixedPoint<DDC_INPUT_FP_FORMAT> _input;
+    bool _did_receive_input;
 
     // Output variables
-    bool                                                   _output_ready;
-    SLFixedPoint<DDC_OUTPUT_FP_FORMAT>                     _output_inph;
-    SLFixedPoint<DDC_OUTPUT_FP_FORMAT>                     _output_quad;
+    bool _output_ready;
+    SLFixedPoint<DDC_OUTPUT_FP_FORMAT> _output_inph;
+    SLFixedPoint<DDC_OUTPUT_FP_FORMAT> _output_quad;
 };
-

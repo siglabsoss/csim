@@ -81,33 +81,13 @@ void runFFTTest(const std::string &infile, const std::string &outfile, size_t ou
 
     std::vector<ComplexDouble> inputs;
     std::vector<ComplexDouble> answers;
-    std::vector<ComplexDouble> outputs;
 
     inputs = utils::readComplexFromCSV<ComplexDouble>(inFile);
     BOOST_REQUIRE_MESSAGE(!inputs.empty(), "Could not open " << inFile);
     answers = utils::readComplexFromCSV<ComplexDouble >(answersFile);
     BOOST_REQUIRE_MESSAGE(!answers.empty(), "Could not open " << answersFile);
 
-    int points = inputs.size();
-    FFT fft(points, inverse);
-    fft.setOutputFormat(FFT_OUTPUT_WL, outputIWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
-    filter_io_t data;
-    for (unsigned int i = 0; i < 2; i++) {
-        for (int j = 0; j < points; j++) {
-            //std::cout << j << ": " << inputs[j] << std::endl;
-            data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(FFT_INPUT_FORMAT);
-            data.fc.set(inputs[j].real(), inputs[j].imag());
-            //std::cout << inputs[j] << " = " << data << std::endl;
-            fft.input(data);
-            fft.tick();
-            bool didGetOutput = fft.output(data);
-            bool lastInput = (i == 1 && j == points - 1);
-            if (didGetOutput && !lastInput) {
-                outputs.push_back(data.toComplexDouble());
-            }//If output is ready
-        }//Insert all input
-    }//Insert input again to get output
+    std::vector<ComplexDouble> outputs = FFTWrap(inputs, inverse, FFT_OUTPUT_WL, outputIWL);
 
     //This threshold is arbitrary and can be refined based on some kind of analysis
     checkErrorComplexDouble(outputs, answers, threshold);
@@ -148,7 +128,7 @@ void runIFFTLoopbackTest(const std::string &infile, double threshold)
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(ifftoutputs[j]);
+            data.fc.setFormat(ifftoutputs[j].getFormat());
             data.fc = ifftoutputs[j];
             fft.input(data);
             fft.tick();
@@ -198,7 +178,7 @@ void runFFTLoopbackTest(const std::string &infile, double threshold)
     for (unsigned int i = 0; i < 2; i++) {
         for (int j = 0; j < points; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(fftoutputs[j]);
+            data.fc.setFormat(fftoutputs[j].getFormat());
             data.fc = fftoutputs[j];
             ifft.input(data);
             ifft.tick();
@@ -224,9 +204,9 @@ void checkError(const vector<T> &outputs, const vector<T> &answers, double diffe
             double realDiff = fabs(outputReal - answersReal);
             double imagDiff = fabs(outputImag - answersImag);
             BOOST_REQUIRE_MESSAGE(realDiff < difference,
-            "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+            "I: " << i << " Real Actual: " << outputReal << " Real Expected: " << answersReal << " Real Diff: " << realDiff );
             BOOST_REQUIRE_MESSAGE(imagDiff < difference,
-            "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
+            "I: " << i << " Imag Actual: " << outputImag << " Imag Expected: " << answersImag << " Imag Diff: " << imagDiff );
 		}
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
@@ -240,8 +220,8 @@ void checkErrorComplexInt (const vector<std::complex<int32_t> > &actual, const v
         accumRealDiff += realDiff;
         accumImagDiff += imagDiff;
 
-        BOOST_CHECK_MESSAGE(realDiff < threshold, "Real Output: " << actual[i].real() << " Real Answer: " << expected[i].real() << " Real Diff: " << realDiff);
-        BOOST_CHECK_MESSAGE(imagDiff < threshold, "Imag Output: " << actual[i].imag() << " Imag Answer: " << expected[i].imag() << " Imag Diff: " << imagDiff);
+        BOOST_CHECK_MESSAGE(realDiff < threshold, "Real Actual: " << actual[i].real() << " Real Expected: " << expected[i].real() << " Real Diff: " << realDiff);
+        BOOST_CHECK_MESSAGE(imagDiff < threshold, "Imag Actual: " << actual[i].imag() << " Imag Expected: " << expected[i].imag() << " Imag Diff: " << imagDiff);
     }
 
     double avgRealDiff = static_cast<double>(accumRealDiff) / actual.size();
@@ -260,11 +240,10 @@ void checkErrorComplexDouble(const vector<ComplexDouble> &outputs, const vector<
             double realDiff = fabs(outputReal - answersReal);
             double imagDiff = fabs(outputImag - answersImag);
             BOOST_CHECK_MESSAGE(realDiff < difference,
-            "I: " << i << " Real Output: " << outputReal << " Real Answer: " << answersReal << " Real Diff: " << realDiff );
+            "I: " << i << " Real Actual: " << outputReal << " Real Expected: " << answersReal << " Real Diff: " << realDiff );
             BOOST_CHECK_MESSAGE(imagDiff < difference,
-            "I: " << i << " Imag Output: " << outputImag << " Imag Answer: " << answersImag << " Imag Diff: " << imagDiff );
+            "I: " << i << " Imag Actual: " << outputImag << " Imag Expected: " << answersImag << " Imag Diff: " << imagDiff );
         }
 }//Compares results of fft with answers. Takes in vector of outputs and answers, the max percent error as a float, and the max difference as an int
 
 CSIM_TEST_SUITE_END()
-

@@ -16,7 +16,7 @@ bool ChannelEqualizer::input(const filter_io_t& data)
 {
     assert(data.type == IO_TYPE_COMPLEX_FIXPOINT);
     gotInput = true;
-    m_sample.setFormat(data.fc);
+    m_sample.setFormat(data.fc.getFormat());
     m_sample = data.fc;
     return true;
 }
@@ -31,7 +31,7 @@ bool ChannelEqualizer::output(filter_io_t& data)
             m_outIdx = 0;
         }
         data.type = IO_TYPE_COMPLEX_FIXPOINT;
-        data.fc.setFormat(m_sample);
+        data.fc.setFormat(m_sample.getFormat());
         data.fc.set(result.real(), result.imag());
         return true;
     }

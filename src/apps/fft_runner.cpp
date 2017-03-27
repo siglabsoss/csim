@@ -7,12 +7,12 @@ static constexpr size_t N_FFT_POINTS = 1024;
 int main(int argc, char *argv[])
 {
     int c;
-    bool gotInputFile = false, shouldScale = false, shouldInverseFFT = false;
+    bool gotInputFile = false, shouldScale = false, shouldInverseFFT = false, shouldDebug = false;
     size_t outputIWL = FFT_OUTPUT_IWL;
     size_t outputWL = FFT_OUTPUT_WL;
 
     std::string inputFile;
-    while ((c = getopt(argc, argv, "f:i:w:sx")) != -1) {
+    while ((c = getopt(argc, argv, "f:i:w:sxd")) != -1) {
         switch(c) {
         case 'f':
             inputFile = std::string(optarg);
@@ -30,6 +30,9 @@ int main(int argc, char *argv[])
         case 'x':
             shouldInverseFFT = true;
             break;
+        case 'd':
+            shouldDebug = true;
+            break;
         }
     }
 
@@ -46,6 +49,7 @@ int main(int argc, char *argv[])
     FFT fft(N_FFT_POINTS, shouldInverseFFT);
 
     fft.setOutputFormat(outputWL, outputIWL, SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE);
+    fft.setDebug(shouldDebug);
     filter_io_t data;
     size_t outputCount = 0;
     size_t inWl = 0;
@@ -62,7 +66,7 @@ int main(int argc, char *argv[])
         saturationCount = SLFixPoint::overflowCount;
         for (size_t j = 0; j < N_FFT_POINTS; j++) {
             data.type = IO_TYPE_COMPLEX_FIXPOINT;
-            data.fc.setFormat(inputsFP[j]);
+            data.fc.setFormat(inputsFP[j].getFormat());
             data.fc = inputsFP[j];
             inWl = data.fc.wl();
             inIwl = data.fc.iwl();
@@ -71,7 +75,7 @@ int main(int argc, char *argv[])
             bool didGetOutput = fft.output(data);
             bool lastInput = (i == 1 && j == N_FFT_POINTS - 1);
             if (didGetOutput && !lastInput) {
-                outputs[outputCount].setFormat(data.fc);
+                outputs[outputCount].setFormat(data.fc.getFormat());
                 outputs[outputCount] = data.fc;
                 ++outputCount;
             }//If output is ready
