@@ -56,7 +56,7 @@ filter_io_t::filter_io_t(const uint8_t in) :
 filter_io_t::filter_io_t(const SLFixComplex in) :
 		type(IO_TYPE_COMPLEX_FIXPOINT)
 {
-	this->fc.setFormat(in);
+	this->fc.setFormat(in.getFormat());
 	this->fc = in;
 }
 

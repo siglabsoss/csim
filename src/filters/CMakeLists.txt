@@ -6,8 +6,6 @@ set(SIGFILTERS_SOURCES
     ddc_duc/ddc.cpp
     ddc_duc/duc.cpp
     ddc_duc/ddc_utils.cpp
-    mixer.cpp
-    decimator.cpp
     mapper.cpp
     demapper.cpp
     nco.cpp

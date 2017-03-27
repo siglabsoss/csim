@@ -257,11 +257,6 @@ SLFixPoint& SLFixPoint::operator=(double val)
         }
     }
     maskAndSignExtend();
-}
-
-SLFixPoint &SLFixPoint::operator=(double val)
-{
-    set(val);
     return *this;
 }
 
