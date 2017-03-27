@@ -3,10 +3,10 @@
  * and the block floating point technique to maximize precision.
  *
  * This implementation was inspired by the non-recursive method outlined here:
- *****************http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
+ ******************http://www.engineeringproductivitytools.com/stuff/T0001/PT04.HTM#Head208
  *
  * The "block floating point" technique was inspired by the paper here:
- *****************http://www.ti.com/lit/an/spra948/spra948.pdf
+ ******************http://www.ti.com/lit/an/spra948/spra948.pdf
  *
  */
 
@@ -135,9 +135,9 @@ void FFT::execute()
 {
     /**
      * Block floating point scaling operates on a per-stage basis by executing
-     *****************the following steps
+     ******************the following steps
      * 1) Calculate the appropriate shift for the entire "block" (inputs for the
-     *****************current stage) based on the single maximum input value.
+     ******************current stage) based on the single maximum input value.
      * 2) Shift the "block" based on the scaling factor from step 1.
      * 3) Perform the radix-2 butterflies
      */
@@ -434,6 +434,44 @@ std::vector<ComplexDouble>FFTWrap(
 
             if (didGetOutput && !lastInput) {
                 outputs.push_back(data.toComplexDouble());
+            } // If output is ready
+        }     // Insert all input
+    }         // Insert input again to get output
+
+    return std::move(outputs);
+}
+
+std::vector<SLFixComplex>FFTWrap(
+    const std::vector<SLFixComplex>& inputs,
+    bool                             inverse,
+    size_t                           outputWordLength,
+    size_t                           outputIntLength)
+{
+    const size_t Nfft = inputs.size();
+
+    std::vector<SLFixComplex> outputs;
+    FFT fft(inputs.size(), inverse);
+    fft.setOutputFormat(outputWordLength,
+                        outputIntLength,
+                        SLFixPoint::QUANT_RND_HALF_UP,
+                        SLFixPoint::OVERFLOW_SATURATE);
+    filter_io_t data;
+
+    for (unsigned int i = 0; i < 2; i++) {
+        for (size_t j = 0; j < Nfft; j++) {
+            // std::cout << j << ": " << inputs[j] << std::endl;
+            data.type = IO_TYPE_COMPLEX_FIXPOINT;
+            data.fc.setFormat(FFT_INPUT_FORMAT);
+            data.fc = inputs[j];
+
+            // std::cout << inputs[j] << " = " << data << std::endl;
+            fft.input(data);
+            fft.tick();
+            bool didGetOutput = fft.output(data);
+            bool lastInput    = (i == 1 && j == Nfft - 1);
+
+            if (didGetOutput && !lastInput) {
+                outputs.push_back(data.fc);
             } // If output is ready
         }     // Insert all input
     }         // Insert input again to get output
