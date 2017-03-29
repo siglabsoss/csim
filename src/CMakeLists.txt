@@ -42,6 +42,32 @@ endif( ZEROMQ_FOUND )
 
 # --- End 0MQ ---
 
+ 
+
+option(USE_PYTHON_BINDINGS "USE_PYTHON_BINDINGS" ON)
+
+# ================ boost.python ================
+if(USE_PYTHON_BINDINGS)
+	message( STATUS "Python Bindings: Enabled")
+	add_definitions(-DUSE_PYTHON_BINDINGS)  # this defines a macro for our c files
+	FIND_PACKAGE(PythonInterp)
+	FIND_PACKAGE(PythonLibs)
+	if(APPLE AND ${PYTHON_VERSION_MAJOR} EQUAL 3)
+	    FIND_PACKAGE(Boost COMPONENTS python3)
+	else()
+	    FIND_PACKAGE(Boost COMPONENTS python)
+	endif()
+
+	#ENABLE_TESTING()
+	INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIRS} ${PYTHON_INCLUDE_DIRS})
+	LINK_LIBRARIES(${Boost_LIBRARIES} ${PYTHON_LIBRARIES}) # Deprecated but so convenient!
+else()
+	message( STATUS "Python Bindings: Disabled")
+endif()
+# ================ boost.python ================
+
+
+
 
 add_definitions(-DSC_DISABLE_API_VERSION_CHECK)
 add_definitions(-DSC_INCLUDE_DYNAMIC_PROCESSES)

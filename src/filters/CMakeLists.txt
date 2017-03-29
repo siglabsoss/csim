@@ -20,8 +20,18 @@ set(SIGFILTERS_SOURCES
     depuncture.cpp
     subcarrier_mapper.cpp
     ofdm_frame_sync.cpp
+    boost_pywrap.cpp
     )
 
 add_library(sigfiltersobj OBJECT ${SIGFILTERS_SOURCES})
 add_library(sigfilters $<TARGET_OBJECTS:sigfiltersobj>)
 target_link_libraries(sigfilters sigutils sigcore)
+
+
+
+
+
+if(USE_PYTHON_BINDINGS)
+	PYTHON_ADD_MODULE(libboost_pywrap boost_pywrap.cpp)
+	TARGET_LINK_LIBRARIES(libboost_pywrap ${Boost_LIBRARIES} sigtypes sigfilters sigutils sigcore sigmath)
+endif()

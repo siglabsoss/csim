@@ -39,6 +39,28 @@ filter_io_t::filter_io_t() :
     type(IO_TYPE_NULL)
 {}
 
+
+filter_io_t::filter_io_t(const ComplexDouble in) :
+		type(IO_TYPE_COMPLEX_DOUBLE)
+{
+	this->rf = in;
+}
+
+
+filter_io_t::filter_io_t(const uint8_t in) :
+        type(IO_TYPE_BYTE)
+{
+	this->byte = in;
+}
+
+filter_io_t::filter_io_t(const SLFixComplex in) :
+		type(IO_TYPE_COMPLEX_FIXPOINT)
+{
+	this->fc.setFormat(in.getFormat());
+	this->fc = in;
+}
+
+
 filter_io_t::filter_io_t(const filter_io_t& other) :
     type(other.type)
 {

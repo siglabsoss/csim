@@ -216,6 +216,11 @@ SLFixPoint& SLFixPoint::operator=(const SLFixComplex& rhs)
     return *this;
 }
 
+void SLFixPoint::set(double val)
+{
+	this->operator=(val);
+}
+
 SLFixPoint& SLFixPoint::operator=(double val)
 {
     assert(m_fmt.valid);
