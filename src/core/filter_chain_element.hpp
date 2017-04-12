@@ -1,3 +1,8 @@
+/**
+ * @file filter_chain_element.hpp
+ * Generic encapsulation for a filter meant to be chained together with others.
+ */
+
 #pragma once
 
 #include <interfaces/abstract_siso.hpp>
@@ -12,6 +17,16 @@
 
 extern std::ostream& operator<<(std::ostream& os, const filter_io_t& obj);
 
+/**
+ * Generic encapsulation for a filter meant to be chained together with others.
+ * Objects of this class represent filters, which are single-input-single-output
+ * processing elements, that are linked together to produce a filter chain.
+ *
+ * This class also provides a generic mechanism for storing input samples
+ * in a circular FIFO.
+ *
+ * @see FilterChain
+ */
 class FilterChainElement : public AbstractSISO< filter_io_t, filter_io_t >
 {
 public:
