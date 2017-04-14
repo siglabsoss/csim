@@ -33,3 +33,24 @@ void ScramblerBlock::reset(unsigned initState)
 {
     m_scrambler.reset(initState);
 }
+
+std::vector<bool>ScramblerWrap(const std::vector<bool>& inputs)
+{
+    ScramblerBlock s;
+    filter_io_t    sample;
+    filter_io_t    output_sample;
+
+    std::vector<bool> outputs;
+    sample.type = IO_TYPE_BIT;
+
+    for (size_t i = 0; i < inputs.size(); ++i) {
+        sample.bit = inputs[i];
+        s.input(sample);
+        s.tick();
+
+        if (s.output(output_sample)) {
+            outputs.push_back(output_sample.bit);
+        }
+    }
+    return outputs;
+}
