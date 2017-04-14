@@ -1,6 +1,7 @@
 /**
+ * @file fft.hpp
  * A fixed-point FFT implementation using decimation-in-time (DIT)
- * and the block floating point technique to maximize precision.
+ * with techniques to minimize loss of precision.
  */
 
 #pragma once
@@ -38,18 +39,44 @@
     SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
 #define FFT_OUTPUT_FORMAT             FFT_OUTPUT_WL, FFT_OUTPUT_IWL, \
     SLFixPoint::QUANT_RND_HALF_UP, SLFixPoint::OVERFLOW_SATURATE
-
+/**
+ * A fixed-point FFT implementation using decimation-in-time (DIT)
+ * with techniques to minimize loss of precision. This implementation uses
+ * the radix-2 butterfly approach, which enables compute optimizations, but
+ * constrains the size of the inputs to be a power of two.
+ */
 class FFT : public FilterChainElement
 {
 public:
 
-    FFT(size_t N,
-        bool   inverse);
+    /**
+     * Construct an FFT filter.
+     * @param N the number of input samples to operate on at once. Must be a
+     * power of tow.
+     * @param inverse if set to true, the filter will perform an inverse
+     * transform. That is, a transformation from frequency-domain to
+     * time-domain.
+     */
+    FFT(size_t N, bool inverse);
     bool input(const filter_io_t& data) override;
     bool output(filter_io_t& data) override;
     void tick(void) override;
 
+    /**
+     * Print the twiddle factors to the console in CSV format. The twiddle
+     * factors are printed in both in scaled integer form as well as decimal
+     * form. Twiddle factors are the precomputed sine and cosine values for
+     * the angles in discrete increments of N.
+     */
     void printTwiddleFactors() const;
+
+    /**
+     * Set the fixed-point format of the output. This FFT implementation is
+     * designed in such a way that the intermediate fixed-point values will not
+     * lose precision or overflow. The output of the final FFT stage is then
+     * cast to this output format, which may cause loss of precision or
+     * overflow.
+     */
     void setOutputFormat(size_t                      wordLength,
                          ssize_t                     intLength,
                          SLFixPoint::quant_mode_t    quantMode,
