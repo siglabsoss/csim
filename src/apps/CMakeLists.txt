@@ -19,3 +19,6 @@ target_link_libraries(ldpc_decode sigfilters sigcore sigmath sigtypes sigutils)
 
 add_executable(timing_alignment timing_alignment.cpp)
 target_link_libraries(timing_alignment sigfilters sigcore sigmath sigtypes sigutils)
+
+add_executable(ryan_test_app ryan_test_app.cpp)
+target_link_libraries(ryan_test_app sigfilters sigcore sigtypes)
