@@ -19,3 +19,7 @@ target_link_libraries(ldpc_decode sigfilters sigcore sigmath sigtypes sigutils)
 
 add_executable(timing_alignment timing_alignment.cpp)
 target_link_libraries(timing_alignment sigfilters sigcore sigmath sigtypes sigutils)
+
+add_executable(CFO_estimation CFO_estimation.cpp)
+target_link_libraries(CFO_estimation sigfilters sigcore sigmath sigtypes sigutils)
+
